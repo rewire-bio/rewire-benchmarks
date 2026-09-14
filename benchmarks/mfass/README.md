@@ -69,11 +69,38 @@ closeness to the cohort rate, fixed before any model runs and never using a pred
 
 ## Results
 
-On `split-v2`, 8,324 held-out variants across 463 independent groups, prevalence 3.784%.
+On `split-v2`, restricted to the 8,194 variants both methods could score, across 454 independent
+groups at 3.76% prevalence.
 
-| Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage |
-|---|---|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 |
+| Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage | s/variant |
+|---|---|---:|---:|---:|---:|---:|---:|
+| baseline-kmer-position | trivial baseline | 0.620 | 0.201 | 0.290 | 0.769 | 8324/8324 | 0.00003 |
+| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.537 |
+
+### Paired comparison, SpliceAI minus baseline
+
+Resampling whole groups, so the difference is paired and the interval respects the grouping.
+
+| Metric | Delta | 95% interval | Distinguishable |
+|---|---:|---|---|
+| Precision@100 | +0.011 | [-0.090, +0.105] | no |
+| Average precision | +0.008 | [-0.040, +0.056] | no |
+| AUROC | +0.037 | [+0.002, +0.075] | yes |
+
+**SpliceAI ranks better globally and is indistinguishable at the operating point a laboratory uses.**
+AUROC separates the two; precision at a 100-variant review capacity does not, and neither does average
+precision. This is the divergence that motivates leading on precision at capacity rather than AUROC.
+
+Two things must be said alongside that, and they cut in opposite directions.
+
+The baseline is **supervised**: it was trained on the training split of this same assay, so it has
+in-domain label information SpliceAI never saw. SpliceAI is **zero-shot** here, having been trained on
+GENCODE transcripts and never on MFASS outcomes. This is not evidence that SpliceAI is weak. It is
+evidence that a simple model with in-domain training data reaches the same operating point as a strong
+zero-shot specialist.
+
+And SpliceAI costs about **28,000 times more compute per variant**, 0.537s against 0.00002s, while
+scoring 130 fewer variants.
 
 ### What the split costs
 
@@ -91,7 +118,7 @@ beside every number.
 
 ## Not yet done
 
-- SpliceAI and Pangolin, configuration-matched
+- Pangolin, configuration-matched against SpliceAI
 - Pretrained encoders: DNABERT-2, NT-v2, Caduceus, SpliceBERT
 - Canonical versus non-canonical subgroup breakdown
 - A declared improvement margin, written down before any candidate is scored

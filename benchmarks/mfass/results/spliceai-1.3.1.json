@@ -1,0 +1,53 @@
+{
+  "benchmark": "mfass-v1",
+  "method": "spliceai-1.3.1",
+  "family": "specialist",
+  "description": "SpliceAI 1.3.1 official five-model ensemble, max delta score over AG/AL/DG/DL",
+  "split": "benchmarks/mfass/splits/split-v2.tsv",
+  "metrics": {
+    "n": 8194,
+    "positives": 308,
+    "prevalence": 0.03758847937515255,
+    "capacity": 100,
+    "precision_at_capacity": 0.64,
+    "recall_at_capacity": 0.2077922077922078,
+    "average_precision_sklearn": 0.2986855472760137,
+    "auroc": 0.8055241740253153,
+    "scored_subset_note": "metrics computed on scored variants only; see coverage"
+  },
+  "coverage": {
+    "scored": 8194,
+    "unscored": 130,
+    "denominator": 8324
+  },
+  "timing_seconds": {
+    "load_models_and_reference": 0.706,
+    "score_test": 4463.099,
+    "per_variant_total": 0.536257
+  },
+  "independent_groups": 454,
+  "config": {
+    "version": "1.3.1",
+    "models": "bundled 5-model ensemble (spliceai1-5.h5)",
+    "annotation": "grch38",
+    "reference": "GRCh38.primary_assembly.genome.fa",
+    "distance_D": 50,
+    "mask_M": 0,
+    "score": "max(DS_AG, DS_AL, DS_DG, DS_DL)",
+    "context_bases": 10000,
+    "patches": [
+      "one_hot_encode: np.fromstring -> np.frombuffer for NumPy 2 compatibility; identical dtype, values and length"
+    ]
+  },
+  "contamination": "SpliceAI was trained on GENCODE transcripts on the reference genome, not on MFASS assay outcomes, so the labels are independent of its training signal. Whether any assayed exon appeared in its training transcripts is unchecked.",
+  "pretrained": true,
+  "notes": "MFASS measures exon recognition in a minigene construct; SpliceAI scores the variant in genomic context. Both predict splice disruption for the same variant, but they are not measuring the same molecule.",
+  "environment": {
+    "python": "3.11.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "created_utc": "2026-09-14T15:19:21.848415+00:00",
+  "git_revision": "9520828"
+}

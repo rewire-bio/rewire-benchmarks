@@ -5,10 +5,17 @@ description = "MFASS splice-variant prioritisation benchmark"
 requires-python = ">=3.11"
 dependencies = ["rewirebench"]
 
+# SpliceAI 1.3.1 is a 2019 package: it needs pkg_resources (so setuptools<82) and
+# pulls TensorFlow. Kept optional so the core benchmark installs without it.
+[project.optional-dependencies]
+spliceai = ["spliceai==1.3.1", "tensorflow>=2.16", "setuptools<82", "pyfaidx>=0.5", "pandas>=2"]
+
 [project.scripts]
 mfass-build = "mfass.build_dataset:main"
 mfass-split = "mfass.split:main"
 mfass-baseline = "mfass.run_baseline:main"
+mfass-spliceai = "mfass.run_spliceai:main"
+mfass-compare = "mfass.compare:main"
 
 [build-system]
 requires = ["hatchling"]

@@ -27,25 +27,28 @@ rather than written.
 
 | Benchmark | Task | Labels | Prevalence | Status |
 |---|---|---|---:|---|
-| [`mfass-v1`](benchmarks/mfass) | Splice-variant prioritisation | Functional, minigene exon recognition | 3.79% | Baseline only |
+| [`mfass-v1`](benchmarks/mfass) | Splice-variant prioritisation | Functional, minigene exon recognition | 3.76% | Baseline + SpliceAI |
 
 ### mfass-v1 results
 
-Primary metric is precision at a review capacity of 100 variants, on 8,324 held-out variants across
-463 independent groups.
+Primary metric is precision at a review capacity of 100 variants, on the 8,194 variants every
+method could score, across 454 independent groups.
 
-| Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage |
-|---|---|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 |
+| Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage | s/variant |
+|---|---|---:|---:|---:|---:|---:|---:|
+| baseline-kmer-position | trivial baseline | 0.620 | 0.201 | 0.290 | 0.769 | 8324/8324 | 0.00003 |
+| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.537 |
 
-At 3.78% prevalence, precision@100 of 0.620 is a 16-fold enrichment over chance, from exon-boundary
-distances, allele identity, conservation and 3-mer composition alone. That is the floor.
+At 3.76% prevalence, precision@100 of 0.620 is a 16-fold enrichment over chance from position,
+conservation and 3-mers alone.
 
-Grouping by gene as well as exon costs 14 points of precision@100 against grouping by exon alone,
-which is more than conservation features add. A naive concatenated key would have claimed 2,267
-independent units where there are 1,590.
+SpliceAI's advantage over that floor is **+0.011 precision@100, 95% interval [-0.090, +0.105]**: not
+distinguishable at the operating point, for about 28,000 times the compute. It does win on AUROC
+(+0.037, [+0.002, +0.075]). Note the baseline is supervised on this assay's training split while
+SpliceAI is zero-shot, so this measures in-domain training against a strong specialist prior, not the
+quality of either tool in isolation.
 
-Specialist tools and pretrained encoders are not yet run.
+Pangolin and pretrained encoders are not yet run.
 
 ## Layout
 
