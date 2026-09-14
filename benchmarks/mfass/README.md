@@ -45,25 +45,53 @@ is counted before the `strong_lof` filter, so the evaluation cohort itself spans
 
 ## Split
 
-Grouping unit is the connected component of relations that must not cross the boundary. For v1 the
-mandatory relation is the exon, since many variants share an exon and the same minigene context.
+Grouping unit is the connected component of relations that must not cross the boundary.
 
-`split-v1`: 8,320 held-out variants in **662 independent groups**, both arms at 3.786% prevalence
-against 19,413 training variants in 1,523 groups.
+`split-v1` groups by exon alone: many variants share an exon and the same minigene context. 8,320
+held-out variants in 662 independent groups.
+
+`split-v2` adds the gene, and is the canonical split. The 2,185 exons map to 1,615 genes, and 27 exons
+map to more than one gene, so variants in two exons of one gene are not independent.
+
+| | v1 (exon) | v2 (exon + gene) |
+|---|---:|---:|
+| Independent groups | 2,185 | **1,590** |
+| Naive concatenated key would claim | 2,185 | 2,267 |
+| Overstatement | none | **43%** |
+| Largest single group | 37 | 354 |
+| Held-out groups | 662 | 463 |
+
+The naive concatenated key claims *more* units under two keys than the real count under one, which is
+the failure this machinery exists to prevent.
 
 Groups are assigned whole. Prevalence is matched between arms by the best of 200 seeded draws on
 closeness to the cohort rate, fixed before any model runs and never using a prediction.
 
 ## Results
 
+On `split-v2`, 8,324 held-out variants across 463 independent groups, prevalence 3.784%.
+
 | Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage |
 |---|---|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.680 | 0.216 | 0.346 | 0.817 | 8320/8320 |
+| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 |
+
+### What the split costs
+
+Same features, same code, only the grouping rule changes:
+
+| Split | Features | Precision@100 | AUROC |
+|---|---|---:|---:|
+| v1, exon only | position + 3-mers | 0.680 | 0.817 |
+| v1, exon only | + phyloP, phastCons | 0.760 | 0.816 |
+| v2, exon + gene | + phyloP, phastCons | 0.620 | 0.768 |
+
+Conservation adds 8 points of precision@100. Grouping by gene as well as exon removes 14. **The honest
+split costs more than the best feature gain**, which is the argument for publishing the grouping rule
+beside every number.
 
 ## Not yet done
 
 - SpliceAI and Pangolin, configuration-matched
 - Pretrained encoders: DNABERT-2, NT-v2, Caduceus, SpliceBERT
-- Exon-to-gene mapping so the split can group on gene as well as exon
 - Canonical versus non-canonical subgroup breakdown
 - A declared improvement margin, written down before any candidate is scored

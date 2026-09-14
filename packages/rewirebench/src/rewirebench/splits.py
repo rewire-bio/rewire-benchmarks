@@ -12,12 +12,22 @@ from collections import Counter, defaultdict
 from typing import Any, Hashable, Iterable, Mapping, Sequence
 
 
+MISSING = frozenset({"", "NA", "N/A", "None", "null"})
+
+
 def connected_components(
     records: Sequence[Mapping[str, Any]],
     keys: Sequence[str],
     id_field: str = "id",
-) -> dict[str, Hashable]:
-    """Map record id to its component root over the given equivalence keys."""
+    missing: frozenset[str] = MISSING,
+) -> dict[str, str]:
+    """Map record id to its component root over the given equivalence keys.
+
+    A record whose value for a key is missing forms no relation on that key. This
+    matters: unioning on a literal "NA" would merge every record with an unknown
+    value into one enormous component, which looks like conservative grouping and
+    is in fact a silent collapse of the split.
+    """
     parent: dict[Hashable, Hashable] = {}
 
     def find(x: Hashable) -> Hashable:
@@ -36,7 +46,10 @@ def connected_components(
         node = ("rec", rec[id_field])
         find(node)
         for k in keys:
-            union(node, (k, rec[k]))
+            val = rec.get(k)
+            if val is None or (isinstance(val, str) and val.strip() in missing):
+                continue
+            union(node, (k, val))
 
     roots = {rec[id_field]: find(("rec", rec[id_field])) for rec in records}
     return _stabilise(roots)

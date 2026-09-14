@@ -31,15 +31,19 @@ rather than written.
 
 ### mfass-v1 results
 
-Primary metric is precision at a review capacity of 100 variants, on 8,320 held-out variants across
-662 independent groups.
+Primary metric is precision at a review capacity of 100 variants, on 8,324 held-out variants across
+463 independent groups.
 
 | Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage |
 |---|---|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.680 | 0.216 | 0.346 | 0.817 | 8320/8320 |
+| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 |
 
-At 3.79% prevalence, precision@100 of 0.680 is an 18-fold enrichment over chance, from exon-boundary
-distances, allele identity and 3-mer composition alone. That is the floor.
+At 3.78% prevalence, precision@100 of 0.620 is a 16-fold enrichment over chance, from exon-boundary
+distances, allele identity, conservation and 3-mer composition alone. That is the floor.
+
+Grouping by gene as well as exon costs 14 points of precision@100 against grouping by exon alone,
+which is more than conservation features add. A naive concatenated key would have claimed 2,267
+independent units where there are 1,590.
 
 Specialist tools and pretrained encoders are not yet run.
 

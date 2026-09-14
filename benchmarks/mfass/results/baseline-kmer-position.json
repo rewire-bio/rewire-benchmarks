@@ -2,36 +2,37 @@
   "benchmark": "mfass-v1",
   "method": "baseline-kmer-position",
   "family": "trivial baseline",
-  "description": "exon-boundary distances, allele identity and 3-mer composition of a 21bp window, HistGradientBoosting",
-  "split": "benchmarks/mfass/splits/split-v1.tsv",
+  "description": "exon-boundary distances, allele identity, phyloP and phastCons conservation, and 3-mer composition of a 21bp window, HistGradientBoosting",
+  "split": "benchmarks/mfass/splits/split-v2.tsv",
   "metrics": {
-    "n": 8320,
+    "n": 8324,
     "positives": 315,
-    "prevalence": 0.03786057692307692,
+    "prevalence": 0.037842383469485825,
     "capacity": 100,
-    "precision_at_capacity": 0.68,
-    "recall_at_capacity": 0.21587301587301588,
-    "average_precision_sklearn": 0.345555358700358,
-    "auroc": 0.8167744366120381
+    "precision_at_capacity": 0.62,
+    "recall_at_capacity": 0.19682539682539682,
+    "average_precision_sklearn": 0.2860523277890755,
+    "auroc": 0.7676732723305331
   },
   "coverage": {
-    "scored": 8320,
+    "scored": 8324,
     "unscored": 0,
-    "denominator": 8320
+    "denominator": 8324
   },
   "timing_seconds": {
-    "featurise_train_and_test": 0.137,
-    "fit": 1.04,
-    "predict_test": 0.016,
-    "per_variant_total": 4.3e-05
+    "featurise_train_and_test": 0.142,
+    "fit": 0.374,
+    "predict_test": 0.007,
+    "per_variant_total": 1.9e-05
   },
-  "independent_groups": 662,
+  "independent_groups": 463,
   "config": {
-    "trained_on_variants": 19413,
+    "trained_on_variants": 19409,
     "trained_on_positives": 735,
     "seed": 20260914,
     "kmer_k": 3,
-    "window": 21
+    "window": 21,
+    "features": "exon-boundary distances, allele identity, phyloP, phastCons, 3-mers"
   },
   "contamination": null,
   "pretrained": false,
@@ -42,6 +43,6 @@
     "machine": "arm64",
     "processor": "arm"
   },
-  "created_utc": "2026-09-14T13:30:04.541352+00:00",
-  "git_revision": "757f0f6"
+  "created_utc": "2026-09-14T13:56:20.375463+00:00",
+  "git_revision": "c13f337"
 }

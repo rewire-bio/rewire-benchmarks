@@ -1,0 +1,29 @@
+{
+  "benchmark": "mfass-v1",
+  "keys": [
+    "ensembl_id",
+    "ensembl_gene_id"
+  ],
+  "naive_concatenated_key_count": 2267,
+  "inflation_factor": 1.4258,
+  "independent_groups": 1590,
+  "largest_group": 354,
+  "median_group": 14,
+  "singleton_groups": 55,
+  "seed": 20260914,
+  "restarts": 200,
+  "test_frac_requested": 0.3,
+  "cohort_prevalence": 0.03786,
+  "train": {
+    "variants": 19409,
+    "positives": 735,
+    "prevalence": 0.03787,
+    "groups": 1127
+  },
+  "test": {
+    "variants": 8324,
+    "positives": 315,
+    "prevalence": 0.03784,
+    "groups": 463
+  }
+}

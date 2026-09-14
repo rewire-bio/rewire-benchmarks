@@ -31,7 +31,7 @@ def featurise(rows, k=3, window=21):
     """Positional and compositional features. No label information is used."""
     vocab = {km: i for i, km in enumerate(kmers(k))}
     n_kmer = len(vocab)
-    X = np.zeros((len(rows), 8 + len(REGIONS) + 8 + n_kmer), dtype=np.float32)
+    X = np.zeros((len(rows), 8 + 2 + len(REGIONS) + 8 + n_kmer), dtype=np.float32)
 
     for i, r in enumerate(rows):
         pos = float(r["rel_position"])
@@ -46,6 +46,13 @@ def featurise(rows, k=3, window=21):
         X[i, c] = ex; c += 1
         X[i, c] = i1; c += 1
         X[i, c] = float(r["intron2_len"]); c += 1
+        # Raw conservation. phyloP and phastCons are alignment statistics, not
+        # trained predictors, so they belong in a trivial baseline. CADD is in the
+        # cohort but is a trained model and gets its own comparator row instead.
+        for col in ("phylop_score", "mean_phastCons_score"):
+            v = r.get(col, "NA")
+            X[i, c] = float(v) if v not in ("NA", "", None) else np.nan
+            c += 1
         for reg in REGIONS:
             X[i, c] = 1.0 if r["label"] == reg else 0.0; c += 1
         ref, alt = r["ref_allele"], r["alt_allele"]
@@ -73,7 +80,7 @@ def featurise(rows, k=3, window=21):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cohort", default="benchmarks/mfass/data/cohort.tsv")
-    ap.add_argument("--split", default="benchmarks/mfass/splits/split-v1.tsv")
+    ap.add_argument("--split", default="benchmarks/mfass/splits/split-v2.tsv")
     ap.add_argument("--out", default="benchmarks/mfass/results/baseline-kmer-position.json")
     ap.add_argument("--capacity", type=int, default=100)
     ap.add_argument("--seed", type=int, default=20260914)
@@ -110,8 +117,9 @@ def main():
         benchmark="mfass-v1",
         method="baseline-kmer-position",
         family="trivial baseline",
-        description=("exon-boundary distances, allele identity and 3-mer composition of a "
-                     "21bp window, HistGradientBoosting"),
+        description=("exon-boundary distances, allele identity, phyloP and phastCons "
+                     "conservation, and 3-mer composition of a 21bp window, "
+                     "HistGradientBoosting"),
         split=args.split,
         metrics=M.point_metrics(yte, scores, args.capacity),
         coverage={"scored": len(test), "unscored": 0, "denominator": len(test)},
@@ -124,7 +132,8 @@ def main():
         independent_groups=len(set(groups_test)),
         pretrained=False,
         config={"trained_on_variants": len(train), "trained_on_positives": int(ytr.sum()),
-                "seed": args.seed, "kmer_k": 3, "window": 21},
+                "seed": args.seed, "kmer_k": 3, "window": 21,
+                "features": "exon-boundary distances, allele identity, phyloP, phastCons, 3-mers"},
     )
     out = write_result(result, args.out)
     np.save(out.with_suffix(".scores.npy"), scores)

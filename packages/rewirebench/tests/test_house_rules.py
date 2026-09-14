@@ -80,3 +80,17 @@ def test_precision_at_n_is_tie_robust():
     vals = {precision_at_n(labels, flat, 10, np.random.default_rng(s)) for s in range(20)}
     assert len(vals) > 1, "identical scores must not yield a deterministic top-n"
     assert all(0.0 <= v <= 1.0 for v in vals)
+
+
+def test_missing_key_values_do_not_merge_everything():
+    """A literal 'NA' must not union every unknown record into one component."""
+    recs = [
+        {"id": "a", "exon": "E1", "gene": "NA"},
+        {"id": "b", "exon": "E2", "gene": "NA"},
+        {"id": "c", "exon": "E3", "gene": "G1"},
+        {"id": "d", "exon": "E4", "gene": "G1"},
+    ]
+    groups = connected_components(recs, ["exon", "gene"])
+    assert groups["a"] != groups["b"], "records with unknown gene must stay separate"
+    assert groups["c"] == groups["d"], "records sharing a real gene must merge"
+    assert len(set(groups.values())) == 3
