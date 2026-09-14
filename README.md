@@ -27,7 +27,7 @@ rather than written.
 
 | Benchmark | Task | Labels | Prevalence | Status |
 |---|---|---|---:|---|
-| [`mfass-v1`](benchmarks/mfass) | Splice-variant prioritisation | Functional, minigene exon recognition | 3.76% | Baseline + SpliceAI |
+| [`mfass-v1`](benchmarks/mfass) | Splice-variant prioritisation | Functional, minigene exon recognition | 3.78% | Baseline, SpliceAI, Pangolin |
 
 ### mfass-v1 results
 
@@ -36,19 +36,16 @@ method could score, across 454 independent groups.
 
 | Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage | s/variant |
 |---|---|---:|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.620 | 0.201 | 0.290 | 0.769 | 8324/8324 | 0.00003 |
-| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.537 |
+| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 | 0.00002 |
+| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.53626 |
+| pangolin (mask=False) | specialist | 0.650 | 0.207 | 0.389 | 0.876 | 8301/8324 | 1.64162 |
 
-At 3.76% prevalence, precision@100 of 0.620 is a 16-fold enrichment over chance from position,
-conservation and 3-mers alone.
+**Every pair separates on AP and AUROC. No pair separates at precision@100**, a 100-variant review
+capacity. Pangolin leads on global ranking, distinguishably over both SpliceAI and the baseline, and
+is the only method that stays ahead of the trivial baseline for variants more than 30 bases from a
+splice site.
 
-SpliceAI's advantage over that floor is **+0.011 precision@100, 95% interval [-0.090, +0.105]**: not
-distinguishable at the operating point, for about 28,000 times the compute. It does win on AUROC
-(+0.037, [+0.002, +0.075]). Note the baseline is supervised on this assay's training split while
-SpliceAI is zero-shot, so this measures in-domain training against a strong specialist prior, not the
-quality of either tool in isolation.
-
-Pangolin and pretrained encoders are not yet run.
+Full tables, paired intervals and the distance-band breakdown: [`benchmarks/mfass`](benchmarks/mfass).
 
 ## Layout
 

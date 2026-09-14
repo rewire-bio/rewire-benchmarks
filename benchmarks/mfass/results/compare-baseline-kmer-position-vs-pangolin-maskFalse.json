@@ -1,0 +1,63 @@
+{
+  "baseline_file": "benchmarks/mfass/results/baseline-kmer-position.predictions.tsv",
+  "candidate_file": "benchmarks/mfass/results/pangolin-maskFalse.predictions.tsv",
+  "denominators": {
+    "baseline_scored": 8324,
+    "candidate_scored": 8301,
+    "common": 8301,
+    "baseline_only": 23,
+    "candidate_only": 0
+  },
+  "on_common_subset": {
+    "baseline": {
+      "n": 8301,
+      "positives": 314,
+      "prevalence": 0.037826767859294064,
+      "capacity": 100,
+      "precision_at_capacity": 0.62,
+      "recall_at_capacity": 0.19745222929936307,
+      "average_precision_sklearn": 0.2867783320647613,
+      "auroc": 0.768116621037849
+    },
+    "candidate": {
+      "n": 8301,
+      "positives": 314,
+      "prevalence": 0.037826767859294064,
+      "capacity": 100,
+      "precision_at_capacity": 0.65,
+      "recall_at_capacity": 0.2070063694267516,
+      "average_precision_sklearn": 0.3887617543064248,
+      "auroc": 0.8756851300560864
+    }
+  },
+  "independent_groups": 461,
+  "paired": {
+    "precision_at_capacity": {
+      "metric": "precision_at_capacity",
+      "mean_delta": 0.027278780605218964,
+      "ci95_low": -0.054362756808409,
+      "ci95_high": 0.10228600254885296,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 461
+    },
+    "average_precision_sklearn": {
+      "metric": "average_precision_sklearn",
+      "mean_delta": 0.1006262592905308,
+      "ci95_low": 0.061253061540220255,
+      "ci95_high": 0.1380995691768458,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 461
+    },
+    "auroc": {
+      "metric": "auroc",
+      "mean_delta": 0.10742092583849609,
+      "ci95_low": 0.08113447844431017,
+      "ci95_high": 0.1344559520170051,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 461
+    }
+  }
+}

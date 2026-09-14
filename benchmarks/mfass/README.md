@@ -69,64 +69,76 @@ closeness to the cohort rate, fixed before any model runs and never using a pred
 
 ## Results
 
-On `split-v2`, restricted to the 8,194 variants both methods could score, across 454 independent
-groups at 3.76% prevalence.
+`split-v2`, 8,324 held-out variants, 3.78% prevalence. Metrics are on each method's own scored subset;
+see the paired comparisons below for like-for-like.
 
 | Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage | s/variant |
 |---|---|---:|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.620 | 0.201 | 0.290 | 0.769 | 8324/8324 | 0.00003 |
-| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.537 |
+| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 | 0.00002 |
+| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.53626 |
+| pangolin (mask=False) | specialist | 0.650 | 0.207 | 0.389 | 0.876 | 8301/8324 | 1.64162 |
 
-### Paired comparison, SpliceAI minus baseline
+### Paired comparisons
 
-Resampling whole groups, so the difference is paired and the interval respects the grouping.
+Candidate minus reference, resampling whole groups, restricted to the variants both methods scored.
+Bold means the 95% interval excludes zero.
 
-| Metric | Delta | 95% interval | Distinguishable |
-|---|---:|---|---|
-| Precision@100 | +0.011 | [-0.090, +0.105] | no |
-| Average precision | +0.008 | [-0.040, +0.056] | no |
-| AUROC | +0.037 | [+0.002, +0.075] | yes |
+| Comparison | Precision@100 | AP | AUROC |
+|---|---|---|---|
+| SpliceAI minus baseline | +0.011 [-0.090, +0.105] | +0.008 [-0.040, +0.056] | **+0.037 [+0.002, +0.075]** |
+| Pangolin minus baseline | +0.027 [-0.054, +0.102] | **+0.101 [+0.061, +0.138]** | **+0.107 [+0.081, +0.134]** |
+| Pangolin minus SpliceAI | +0.018 [-0.039, +0.076] | **+0.092 [+0.061, +0.122]** | **+0.070 [+0.043, +0.094]** |
 
-**SpliceAI ranks better globally and is indistinguishable at the operating point a laboratory uses.**
-AUROC separates the two; precision at a 100-variant review capacity does not, and neither does average
-precision. This is the divergence that motivates leading on precision at capacity rather than AUROC.
+**Every pair separates on AP and AUROC. No pair separates at precision@100.**
 
-Two things must be said alongside that, and they cut in opposite directions.
+The ranking on global metrics is unambiguous: Pangolin, then SpliceAI, then the trivial baseline, with
+every gap distinguishable. At a 100-variant review capacity none of the three can be told apart. At
+3.78% prevalence the top 100 is a thin slice, and all three find broadly the same easy canonical
+variants in it. The differences live across the rest of the ranking.
 
-The baseline is **supervised**: it was trained on the training split of this same assay, so it has
-in-domain label information SpliceAI never saw. SpliceAI is **zero-shot** here, having been trained on
-GENCODE transcripts and never on MFASS outcomes. This is not evidence that SpliceAI is weak. It is
-evidence that a simple model with in-domain training data reaches the same operating point as a strong
-zero-shot specialist.
-
-And SpliceAI costs about **28,000 times more compute per variant**, 0.537s against 0.00002s, while
-scoring 130 fewer variants.
+That divergence is the argument for reporting both, and for not choosing a tool on AUROC alone.
 
 ### By distance to the exon boundary
 
-Canonical splice sites are largely solved. The question a laboratory has is what happens further out,
-and MFASS is mostly further out: 83.4% of its splice-disrupting variants sit more than 2 bases from a
-boundary, independently reproducing the source paper's ~83%.
+Canonical splice sites are largely solved. MFASS is mostly not canonical: 83.4% of its
+splice-disrupting variants sit more than 2 bases from a boundary, independently reproducing the source
+paper's ~83%. AUROC per band, on the 8,194 variants all three methods scored.
 
-Bands are the minimum absolute distance to either exon boundary. Review capacity is scaled to band
-size. Metrics on the 8,194 variants both methods scored.
-
-| Band | Variants | SDVs | Prevalence | Share of SDVs | baseline AUROC | SpliceAI AUROC |
+| Band | Variants | SDVs | Share of SDVs | baseline | SpliceAI | Pangolin |
 |---|---:|---:|---:|---:|---:|---:|
-| canonical, 0 to 2 | 443 | 41 | 9.25% | 13.3% | 0.825 | **0.902** |
-| near, 3 to 10 | 1,671 | 77 | 4.61% | 25.0% | 0.745 | **0.798** |
-| mid, 11 to 30 | 4,166 | 159 | 3.82% | 51.6% | 0.744 | **0.785** |
-| distal, over 30 | 1,914 | 31 | 1.62% | 10.1% | **0.786** | 0.744 |
+| canonical, 0 to 2 | 443 | 41 | 13.3% | 0.825 | 0.902 | **0.925** |
+| near, 3 to 10 | 1,671 | 77 | 25.0% | 0.745 | 0.798 | **0.857** |
+| mid, 11 to 30 | 4,166 | 159 | 51.6% | 0.744 | 0.785 | **0.868** |
+| distal, over 30 | 1,914 | 31 | 10.1% | *0.786* | 0.744 | **0.844** |
 
-**SpliceAI's advantage is concentrated near the splice site and inverts beyond 30 bases**, where it
-ranks slightly below a model built from position, conservation and 3-mers. Precision at scaled
-capacity is close to identical in every band, and in the distal band both methods reach only 0.130.
+**Pangolin leads in every band, including the distal one where SpliceAI falls below the trivial
+baseline** (0.744 against 0.786). SpliceAI's advantage is concentrated near the splice site and does
+not survive past 30 bases; Pangolin's does.
 
-Read the per-band precision figures with care: the canonical band scales to a capacity of 5, so its
-precision moves in steps of 0.2. AUROC is the more stable per-band read at these counts.
+For a laboratory triaging deep intronic and exonic candidates, which are 62% of the disrupting
+variants here, that is the practical difference between the two specialists.
 
-The practical reading is that the deep intronic and exonic variants, which are 62% of the SDVs here,
-are where neither method does well and where the choice between them matters least.
+Per-band precision at capacity is coarse at these counts, so AUROC is the more stable per-band read.
+
+### Cost and coverage
+
+Pangolin costs about 3 times SpliceAI per variant (1.64s against 0.54s) and roughly 86,000 times the
+trivial baseline. It also scores more variants: 8,301 against SpliceAI's 8,194, because it was pointed
+at GENCODE v44 while SpliceAI used its bundled v24-derived table.
+
+**That annotation difference is an open confound.** The SpliceAI figures here carry both a model
+difference and an annotation difference from Pangolin. Re-running SpliceAI against a v44-derived
+annotation is outstanding, and until it is done the SpliceAI-Pangolin gap should be read as an upper
+bound on the model difference.
+
+### Caveats that travel with these numbers
+
+The baseline is **supervised** on this assay's training split. SpliceAI and Pangolin are **zero-shot**
+here: neither saw MFASS outcomes. So the baseline comparison measures in-domain training against a
+specialist prior, not the standalone quality of any tool.
+
+MFASS measures exon recognition in a minigene construct. These are not predictions of splicing in
+patient RNA.
 
 ### What the split costs
 

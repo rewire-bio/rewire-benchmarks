@@ -1,0 +1,54 @@
+{
+  "benchmark": "mfass-v1",
+  "method": "pangolin-maskFalse",
+  "family": "specialist",
+  "description": "Pangolin official 12-model ensemble, max absolute predicted change in splice site usage, mask=False",
+  "split": "benchmarks/mfass/splits/split-v2.tsv",
+  "metrics": {
+    "n": 8301,
+    "positives": 314,
+    "prevalence": 0.037826767859294064,
+    "capacity": 100,
+    "precision_at_capacity": 0.65,
+    "recall_at_capacity": 0.2070063694267516,
+    "average_precision_sklearn": 0.3887617543064248,
+    "auroc": 0.8756851300560864,
+    "scored_subset_note": "metrics computed on scored variants only; see coverage"
+  },
+  "coverage": {
+    "scored": 8301,
+    "unscored": 23,
+    "denominator": 8324
+  },
+  "timing_seconds": {
+    "load_models_and_annotation": 0.14,
+    "score_test": 13664.681,
+    "per_variant_total": 1.641617
+  },
+  "independent_groups": 461,
+  "config": {
+    "models": "official 12-model ensemble (final.{1,2,3}.{0,2,4,6}.3.v2)",
+    "annotation": "gencode.v44.annotation.db",
+    "annotation_release": "GENCODE v44",
+    "reference": "GRCh38.primary_assembly.genome.fa",
+    "distance_d": 50,
+    "mask_m": "False",
+    "score": "max absolute predicted change in splice site usage over reported sites",
+    "context_bases": 10000,
+    "torch_threads": 10,
+    "patches": [
+      "cached the per-call pyfastx.Fasta handle and raised torch thread count; performance only, no effect on scores"
+    ]
+  },
+  "contamination": "Pangolin was trained on splice site usage across GTEx tissues and four species, not on MFASS assay outcomes, so the labels are independent of its training signal. Whether any assayed exon appeared in its training annotation is unchecked.",
+  "pretrained": true,
+  "notes": "mask=True is Pangolin's own default and zeroes splice gains at annotated sites and losses at unannotated sites. mask=False matches SpliceAI's unmasked default. Both are run so the effect of the differing defaults is measured rather than assumed.",
+  "environment": {
+    "python": "3.11.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "created_utc": "2026-09-14T20:04:01.127498+00:00",
+  "git_revision": "0ad4fea"
+}

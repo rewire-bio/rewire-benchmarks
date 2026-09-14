@@ -18,6 +18,11 @@
           "precision_at_scaled_capacity": 0.6,
           "average_precision_sklearn": 0.5857307167402802,
           "auroc": 0.9017716296565951
+        },
+        "pangolin": {
+          "precision_at_scaled_capacity": 0.8,
+          "average_precision_sklearn": 0.651449074292695,
+          "auroc": 0.9246450673461958
         }
       }
     },
@@ -37,6 +42,11 @@
           "precision_at_scaled_capacity": 0.6,
           "average_precision_sklearn": 0.27226583608733973,
           "auroc": 0.7977561961250794
+        },
+        "pangolin": {
+          "precision_at_scaled_capacity": 0.65,
+          "average_precision_sklearn": 0.3875310396229973,
+          "auroc": 0.8566540109827439
         }
       }
     },
@@ -56,6 +66,11 @@
           "precision_at_scaled_capacity": 0.5882352941176471,
           "average_precision_sklearn": 0.28420482071335973,
           "auroc": 0.7848152525533147
+        },
+        "pangolin": {
+          "precision_at_scaled_capacity": 0.5882352941176471,
+          "average_precision_sklearn": 0.3631684279395746,
+          "auroc": 0.8680555882551446
         }
       }
     },
@@ -75,6 +90,11 @@
           "precision_at_scaled_capacity": 0.13043478260869565,
           "average_precision_sklearn": 0.07335603629452685,
           "auroc": 0.7437513919106435
+        },
+        "pangolin": {
+          "precision_at_scaled_capacity": 0.30434782608695654,
+          "average_precision_sklearn": 0.15254197193702868,
+          "auroc": 0.8438918678155997
         }
       }
     }
