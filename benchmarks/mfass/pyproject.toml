@@ -9,6 +9,8 @@ dependencies = ["rewirebench"]
 # pulls TensorFlow. Kept optional so the core benchmark installs without it.
 [project.optional-dependencies]
 spliceai = ["spliceai==1.3.1", "tensorflow>=2.16", "setuptools<82", "pyfaidx>=0.5", "pandas>=2"]
+# Pangolin is installed from git; it needs torch, gffutils, pyvcf3 and pyfastx.
+pangolin = ["torch>=2", "gffutils>=0.13", "pyvcf3", "pyfastx", "setuptools<82"]
 
 [project.scripts]
 mfass-build = "mfass.build_dataset:main"
@@ -17,6 +19,7 @@ mfass-baseline = "mfass.run_baseline:main"
 mfass-spliceai = "mfass.run_spliceai:main"
 mfass-compare = "mfass.compare:main"
 mfass-subgroups = "mfass.subgroups:main"
+mfass-pangolin = "mfass.run_pangolin:main"
 
 [build-system]
 requires = ["hatchling"]
