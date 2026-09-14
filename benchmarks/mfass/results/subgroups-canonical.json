@@ -1,0 +1,82 @@
+{
+  "capacity_total": 100,
+  "common_variants": 8194,
+  "bands": {
+    "canonical <=2": {
+      "variants": 443,
+      "positives": 41,
+      "prevalence": 0.09255,
+      "share_of_all_positives": 0.1331,
+      "capacity_scaled": 5,
+      "methods": {
+        "baseline": {
+          "precision_at_scaled_capacity": 0.6,
+          "average_precision_sklearn": 0.5471237084277103,
+          "auroc": 0.8248392185414394
+        },
+        "spliceai": {
+          "precision_at_scaled_capacity": 0.6,
+          "average_precision_sklearn": 0.5857307167402802,
+          "auroc": 0.9017716296565951
+        }
+      }
+    },
+    "near 3-10": {
+      "variants": 1671,
+      "positives": 77,
+      "prevalence": 0.04608,
+      "share_of_all_positives": 0.25,
+      "capacity_scaled": 20,
+      "methods": {
+        "baseline": {
+          "precision_at_scaled_capacity": 0.55,
+          "average_precision_sklearn": 0.2913383417333226,
+          "auroc": 0.744806009548795
+        },
+        "spliceai": {
+          "precision_at_scaled_capacity": 0.6,
+          "average_precision_sklearn": 0.27226583608733973,
+          "auroc": 0.7977561961250794
+        }
+      }
+    },
+    "mid 11-30": {
+      "variants": 4166,
+      "positives": 159,
+      "prevalence": 0.03817,
+      "share_of_all_positives": 0.5162,
+      "capacity_scaled": 51,
+      "methods": {
+        "baseline": {
+          "precision_at_scaled_capacity": 0.5686274509803921,
+          "average_precision_sklearn": 0.265446677358647,
+          "auroc": 0.7435745307347362
+        },
+        "spliceai": {
+          "precision_at_scaled_capacity": 0.5882352941176471,
+          "average_precision_sklearn": 0.28420482071335973,
+          "auroc": 0.7848152525533147
+        }
+      }
+    },
+    "distal >30": {
+      "variants": 1914,
+      "positives": 31,
+      "prevalence": 0.0162,
+      "share_of_all_positives": 0.1006,
+      "capacity_scaled": 23,
+      "methods": {
+        "baseline": {
+          "precision_at_scaled_capacity": 0.13043478260869565,
+          "average_precision_sklearn": 0.05914835867243513,
+          "auroc": 0.7862796155756943
+        },
+        "spliceai": {
+          "precision_at_scaled_capacity": 0.13043478260869565,
+          "average_precision_sklearn": 0.07335603629452685,
+          "auroc": 0.7437513919106435
+        }
+      }
+    }
+  }
+}

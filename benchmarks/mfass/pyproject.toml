@@ -16,6 +16,7 @@ mfass-split = "mfass.split:main"
 mfass-baseline = "mfass.run_baseline:main"
 mfass-spliceai = "mfass.run_spliceai:main"
 mfass-compare = "mfass.compare:main"
+mfass-subgroups = "mfass.subgroups:main"
 
 [build-system]
 requires = ["hatchling"]

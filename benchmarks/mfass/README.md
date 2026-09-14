@@ -102,6 +102,32 @@ zero-shot specialist.
 And SpliceAI costs about **28,000 times more compute per variant**, 0.537s against 0.00002s, while
 scoring 130 fewer variants.
 
+### By distance to the exon boundary
+
+Canonical splice sites are largely solved. The question a laboratory has is what happens further out,
+and MFASS is mostly further out: 83.4% of its splice-disrupting variants sit more than 2 bases from a
+boundary, independently reproducing the source paper's ~83%.
+
+Bands are the minimum absolute distance to either exon boundary. Review capacity is scaled to band
+size. Metrics on the 8,194 variants both methods scored.
+
+| Band | Variants | SDVs | Prevalence | Share of SDVs | baseline AUROC | SpliceAI AUROC |
+|---|---:|---:|---:|---:|---:|---:|
+| canonical, 0 to 2 | 443 | 41 | 9.25% | 13.3% | 0.825 | **0.902** |
+| near, 3 to 10 | 1,671 | 77 | 4.61% | 25.0% | 0.745 | **0.798** |
+| mid, 11 to 30 | 4,166 | 159 | 3.82% | 51.6% | 0.744 | **0.785** |
+| distal, over 30 | 1,914 | 31 | 1.62% | 10.1% | **0.786** | 0.744 |
+
+**SpliceAI's advantage is concentrated near the splice site and inverts beyond 30 bases**, where it
+ranks slightly below a model built from position, conservation and 3-mers. Precision at scaled
+capacity is close to identical in every band, and in the distal band both methods reach only 0.130.
+
+Read the per-band precision figures with care: the canonical band scales to a capacity of 5, so its
+precision moves in steps of 0.2. AUROC is the more stable per-band read at these counts.
+
+The practical reading is that the deep intronic and exonic variants, which are 62% of the SDVs here,
+are where neither method does well and where the choice between them matters least.
+
 ### What the split costs
 
 Same features, same code, only the grouping rule changes:
@@ -120,5 +146,4 @@ beside every number.
 
 - Pangolin, configuration-matched against SpliceAI
 - Pretrained encoders: DNABERT-2, NT-v2, Caduceus, SpliceBERT
-- Canonical versus non-canonical subgroup breakdown
 - A declared improvement margin, written down before any candidate is scored
