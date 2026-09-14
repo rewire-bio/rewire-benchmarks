@@ -1,0 +1,28 @@
+{
+  "benchmark": "mfass-v1",
+  "keys": [
+    "ensembl_id"
+  ],
+  "naive_concatenated_key_count": 2185,
+  "inflation_factor": 1.0,
+  "independent_groups": 2185,
+  "largest_group": 37,
+  "median_group": 12,
+  "singleton_groups": 84,
+  "seed": 20260914,
+  "restarts": 200,
+  "test_frac_requested": 0.3,
+  "cohort_prevalence": 0.03786,
+  "train": {
+    "variants": 19413,
+    "positives": 735,
+    "prevalence": 0.03786,
+    "groups": 1523
+  },
+  "test": {
+    "variants": 8320,
+    "positives": 315,
+    "prevalence": 0.03786,
+    "groups": 662
+  }
+}

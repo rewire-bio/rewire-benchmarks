@@ -1,0 +1,47 @@
+{
+  "benchmark": "mfass-v1",
+  "method": "baseline-kmer-position",
+  "family": "trivial baseline",
+  "description": "exon-boundary distances, allele identity and 3-mer composition of a 21bp window, HistGradientBoosting",
+  "split": "benchmarks/mfass/splits/split-v1.tsv",
+  "metrics": {
+    "n": 8320,
+    "positives": 315,
+    "prevalence": 0.03786057692307692,
+    "capacity": 100,
+    "precision_at_capacity": 0.68,
+    "recall_at_capacity": 0.21587301587301588,
+    "average_precision_sklearn": 0.345555358700358,
+    "auroc": 0.8167744366120381
+  },
+  "coverage": {
+    "scored": 8320,
+    "unscored": 0,
+    "denominator": 8320
+  },
+  "timing_seconds": {
+    "featurise_train_and_test": 0.137,
+    "fit": 1.04,
+    "predict_test": 0.016,
+    "per_variant_total": 4.3e-05
+  },
+  "independent_groups": 662,
+  "config": {
+    "trained_on_variants": 19413,
+    "trained_on_positives": 735,
+    "seed": 20260914,
+    "kmer_k": 3,
+    "window": 21
+  },
+  "contamination": null,
+  "pretrained": false,
+  "notes": null,
+  "environment": {
+    "python": "3.11.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "created_utc": "2026-09-14T13:30:04.541352+00:00",
+  "git_revision": "757f0f6"
+}

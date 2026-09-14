@@ -1,0 +1,19 @@
+[project]
+name = "rewire-benchmarks"
+version = "0.1.0"
+description = "Independent, reproducible benchmarks for AI models in biology"
+requires-python = ">=3.11"
+dependencies = ["rewirebench", "mfass"]
+
+[tool.uv.workspace]
+members = ["packages/*", "benchmarks/*"]
+
+[tool.uv.sources]
+rewirebench = { workspace = true }
+mfass = { workspace = true }
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 100
