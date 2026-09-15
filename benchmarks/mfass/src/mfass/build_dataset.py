@@ -1,6 +1,6 @@
 """Build the MFASS evaluation cohort from the published per-variant table.
 
-Source: Cheung et al., Molecular Cell 2018. Analysis repository KosuriLab/MFASS,
+Source: Chong et al., Molecular Cell 2018. Analysis repository KosuriLab/MFASS,
 file processed_data/snv/snv_data_clean.txt.
 
 The eligibility filter is asserted against the counts reported in the paper so the
@@ -13,7 +13,7 @@ import json
 import pathlib
 import sys
 
-# Published totals, Cheung et al. 2018. See RECONCILIATION in the README.
+# Published totals, Chong et al. 2018. See RECONCILIATION in the README.
 PUBLISHED_VARIANTS = 27733
 PUBLISHED_SDVS = 1050
 PUBLISHED_EXONS_MUTANT = 2198

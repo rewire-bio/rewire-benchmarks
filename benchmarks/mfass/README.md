@@ -5,7 +5,7 @@ laboratory already runs, measured against independent functional labels?
 
 ## Dataset
 
-[Cheung et al., *Molecular Cell* 2018](https://pmc.ncbi.nlm.nih.gov/articles/PMC6599603/). MFASS is a
+[Chong et al., *Molecular Cell* 2018](https://pmc.ncbi.nlm.nih.gov/articles/PMC6599603/). MFASS is a
 multiplexed functional assay of splicing using Sort-seq: each variant sits in a minigene reporter
 wired to GFP, cells are sorted by fluorescence, and sequencing quantifies which variants disrupted
 exon recognition.
@@ -23,6 +23,10 @@ Chosen for four reasons:
 
 Scope limit worth stating plainly: this measures exon recognition in an artificial construct, not
 splicing in patient RNA.
+
+> **Author name.** The first author is Rockie Chong. Cell Press's own "In Brief" blurb inside the
+> paper says "Cheung et al.", contradicting its byline, and that error propagated into the reference
+> lists of both the Pangolin and CADD-Splice papers. Crossref and PubMed both give Chong.
 
 ## Cohort reconciliation
 
