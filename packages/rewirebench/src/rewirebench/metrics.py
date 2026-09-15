@@ -84,7 +84,12 @@ def paired_group_bootstrap(labels, baseline, candidate, groups, capacity,
             return float(roc_auc_score(y, s))
         raise ValueError(f"unknown metric {metric}")
 
-    deltas, skipped = [], 0
+    # The observed paired difference on the full common subset. This is the point
+    # estimate. The resample mean below is theta-hat plus bootstrap bias, so
+    # publishing it as "the effect" adds the bias rather than removing it.
+    observed = score(labels, candidate, capacity) - score(labels, baseline, capacity)
+
+    deltas, skipped, caps = [], 0, []
     for _ in range(n):
         drawn = rng.choice(uniq, size=len(uniq), replace=True)
         rows = np.concatenate([index[g] for g in drawn])
@@ -94,7 +99,11 @@ def paired_group_bootstrap(labels, baseline, candidate, groups, capacity,
             continue
         # Hold capacity proportional to the resampled size so the operating point
         # is comparable across draws of differing length.
+        # Resampled lists vary in length because groups are unequal, so capacity is
+        # held at a constant FRACTION of the list rather than a constant count. The
+        # realised spread is reported so an interval is never read as "exactly N".
         cap = max(1, int(round(capacity * len(rows) / len(labels))))
+        caps.append(cap)
         deltas.append(score(y, candidate[rows], cap) - score(y, baseline[rows], cap))
 
     if skipped > max_single_class_frac * n:
@@ -105,9 +114,20 @@ def paired_group_bootstrap(labels, baseline, candidate, groups, capacity,
 
     deltas = np.asarray(deltas)
     lo, hi = np.percentile(deltas, [2.5, 97.5])
+    caps = np.asarray(caps)
     return {
         "metric": metric,
-        "mean_delta": float(deltas.mean()),
+        "observed_delta": float(observed),
+        "resample_mean_delta": float(deltas.mean()),
+        "bootstrap_bias": float(deltas.mean() - observed),
+        "mean_delta": float(deltas.mean()),  # deprecated alias, use observed_delta
+        "realised_capacity": {
+            "requested": int(capacity),
+            "mean": float(caps.mean()),
+            "min": int(caps.min()),
+            "max": int(caps.max()),
+            "list_fraction": round(float(capacity) / len(labels), 5),
+        },
         "ci95_low": float(lo),
         "ci95_high": float(hi),
         "draws": int(n),

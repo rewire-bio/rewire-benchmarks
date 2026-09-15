@@ -36,7 +36,17 @@
   "paired": {
     "precision_at_capacity": {
       "metric": "precision_at_capacity",
+      "observed_delta": 0.020000000000000018,
+      "resample_mean_delta": 0.01067758794207996,
+      "bootstrap_bias": -0.009322412057920058,
       "mean_delta": 0.01067758794207996,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 100.064,
+        "min": 80,
+        "max": 132,
+        "list_fraction": 0.0122
+      },
       "ci95_low": -0.09002272727272735,
       "ci95_high": 0.10526315789473684,
       "draws": 2000,
@@ -45,7 +55,17 @@
     },
     "average_precision_sklearn": {
       "metric": "average_precision_sklearn",
+      "observed_delta": 0.008881807312154821,
+      "resample_mean_delta": 0.008226023680229663,
+      "bootstrap_bias": -0.0006557836319251581,
       "mean_delta": 0.008226023680229663,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 100.064,
+        "min": 80,
+        "max": 132,
+        "list_fraction": 0.0122
+      },
       "ci95_low": -0.04041644340047911,
       "ci95_high": 0.05602398700542567,
       "draws": 2000,
@@ -54,7 +74,17 @@
     },
     "auroc": {
       "metric": "auroc",
+      "observed_delta": 0.03689816080445041,
+      "resample_mean_delta": 0.03693402182878345,
+      "bootstrap_bias": 3.586102433304067e-05,
       "mean_delta": 0.03693402182878345,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 100.064,
+        "min": 80,
+        "max": 132,
+        "list_fraction": 0.0122
+      },
       "ci95_low": 0.0022783026372199867,
       "ci95_high": 0.07499135881603218,
       "draws": 2000,
