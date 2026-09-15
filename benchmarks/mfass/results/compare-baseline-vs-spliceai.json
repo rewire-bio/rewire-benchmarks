@@ -1,6 +1,8 @@
 {
   "baseline_file": "benchmarks/mfass/results/baseline-kmer-position.predictions.tsv",
   "candidate_file": "benchmarks/mfass/results/spliceai-1.3.1.predictions.tsv",
+  "capacity": 100,
+  "seed": 20260914,
   "denominators": {
     "baseline_scored": 8324,
     "candidate_scored": 8194,

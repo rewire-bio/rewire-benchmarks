@@ -50,6 +50,8 @@ def main():
     report = {
         "baseline_file": args.baseline,
         "candidate_file": args.candidate,
+        "capacity": args.capacity,
+        "seed": args.seed,
         "denominators": {
             "baseline_scored": len(b),
             "candidate_scored": len(c),
