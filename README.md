@@ -94,6 +94,22 @@ uv run --group dev pytest packages/rewirebench/tests -q
 4. A trivial baseline, before any pretrained model.
 5. Results written through `rewirebench.results.write_result`, which enforces the house rules.
 
+## Licensing and data
+
+The code in this repository is MIT licensed. The benchmark data is not ours and is not
+redistributed.
+
+- **Code** (`packages/`, `benchmarks/*/src/`): MIT, see `LICENSE`.
+- **Source data**: downloaded at run time from the original authors and gitignored. MFASS comes from
+  [KosuriLab/MFASS](https://github.com/KosuriLab/MFASS), which declares no licence, so it remains the
+  authors' work under their terms. Cite [Chong et al., *Molecular Cell* 2018](https://pmc.ncbi.nlm.nih.gov/articles/PMC6599603/).
+- **Derived results** (`benchmarks/*/results/`, `benchmarks/*/splits/`): committed so a reader can
+  verify a comparison without rerunning a specialist. The prediction tables carry the upstream
+  assay label beside our scores, for attribution and verification only. Anyone building on the labels
+  themselves should take them from the original repository, which is the authoritative copy.
+- **Model weights**: never redistributed. SpliceAI is PolyForm Strict 1.0.0 code with CC BY-NC 4.0
+  weights; Pangolin is GPL v3. Both are installed from upstream at run time under their own terms.
+
 ## Reproducibility
 
 Results carry the git revision, UTC timestamp, Python version and platform. Data directories are
