@@ -2,8 +2,15 @@
 
 Canonical splice sites are largely a solved problem, and a method that only wins
 there has not helped with the variants a laboratory actually struggles to
-interpret. In MFASS the canonical band holds 16.6% of the splice-disrupting
-variants, matching the source paper's ~17%, so 83% of the signal sits outside it.
+interpret. Across the whole MFASS cohort the canonical band holds 16.6% of the
+splice-disrupting variants, matching the source paper's ~17%; within a given test
+split the share differs (13.3% on the reported three-method common subset).
+
+**Confound, stated because it changes how these bands read.** The band variable is
+the minimum absolute distance to either exon boundary, and that same quantity is a
+fitted feature of the trivial baseline in run_baseline.py. Stratifying on one of a
+model's own inputs is not a neutral cut for that model, so a band-wise reversal
+involving the baseline is confounded with its supervision, not merely imprecise.
 
 Bands are defined on the minimum absolute distance from the variant to either exon
 boundary, in window coordinates:

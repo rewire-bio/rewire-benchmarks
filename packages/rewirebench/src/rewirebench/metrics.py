@@ -8,9 +8,14 @@ average_precision_score is not interpolated and is not the same quantity as a
 trapezoidally integrated precision-recall area.
 
 Uncertainty is a paired bootstrap over whole groups. Single-class resamples are
-refused rather than filtered, because discarding them conditions the interval on
-the draws that happened to contain both classes and reports it as narrower than
-the data supports.
+skipped, and the run is refused outright once they exceed a small fraction of
+draws, because discarding many of them conditions the interval on the draws that
+happened to contain both classes and reports it as narrower than the data
+supports. The skipped count is always returned.
+
+The point estimate is the observed difference on the full common subset, not the
+mean of the resampled differences. The resample mean is theta-hat plus bootstrap
+bias; reporting it as the effect adds the bias instead of removing it.
 """
 import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
