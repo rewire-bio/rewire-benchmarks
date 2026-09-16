@@ -19,6 +19,8 @@ from rewirebench import metrics as M
 from rewirebench.results import BenchmarkResult, write_result
 from sklearn.ensemble import HistGradientBoostingClassifier
 
+from .validation import validate_canonical_split
+
 BASES = "ACGT"
 REGIONS = ["exon", "upstr_intron", "downstr_intron"]
 
@@ -91,6 +93,7 @@ def main():
     ap.add_argument("--seed", type=int, default=20260914)
     args = ap.parse_args()
 
+    validate_canonical_split(args.split)
     t_all = time.perf_counter()
     with open(args.cohort, newline="") as fh:
         rows = list(csv.DictReader(fh, delimiter="\t"))

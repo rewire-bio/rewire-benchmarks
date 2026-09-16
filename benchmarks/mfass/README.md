@@ -125,11 +125,14 @@ mean of `last_hidden_state`, concatenates the reference vector with the
 mutant-minus-reference vector, and fits a fixed balanced L2 logistic head
 (`C=0.1`) solely on the 19,409 training variants. It scores the full 8,324-row
 held-out arm once, with no tuning against it. The source/revision and runtime
-metadata are recorded with the result. If any full-score gate fails, no partial
-accuracy artifact is written.
+metadata are recorded with the result. Both v2 runners refuse a split whose
+SHA-256 differs from the predeclared canonical split, even if its arm sizes and
+class counts match. Before embedding, the full DNABERT-2 runner also checks the
+loaded code against the pinned revision and verifies code and weights against
+the pilot. If any full-score gate fails, no partial accuracy artifact is written.
 
 The [run provenance manifest](provenance/mfass-v2-local-dnabert2.json)
-binds the pinned checkpoint and source hashes, the exact runner source,
+binds the pinned checkpoint and source hashes, the runner source history,
 the original pilot used for the full run, complete predictions, trained
 head, result JSON, and paired comparison. The checkpoint comes from the
 [official DNABERT-2 repository](https://huggingface.co/zhihan1996/DNABERT-2-117M)

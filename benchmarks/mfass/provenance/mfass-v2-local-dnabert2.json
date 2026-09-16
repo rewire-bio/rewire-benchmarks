@@ -63,14 +63,18 @@
     },
     "full_runner_source": {
       "path": "benchmarks/mfass/src/mfass/run_dnabert2.py",
-      "sha256": "e9ec3021f1c06872bb2f77b59fc7719cfedcaed8fdbe434c13655be4f9460d87"
+      "sha256": "b7ebb4324e22cb421482181c52722c64cac5fec7c43161c082fc34e9920c4a85"
     },
     "baseline_runner_source": {
       "path": "benchmarks/mfass/src/mfass/run_baseline.py",
-      "sha256": "49116f8e0af33f6a314b48aa4e541b193f48325e5feefa5850802742892210ed"
+      "sha256": "7066ae357aac960ddd6e95ee55a98dcd876b619edfadae1e1d9d03eb3f5b0acc"
+    },
+    "canonical_split_validation_source": {
+      "path": "benchmarks/mfass/src/mfass/validation.py",
+      "sha256": "1a2a2fa75b68b69b9f32cd80a07c2440442c8d4c67871b2eaf944d0d2b546fda"
     }
   },
-  "notes": "Original mfass-v1 result and prediction artifacts were not overwritten; this manifest binds the local v2 frozen-pair protocol, full result and corrected comparison. The two prediction TSVs were normalized from CRLF to LF after scoring without changing fields or numeric values; the current writers now emit LF. The source hashes at scoring are preserved in post_run_lf_normalization.",
+  "notes": "Original mfass-v1 result and prediction artifacts were not overwritten; this manifest binds the local v2 frozen-pair protocol, full result and corrected comparison. The two prediction TSVs were normalized from CRLF to LF after scoring without changing fields or numeric values; the current writers now emit LF. The source hashes at scoring are preserved in post_run_lf_normalization. Post-review input identity guards changed the current runner sources without rescoring; their prior hashes are retained in post_review_validation_guards.",
   "post_run_lf_normalization": {
     "kind": "line_ending_only",
     "format": "CRLF to LF",
@@ -97,5 +101,24 @@
         "change": "prediction csv.writer lineterminator set to LF"
       }
     }
+  },
+  "post_review_validation_guards": {
+    "kind": "input_identity_checks_only",
+    "numerical_values_changed": false,
+    "changes": [
+      "Both runners refuse split files whose SHA-256 differs from the predeclared canonical split, before fitting or embedding.",
+      "The full DNABERT-2 runner verifies loaded remote code against the pinned code and the verified pilot, and weights against the verified pilot."
+    ],
+    "runner_sources": {
+      "full_runner_source": {
+        "before_review_sha256": "e9ec3021f1c06872bb2f77b59fc7719cfedcaed8fdbe434c13655be4f9460d87",
+        "after_review_sha256": "b7ebb4324e22cb421482181c52722c64cac5fec7c43161c082fc34e9920c4a85"
+      },
+      "baseline_runner_source": {
+        "before_review_sha256": "49116f8e0af33f6a314b48aa4e541b193f48325e5feefa5850802742892210ed",
+        "after_review_sha256": "7066ae357aac960ddd6e95ee55a98dcd876b619edfadae1e1d9d03eb3f5b0acc"
+      }
+    },
+    "verification": "Existing predictions, scores, heads, metrics and comparisons are unchanged. The corrected baseline was independently rerun and produced bit-identical score arrays; all point metrics were recomputed from saved scores."
   }
 }

@@ -24,6 +24,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
 from .run_dnabert2_pilot import MIN_FREE_BYTES, MODEL_ID, MODEL_REVISION, sha256
+from .validation import validate_canonical_split
 
 METHOD = "dnabert2-117m-frozen-pair-logreg"
 TOTAL_LIMIT_HOURS = 12
@@ -38,6 +39,7 @@ def masked_mean(hidden, attention_mask):
 
 
 def load_rows(cohort, split):
+    validate_canonical_split(split)
     with open(cohort, newline="") as fh:
         rows = list(csv.DictReader(fh, delimiter="\t"))
     with open(split, newline="") as fh:
@@ -130,6 +132,13 @@ def main():
     tokenizer_path = pathlib.Path(hf_hub_download(MODEL_ID, "tokenizer.json",
                                                    revision=MODEL_REVISION))
     checkpoint_hash = sha256(weights_path)
+    pinned_code_path = pathlib.Path(hf_hub_download(MODEL_ID, "bert_layers.py",
+                                                   revision=MODEL_REVISION))
+    if sha256(code_path) != sha256(pinned_code_path):
+        raise RuntimeError("Loaded remote code differs from the pinned repository revision")
+    if (sha256(code_path) != pilot["environment"].get("loaded_remote_code_sha256") or
+            checkpoint_hash != pilot["environment"].get("checkpoint_safetensors_sha256")):
+        raise RuntimeError("Loaded code/checkpoint differs from the verified pilot; rerun the pilot")
 
     vectors, t_embed, token_lengths = embed_pairs(rows, tokenizer, model, torch, args.batch_size)
     # The encoder is frozen; discard it before fitting the small supervised head.
