@@ -1,4 +1,13 @@
-# mfass-v1
+# MFASS benchmark
+
+> **Correction, September 2026:** The published `mfass-v1` baseline used the raw
+> `sequence` field with assay-coordinate `rel_position`. In 7,770 of the 27,733
+> eligible variants, that field is the reverse complement of `original_seq`, so
+> its 21bp 3-mer window was centred at the wrong base. The original v1 JSON and
+> prediction artifacts remain as an auditable historical snapshot. **Do not use
+> the v1 baseline comparisons or the v1 split-cost claims as current
+> evidence.** `mfass-v2` rebuilds a validated assay-oriented reference/mutant
+> pair from `natural_seq`/`original_seq` and reruns the baseline and comparisons.
 
 Does a genomic foundation model improve splice-variant prioritisation over the tools a diagnostic
 laboratory already runs, measured against independent functional labels?
@@ -47,6 +56,13 @@ category == "mutant"  AND  strong_lof != "NA"
 `build_dataset` asserts all three and refuses to write on drift. One wrinkle: the paper's 2,198 exons
 is counted before the `strong_lof` filter, so the evaluation cohort itself spans 2,185.
 
+The source `original_seq` is the assayed mutant and `natural_seq` its reference.
+For every eligible variant, they are both 170bp and differ at exactly
+`rel_position - 1`, with alleles checked against the recorded strand. The raw
+`sequence` equals `original_seq` for 19,963 rows and its reverse complement for
+7,770. The v2 cohort keeps the legacy field for provenance but exposes validated
+`reference_sequence` and `mutant_sequence` for all sequence-based methods.
+
 ## Split
 
 Grouping unit is the connected component of relations that must not cross the boundary.
@@ -71,95 +87,132 @@ the failure this machinery exists to prevent.
 Groups are assigned whole. Prevalence is matched between arms by the best of 200 seeded draws on
 closeness to the cohort rate, fixed before any model runs and never using a prediction.
 
-## Results
+## Reproduce v2 on a local machine
 
-`split-v2`, 8,324 held-out variants, 3.78% prevalence. Metrics are on each method's own scored subset;
-see the paired comparisons below for like-for-like.
+The two source tables are downloaded from the authors' public repository and kept
+outside Git. Their SHA-256 hashes in this run are
+`a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8`
+(`snv_data_clean.txt`) and
+`71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1`
+(`snv_func_annot.txt`). The canonical checked-in split is
+`benchmarks/mfass/splits/split-v2.tsv`; its SHA-256 is
+`999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052`.
 
-| Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage | s/variant |
-|---|---|---:|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 | 0.00002 |
-| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.53626 |
-| pangolin (mask=False) | specialist | 0.650 | 0.207 | 0.389 | 0.876 | 8301/8324 | 1.64162 |
+```bash
+mkdir -p benchmarks/mfass/data
+curl -L -o benchmarks/mfass/data/snv_data_clean.txt \
+  https://raw.githubusercontent.com/KosuriLab/MFASS/master/processed_data/snv/snv_data_clean.txt
+curl -L -o benchmarks/mfass/data/snv_func_annot.txt \
+  https://raw.githubusercontent.com/KosuriLab/MFASS/master/processed_data/snv/snv_func_annot.txt
+uv sync --package mfass --extra dnabert2-pilot
+uv run --package mfass --extra dnabert2-pilot mfass-build --check
+uv run --package mfass --extra dnabert2-pilot mfass-build
+uv run --package mfass --extra dnabert2-pilot mfass-baseline
+uv run --package mfass --extra dnabert2-pilot mfass-dnabert2-pilot
+# Only after the pilot confirms <=12 hours projected and >=1 GiB free disk:
+uv run --package mfass --extra dnabert2-pilot mfass-dnabert2
+```
+
+No paid API or cloud compute is used. The pilot deterministically samples 16
+held-out reference/mutant pairs from each legacy orientation stratum, embeds
+both 170bp sequences, and records token lengths, runtime, memory, disk reserve,
+and failures. It does **not** compute accuracy. The verified local pilot embedded
+all 32 pairs in 0.690 seconds, peaked at about 1.25 GB process RSS, and left
+3.59 GB disk free; its refreshed artifact checks the loaded code and weight
+SHA-256 against the pinned repository revision. DNABERT-2's released checkpoint
+has untrained pooler weights; the full protocol therefore uses the attention-mask
+mean of `last_hidden_state`, concatenates the reference vector with the
+mutant-minus-reference vector, and fits a fixed balanced L2 logistic head
+(`C=0.1`) solely on the 19,409 training variants. It scores the full 8,324-row
+held-out arm once, with no tuning against it. The source/revision and runtime
+metadata are recorded with the result. Both v2 runners refuse a split whose
+SHA-256 differs from the predeclared canonical split, even if its arm sizes and
+class counts match. Before embedding, the full DNABERT-2 runner also checks the
+loaded code against the pinned revision and verifies code and weights against
+the pilot. If any full-score gate fails, no partial accuracy artifact is written.
+
+The [run provenance manifest](provenance/mfass-v2-local-dnabert2.json)
+binds the pinned checkpoint and source hashes, the runner source history,
+the original pilot used for the full run, complete predictions, trained
+head, result JSON, and paired comparison. The checkpoint comes from the
+[official DNABERT-2 repository](https://huggingface.co/zhihan1996/DNABERT-2-117M)
+and is never redistributed here.
+
+## MFASS-v2 results
+
+The canonical split has 8,324 held-out variants (315 disrupting) in 463 groups.
+Each method's point metrics use its own scored subset; paired deltas use only
+variants scored by both methods. SpliceAI and Pangolin predictions came from
+the unchanged genomic-context specialist runs and were not silently relabelled
+as new assay-sequence runs.
+
+| Method | Family/protocol | P@100 | AP | AUROC | Coverage |
+|---|---|---:|---:|---:|---:|
+| Corrected k-mer/position baseline | supervised trivial baseline | 0.610 | 0.286 | 0.778 | 8,324/8,324 |
+| SpliceAI 1.3.1 | zero-shot specialist, unchanged | 0.640 | 0.299 | 0.806 | 8,194/8,324 |
+| Pangolin, mask=False | zero-shot specialist, unchanged | 0.650 | 0.389 | 0.876 | 8,301/8,324 |
+| DNABERT-2 117M, frozen pair + logistic head | supervised pretrained encoder | 0.030 | 0.045 | 0.550 | 8,324/8,324 |
 
 ### Paired comparisons
 
-Candidate minus reference, resampling whole groups, restricted to the variants both methods scored.
-Bold means the 95% interval excludes zero.
+Candidate minus the **corrected** baseline on the common subset, with 95%
+intervals from 2,000 resamples of whole connected exon/gene groups. The
+precision@100 intervals account for a fixed review-list fraction under
+group resampling; no method's high-level ranking is inferred from P@100 alone.
 
-| Comparison | Precision@100 | AP | AUROC |
-|---|---|---|---|
-| SpliceAI minus baseline | +0.011 [-0.090, +0.105] | +0.008 [-0.040, +0.056] | **+0.037 [+0.002, +0.075]** |
-| Pangolin minus baseline | +0.027 [-0.054, +0.102] | **+0.101 [+0.061, +0.138]** | **+0.107 [+0.081, +0.134]** |
-| Pangolin minus SpliceAI | +0.018 [-0.039, +0.076] | **+0.092 [+0.061, +0.122]** | **+0.070 [+0.043, +0.094]** |
+| Candidate | Common variants | P@100 delta [95% interval] | AP delta [95% interval] | AUROC delta [95% interval] |
+|---|---:|---|---|---|
+| SpliceAI | 8,194 | +0.030 [-0.068, +0.107] | +0.009 [-0.039, +0.061] | +0.028 [-0.004, +0.064] |
+| Pangolin | 8,301 | +0.040 [-0.041, +0.120] | +0.102 [+0.063, +0.141] | +0.098 [+0.073, +0.125] |
+| DNABERT-2 frozen pair + head | 8,324 | -0.580 [-0.713, -0.464] | -0.241 [-0.304, -0.182] | -0.228 [-0.300, -0.160] |
 
-**Every pair separates on AP and AUROC. No pair separates at precision@100.**
+The v1 statement that SpliceAI clearly exceeded the baseline on AUROC is
+**withdrawn**: after correcting the baseline, its paired interval crosses
+zero. Pangolin still exceeds the baseline on AP and AUROC, though its P@100
+interval crosses zero. The tested DNABERT-2 frozen-pair protocol is worse than
+the trivial baseline on all three measures. This evaluates **one fixed
+representation and head**, not the model's best achievable result or a
+general claim about genomic foundation models.
 
-The ranking on global metrics is unambiguous: Pangolin, then SpliceAI, then the trivial baseline, with
-every gap distinguishable. At a 100-variant review capacity none of the three can be told apart. At
-3.78% prevalence the top 100 is a thin slice, and all three find broadly the same easy canonical
-variants in it. The differences live across the rest of the ranking.
+### Boundary distance and runtime
 
-That divergence is the argument for reporting both, and for not choosing a tool on AUROC alone.
+On the 8,194 variants all three original methods could score, the corrected
+baseline's AUROC by boundary-distance band is 0.850 (0–2 bases), 0.735
+(3–10), 0.764 (11–30), and 0.756 (over 30). The specialist numbers and
+shared-subset denominators are preserved in
+`results/subgroups-canonical-v2.json`. The older boundary table with a
+0.786 distal baseline value is superseded.
 
-### By distance to the exon boundary
+The corrected baseline took 1.399 seconds end to end to load, validate,
+featurise, fit, and score this cohort on the M4 Mac mini. The local DNABERT-2
+run took 618.239 seconds, including loading, embedding every training and
+test reference/mutant pair, fitting its head, and scoring held-out rows.
+Specialist runtimes in their original artifacts cover held-out inference and
+annotation/model loading; these scopes differ, so per-variant numbers should
+be read with their timing fields.
 
-Canonical splice sites are largely solved. MFASS is mostly not canonical: 83.4% of its
-splice-disrupting variants sit more than 2 bases from a boundary, independently reproducing the source
-paper's ~83%. AUROC per band, on the 8,194 variants all three methods scored.
+### Limits
 
-| Band | Variants | SDVs | Share of SDVs | baseline | SpliceAI | Pangolin |
-|---|---:|---:|---:|---:|---:|---:|
-| canonical, 0 to 2 | 443 | 41 | 13.3% | 0.825 | 0.902 | **0.925** |
-| near, 3 to 10 | 1,671 | 77 | 25.0% | 0.745 | 0.798 | **0.857** |
-| mid, 11 to 30 | 4,166 | 159 | 51.6% | 0.744 | 0.785 | **0.868** |
-| distal, over 30 | 1,914 | 31 | 10.1% | *0.786* | 0.744 | **0.844** |
+MFASS assays exon recognition in an artificial minigene, not splicing in
+patient RNA. The baseline and DNABERT-2 logistic head are supervised on
+MFASS train labels; SpliceAI and Pangolin are zero-shot on the assay. Both
+specialists use genomic context rather than the assay construct. They also
+use different annotation releases (SpliceAI's bundled v24-derived table
+versus Pangolin's GENCODE v44), leaving a model-versus-annotation confound.
+The exact pretraining sequence overlap for DNABERT-2 has not been checked.
 
-**Pangolin leads in every band, including the distal one where SpliceAI falls below the trivial
-baseline** (0.744 against 0.786). SpliceAI's advantage is concentrated near the splice site and does
-not survive past 30 bases; Pangolin's does.
+## Archived mfass-v1 snapshot
 
-For a laboratory triaging deep intronic and exonic candidates, which are 62% of the disrupting
-variants here, that is the practical difference between the two specialists.
+The archived `results/baseline-kmer-position.json` and its predictions
+remain unchanged. They reported P@100 0.620 and AUROC 0.768 from the
+mis-centred k-mer windows; they must not be mixed with v2 comparisons.
+The earlier exon-only split-cost experiment also used that windowing code
+and needs a corrected rerun before any split-effect claim is reused.
 
-Per-band precision at capacity is coarse at these counts, so AUROC is the more stable per-band read.
+## Next experiments
 
-### Cost and coverage
-
-Pangolin costs about 3 times SpliceAI per variant (1.64s against 0.54s) and roughly 86,000 times the
-trivial baseline. It also scores more variants: 8,301 against SpliceAI's 8,194, because it was pointed
-at GENCODE v44 while SpliceAI used its bundled v24-derived table.
-
-**That annotation difference is an open confound.** The SpliceAI figures here carry both a model
-difference and an annotation difference from Pangolin. Re-running SpliceAI against a v44-derived
-annotation is outstanding, and until it is done the SpliceAI-Pangolin gap should be read as an upper
-bound on the model difference.
-
-### Caveats that travel with these numbers
-
-The baseline is **supervised** on this assay's training split. SpliceAI and Pangolin are **zero-shot**
-here: neither saw MFASS outcomes. So the baseline comparison measures in-domain training against a
-specialist prior, not the standalone quality of any tool.
-
-MFASS measures exon recognition in a minigene construct. These are not predictions of splicing in
-patient RNA.
-
-### What the split costs
-
-Same features, same code, only the grouping rule changes:
-
-| Split | Features | Precision@100 | AUROC |
-|---|---|---:|---:|
-| v1, exon only | position + 3-mers | 0.680 | 0.817 |
-| v1, exon only | + phyloP, phastCons | 0.760 | 0.816 |
-| v2, exon + gene | + phyloP, phastCons | 0.620 | 0.768 |
-
-Conservation adds 8 points of precision@100. Grouping by gene as well as exon removes 14. **The honest
-split costs more than the best feature gain**, which is the argument for publishing the grouping rule
-beside every number.
-
-## Not yet done
-
-- Pangolin, configuration-matched against SpliceAI
-- Pretrained encoders: DNABERT-2, NT-v2, Caduceus, SpliceBERT
-- A declared improvement margin, written down before any candidate is scored
+- Configuration-match SpliceAI and Pangolin annotations before attributing
+  their gap to models.
+- Predeclare further frozen or fine-tuned foundation-model protocols before
+  viewing their held-out scores; this run is not a tuning set.
+- Check exact sequence/exon overlap in pretrained corpora where possible.

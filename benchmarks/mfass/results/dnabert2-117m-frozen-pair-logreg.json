@@ -1,0 +1,70 @@
+{
+  "benchmark": "mfass-v2",
+  "method": "dnabert2-117m-frozen-pair-logreg",
+  "family": "pretrained encoder",
+  "description": "Frozen DNABERT-2 117M masked-mean reference/mutant embeddings, train-only balanced L2 logistic head",
+  "split": "benchmarks/mfass/splits/split-v2.tsv",
+  "metrics": {
+    "n": 8324,
+    "positives": 315,
+    "prevalence": 0.037842383469485825,
+    "capacity": 100,
+    "precision_at_capacity": 0.03,
+    "recall_at_capacity": 0.009523809523809525,
+    "average_precision_sklearn": 0.04508654312652131,
+    "auroc": 0.5500324040216661
+  },
+  "coverage": {
+    "scored": 8324,
+    "unscored": 0,
+    "denominator": 8324
+  },
+  "timing_seconds": {
+    "load_tokenizer_and_checkpoint": 0.52,
+    "embed_all_pairs": 602.233,
+    "fit_head_train_only": 15.253,
+    "predict_test": 0.027,
+    "end_to_end": 618.239,
+    "per_variant_total": 0.022285
+  },
+  "independent_groups": 463,
+  "config": {
+    "model_id": "zhihan1996/DNABERT-2-117M",
+    "checkpoint_revision": "b5ae377faa374ee160eec1c27b8494436cc94451",
+    "checkpoint_safetensors_sha256": "75c91dc7bd0eea50f63e2ce6aeac2d9f20980f9efc9c715a26e4efa1e369de1c",
+    "remote_code_module": "transformers_modules.zhihan1996.DNABERT-2-117M.7bce263b15377fc15361f52cfab88f8b586abda0.bert_layers",
+    "remote_code_bert_layers_sha256": "317ad7e9667980ac724c07f0174ba265c8446ca5230f6b473068ff1b911edcf9",
+    "tokenizer_json_sha256": "5d178e8ce2ba55df97fff197f4b30f40133b95d7096be398c2df6b526c5d8cd3",
+    "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "context_bases": 170,
+    "token_length_min": 31,
+    "token_length_max": 42,
+    "pooling": "attention-mask mean of last_hidden_state; random pooler ignored",
+    "pair_features": "concat(reference_mean, mutant_mean - reference_mean)",
+    "device": "cpu",
+    "precision": "float32",
+    "batch_size_pairs": 2,
+    "head": "StandardScaler + balanced L2 LogisticRegression",
+    "head_C": 0.1,
+    "head_solver": "liblinear",
+    "head_max_iter": 1000,
+    "head_iterations": 8,
+    "seed": 20260914,
+    "trained_on_variants": 19409,
+    "trained_on_positives": 735,
+    "heldout_variants": 8324,
+    "pilot_projected_full_cohort_hours": 0.16688971690689566
+  },
+  "contamination": "DNABERT-2 pretraining used multi-species genome sequences. MFASS assay outcomes were not a declared pretraining target; exact sequence or exon overlap with pretraining has not been checked.",
+  "pretrained": true,
+  "notes": "This is a supervised assay-specific head on frozen pretrained embeddings; the encoder itself was not fine-tuned. Assay-oriented source pairs were validated before any label was used.",
+  "environment": {
+    "python": "3.11.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "created_utc": "2026-09-15T23:37:38.832641+00:00",
+  "git_revision": "edf5b5c"
+}

@@ -1,0 +1,53 @@
+{
+  "benchmark": "mfass-v2",
+  "method": "baseline-kmer-position",
+  "family": "trivial baseline",
+  "description": "exon-boundary distances, allele identity, phyloP and phastCons conservation, and 3-mer composition of a 21bp assay-oriented window, HistGradientBoosting",
+  "split": "benchmarks/mfass/splits/split-v2.tsv",
+  "metrics": {
+    "n": 8324,
+    "positives": 315,
+    "prevalence": 0.037842383469485825,
+    "capacity": 100,
+    "precision_at_capacity": 0.61,
+    "recall_at_capacity": 0.19365079365079366,
+    "average_precision_sklearn": 0.2864167459589237,
+    "auroc": 0.7779498064677238
+  },
+  "coverage": {
+    "scored": 8324,
+    "unscored": 0,
+    "denominator": 8324
+  },
+  "timing_seconds": {
+    "load_and_validate_cohort_and_split": 0.273,
+    "featurise_train_and_test": 0.469,
+    "fit": 0.638,
+    "predict_test": 0.012,
+    "end_to_end": 1.399,
+    "per_variant_total": 5e-05
+  },
+  "independent_groups": 463,
+  "config": {
+    "trained_on_variants": 19409,
+    "trained_on_positives": 735,
+    "seed": 20260914,
+    "kmer_k": 3,
+    "window": 21,
+    "features": "exon-boundary distances, allele identity, phyloP, phastCons, 3-mers",
+    "sequence_orientation": "validated assay-oriented original_seq at rel_position - 1",
+    "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052"
+  },
+  "contamination": null,
+  "pretrained": false,
+  "notes": "Corrected from mfass-v1: the old baseline centred windows using raw sequence, which was reverse-complemented for 7,770 variants; v1 artifacts are preserved.",
+  "environment": {
+    "python": "3.11.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "created_utc": "2026-09-15T23:39:17.174385+00:00",
+  "git_revision": "edf5b5c"
+}

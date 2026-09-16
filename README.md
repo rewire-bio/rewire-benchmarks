@@ -1,5 +1,12 @@
 # rewire.it benchmarks
 
+> **MFASS correction, September 2026:** The archived `mfass-v1` baseline used a
+> sequence field reverse-complemented for 7,770 variants while keeping the
+> original assay coordinate. Its baseline comparisons and split-cost claims
+> are superseded. See the validated assay-oriented `mfass-v2` results in
+> [the MFASS benchmark README](benchmarks/mfass/README.md). V1 result files are
+> preserved for audit.
+
 Independent, reproducible benchmarks for AI models in biology.
 
 Every benchmark here runs from public data, on open weights, on hardware a reader can afford, and
@@ -27,61 +34,61 @@ rather than written.
 
 | Benchmark | Task | Labels | Prevalence | Status |
 |---|---|---|---:|---|
-| [`mfass-v1`](benchmarks/mfass) | Splice-variant prioritisation | Functional, minigene exon recognition | 3.78% | Baseline, SpliceAI, Pangolin |
+| [`mfass-v1`](benchmarks/mfass/README.md) | Splice-variant prioritisation | MFASS minigene exon recognition | 3.78% | Archived; baseline superseded after sequence correction |
+| [`mfass-v2`](benchmarks/mfass/README.md) | Splice-variant prioritisation | Same functional cohort and canonical exon/gene split | 3.78% | Corrected baseline and local DNABERT-2; specialists carried unchanged |
 
-### mfass-v1 results
+### MFASS-v2 results
 
-Primary metric is precision at a review capacity of 100 variants, on the 8,194 variants every
-method could score, across 454 independent groups.
+The source assay's `original_seq` and `natural_seq` differ at the variant's
+assay-coordinate position for all 27,733 eligible rows. The legacy `sequence`
+field is reversed for 7,770 of them; `mfass-v2` validates the pair and uses the
+assay-oriented mutant. The v1 result files are retained for audit, but v1
+baseline comparisons and split-cost claims are withdrawn.
 
-| Method | Family | Precision@100 | Recall@100 | AP | AUROC | Coverage | s/variant |
-|---|---|---:|---:|---:|---:|---:|---:|
-| baseline-kmer-position | trivial baseline | 0.620 | 0.197 | 0.286 | 0.768 | 8324/8324 | 0.00002 |
-| spliceai-1.3.1 | specialist | 0.640 | 0.208 | 0.299 | 0.806 | 8194/8324 | 0.53626 |
-| pangolin (mask=False) | specialist | 0.650 | 0.207 | 0.389 | 0.876 | 8301/8324 | 1.64162 |
+| Method | Protocol | P@100 | AP | AUROC | Coverage |
+|---|---|---:|---:|---:|---:|
+| Corrected k-mer/position baseline | supervised on MFASS train | 0.610 | 0.286 | 0.778 | 8,324/8,324 |
+| SpliceAI 1.3.1 | zero-shot specialist, unchanged | 0.640 | 0.299 | 0.806 | 8,194/8,324 |
+| Pangolin, mask=False | zero-shot specialist, unchanged | 0.650 | 0.389 | 0.876 | 8,301/8,324 |
+| DNABERT-2 117M frozen pair + logistic head | supervised head on MFASS train | 0.030 | 0.045 | 0.550 | 8,324/8,324 |
 
-**Every pair separates on AP and AUROC. No pair separates at precision@100**, a 100-variant review
-capacity. Pangolin leads on global ranking, distinguishably over both SpliceAI and the baseline, and
-is the only method that stays ahead of the trivial baseline for variants more than 30 bases from a
-splice site.
-
-Full tables, paired intervals and the distance-band breakdown: [`benchmarks/mfass`](benchmarks/mfass).
-
-## Layout
-
-```
-pyproject.toml                 uv workspace root
-packages/rewirebench/          shared: grouping, splits, metrics, result schema
-benchmarks/mfass/              one benchmark per directory
-  src/mfass/                   build_dataset, split, run_baseline
-  splits/                      split manifests, committed
-  results/                     one JSON per method per run, committed
-  data/                        downloaded and derived, gitignored
-```
-
-Shared machinery lives in `rewirebench` so that grouping and scoring cannot quietly diverge between
-benchmarks. A benchmark directory holds only what is specific to its dataset.
+Paired whole-exon/gene-group resampling on common variants shows Pangolin
+still exceeds the corrected baseline on AP and AUROC. SpliceAI's corrected
+AUROC difference is +0.028 with a 95% interval [-0.004, +0.064], so the
+old claim of clear separation is invalid. The locally run DNABERT-2
+**frozen-pair protocol** is worse than the trivial baseline: P@100 -0.580
+[-0.713, -0.464], AP -0.241 [-0.304, -0.182], and AUROC -0.228
+[-0.300, -0.160]. This is one declared representation and train-only head,
+not a model-wide verdict. Full method, access, coverage, timing, and source
+limits are in the [MFASS benchmark report](benchmarks/mfass/README.md),
+with exact artifact hashes in the [run provenance manifest](benchmarks/mfass/provenance/mfass-v2-local-dnabert2.json).
 
 ## Running
 
 Requires [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync
+uv sync --package mfass --extra dnabert2-pilot
 
-# mfass-v1, about a minute end to end on a laptop
+# Public author-maintained source tables; their exact hashes are in the MFASS README.
 curl -L -o benchmarks/mfass/data/snv_data_clean.txt \
   https://raw.githubusercontent.com/KosuriLab/MFASS/master/processed_data/snv/snv_data_clean.txt
+curl -L -o benchmarks/mfass/data/snv_func_annot.txt \
+  https://raw.githubusercontent.com/KosuriLab/MFASS/master/processed_data/snv/snv_func_annot.txt
 
-uv run mfass-build
-uv run mfass-split
-uv run mfass-baseline
+uv run --package mfass --extra dnabert2-pilot mfass-build --check
+uv run --package mfass --extra dnabert2-pilot mfass-build
+# Use the checked-in split-v2.tsv; do not overwrite it with a new draw.
+uv run --package mfass --extra dnabert2-pilot mfass-baseline
+uv run --package mfass --extra dnabert2-pilot mfass-dnabert2-pilot
+# If the pilot passes its 12-hour projection and 1 GiB disk reserve:
+uv run --package mfass --extra dnabert2-pilot mfass-dnabert2
 ```
 
 Tests:
 
 ```bash
-uv run --group dev pytest packages/rewirebench/tests -q
+uv run --group dev pytest -q
 ```
 
 ## Adding a benchmark
