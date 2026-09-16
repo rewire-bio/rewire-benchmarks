@@ -1,0 +1,101 @@
+{
+  "kind": "mfass_v2_run_provenance",
+  "benchmark": "mfass-v2",
+  "method": "dnabert2-117m-frozen-pair-logreg",
+  "status": "verified_full_heldout_result",
+  "source_sha256": {
+    "published_variant_table": "a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8",
+    "functional_annotation": "71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1",
+    "validated_cohort": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "canonical_split": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052"
+  },
+  "model": {
+    "id": "zhihan1996/DNABERT-2-117M",
+    "checkpoint_revision": "b5ae377faa374ee160eec1c27b8494436cc94451",
+    "safetensors_sha256": "75c91dc7bd0eea50f63e2ce6aeac2d9f20980f9efc9c715a26e4efa1e369de1c",
+    "loaded_remote_code_module": "transformers_modules.zhihan1996.DNABERT-2-117M.7bce263b15377fc15361f52cfab88f8b586abda0.bert_layers",
+    "loaded_bert_layers_sha256": "317ad7e9667980ac724c07f0174ba265c8446ca5230f6b473068ff1b911edcf9",
+    "tokenizer_json_sha256": "5d178e8ce2ba55df97fff197f4b30f40133b95d7096be398c2df6b526c5d8cd3"
+  },
+  "coverage": {
+    "scored": 8324,
+    "unscored": 0,
+    "denominator": 8324
+  },
+  "independent_groups": 463,
+  "paired_common_variants": 8324,
+  "artifacts": {
+    "result": {
+      "path": "benchmarks/mfass/results/dnabert2-117m-frozen-pair-logreg.json",
+      "sha256": "60b28541853de349f878d6d1ccbcbe7dfd21b69db976e9c01f60e88bdba0f2a1"
+    },
+    "predictions": {
+      "path": "benchmarks/mfass/results/dnabert2-117m-frozen-pair-logreg.predictions.tsv",
+      "sha256": "3abded2932366e6e2c8d6e0da5836c4240239372758b3c68cd5f19635b8cee11"
+    },
+    "scores": {
+      "path": "benchmarks/mfass/results/dnabert2-117m-frozen-pair-logreg.scores.npy",
+      "sha256": "e6b019babf0b3fb9ec05d4261a9383c0c896183a76c3b31634564c7a63d01105"
+    },
+    "trained_head": {
+      "path": "benchmarks/mfass/results/dnabert2-117m-frozen-pair-logreg.head.npz",
+      "sha256": "ad66e584ea0a830c1202c52476f7b1dc14d7286438c626c350ed2f05b7a786cb"
+    },
+    "paired_vs_corrected_baseline": {
+      "path": "benchmarks/mfass/results/compare-baseline-v2-vs-dnabert2.json",
+      "sha256": "52216e003f4e5332ecb43511864c9f0b3df7b1ed0f731c631412dc7311f505c3"
+    },
+    "corrected_baseline_result": {
+      "path": "benchmarks/mfass/results/baseline-kmer-position-v2.json",
+      "sha256": "9a0b78674cc714177fec6e8c487588d6186d4fe93d6d7dbcb48bed6858885e15"
+    },
+    "corrected_baseline_predictions": {
+      "path": "benchmarks/mfass/results/baseline-kmer-position-v2.predictions.tsv",
+      "sha256": "2f3117c225a8da9ea737abfa2d0f7e1dec97696ae4bacd263864bec9d7f923eb"
+    },
+    "pilot_used_for_full_run": {
+      "path": "benchmarks/mfass/feasibility/dnabert2-local-used-for-full-run.json",
+      "sha256": "688ce64767a3ad5757c9f64936a35c22122b9d3c9991d3d360402676b19c7445"
+    },
+    "pilot_refreshed_code_verification": {
+      "path": "benchmarks/mfass/feasibility/dnabert2-local.json",
+      "sha256": "e2e5ef9cf7c600777b6a3916f4196e632cbdab297eedfe22f293ee1cbd41dc20"
+    },
+    "full_runner_source": {
+      "path": "benchmarks/mfass/src/mfass/run_dnabert2.py",
+      "sha256": "e9ec3021f1c06872bb2f77b59fc7719cfedcaed8fdbe434c13655be4f9460d87"
+    },
+    "baseline_runner_source": {
+      "path": "benchmarks/mfass/src/mfass/run_baseline.py",
+      "sha256": "49116f8e0af33f6a314b48aa4e541b193f48325e5feefa5850802742892210ed"
+    }
+  },
+  "notes": "Original mfass-v1 result and prediction artifacts were not overwritten; this manifest binds the local v2 frozen-pair protocol, full result and corrected comparison. The two prediction TSVs were normalized from CRLF to LF after scoring without changing fields or numeric values; the current writers now emit LF. The source hashes at scoring are preserved in post_run_lf_normalization.",
+  "post_run_lf_normalization": {
+    "kind": "line_ending_only",
+    "format": "CRLF to LF",
+    "numerical_values_changed": false,
+    "files": {
+      "predictions": {
+        "original_sha256": "da67c28f7f02ae2b9dc4d35bb7dae4d0121c2065c53d951f5ac2dc0394828ace",
+        "normalized_sha256": "3abded2932366e6e2c8d6e0da5836c4240239372758b3c68cd5f19635b8cee11",
+        "lines": 8325
+      },
+      "corrected_baseline_predictions": {
+        "original_sha256": "2432298f7cdee6fa615ba72f965953e53a3f1edd8762723a4306a3841bd6f85b",
+        "normalized_sha256": "2f3117c225a8da9ea737abfa2d0f7e1dec97696ae4bacd263864bec9d7f923eb",
+        "lines": 8325
+      },
+      "full_runner_source": {
+        "source_sha256_at_scoring": "b142bd5fcd9420edd8ebc42ae7076611af70591ab4b9d08ed2a3ae39f2bb3ec2",
+        "current_source_sha256": "e9ec3021f1c06872bb2f77b59fc7719cfedcaed8fdbe434c13655be4f9460d87",
+        "change": "prediction csv.writer lineterminator set to LF"
+      },
+      "baseline_runner_source": {
+        "source_sha256_at_scoring": "078bfd90d75df1d38a9fe717c1d4c806df94aa4e7b425c884831825ce6182f2f",
+        "current_source_sha256": "49116f8e0af33f6a314b48aa4e541b193f48325e5feefa5850802742892210ed",
+        "change": "prediction csv.writer lineterminator set to LF"
+      }
+    }
+  }
+}

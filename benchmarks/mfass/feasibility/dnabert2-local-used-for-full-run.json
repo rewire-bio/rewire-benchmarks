@@ -1,0 +1,86 @@
+{
+  "kind": "unscored_local_feasibility",
+  "status": "feasible",
+  "created_utc": "2026-09-15T23:23:48.663669+00:00",
+  "model": "zhihan1996/DNABERT-2-117M",
+  "checkpoint_and_code_revision": "b5ae377faa374ee160eec1c27b8494436cc94451",
+  "source": {
+    "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "sample_seed": "rewire-mfass-dnabert2-pilot-v1",
+    "sample_ids": [
+      "ENSE00000411843_001",
+      "ENSE00000583150_007",
+      "ENSE00000660518_018",
+      "ENSE00000668638_003",
+      "ENSE00000767839_011",
+      "ENSE00000957489_013",
+      "ENSE00000987603_014",
+      "ENSE00000989842_004",
+      "ENSE00000997922_004",
+      "ENSE00001086665_005",
+      "ENSE00001104104_017",
+      "ENSE00001105667_033",
+      "ENSE00001130107_022",
+      "ENSE00001204457_002",
+      "ENSE00001296545_008",
+      "ENSE00001353824_004",
+      "ENSE00001400608_008",
+      "ENSE00001414840_007",
+      "ENSE00001435474_017",
+      "ENSE00001653697_009",
+      "ENSE00001686462_004",
+      "ENSE00001686462_009",
+      "ENSE00001718712_018",
+      "ENSE00001747870_011",
+      "ENSE00001760884_004",
+      "ENSE00001774521_013",
+      "ENSE00001776970_017",
+      "ENSE00001783324_001",
+      "ENSE00002343974_019",
+      "ENSE00002349453_008",
+      "ENSE00002354222_018",
+      "ENSE00002364667_010"
+    ],
+    "sample_orientation_counts": {
+      "assay": 16,
+      "reverse_complement": 16
+    },
+    "pairs": 32,
+    "sequences": 64,
+    "length_bases": 170
+  },
+  "environment": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.11.13",
+    "device": "cpu",
+    "batch_size": 2,
+    "dtype": "float32",
+    "disk_free_bytes_before": 3641909248,
+    "torch": "2.2.2",
+    "transformers": "4.29.2",
+    "mps_available": true,
+    "disk_free_bytes_after": 3641081856
+  },
+  "accuracy": null,
+  "leaderboard_eligible": false,
+  "timing_seconds": {
+    "load_tokenizer_and_checkpoint": 0.9645544999511912,
+    "embed_pairs": 0.6932425409322605,
+    "end_to_end": 2.154336833045818
+  },
+  "memory": {
+    "peak_process_rss_bytes_after_load": 1249902592,
+    "peak_process_rss_bytes": 1249902592
+  },
+  "token_lengths": {
+    "min": 32,
+    "max": 40,
+    "mean": 36.96875
+  },
+  "failures": [],
+  "projected_full_test_hours": 0.05009158776666785,
+  "full_run_within_12h": true,
+  "full_run_disk_reserve_ok": true
+}

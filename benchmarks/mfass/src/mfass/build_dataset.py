@@ -26,6 +26,43 @@ KEEP = [
     "label", "category", "strong_lof", "delta_dpsi", "sequence",
 ]
 
+COMPLEMENT = str.maketrans("ACGT", "TGCA")
+
+
+def assay_pair(row):
+    """Return assay-oriented reference/mutant sequences, checking the source allele.
+
+    The raw `sequence` field is reverse-complemented relative to `rel_position`
+    in some rows. `natural_seq` and `original_seq` are always in the assay's
+    coordinate system, with the variant at `rel_position - 1`.
+    """
+    reference = row["natural_seq"].upper()
+    mutant = row["original_seq"].upper()
+    legacy = row["sequence"].upper()
+    pos = int(row["rel_position"]) - 1
+    ident = row["id"]
+    if not (len(reference) == len(mutant) == len(legacy) and 0 <= pos < len(mutant)):
+        raise ValueError(f"{ident}: invalid assay sequence lengths or position")
+    if [i for i, (a, b) in enumerate(zip(reference, mutant)) if a != b] != [pos]:
+        raise ValueError(f"{ident}: assay sequences must differ only at rel_position - 1")
+    strand = row["strand"]
+    if strand not in ("+", "-"):
+        raise ValueError(f"{ident}: unsupported strand {strand}")
+    expected_ref = row["ref_allele"].upper()
+    expected_alt = row["alt_allele"].upper()
+    if strand == "-":
+        expected_ref = expected_ref.translate(COMPLEMENT)
+        expected_alt = expected_alt.translate(COMPLEMENT)
+    if reference[pos] != expected_ref or mutant[pos] != expected_alt:
+        raise ValueError(f"{ident}: assay sequence allele does not match the variant")
+    if legacy == mutant:
+        orientation = "assay"
+    elif legacy == mutant.translate(COMPLEMENT)[::-1]:
+        orientation = "reverse_complement"
+    else:
+        raise ValueError(f"{ident}: legacy sequence is neither assay nor reverse complement")
+    return reference, mutant, orientation
+
 # Joined from processed_data/snv/snv_func_annot.txt on `id`. The gene is needed for
 # grouping (variants in two exons of one gene are not independent) and the
 # conservation scores belong in the trivial baseline.
@@ -69,6 +106,10 @@ def build(raw_path, annot_path=None):
     out = []
     for r in cohort:
         rec = {k: r[k] for k in KEEP}
+        reference, mutant, orientation = assay_pair(r)
+        rec["reference_sequence"] = reference
+        rec["mutant_sequence"] = mutant
+        rec["legacy_sequence_orientation"] = orientation
         rec["sdv"] = 1 if r["strong_lof"] == "TRUE" else 0
         rec.update(annot.get(r["id"], {k: "NA" for k in ANNOT}))
         out.append(rec)
@@ -100,6 +141,11 @@ def main():
         "genes_in_cohort": len({r["ensembl_gene_id"] for r in cohort
                                 if r["ensembl_gene_id"] not in ("NA", "")}),
         "annotated": sum(1 for r in cohort if r["phylop_score"] not in ("NA", "")),
+        "legacy_sequence_orientation": {
+            "assay": sum(r["legacy_sequence_orientation"] == "assay" for r in cohort),
+            "reverse_complement": sum(r["legacy_sequence_orientation"] == "reverse_complement"
+                                      for r in cohort),
+        },
         "reconciliation": {k: {"observed": g, "published": w} for k, (g, w) in checks.items()},
     }
     print(json.dumps(summary, indent=2))

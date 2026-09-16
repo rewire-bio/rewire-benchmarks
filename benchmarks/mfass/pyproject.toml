@@ -11,6 +11,8 @@ dependencies = ["rewirebench"]
 spliceai = ["spliceai==1.3.1", "tensorflow>=2.16", "setuptools<82", "pyfaidx>=0.5", "pandas>=2"]
 # Pangolin is installed from git; it needs torch, gffutils, pyvcf3 and pyfastx.
 pangolin = ["torch>=2", "gffutils>=0.13", "pyvcf3", "pyfastx", "setuptools<82"]
+dnabert2-pilot = ["torch==2.2.2", "transformers==4.29.2", "einops==0.6.1",
+                  "safetensors==0.7.0", "numpy==1.26.4"]
 
 [project.scripts]
 mfass-build = "mfass.build_dataset:main"
@@ -20,6 +22,8 @@ mfass-spliceai = "mfass.run_spliceai:main"
 mfass-compare = "mfass.compare:main"
 mfass-subgroups = "mfass.subgroups:main"
 mfass-pangolin = "mfass.run_pangolin:main"
+mfass-dnabert2-pilot = "mfass.run_dnabert2_pilot:main"
+mfass-dnabert2 = "mfass.run_dnabert2:main"
 
 [build-system]
 requires = ["hatchling"]
