@@ -15,6 +15,7 @@ import importlib.metadata
 import json
 import math
 import numbers
+import os
 import platform
 import time
 from collections.abc import Mapping
@@ -234,6 +235,9 @@ def evaluate(
         "scope": data["scope"],
         "completion": "complete" if full else "partial",
         "model": _model_info(model),
+        "model_configuration": copy.deepcopy((model or {}).get("configuration", {})),
+        "input_information": str((model or {}).get("input_information", "unreported")),
+        "protocol_configuration": copy.deepcopy(data.get("metadata", {})),
         "metrics": result.get("metrics", result),
         "protocol_results": result,
         "coverage": coverage,
@@ -251,6 +255,10 @@ def evaluate(
             "platform": platform.platform(),
             "architecture": platform.machine(),
             "rewirebench": _version(),
+            "sdk_code_sha256": _code_digest(),
+            "container_digest": os.environ.get("REWIRE_CONTAINER_DIGEST", "unreported"),
+            "sif_sha256": os.environ.get("REWIRE_SIF_SHA256", "unreported"),
+            "container_runtime": os.environ.get("REWIRE_CONTAINER_RUNTIME", "unreported"),
         },
         "timing_seconds": {"evaluation": time.perf_counter() - start},
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -262,6 +270,15 @@ def evaluate(
     _write(path / "predictions.json", normalized)
     _write(path / "unscored.json", failures)
     return report
+
+
+def _code_digest() -> str:
+    root = Path(__file__).parent
+    digest = hashlib.sha256()
+    for path in sorted(root.rglob("*.py")):
+        digest.update(str(path.relative_to(root)).encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
 
 
 def _version() -> str:
@@ -357,6 +374,9 @@ def export(report: dict | str | Path, *, output: str | Path) -> dict:
         raise ValueError("Expected a local evaluation report")
     if data.get("scope") == "smoke":
         raise ValueError("Smoke tests cannot be exported as benchmark contributions")
+    evidence_path = Path(output).with_suffix(".evidence.json")
+    if Path(output).exists() or evidence_path.exists():
+        raise FileExistsError("Export and evidence paths must both be new")
     keys = ("protocol_id", "protocol_version", "dataset_id", "scope", "completion", "coverage")
     bundle = {key: copy.deepcopy(data[key]) for key in keys}
     bundle.update(
@@ -389,6 +409,13 @@ def export(report: dict | str | Path, *, output: str | Path) -> dict:
     )
     # Only known digest/revision fields leave the local report. Never dump config.
     provenance = dict(data.get("provenance", {}))
+    provenance["sdk_code_sha256"] = data.get("environment", {}).get("sdk_code_sha256")
+    environment = data.get("environment", {})
+    if _is_sha256(environment.get("sif_sha256")):
+        provenance["sif_sha256"] = environment["sif_sha256"]
+    image_digest = str(environment.get("container_digest", ""))
+    if image_digest.startswith("sha256:") and _is_sha256(image_digest[7:]):
+        provenance["oci_image_sha256"] = image_digest[7:]
     for key, value in data.get("execution", {}).get("adapter_provenance", {}).items():
         if key.endswith(("_sha256", "_revision")):
             provenance["model_" + key] = value
@@ -400,5 +427,41 @@ def export(report: dict | str | Path, *, output: str | Path) -> dict:
         and len(v) in {40, 64}
         and all(c in "0123456789abcdef" for c in v)
     }
+    evidence = {"schema_version": "1.0", "assays": {}, "public_model_artifacts": {}}
+    if data["protocol_id"] == "proteingym-v1.3-dms-substitutions":
+        from rewirebench.protocols.proteingym import resource_path
+
+        with resource_path("DMS_substitutions.csv").open(newline="") as source:
+            allowed_assays = {row["DMS_id"] for row in csv.DictReader(source)}
+        for name, digest in data.get("provenance", {}).get("assay_sha256", {}).items():
+            if name in allowed_assays and _is_sha256(digest):
+                evidence["assays"][name] = digest
+    from rewirebench.adapters.mfass import DNABERT2
+
+    for name, digest in (
+        data.get("execution", {}).get("adapter_provenance", {}).get("artifact_sha256", {}).items()
+    ):
+        if name in DNABERT2.ARTIFACTS and digest == DNABERT2.ARTIFACTS[name]:
+            evidence["public_model_artifacts"][name] = digest
+    bundle["provenance"]["evidence_manifest_sha256"] = _digest(evidence)
+    verification = data.get("provenance", {}).get("data_verification", "unreported")
+    if data["protocol_id"].startswith("mfass-v2"):
+        from rewirebench.protocols.mfass import COHORT_SHA256
+
+        if bundle["provenance"].get("cohort_sha256") == COHORT_SHA256:
+            verification = "pinned_source_bytes"
+    bundle["data_verification"] = (
+        verification
+        if verification
+        in {"pinned_source_bytes", "local_bytes_hashed_not_independently_source_verified"}
+        else "unreported"
+    )
     _write(Path(output), bundle)
+    _write(evidence_path, evidence)
     return bundle
+
+
+def _is_sha256(value):
+    return (
+        isinstance(value, str) and len(value) == 64 and all(c in "0123456789abcdef" for c in value)
+    )

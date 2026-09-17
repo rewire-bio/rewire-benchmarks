@@ -240,3 +240,45 @@ def test_vendored_evidence_receipts_match_bytes():
         if receipt.get("local_file"):
             path = pg.resource_path(receipt["local_file"])
             assert hashlib.sha256(path.read_bytes()).hexdigest() == receipt["sha256"]
+
+
+def _cached_esm_without_weights():
+    """Test input routing without downloading model weights."""
+    from rewirebench.adapters.esm import ESM2Adapter
+
+    adapter = ESM2Adapter.__new__(ESM2Adapter)
+
+    class Alphabet:
+        @staticmethod
+        def get_idx(amino_acid):
+            return {"A": 0, "C": 1}[amino_acid]
+
+    adapter.alphabet = Alphabet()
+    adapter._cache = {("AC", 0): np.array([-0.4, -0.2])}
+    return adapter
+
+
+def test_esm_long_sequence_unscored_and_batch_continues():
+    adapter = _cached_esm_without_weights()
+    output = adapter.predict([
+        {"id": "long", "wild_type_sequence": "A" * 1023, "mutant": "A1C"},
+        {"id": "short", "wild_type_sequence": "AC", "mutant": "A1C"},
+    ])
+    assert output["long"] == {
+        "score": None,
+        "reason": "ESM example supports at most 1022 residues; windowed inference not implemented",
+    }
+    assert output["short"] == pytest.approx(0.2)
+
+
+@pytest.mark.parametrize("sequence", ["", "AC*", "AC DEF", "A" * 1023 + "*", None])
+def test_esm_invalid_sequence_still_rejected(sequence):
+    adapter = _cached_esm_without_weights()
+    with pytest.raises(ValueError, match="valid amino-acid sequence"):
+        adapter.predict([{"id": "invalid", "wild_type_sequence": sequence, "mutant": "A1C"}])
+
+
+def test_esm_long_sequence_invalid_mutation_is_not_silently_unscored():
+    adapter = _cached_esm_without_weights()
+    with pytest.raises(ValueError, match="Mutation does not match"):
+        adapter.predict([{"id": "invalid", "wild_type_sequence": "A" * 1023, "mutant": "C1A"}])

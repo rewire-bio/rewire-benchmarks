@@ -50,7 +50,7 @@ python examples/proteingym/run_esm.py \
 
 At every mutated position, the adapter masks that residue in the wild-type sequence, calculates log P(mutant) − log P(wild type), then sums those terms for multiple substitutions. This follows the upstream masked-marginal definition. The loader uses the local checkpoint directly and never calls the model hub. Missing contact-regression weights can produce a warning; contact prediction is not used.
 
-The example requires `fair-esm==2.0.0` and PyTorch. It deliberately rejects sequences longer than 1,022 residues; no implicit truncation or unreviewed windowing occurs. This example does **not** reproduce a specific published ProteinGym row or promise full-suite inference support. CPU execution is available; full-track preparation/scoring may need substantial RAM and disk because this initial SDK materializes input rows. Start with a selected assay.
+The example requires `fair-esm==2.0.0` and PyTorch. For valid sequences longer than 1,022 residues it records an explicit unscored reason and continues with other variants; no implicit truncation or unreviewed windowing occurs. Invalid sequences still fail validation. Long-protein variants retain their denominators, so runs containing them remain partial. This example does **not** reproduce a specific published ProteinGym row or promise full-suite inference support. CPU execution is available; full-track preparation/scoring may need substantial RAM and disk because this initial SDK materializes input rows. Start with a selected assay.
 
 `examples/proteingym/synthetic_smoke.py` performs two small substitutions with no experimental labels. It is useful for checking an offline environment, and prints `benchmark_result: false`.
 

@@ -71,7 +71,8 @@ def test_private_adapter_only_sees_allowed_inputs_and_train_labels(tmp_path, plu
     assert "/private" not in json.dumps(bundle)
     assert "sequence" not in json.dumps(bundle)
     assert "environment" not in bundle
-    assert bundle["provenance"] == {"source_sha256": "a" * 64}
+    assert bundle["provenance"]["source_sha256"] == "a" * 64
+    assert len(bundle["provenance"]["sdk_code_sha256"]) == 64
 
 
 @pytest.mark.parametrize(
@@ -151,3 +152,25 @@ def test_numpy_adapter_outputs_are_normalized_before_serializing(tmp_path, plugi
         "test-a": 0.25,
         "test-b": 1.0,
     }
+
+
+def test_export_preserves_public_checkpoint_evidence_without_paths(tmp_path, plugin):
+    from rewirebench.adapters.mfass import DNABERT2
+
+    report = sdk.evaluate(data(), {"test-a": 0, "test-b": 1}, output=tmp_path / "run")
+    report["execution"]["adapter_provenance"] = {
+        "artifact_sha256": {
+            "model.safetensors": DNABERT2.ARTIFACTS["model.safetensors"],
+            "/private/model.bin": "0" * 64,
+        }
+    }
+    report["environment"].update({"sif_sha256": "e" * 64, "container_digest": "sha256:" + "f" * 64})
+    bundle = sdk.export(report, output=tmp_path / "bundle.json")
+    evidence = json.loads((tmp_path / "bundle.evidence.json").read_text())
+    assert evidence["public_model_artifacts"] == {
+        "model.safetensors": DNABERT2.ARTIFACTS["model.safetensors"]
+    }
+    assert bundle["provenance"]["evidence_manifest_sha256"] == sdk._digest(evidence)
+    assert bundle["provenance"]["sif_sha256"] == "e" * 64
+    assert "/private" not in json.dumps(evidence)
+    assert bundle["data_verification"] == "unreported"

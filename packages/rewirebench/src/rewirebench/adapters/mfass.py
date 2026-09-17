@@ -1,4 +1,5 @@
 """Local MFASS adapters; model frameworks are imported only when requested."""
+
 from __future__ import annotations
 
 import hashlib
@@ -26,16 +27,24 @@ def featurise(rows, k=3, window=21):
     for i, r in enumerate(rows):
         pos = float(r["rel_position"])
         i1, ex = float(r["intron1_len"]), float(r["exon_len"])
-        acceptor, donor = i1, i1 + ex          # exon boundaries within the window
+        acceptor, donor = i1, i1 + ex  # exon boundaries within the window
         c = 0
-        X[i, c] = pos; c += 1
-        X[i, c] = float(r["rel_position_scaled"]); c += 1
-        X[i, c] = pos - acceptor; c += 1                       # signed dist to acceptor
-        X[i, c] = pos - donor; c += 1                          # signed dist to donor
-        X[i, c] = min(abs(pos - acceptor), abs(pos - donor)); c += 1
-        X[i, c] = ex; c += 1
-        X[i, c] = i1; c += 1
-        X[i, c] = float(r["intron2_len"]); c += 1
+        X[i, c] = pos
+        c += 1
+        X[i, c] = float(r["rel_position_scaled"])
+        c += 1
+        X[i, c] = pos - acceptor
+        c += 1  # signed dist to acceptor
+        X[i, c] = pos - donor
+        c += 1  # signed dist to donor
+        X[i, c] = min(abs(pos - acceptor), abs(pos - donor))
+        c += 1
+        X[i, c] = ex
+        c += 1
+        X[i, c] = i1
+        c += 1
+        X[i, c] = float(r["intron2_len"])
+        c += 1
         # Raw conservation. phyloP and phastCons are alignment statistics, not
         # trained predictors, so they belong in a trivial baseline. CADD is in the
         # cohort but is a trained model and gets its own comparator row instead.
@@ -44,12 +53,15 @@ def featurise(rows, k=3, window=21):
             X[i, c] = float(v) if v not in ("NA", "", None) else np.nan
             c += 1
         for reg in REGIONS:
-            X[i, c] = 1.0 if r["region"] == reg else 0.0; c += 1
+            X[i, c] = 1.0 if r["region"] == reg else 0.0
+            c += 1
         ref, alt = r["ref_allele"], r["alt_allele"]
         for b in BASES:
-            X[i, c] = 1.0 if ref == b else 0.0; c += 1
+            X[i, c] = 1.0 if ref == b else 0.0
+            c += 1
         for b in BASES:
-            X[i, c] = 1.0 if alt == b else 0.0; c += 1
+            X[i, c] = 1.0 if alt == b else 0.0
+            c += 1
 
         # `sequence` is reverse-complemented for 7,770 cohort rows while
         # rel_position remains in assay orientation. The validated mutant pair
@@ -62,22 +74,25 @@ def featurise(rows, k=3, window=21):
         sub = seq[lo:hi]
         counts = np.zeros(n_kmer, dtype=np.float32)
         for j in range(len(sub) - k + 1):
-            idx = vocab.get(sub[j:j + k])
+            idx = vocab.get(sub[j : j + k])
             if idx is not None:
                 counts[idx] += 1
         total = counts.sum()
         if total:
             counts /= total
-        X[i, c:c + n_kmer] = counts
+        X[i, c : c + n_kmer] = counts
     return X
-
 
 
 class KmerBaseline:
     """Corrected 21-base assay window baseline, fitted only by the evaluator."""
+
     capability = "scalar"
-    metadata: ClassVar[dict] = {"method": "baseline-kmer-position-v2", "pretrained": False,
-                "training_overlap": "fitted on supplied canonical training rows only"}
+    metadata: ClassVar[dict] = {
+        "method": "baseline-kmer-position-v2",
+        "pretrained": False,
+        "training_overlap": "fitted on supplied canonical training rows only",
+    }
 
     def provenance(self):
         return dict(self.metadata)
@@ -86,8 +101,12 @@ class KmerBaseline:
         if len(inputs) != len(targets) or len(set(targets)) != 2:
             raise ValueError("Training requires matching inputs and both outcome classes")
         self.model = HistGradientBoostingClassifier(
-            max_iter=300, learning_rate=0.06, max_leaf_nodes=31,
-            l2_regularization=1.0, random_state=20260914)
+            max_iter=300,
+            learning_rate=0.06,
+            max_leaf_nodes=31,
+            l2_regularization=1.0,
+            random_state=20260914,
+        )
         self.model.fit(featurise(inputs), targets)
         return self
 
@@ -105,6 +124,7 @@ class DNABERT2:
     loaded by the archived v2 run; copy them into the checkpoint directory during
     preparation. Verifying all executable files happens before trust_remote_code.
     """
+
     capability = "embedding"
     MODEL_REVISION = "b5ae377faa374ee160eec1c27b8494436cc94451"
     CODE_REVISION = "7bce263b15377fc15361f52cfab88f8b586abda0"
@@ -129,17 +149,30 @@ class DNABERT2:
                 raise ValueError(f"Missing or mismatched pinned DNABERT-2 artifact: {name}")
         import torch
         from transformers import AutoModel, AutoTokenizer
+
         self.torch, self.batch_size = torch, batch_size
         self.tokenizer = AutoTokenizer.from_pretrained(str(checkpoint), local_files_only=True)
-        self.model = AutoModel.from_pretrained(
-            str(checkpoint), trust_remote_code=True, local_files_only=True,
-            use_safetensors=True, torch_dtype=torch.float32).eval().to("cpu")
+        self.model = (
+            AutoModel.from_pretrained(
+                str(checkpoint),
+                trust_remote_code=True,
+                local_files_only=True,
+                use_safetensors=True,
+                torch_dtype=torch.float32,
+            )
+            .eval()
+            .to("cpu")
+        )
         self.metadata = {
             "method": "DNABERT-2 frozen masked-mean pair embeddings",
             "model_id": "zhihan1996/DNABERT-2-117M",
-            "checkpoint_revision": self.MODEL_REVISION, "code_revision": self.CODE_REVISION,
-            "artifact_sha256": dict(self.ARTIFACTS), "device": "cpu", "dtype": "float32",
-            "pretrained": True, "training_overlap": "exact MFASS sequence overlap with pretraining is unreported",
+            "checkpoint_revision": self.MODEL_REVISION,
+            "code_revision": self.CODE_REVISION,
+            "artifact_sha256": dict(self.ARTIFACTS),
+            "device": "cpu",
+            "dtype": "float32",
+            "pretrained": True,
+            "training_overlap": "exact MFASS sequence overlap with pretraining is unreported",
         }
 
     def provenance(self):
@@ -149,11 +182,13 @@ class DNABERT2:
         output = {}
         with self.torch.inference_mode():
             for start in range(0, len(inputs), self.batch_size):
-                chunk = inputs[start:start + self.batch_size]
-                sequences = [row[key] for row in chunk
-                             for key in ("reference_sequence", "mutant_sequence")]
-                encoded = self.tokenizer(sequences, return_tensors="pt", padding=True,
-                                         truncation=False)
+                chunk = inputs[start : start + self.batch_size]
+                sequences = [
+                    row[key] for row in chunk for key in ("reference_sequence", "mutant_sequence")
+                ]
+                encoded = self.tokenizer(
+                    sequences, return_tensors="pt", padding=True, truncation=False
+                )
                 states = self.model(**encoded)
                 hidden = states[0] if isinstance(states, tuple) else states.last_hidden_state
                 mask = encoded["attention_mask"].to(hidden.dtype).unsqueeze(-1)

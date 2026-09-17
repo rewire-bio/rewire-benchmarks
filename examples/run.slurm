@@ -6,6 +6,8 @@ set -euo pipefail
 : "${REWIRE_PREPARED:?Set absolute path to prepared MFASS directory}"
 : "${REWIRE_OUTPUT_ROOT:?Set absolute output directory}"
 mkdir -p "$REWIRE_OUTPUT_ROOT"
+export APPTAINERENV_REWIRE_SIF_SHA256="$(sha256sum "$REWIRE_IMAGE" | cut -d' ' -f1)"
+export APPTAINERENV_REWIRE_CONTAINER_RUNTIME="apptainer $(apptainer version)"
 export APPTAINERENV_OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
 export APPTAINERENV_HF_HUB_OFFLINE=1
 export APPTAINERENV_TRANSFORMERS_OFFLINE=1

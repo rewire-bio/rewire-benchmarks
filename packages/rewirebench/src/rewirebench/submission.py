@@ -42,8 +42,18 @@ def _validate_bundle(bundle):
         "prepared_sha256",
         "predictions_sha256",
     }
-    if not isinstance(bundle, dict) or set(bundle) != required:
+    if (
+        not isinstance(bundle, dict)
+        or not required.issubset(bundle)
+        or set(bundle) - required - {"data_verification"}
+    ):
         raise ValueError("Submit only the allowlisted bundle produced by rewirebench.export")
+    if bundle.get("data_verification", "unreported") not in {
+        "pinned_source_bytes",
+        "local_bytes_hashed_not_independently_source_verified",
+        "unreported",
+    }:
+        raise ValueError("Invalid data verification declaration")
     if (
         bundle["schema_version"] != "1.0"
         or bundle["kind"] != "rewire_benchmark_submission"
@@ -170,8 +180,8 @@ def submit(
     key = idempotency_key or hashlib.sha256(encoded_contribution.encode()).hexdigest()
     if not 16 <= len(key) <= 128:
         raise ValueError("idempotency_key must be 16..128 characters")
-    if len(json.dumps(contribution["details"]).encode()) > 24 * 1024:
-        raise ValueError("Contribution details exceed 24 KiB; submit aggregate metrics only")
+    if len(json.dumps(contribution["details"]).encode()) > 24_000:
+        raise ValueError("Contribution details exceed 24,000 bytes; submit aggregate metrics only")
     payload = {"contribution": contribution, "idempotencyKey": key}
     if dry_run:
         return payload

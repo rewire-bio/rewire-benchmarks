@@ -1,13 +1,13 @@
 {
   "validation": "small_synthetic_inference_not_a_benchmark_result",
-  "date": "2026-09-17T13:41:14.209613+00:00",
+  "date": "2026-09-17T13:51:12.648574+00:00",
   "network": "socket.connect blocked during loading/inference",
   "model_provenance": {
     "model": "esm2_t6_8M_UR50D",
     "checkpoint_sha256": "46f002a9870c9bdecd0ea887acb1f9a38a6b561e8f8bf8a6990b679b9d31b928",
     "checkpoint_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t6_8M_UR50D.pt",
     "fair_esm_version": "2.0.0",
-    "implementation_sha256": "3f5e95a3c8c2711f0d2e2edc440818776a2bc4968c8ae493a13b927901493333",
+    "implementation_sha256": "4ff38cfbb91d718b52a44da53aa5594fe73d9d1d4d0ce43724807597c3929889",
     "strategy": "masked_marginals_wild_type_context_sum_log_odds",
     "maximum_sequence_length": 1022,
     "device": "cpu",
@@ -15,9 +15,13 @@
     "published_result_reproduction": false
   },
   "predictions": {
+    "synthetic-long::A1C": {
+      "score": null,
+      "reason": "ESM example supports at most 1022 residues; windowed inference not implemented"
+    },
     "synthetic::M1A": -4.778661251068115,
     "synthetic::K2A": -0.1448354721069336
   },
   "platform": "macOS-26.6.2-arm64-arm-64bit",
-  "input_description": "Two substitutions in synthetic 36-residue sequence; no measured labels"
+  "input_description": "Two substitutions in synthetic 36-residue sequence plus one explicitly unscored 1023-residue sequence; no measured labels"
 }

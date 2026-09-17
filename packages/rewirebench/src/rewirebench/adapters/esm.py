@@ -8,8 +8,9 @@ from __future__ import annotations
 import hashlib
 import importlib.metadata
 from pathlib import Path
+from typing import Any
 
-from rewirebench.protocols.proteingym import _substitutions
+from rewirebench.protocols.proteingym import AMINO_ACIDS, _substitutions
 
 MODEL_NAME = "esm2_t6_8M_UR50D"
 CHECKPOINT_SHA256 = "46f002a9870c9bdecd0ea887acb1f9a38a6b561e8f8bf8a6990b679b9d31b928"
@@ -19,8 +20,8 @@ CHECKPOINT_URL = "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t6_8M_UR50
 class ESM2Adapter:
     """Local pinned checkpoint only. Construct once, then call predict in batches.
 
-    The first example deliberately rejects >1022 residues instead of silently
-    cropping sequences or inventing equivalence to upstream windowing protocols.
+    Sequences exceeding 1022 residues receive an explicit unscored reason.
+    No silent cropping or equivalence to upstream windowing protocols is implied.
     """
 
     capability = "scalar"
@@ -58,7 +59,7 @@ class ESM2Adapter:
             "published_result_reproduction": False,
         }
 
-    def predict(self, inputs: list[dict]) -> dict[str, float]:
+    def predict(self, inputs: list[dict]) -> dict[str, Any]:
         results = {}
         for record in inputs:
             if not {"id", "wild_type_sequence", "mutant"}.issubset(record):
@@ -68,9 +69,16 @@ class ESM2Adapter:
             identifier, sequence = record["id"], record["wild_type_sequence"]
             if identifier in results:
                 raise ValueError("Duplicate input ID")
-            if not sequence or len(sequence) > 1022:
-                raise ValueError("ESM example supports 1–1022 residues; no implicit truncation")
+            if (not isinstance(sequence, str) or not sequence
+                    or set(sequence) - (AMINO_ACIDS | set("XBZUO"))):
+                raise ValueError("ESM inputs require a nonempty valid amino-acid sequence")
             mutations = _substitutions(record["mutant"], sequence)
+            if len(sequence) > 1022:
+                results[identifier] = {
+                    "score": None,
+                    "reason": "ESM example supports at most 1022 residues; windowed inference not implemented",
+                }
+                continue
             score = 0.0
             for index, wild_type, mutant in mutations:
                 cache_key = (sequence, index)

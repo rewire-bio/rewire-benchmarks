@@ -25,7 +25,7 @@ Release preparation CI produces wheels, OCI archives, SIF files, checksums, and
 native/container scoring comparisons. It does not publish without a separate
 reviewed GitHub release. Images contain software and reference/split metadata, not
 private checkpoints or upstream assay archives. Large model environments can require
-several GB: check disk quotas before building or pulling them.
+substantial disk space: check disk quotas before building or pulling them.
 
 Source OCI digest and the actual SIF checksum are distinct identifiers. Locally
 converting the same OCI image can change SIF metadata; compare a downloaded SIF
@@ -72,3 +72,8 @@ Sources: https://docs.podman.io/en/latest/markdown/podman.1.html and
 https://apptainer.org/docs/user/latest/docker_and_oci.html (reviewed 2026-09-17).
 Execution status is reported in validation receipts; an example alone is not a claim
 of testing on your institution's HPC cluster.
+
+The optional Linux model locks use the official PyTorch CPU wheel and do not install
+CUDA dependencies. Regenerate them with `python containers/generate_cpu_locks.py`;
+`--verify-upstream` checks the official index and wheel metadata. See
+`containers/CPU-LOCKS.md`. The native `uv.lock` retains platform-specific installation.

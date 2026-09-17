@@ -94,7 +94,7 @@ Model name and training-overlap text are deliberate contribution fields; do not 
 private names or confidential details in those fields. The default export excludes
 raw sequences, predictions, embeddings, weights, arbitrary configuration, local paths
 and environment variables. Per-assay metrics may be exported for a partial ProteinGym
-run; they are not a suite-wide score. Contributions exceeding 24 KiB of details must
+run; they are not a suite-wide score. Contributions exceeding 24,000 bytes of details must
 be reduced to an appropriately scoped reviewed report, not silently truncated.
 
 Sign in to the contribution page with your verified email. Its SDK access control
@@ -126,3 +126,20 @@ Curators review the contribution, and publication occurs only through a dataset 
 
 No universal model API coerces arbitrary embeddings, structures or generated sequences
 into a score. Additional biological tasks require explicit protocols and evaluators.
+
+### Local configuration provenance
+
+Pass optional `model={"name": "...", "training_overlap": "...", "configuration": {...},
+"input_information": "assay sequence only"}` to retain your model settings and input
+conditions in the local report. Configuration stays out of the contribution export.
+The report includes protocol settings, a digest of installed SDK source, and
+`REWIRE_CONTAINER_DIGEST` when explicitly supplied by the container launcher. An
+unreported container identity is shown as unreported, never inferred from a mutable tag.
+Model loading happens when the adapter is constructed; inference-and-fitting timing
+starts afterwards and is labelled accordingly.
+
+The export also writes a `.evidence.json` sidecar containing allowlisted public assay
+and public-checkpoint artifact hashes. Its checksum is included in the small submission
+bundle. Keep it with the public evidence report cited in your submission; the SDK does
+not upload files. Data verification is declared separately from review status: hashing
+local ProteinGym files does not establish that their bytes match an official archive.

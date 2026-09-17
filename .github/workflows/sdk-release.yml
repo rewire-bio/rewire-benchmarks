@@ -10,6 +10,10 @@ permissions:
 jobs:
   artifacts:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [core, esm, dnabert2]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,20 +32,20 @@ jobs:
           sudo apt-get install -y apptainer
           apptainer version > dist/apptainer-version.txt
       - name: Build OCI and SIF artifacts
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
         run: |
-          for environment in core esm dnabert2; do
-            podman build --platform linux/amd64 --build-arg ENVIRONMENT="$environment" -f containers/Containerfile -t "localhost/rewirebench:$environment" .
-            podman save --format oci-archive -o "dist/rewirebench-$environment.oci.tar" "localhost/rewirebench:$environment"
-            apptainer build "dist/rewirebench-$environment.sif" "oci-archive://$PWD/dist/rewirebench-$environment.oci.tar"
-            apptainer exec --cleanenv "dist/rewirebench-$environment.sif" rewirebench protocols
-          done
+          podman build --platform linux/amd64 --build-arg ENVIRONMENT="$ENVIRONMENT" -f containers/Containerfile -t "localhost/rewirebench:$ENVIRONMENT" .
+          podman save --format oci-archive -o "dist/rewirebench-$ENVIRONMENT.oci.tar" "localhost/rewirebench:$ENVIRONMENT"
+          apptainer build "dist/rewirebench-$ENVIRONMENT.sif" "oci-archive://$PWD/dist/rewirebench-$ENVIRONMENT.oci.tar"
+          apptainer exec --cleanenv "dist/rewirebench-$ENVIRONMENT.sif" rewirebench protocols
           uv run --no-sync python containers/parity.py > dist/native-parity.json
-          apptainer exec --cleanenv --bind "$PWD:/workspace:ro" dist/rewirebench-core.sif python /workspace/containers/parity.py > dist/apptainer-parity.json
+          apptainer exec --cleanenv --bind "$PWD:/workspace:ro" "dist/rewirebench-$ENVIRONMENT.sif" python /workspace/containers/parity.py > dist/apptainer-parity.json
           diff dist/native-parity.json dist/apptainer-parity.json
           cd dist
           sha256sum *.whl *.tar.gz *.oci.tar *.sif > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: reviewed-sdk-release-candidate
+          name: reviewed-sdk-release-candidate-${{ matrix.environment }}
           path: dist/
           retention-days: 7
