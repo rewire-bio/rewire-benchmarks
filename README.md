@@ -13,6 +13,27 @@ Every benchmark here runs from public data, on open weights, on hardware a reade
 reports what it cost as well as what it scored. The point is not to rank models. It is to give anyone
 a floor they can measure against and re-run themselves.
 
+## Project repositories
+
+This is the public [rewire-bio/rewire-benchmarks](https://github.com/rewire-bio/rewire-benchmarks) repository. It owns benchmark runners, model adapters, baseline implementations, evaluation protocols, split manifests and reproducible run artifacts.
+
+| Repository | Responsibility |
+|---|---|
+| `rewire-benchmarks` (this repository) | Execute declared evaluations and preserve reproducible artifacts |
+| `rewire-bio/rewire-database` (private initially) | Review evidence, publish versioned records, and deploy the [benchmark database](https://benchmarks.rewire.it/) |
+| `rewire-bio/rewire.it` (private) | Write and publish [articles](https://rewire.it/blog/) and their illustrations |
+
+Each repository has an independent build and deployment. Running an evaluation here does not publish a database result or deploy either website. Repository ownership has changed; existing commits, personal attribution and archived scientific artifacts remain intact.
+
+### From a run to a published result
+
+1. Commit the protocol, configuration, split identity, provenance and reviewable outputs in this repository. Keep downloaded source data, model weights and credentials out of Git.
+2. In the database repository, identify the source using the full commit SHA and the exact artifact paths and SHA-256 hashes. Do not ingest mutable branch names or a moving “latest” file as evidence.
+3. Stage and review the result in the database. Check the evaluation protocol, metrics, coverage, uncertainty and evidence locations against the pinned artifacts. A successful runner exit is not publication approval.
+4. Publish accepted records through a versioned database release. Keep their evidence links pinned to the runner revision. Corrections receive new records or versions with explicit supersession; archived artifacts remain available.
+
+The database's collection tools own this ingestion and review process. This repository does not require website or contribution-service credentials. For the current MFASS v2 evidence, retain the reviewed revision `bee9133b83f3aedaf2bbb9013f1875515845607e`; a documentation update does not change that scientific source identity.
+
 ## House rules
 
 These are enforced in `rewirebench`, not merely described here. A result that breaks one is refused
