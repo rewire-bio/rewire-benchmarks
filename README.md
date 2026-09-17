@@ -125,3 +125,16 @@ a change in either is visible in a diff.
 
 Source files are pinned by SHA-256 in the cohort summary, so an upstream edit shows up as a
 reconciliation failure rather than as a quietly different number.
+
+
+## Python SDK and private models
+
+The 0.2 SDK adds local `prepare`, `run`, `evaluate`, `export` and explicit `submit`
+interfaces for corrected MFASS v2 and ProteinGym v1.3 zero-shot substitutions.
+Bring a Python adapter or import predictions from your own environment. Optional
+Podman and Apptainer environments use the same interfaces.
+
+Start with [the SDK guide](docs/sdk.md), [MFASS](docs/mfass.md),
+[ProteinGym](docs/proteingym.md) and [HPC packaging](docs/hpc.md).
+Submission goes to verified-email private review, never directly to publication.
+Production submissions remain disabled. Existing scientific artifacts are preserved.

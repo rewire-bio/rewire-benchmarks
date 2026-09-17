@@ -11,7 +11,6 @@ import json
 import pathlib
 
 import numpy as np
-
 from rewirebench import metrics as M
 
 
@@ -19,11 +18,43 @@ def load_predictions(path):
     with open(path, newline="") as fh:
         rows = list(csv.DictReader(fh, delimiter="\t"))
     out = {}
+    seen = set()
     for r in rows:
+        if not r["id"] or r["id"] in seen:
+            raise ValueError("Prediction IDs must be nonempty and unique")
+        seen.add(r["id"])
+        if int(r["label"]) not in (0, 1) or not r["group"]:
+            raise ValueError("Invalid prediction label or group")
         if r["score"] in ("", "NA", None):
             continue
-        out[r["id"]] = (r["group"], int(r["label"]), float(r["score"]))
+        value = float(r["score"])
+        if not np.isfinite(value):
+            raise ValueError("Nonfinite prediction score")
+        out[r["id"]] = (r["group"], int(r["label"]), value)
     return out
+
+
+def check_protocol_metadata(baseline_path, candidate_path):
+    """Refuse conflicting pinned manifests; legacy tables retain unknown status."""
+    records = []
+    for path in (baseline_path, candidate_path):
+        path = pathlib.Path(path)
+        suffix = ".predictions.tsv"
+        sidecar = path.with_name(path.name[:-len(suffix)] + ".json") if path.name.endswith(suffix) else None
+        records.append(json.loads(sidecar.read_text()) if sidecar and sidecar.exists() else {})
+    a, b = (record.get("config", {}) for record in records)
+    checked = []
+    for key in ("split_sha256", "cohort_sha256"):
+        if a.get(key) and b.get(key):
+            if a[key] != b[key]:
+                raise ValueError(f"Incompatible paired evaluation {key}")
+            checked.append(key)
+    if any(record.get("config", {}).get("scope") == "smoke" or
+           record.get("benchmark", "").endswith("-smoke") for record in records):
+        raise ValueError("Smoke runs cannot enter a benchmark comparison")
+    return {"checked_hashes": checked,
+            "status": "shared_dataset_and_split" if len(checked) == 2 else "protocol_compatibility_unverified",
+            "note": "Shared IDs, labels and groups are checked. Matching rows alone do not establish matching inputs, training or evaluation protocols."}
 
 
 def main():
@@ -36,18 +67,28 @@ def main():
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
+    if args.capacity < 1 or args.draws < 1:
+        ap.error("capacity and draws must be positive")
+    if args.out and pathlib.Path(args.out).exists():
+        raise FileExistsError("Refusing to overwrite an existing comparison")
+    compatibility = check_protocol_metadata(args.baseline, args.candidate)
     b = load_predictions(args.baseline)
     c = load_predictions(args.candidate)
     common = sorted(set(b) & set(c))
     if not common:
         raise SystemExit("no variants scored by both methods")
 
+    if any(b[i][:2] != c[i][:2] for i in common):
+        raise ValueError("Paired predictions disagree on label or independent group")
     labels = np.array([b[i][1] for i in common])
+    if len(set(labels)) != 2:
+        raise ValueError("Comparison requires both outcome classes")
     groups = np.array([b[i][0] for i in common])
     sb = np.array([b[i][2] for i in common])
     sc = np.array([c[i][2] for i in common])
 
     report = {
+        "compatibility": compatibility,
         "baseline_file": args.baseline,
         "candidate_file": args.candidate,
         "capacity": args.capacity,
@@ -63,7 +104,7 @@ def main():
             "baseline": M.point_metrics(labels, sb, args.capacity),
             "candidate": M.point_metrics(labels, sc, args.capacity),
         },
-        "independent_groups": int(len(set(groups))),
+        "independent_groups": len(set(groups)),
     }
 
     for metric in ("precision_at_capacity", "average_precision_sklearn", "auroc"):
@@ -79,7 +120,8 @@ def main():
     if args.out:
         p = pathlib.Path(args.out)
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(report, indent=2))
+        with p.open("x") as fh:
+            fh.write(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":

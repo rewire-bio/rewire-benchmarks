@@ -6,3 +6,8 @@ __pycache__/
 
 # Downloaded and regenerated benchmark data. Never committed.
 benchmarks/*/data/
+
+# Local SDK validation and wheel artifacts; never private model inputs.
+workbench/
+dist/
+*.egg-info/

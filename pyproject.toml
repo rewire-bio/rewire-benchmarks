@@ -13,7 +13,7 @@ rewirebench = { workspace = true }
 mfass = { workspace = true }
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.6"]
+dev = ["pytest>=8", "ruff>=0.6", "pandas>=2,<3"]
 
 [tool.ruff]
 line-length = 100

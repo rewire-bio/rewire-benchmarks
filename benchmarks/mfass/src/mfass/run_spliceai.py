@@ -21,10 +21,8 @@ import warnings
 warnings.filterwarnings("ignore")
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
-import numpy as np  # noqa: E402
-
-from rewirebench import metrics as M  # noqa: E402
-from rewirebench.results import BenchmarkResult, write_result  # noqa: E402
+import numpy as np
+from rewirebench.results import BenchmarkResult, write_result
 
 # SpliceAI's documented defaults, stated rather than inherited.
 MASK_DEFAULT = 0        # -M in the CLI: unmasked. Pangolin's equivalent defaults to True.
@@ -82,6 +80,18 @@ def main():
     ap.add_argument("--out", default="benchmarks/mfass/results/spliceai-1.3.1.json")
     ap.add_argument("--limit", type=int, default=0, help="score only the first N, for smoke tests")
     args = ap.parse_args()
+    if args.limit < 0 or args.distance < 0:
+        ap.error("limit and distance must be nonnegative")
+    from rewirebench.protocols.mfass import prepare as prepare_protocol
+    from rewirebench.protocols.mfass import score as score_protocol
+    dataset = prepare_protocol(pathlib.Path(args.cohort), split=args.split,
+                               **({"limit": args.limit} if args.limit else {}))
+    destination = pathlib.Path(args.out)
+    if destination.exists():
+        raise FileExistsError(f"Refusing to overwrite {destination}")
+    for suffix in (".json", ".predictions.tsv", ".unscored.tsv"):
+        if destination.with_suffix(suffix).exists():
+            raise FileExistsError(f"Refusing to overwrite {destination.with_suffix(suffix)}")
 
     from spliceai.utils import Annotator, get_delta_scores
     _patch_numpy_fromstring()
@@ -123,36 +133,45 @@ def main():
         best = 0.0
         for entry in ds:
             parts = entry.split("|")
-            best = max(best, max(float(x) for x in parts[2:6]))
-        scores.append(best)
+            values = [float(x) for x in parts[2:6]]
+            if len(values) != 4 or not np.isfinite(values).all():
+                best = np.nan
+                break
+            best = max(best, max(values))
+        if not np.isfinite(best):
+            scores.append(np.nan)
+            unscored.append((r["id"], "nonfinite model score"))
+        else:
+            scores.append(best)
         if (i + 1) % 500 == 0:
             print(f"  {i+1}/{len(test)}  {(time.perf_counter()-t0)/(i+1):.3f}s/variant", flush=True)
     t_score = time.perf_counter() - t0
 
     scores = np.asarray(scores, dtype=float)
-    labels = np.asarray([int(r["sdv"]) for r in test])
-    ok = ~np.isnan(scores)
+    ok = np.isfinite(scores)
 
     # A variant SpliceAI cannot score is a coverage gap, not a negative prediction.
     # Metrics are computed on the scored subset; coverage reports against the whole.
     groups = np.asarray([sp[r["id"]][0] for r in test])
-    m = M.point_metrics(labels[ok], scores[ok], capacity=100)
+    scored = score_protocol(dataset, {r["id"]: float(s) for r, s in zip(test, scores)
+                                      if np.isfinite(s)})
+    m = scored["metrics"]
     m["scored_subset_note"] = "metrics computed on scored variants only; see coverage"
 
     result = BenchmarkResult(
-        benchmark="mfass-v1",
+        benchmark="mfass-v2-smoke" if args.limit else "mfass-v2",
         method="spliceai-1.3.1",
         family="specialist",
         description="SpliceAI 1.3.1 official five-model ensemble, max delta score over AG/AL/DG/DL",
         split=args.split,
         metrics=m,
-        coverage={"scored": int(ok.sum()), "unscored": int((~ok).sum()), "denominator": len(test)},
+        coverage={key: scored["coverage"][key] for key in ("scored", "unscored", "denominator")},
         timing_seconds={
             "load_models_and_reference": round(t_load, 3),
             "score_test": round(t_score, 3),
             "per_variant_total": round((t_load + t_score) / max(len(test), 1), 6),
         },
-        independent_groups=int(len(set(groups[ok]))),
+        independent_groups=len(set(groups[ok])),
         pretrained=True,
         contamination=(
             "SpliceAI was trained on GENCODE transcripts on the reference genome, not on MFASS "
@@ -160,6 +179,14 @@ def main():
             "assayed exon appeared in its training transcripts is unchecked."
         ),
         config={
+            "scope": dataset["scope"],
+            "timing_scope": "model/reference load plus prediction; cohort preparation excluded",
+            "selected_test_rows": len(test),
+            "canonical_test_rows": 8324,
+            "cohort_sha256": dataset["provenance"]["cohort_sha256"],
+            "split_sha256": dataset["provenance"]["split_sha256"],
+            "not_selected_smoke_rows": 8324 - len(test),
+            "input_context": "genomic GRCh38; differs from assay-pair encoder inputs",
             "version": "1.3.1",
             "models": "bundled 5-model ensemble (spliceai1-5.h5)",
             "annotation": args.annotation,
@@ -168,8 +195,8 @@ def main():
             "mask_M": args.mask,
             "score": "max(DS_AG, DS_AL, DS_DG, DS_DL)",
             "context_bases": 10000,
-            "patches": ["one_hot_encode: np.fromstring -> np.frombuffer for NumPy 2 "
-                        "compatibility; identical dtype, values and length"],
+            "patches": [("one_hot_encode: np.fromstring -> np.frombuffer for NumPy 2 "
+                        "compatibility; identical dtype, values and length")],
         },
         notes=(
             "MFASS measures exon recognition in a minigene construct; SpliceAI scores the variant "

@@ -8,6 +8,7 @@ written. A leaderboard is only as trustworthy as the weakest row in it.
 from __future__ import annotations
 
 import json
+import math
 import pathlib
 import platform
 import subprocess
@@ -58,6 +59,9 @@ class BenchmarkResult:
         missing = [k for k in ("scored", "unscored", "denominator") if k not in self.coverage]
         if missing:
             raise ValueError(f"coverage must report {missing}")
+        if any(type(self.coverage[k]) is not int or self.coverage[k] < 0
+               for k in ("scored", "unscored", "denominator")):
+            raise ValueError("coverage counts must be nonnegative integers")
         if self.coverage["scored"] + self.coverage["unscored"] != self.coverage["denominator"]:
             raise ValueError(
                 "coverage does not reconcile: scored + unscored must equal the original "
@@ -66,7 +70,20 @@ class BenchmarkResult:
             )
         if not self.timing_seconds:
             raise ValueError("timing_seconds is required: throughput is reported beside accuracy")
-        if self.independent_groups < 2:
+        if any(isinstance(v, bool) or not isinstance(v, (int, float)) or
+               not math.isfinite(v) or v < 0 for v in self.timing_seconds.values()):
+            raise ValueError("timing_seconds must contain finite nonnegative values")
+        def check_metrics(value):
+            if isinstance(value, dict):
+                for child in value.values():
+                    check_metrics(child)
+            elif isinstance(value, (int, float)) and not math.isfinite(value):
+                raise ValueError("metrics cannot contain nonfinite values")
+        check_metrics(self.metrics)
+        smoke = self.config.get("scope") == "smoke" and self.benchmark.endswith("-smoke")
+        if type(self.independent_groups) is not int or self.independent_groups < 0:
+            raise ValueError("independent_groups must be a nonnegative integer")
+        if self.independent_groups < 2 and not smoke:
             raise ValueError("independent_groups must be at least 2 for any interval to mean anything")
         if self.pretrained and not self.contamination:
             raise ValueError(
@@ -100,6 +117,6 @@ def write_result(result: BenchmarkResult, path: str | pathlib.Path) -> pathlib.P
     result = result.finalise()
     out = pathlib.Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w") as fh:
-        json.dump(asdict(result), fh, indent=2, sort_keys=False)
+    with open(out, "x") as fh:
+        json.dump(asdict(result), fh, indent=2, sort_keys=False, allow_nan=False)
     return out
