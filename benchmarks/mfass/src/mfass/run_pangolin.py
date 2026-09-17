@@ -19,10 +19,8 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-import numpy as np  # noqa: E402
-
-from rewirebench import metrics as M  # noqa: E402
-from rewirebench.results import BenchmarkResult, write_result  # noqa: E402
+import numpy as np
+from rewirebench.results import BenchmarkResult, write_result
 
 MASK_DEFAULT = "True"     # Pangolin's own default. SpliceAI's equivalent is unmasked.
 DISTANCE_DEFAULT = 50     # Matches SpliceAI's -D default. Not the model's input context.
@@ -41,12 +39,14 @@ class _Args:
 
 def _load_models():
     import torch
-    from pkg_resources import resource_filename
     from pangolin.model import Pangolin
+    from pkg_resources import resource_filename
 
     L, W, AR = 32, np.array([11] * 5), np.array([1] * 5)
     # Widths and dilations follow the package's own main(); see pangolin.pangolin.
-    from pangolin.pangolin import L as _L, W as _W, AR as _AR  # noqa: F401
+    from pangolin.pangolin import AR as _AR
+    from pangolin.pangolin import L as _L
+    from pangolin.pangolin import W as _W
     L, W, AR = _L, _W, _AR
 
     models = []
@@ -54,7 +54,7 @@ def _load_models():
         for j in range(1, 4):
             m = Pangolin(L, W, AR)
             w = torch.load(
-                resource_filename("pangolin", "models/final.%s.%s.3.v2" % (j, i)),
+                resource_filename("pangolin", f"models/final.{j}.{i}.3.v2"),
                 map_location=torch.device("cpu"),
                 weights_only=False,
             )
@@ -66,7 +66,7 @@ def _load_models():
 
 def _max_abs_score(raw):
     """Pangolin returns 'gene|pos:gain|pos:loss|Warnings:...' per gene, comma joined."""
-    best = 0.0
+    best = None
     if not raw or raw == -1:
         return None
     for chunk in raw.split(","):
@@ -74,7 +74,10 @@ def _max_abs_score(raw):
             if ":" not in field or field.startswith("Warnings"):
                 continue
             try:
-                best = max(best, abs(float(field.split(":", 1)[1])))
+                value = abs(float(field.split(":", 1)[1]))
+                if not np.isfinite(value):
+                    return None
+                best = value if best is None else max(best, value)
             except ValueError:
                 continue
     return best
@@ -91,14 +94,26 @@ def main():
     ap.add_argument("--out", default=None)
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
+    if args.limit < 0 or args.distance < 0:
+        ap.error("limit and distance must be nonnegative")
+    from rewirebench.protocols.mfass import prepare as prepare_protocol
+    from rewirebench.protocols.mfass import score as score_protocol
+    dataset = prepare_protocol(pathlib.Path(args.cohort), split=args.split,
+                               **({"limit": args.limit} if args.limit else {}))
+    destination = pathlib.Path(args.out or f"benchmarks/mfass/results/pangolin-mask{args.mask}.json")
+    if destination.exists():
+        raise FileExistsError(f"Refusing to overwrite {destination}")
+    for suffix in (".json", ".predictions.tsv", ".unscored.tsv"):
+        if destination.with_suffix(suffix).exists():
+            raise FileExistsError(f"Refusing to overwrite {destination.with_suffix(suffix)}")
 
     out_path = args.out or f"benchmarks/mfass/results/pangolin-mask{args.mask}.json"
 
     import os
 
     import gffutils
-    import torch
     import pangolin.pangolin as pp
+    import torch
     from pangolin.pangolin import process_variant
 
     # Performance only, no effect on numerics: process_variant reopens the FASTA on
@@ -155,28 +170,29 @@ def main():
     t_score = time.perf_counter() - t0
 
     scores = np.asarray(scores, dtype=float)
-    labels = np.asarray([int(r["sdv"]) for r in test])
     groups = np.asarray([sp[r["id"]][0] for r in test])
-    ok = ~np.isnan(scores)
+    ok = np.isfinite(scores)
 
-    m = M.point_metrics(labels[ok], scores[ok], capacity=100)
+    scored = score_protocol(dataset, {r["id"]: float(s) for r, s in zip(test, scores)
+                                      if np.isfinite(s)})
+    m = scored["metrics"]
     m["scored_subset_note"] = "metrics computed on scored variants only; see coverage"
 
     result = BenchmarkResult(
-        benchmark="mfass-v1",
+        benchmark="mfass-v2-smoke" if args.limit else "mfass-v2",
         method=f"pangolin-mask{args.mask}",
         family="specialist",
         description=("Pangolin official 12-model ensemble, max absolute predicted change in "
                      f"splice site usage, mask={args.mask}"),
         split=args.split,
         metrics=m,
-        coverage={"scored": int(ok.sum()), "unscored": int((~ok).sum()), "denominator": len(test)},
+        coverage={key: scored["coverage"][key] for key in ("scored", "unscored", "denominator")},
         timing_seconds={
             "load_models_and_annotation": round(t_load, 3),
             "score_test": round(t_score, 3),
             "per_variant_total": round((t_load + t_score) / max(len(test), 1), 6),
         },
-        independent_groups=int(len(set(groups[ok]))),
+        independent_groups=len(set(groups[ok])),
         pretrained=True,
         contamination=(
             "Pangolin was trained on splice site usage across GTEx tissues and four species, not on "
@@ -184,6 +200,14 @@ def main():
             "assayed exon appeared in its training annotation is unchecked."
         ),
         config={
+            "scope": dataset["scope"],
+            "timing_scope": "model/reference load plus prediction; cohort preparation excluded",
+            "selected_test_rows": len(test),
+            "canonical_test_rows": 8324,
+            "cohort_sha256": dataset["provenance"]["cohort_sha256"],
+            "split_sha256": dataset["provenance"]["split_sha256"],
+            "not_selected_smoke_rows": 8324 - len(test),
+            "input_context": "genomic GRCh38; differs from assay-pair encoder inputs",
             "models": "official 12-model ensemble (final.{1,2,3}.{0,2,4,6}.3.v2)",
             "annotation": pathlib.Path(args.db).name,
             "annotation_release": "GENCODE v44",
@@ -193,8 +217,8 @@ def main():
             "score": "max absolute predicted change in splice site usage over reported sites",
             "context_bases": 10000,
             "torch_threads": None,  # filled below
-            "patches": ["cached the per-call pyfastx.Fasta handle and raised torch thread "
-                        "count; performance only, no effect on scores"],
+            "patches": [("cached the per-call pyfastx.Fasta handle and raised torch thread "
+                        "count; performance only, no effect on scores")],
         },
         notes=(
             "mask=True is Pangolin's own default and zeroes splice gains at annotated sites and "

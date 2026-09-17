@@ -1,0 +1,52 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/proteingym/performance_DMS_benchmarks.py",
+    "revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "sha256": "0002bc1b031c02dc2d67fde53da092c8fd301415645e8e83b425b4183570eba2",
+    "retrieved_at": "2026-09-17T13:33:45.646111+00:00",
+    "local_file": "upstream_performance.py",
+    "evidence_location": "lines 10\u201375 (NDCG/recall), 199\u2013210 (five metrics), 261 (assay rounding), 283\u2013295 (category aggregation), 380 (summary rounding)",
+    "review_method": "automated_source_inspection_and_tests"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/reference_files/DMS_substitutions.csv",
+    "revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308",
+    "retrieved_at": "2026-09-17T13:33:45.944662+00:00",
+    "local_file": "DMS_substitutions.csv",
+    "evidence_location": "CSV header and all 217 DMS assay rows; DMS_id, target_seq, DMS_total_number_mutants, UniProt_ID and coarse_selection_type",
+    "review_method": "automated_source_inspection_and_tests"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/LICENSE",
+    "revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "sha256": "9b0d23df61da60c379c15bef09ba5f5b14ab16bae6df025509dde9e50299393c",
+    "retrieved_at": "2026-09-17T13:33:46.182157+00:00",
+    "local_file": "LICENSE.upstream",
+    "evidence_location": "Complete MIT software licence; does not independently establish assay data reuse rights",
+    "review_method": "automated_source_inspection_and_tests"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/proteingym/baselines/esm/compute_fitness.py",
+    "revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "sha256": "35186603513cae44fb6a2a44c72cb085db469115e145a267bd7b78350b9bb1ba",
+    "retrieved_at": "2026-09-17T13:33:46.418387+00:00",
+    "local_file": "upstream_esm_compute_fitness.py",
+    "evidence_location": "label_row function lines 240\u2013250: sum mutant-minus-wildtype log probabilities; masked-marginals branch",
+    "review_method": "automated_source_inspection_and_tests"
+  },
+  {
+    "url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t6_8M_UR50D.pt",
+    "sha256": "46f002a9870c9bdecd0ea887acb1f9a38a6b561e8f8bf8a6990b679b9d31b928",
+    "size_bytes": 30099493,
+    "retrieved_at": "2026-09-17T13:38:17.512969+00:00",
+    "local_file": null,
+    "redistributed": false,
+    "purpose": "pinned offline ESM-2 8M example",
+    "official_code_revision": "2b369911bb5b4b0dda914521b9475cad1656b2ac",
+    "official_code_url": "https://github.com/facebookresearch/esm/tree/2b369911bb5b4b0dda914521b9475cad1656b2ac",
+    "package": "fair-esm==2.0.0",
+    "evidence_location": "Complete checkpoint bytes retrieved from official Meta model host; load and inference tested locally",
+    "review_method": "automated_source_inspection_and_tests"
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "kind": "automated_local_validation",
+  "reviewed_at": "2026-09-17T13:42:49.169584+00:00",
+  "review_method": "automated tests and operator-executed local commands",
+  "platform": "macOS arm64 CPU",
+  "claims": {
+    "full_new_benchmark_run": false,
+    "container_execution": false,
+    "independent_scientific_reproduction": false
+  },
+  "source_revision": "bee9133b83f3aedaf2bbb9013f1875515845607e",
+  "checks": [
+    {
+      "name": "archived_metrics_recomputation",
+      "methods": [
+        "baseline-kmer-position-v2",
+        "dnabert2-117m-frozen-pair-logreg"
+      ],
+      "rows_each": 8324,
+      "full_precision_absolute_tolerance": 1e-12,
+      "printed_tsv_absolute_tolerance": 1e-06,
+      "note": "Ten-decimal DNABERT TSV rounding introduces score ties, changing AUROC by approximately 1.98e-7."
+    },
+    {
+      "name": "offline_public_DNABERT2_smoke",
+      "selected_train": 80,
+      "selected_test": 80,
+      "selection": "first 80 per canonical split in original cohort order, after full source validation",
+      "procedure": [
+        "DNABERT2.embed",
+        "fit_embeddings: train-only StandardScaler and fixed balanced L2 logistic regression",
+        "score on selected held-out rows"
+      ],
+      "seconds_observed": 6.257064999896102,
+      "checkpoint_revision": "b5ae377faa374ee160eec1c27b8494436cc94451",
+      "code_revision": "7bce263b15377fc15361f52cfab88f8b586abda0",
+      "coverage": {
+        "scored": 80,
+        "unscored": 8244,
+        "denominator": 8324
+      },
+      "status": "smoke_test_passed",
+      "network": "HF_HUB_OFFLINE=1 and TRANSFORMERS_OFFLINE=1; all eight checkpoint/code files SHA-256 verified before import",
+      "note": "Smoke subset is not representative; no benchmark score claimed."
+    },
+    {
+      "name": "corrected_baseline_smoke",
+      "selected_train": 80,
+      "selected_test": 80,
+      "status": "passed"
+    }
+  ]
+}

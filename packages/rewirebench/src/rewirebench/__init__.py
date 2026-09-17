@@ -14,3 +14,8 @@ __all__ = [
     "precision_at_n", "recall_at_n", "point_metrics", "paired_group_bootstrap",
     "BenchmarkResult", "write_result",
 ]
+
+# Local execution and explicit reviewed contribution workflow.
+from rewirebench.sdk import prepare, run, evaluate, export
+from rewirebench.submission import submit
+__all__ += ["prepare", "run", "evaluate", "export", "submit"]
