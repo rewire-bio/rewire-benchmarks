@@ -150,7 +150,7 @@ reconciliation failure rather than as a quietly different number.
 
 ## Python SDK and private models
 
-The 0.2 SDK adds local `prepare`, `run`, `evaluate`, `export` and explicit `submit`
+The 0.3 SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit `submit`
 interfaces for corrected MFASS v2 and ProteinGym v1.3 zero-shot substitutions.
 Bring a Python adapter or import predictions from your own environment. Optional
 Podman and Apptainer environments use the same interfaces.

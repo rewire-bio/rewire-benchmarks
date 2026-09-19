@@ -1,6 +1,6 @@
 # Evaluate a public or private biological model
 
-The `rewirebench` 0.2 Python library runs locally. It does not send model code,
+The `rewirebench` 0.3 Python library runs locally. It does not send model code,
 weights, inputs or predictions to Rewire. Optional `submit` sends an explicitly
 exported contribution to the verified-email review queue; it never publishes a result.
 Production submissions remain disabled until the existing service and email launch checks pass.
@@ -21,6 +21,10 @@ Supply a Python object with `predict(inputs)` returning `{id: score}`. Input fie
 are protocol-specific: MFASS uses validated assay-oriented sequence pairs and
 permitted variant features; ProteinGym uses reference/mutated proteins and mutation
 identifiers. Inputs contain stable `id` values, never held-out assay labels.
+Genomic Benchmarks v2 uses opaque IDs and a random order saved in the prepared
+artifact. Its IDs are stable within that artifact, not across preparations.
+V1 Genomic Benchmarks artifacts must be prepared and scored again because their
+IDs disclosed labels.
 
 ```python
 import rewirebench
@@ -97,6 +101,11 @@ and environment variables. Per-assay metrics may be exported for a partial Prote
 run; they are not a suite-wide score. Contributions exceeding 24,000 bytes of details must
 be reduced to an appropriately scoped reviewed report, not silently truncated.
 
+TDC ADMET and Genomic Benchmarks v2 exports accept only their dataset-specific
+scalar metrics and reconciled counts. They explicitly declare a local evaluation,
+not paper reproduction, and retain local source hashes without claiming an
+independently verified upstream split. A complete run covers the local copy.
+
 Sign in to the contribution page with your verified email. Its SDK access control
 provides a short-lived Firebase ID token only when contributions are configured.
 Pass it as the `token=` argument, or set `REWIRE_SUBMISSION_TOKEN` for the CLI.
@@ -139,6 +148,13 @@ The report includes protocol settings, a digest of installed SDK source, and
 unreported container identity is shown as unreported, never inferred from a mutable tag.
 Model loading happens when the adapter is constructed; inference-and-fitting timing
 starts afterwards and is labelled accordingly.
+
+Only explicitly named provenance fields are exported. Adapter declarations may
+use `checkpoint_revision`, `code_revision`, `checkpoint_sha256`,
+`implementation_sha256`, `weights_sha256`, and `configuration_sha256`; exports
+prefix these names with `model_`. Revisions require 40 lowercase hex characters
+and SHA-256 values require 64. Arbitrary keys are excluded even when their values
+look like hashes, because a key can contain a private path or project name.
 
 The export also writes a `.evidence.json` sidecar containing allowlisted public assay
 and public-checkpoint artifact hashes. Its checksum is included in the small submission

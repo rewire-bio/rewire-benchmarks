@@ -1,9 +1,10 @@
 """Genomic Benchmarks scoring, including the parts the paper leaves unstated."""
+import json
 import math
 from pathlib import Path
 
 import pytest
-
+from rewirebench import sdk
 from rewirebench.protocols import genomic_benchmarks as gb
 
 
@@ -102,3 +103,117 @@ def test_embeddings_are_refused_with_a_reason(tmp_path):
     prepared = gb.prepare(build(tmp_path), dataset="human_nontata_promoters")
     with pytest.raises(NotImplementedError, match="not embeddings"):
         gb.fit_embeddings(prepared, {})
+
+
+def test_adapter_ids_and_batch_order_do_not_reveal_class(tmp_path, monkeypatch):
+    # Deliberately interleave the random IDs across source classes. This makes
+    # the ordering check deterministic, including at one-record batch size.
+    # The train/test IDs must also be globally unique.
+    ids = iter(f"{i:064x}" for i in [18, 12, 16, 14, 11, 17, 13, 15, 8, 2, 6, 4, 1, 7, 3, 5])
+    monkeypatch.setattr(gb.secrets, "token_hex", lambda _: next(ids))
+    prepared = sdk.prepare(
+        gb.PROTOCOL_ID, source=build(tmp_path / "source"), dataset="human_nontata_promoters",
+        output=tmp_path / "prepared",
+    )
+    test_rows = [row for row in prepared["rows"] if row["split"] == "test"]
+    assert [row["target"] for row in test_rows] == [1, 0, 1, 0, 1, 0, 1, 0]
+    seen = []
+
+    class IdOnlyAdapter:
+        def predict(self, inputs):
+            for row in inputs:
+                assert set(row) == {"id", "sequence"}
+                assert len(row["id"]) == 64
+                assert "/" not in row["id"]
+                assert "positive" not in row["id"] and "negative" not in row["id"]
+                seen.append(row.copy())
+            return {row["id"]: int("/positive/" in row["id"]) for row in inputs}
+
+    report = sdk.run(
+        tmp_path / "prepared", IdOnlyAdapter(), output=tmp_path / "run", batch_size=1,
+    )
+    assert report["metrics"]["accuracy"] == 0.5
+    first = list(seen)
+    seen.clear()
+    sdk.run(tmp_path / "prepared", IdOnlyAdapter(), output=tmp_path / "rerun", batch_size=3)
+    assert seen == first
+
+
+def test_preparation_reuses_source_hashes_but_not_ids(tmp_path):
+    source = build(tmp_path)
+    first = gb.prepare(source, dataset="human_nontata_promoters")
+    second = gb.prepare(source, dataset="human_nontata_promoters")
+    assert first["provenance"] == second["provenance"]
+    assert {r["id"] for r in first["rows"]}.isdisjoint(r["id"] for r in second["rows"])
+    assert first["protocol_version"] == "2"
+    assert first["metadata"]["adapter_input_contract"] == gb.INPUT_CONTRACT
+
+
+def test_source_digest_includes_class_paths_and_original_bytes(tmp_path):
+    source = build(tmp_path)
+    first = gb.prepare(source, dataset="human_nontata_promoters")
+    file = source / "human_nontata_promoters/test/positive/0.txt"
+    file.write_text(file.read_text() + "\n")
+    second = gb.prepare(source, dataset="human_nontata_promoters")
+    assert first["provenance"]["test_sha256"] != second["provenance"]["test_sha256"]
+    assert first["provenance"]["train_sha256"] == second["provenance"]["train_sha256"]
+    for split in ("train", "test"):
+        path = source / "human_nontata_promoters" / split / "positive"
+        path.rename(path.with_name("zzpositive"))
+    third = gb.prepare(source, dataset="human_nontata_promoters")
+    for key in ("train_sha256", "test_sha256"):
+        assert third["provenance"][key] != second["provenance"][key]
+
+
+@pytest.mark.parametrize("operation", ["run", "evaluate", "export"])
+def test_v1_artifacts_cannot_be_reused(tmp_path, operation):
+    old = {"protocol_id": "genomic-benchmarks-v1", "kind": "rewire_local_evaluation"}
+    with pytest.raises(ValueError, match="v1 exposed class labels"):
+        if operation == "export":
+            sdk.export(old, output=tmp_path / "export.json")
+        elif operation == "run":
+            sdk.run(old, object(), output=tmp_path / "run")
+        else:
+            sdk.evaluate(old, {}, output=tmp_path / "evaluate")
+
+
+@pytest.mark.parametrize("change", ["contract", "ids", "order", "version"])
+def test_v2_reloads_validate_the_input_contract(tmp_path, change):
+    prepared = sdk.prepare(
+        gb.PROTOCOL_ID, source=build(tmp_path / "source"), dataset="human_nontata_promoters",
+        output=tmp_path / "prepared",
+    )
+    if change == "contract":
+        prepared["metadata"].pop("adapter_input_contract")
+    elif change == "version":
+        prepared["protocol_version"] = gb.UPSTREAM_REVISION
+    elif change == "ids":
+        prepared["rows"][0]["id"] = "train/negative/0"
+    else:
+        prepared["rows"].reverse()
+    prepared.pop("prepared_sha256")
+    prepared["prepared_sha256"] = sdk._digest(prepared)
+    with pytest.raises(ValueError, match="run prepare again"):
+        sdk.run(prepared, object(), output=tmp_path / "run")
+
+
+def test_sdk_export_and_submission_describe_only_a_local_copy(tmp_path):
+    from rewirebench.submission import submit
+
+    prepared = sdk.prepare(
+        gb.PROTOCOL_ID, source=build(tmp_path / "source"), dataset="human_nontata_promoters",
+        output=tmp_path / "prepared",
+    )
+    predictions = {r["id"]: r["target"] for r in prepared["rows"] if r["split"] == "test"}
+    report = sdk.evaluate(prepared, predictions, output=tmp_path / "run")
+    bundle = sdk.export(report, output=tmp_path / "bundle.json")
+    assert bundle["evaluation_claim"] == "local_evaluation_not_paper_reproduction"
+    assert bundle["data_verification"] == "local_bytes_hashed_not_independently_source_verified"
+    assert bundle["independently_reproduced"] is False
+    payload = submit(
+        bundle, title="Local sequence evaluation", summary="Evaluation of the downloaded copy.",
+        source_url="https://example.org/evaluation", metric="accuracy", value="1.0",
+        source_locator="Local report", dry_run=True,
+    )
+    assert payload["contribution"]["details"]["rewire_bundle"] == bundle
+    assert json.loads((tmp_path / "bundle.json").read_text()) == bundle

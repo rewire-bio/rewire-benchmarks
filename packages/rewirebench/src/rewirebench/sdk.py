@@ -19,17 +19,22 @@ import os
 import platform
 import time
 from collections.abc import Mapping
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
+
+from rewirebench.provenance import ADAPTER_FIELDS, PUBLIC_FIELDS, is_digest
 
 PROTOCOLS = {
     "mfass-v2": "mfass",
     "mfass-v2-frozen-encoder": "mfass",
     "proteingym-v1.3-dms-substitutions": "proteingym",
     "tdc-admet-group-v1": "tdc_admet",
-    "genomic-benchmarks-v1": "genomic_benchmarks",
+    "genomic-benchmarks-v2": "genomic_benchmarks",
 }
+
+LOCAL_COPY_PROTOCOLS = {"tdc-admet-group-v1", "genomic-benchmarks-v2"}
+LOCAL_EVALUATION_CLAIM = "local_evaluation_not_paper_reproduction"
 
 
 class ScoreAdapter(Protocol):
@@ -43,6 +48,11 @@ class EmbeddingAdapter(Protocol):
 
 
 def _plugin(protocol: str):
+    if protocol == "genomic-benchmarks-v1":
+        raise ValueError(
+            "Genomic Benchmarks v1 exposed class labels in adapter IDs; "
+            "run prepare with genomic-benchmarks-v2 and generate new predictions"
+        )
     if protocol not in PROTOCOLS:
         raise ValueError(f"Unsupported protocol {protocol!r}; choose {', '.join(PROTOCOLS)}")
     return importlib.import_module(f"rewirebench.protocols.{PROTOCOLS[protocol]}")
@@ -77,7 +87,7 @@ def _new_output(output: str | Path) -> Path:
 
 
 def _validate_prepared(data: dict) -> None:
-    _plugin(data["protocol_id"])
+    plugin = _plugin(data["protocol_id"])
     if data.get("scope") not in {"full", "subset", "smoke"}:
         raise ValueError("Prepared data must declare full, subset or smoke scope")
     rows = data.get("rows", [])
@@ -95,6 +105,8 @@ def _validate_prepared(data: dict) -> None:
         {k: v for k, v in data.items() if k != "prepared_sha256"}
     ):
         raise ValueError("Prepared artifact checksum mismatch; run prepare again")
+    if hasattr(plugin, "validate_prepared"):
+        plugin.validate_prepared(data)
 
 
 def prepare(protocol: str, *, source: str | Path, output: str | Path, **options) -> dict:
@@ -125,7 +137,7 @@ def _checked_predictions(
     values: Mapping, expected: set[str], *, partial: bool
 ) -> tuple[dict, dict]:
     if not isinstance(values, Mapping):
-        raise ValueError("Adapter must return a mapping keyed by stable input ID")
+        raise ValueError("Adapter must return a mapping keyed by stable input ID")  # noqa: TRY004 - public validation API
     unknown = set(values) - expected
     if unknown:
         raise ValueError(f"Predictions contain {len(unknown)} unknown IDs")
@@ -263,7 +275,7 @@ def evaluate(
             "container_runtime": os.environ.get("REWIRE_CONTAINER_RUNTIME", "unreported"),
         },
         "timing_seconds": {"evaluation": time.perf_counter() - start},
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "review_status": "unreviewed_local_run",
         "independently_reproduced": False,
     }
@@ -374,6 +386,7 @@ def export(report: dict | str | Path, *, output: str | Path) -> dict:
     data = _load(report, "report.json")
     if data.get("kind") != "rewire_local_evaluation":
         raise ValueError("Expected a local evaluation report")
+    _plugin(data["protocol_id"])
     if data.get("scope") == "smoke":
         raise ValueError("Smoke tests cannot be exported as benchmark contributions")
     evidence_path = Path(output).with_suffix(".evidence.json")
@@ -419,15 +432,12 @@ def export(report: dict | str | Path, *, output: str | Path) -> dict:
     if image_digest.startswith("sha256:") and _is_sha256(image_digest[7:]):
         provenance["oci_image_sha256"] = image_digest[7:]
     for key, value in data.get("execution", {}).get("adapter_provenance", {}).items():
-        if key.endswith(("_sha256", "_revision")):
+        if key in ADAPTER_FIELDS:
             provenance["model_" + key] = value
     bundle["provenance"] = {
         k: v
         for k, v in provenance.items()
-        if (k.endswith("_sha256") or k.endswith("_revision"))
-        and isinstance(v, str)
-        and len(v) in {40, 64}
-        and all(c in "0123456789abcdef" for c in v)
+        if k in PUBLIC_FIELDS and is_digest(v, PUBLIC_FIELDS[k])
     }
     evidence = {"schema_version": "1.0", "assays": {}, "public_model_artifacts": {}}
     if data["protocol_id"] == "proteingym-v1.3-dms-substitutions":
@@ -458,6 +468,11 @@ def export(report: dict | str | Path, *, output: str | Path) -> dict:
         in {"pinned_source_bytes", "local_bytes_hashed_not_independently_source_verified"}
         else "unreported"
     )
+    if data["protocol_id"] in LOCAL_COPY_PROTOCOLS:
+        bundle["evaluation_claim"] = LOCAL_EVALUATION_CLAIM
+        # These protocols only hash a local copy; they cannot establish an
+        # independently verified upstream split, including for old reports.
+        bundle["data_verification"] = "local_bytes_hashed_not_independently_source_verified"
     _write(Path(output), bundle)
     _write(evidence_path, evidence)
     return bundle
