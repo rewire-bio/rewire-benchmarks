@@ -54,6 +54,10 @@ The report names the metric, its direction, and the coverage: how many test rows
 you scored out of how many exist. A partial run is scored and reported as
 partial rather than refused, and it is never marked complete.
 
+Spearman is undefined when targets or predictions are constant. In that case the
+report records a null metric with a reason and retains the predictions and full
+coverage. A run with no available numerical performance metric cannot be submitted.
+
 ## What this does and does not establish
 
 The metric per dataset and the way it is computed are transcribed from TDC's own
@@ -65,3 +69,10 @@ Matching a published number needs more than a matching metric. The split on your
 disk, the featurisation, and the training procedure all have to match too, and
 the published baselines on the rewire database page for this group are the
 paper's own simple models rather than the current leaderboard.
+
+Exports support the explicit review-queue submission workflow in [the SDK guide](sdk.md).
+They carry `evaluation_claim: local_evaluation_not_paper_reproduction` and
+`data_verification: local_bytes_hashed_not_independently_source_verified`.
+Coverage is measured against the local test rows read during preparation; it is
+not an assertion of official cohort size. Submission accepts only the prescribed
+metric for the named dataset and checks its count against scored coverage.

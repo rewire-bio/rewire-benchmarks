@@ -143,6 +143,7 @@ def prepare(source: Path, **options):
             "test_sha256": test_sha,
             "train_val_sha256": train_sha,
             "split_origin": "TDC BenchmarkGroup scaffold split, as written to disk locally",
+            "data_verification": "local_bytes_hashed_not_independently_source_verified",
             "source_url": f"https://github.com/mims-harvard/TDC/tree/{UPSTREAM_REVISION}",
         },
         "metadata": {
@@ -184,7 +185,7 @@ def score(dataset, predictions):
     known = {r["id"] for r in dataset["rows"]}
     unknown = set(predictions) - known
     if unknown:
-        raise ValueError(f"Unknown prediction IDs, first: {sorted(unknown)[0]}")
+        raise ValueError(f"Unknown prediction IDs, first: {min(unknown)}")
     selected = [r for r in rows if r["id"] in predictions]
     values = np.asarray([predictions[r["id"]] for r in selected], dtype=float)
     if not np.isfinite(values).all():
@@ -196,6 +197,11 @@ def score(dataset, predictions):
     )
     if usable:
         metrics = {metric: _metric_value(metric, labels, values), "n": len(selected)}
+        if not np.isfinite(metrics[metric]):
+            metrics[metric] = None
+            metrics["unavailable_reason"] = (
+                "Spearman correlation is undefined for constant targets or predictions"
+            )
     else:
         metrics = {
             metric: None,

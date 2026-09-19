@@ -1,10 +1,11 @@
 """The ADMET group protocol must score the way TDC scores, or not at all."""
 import csv
+import json
 import math
 from pathlib import Path
 
 import pytest
-
+from rewirebench import sdk
 from rewirebench.protocols import tdc_admet
 
 
@@ -137,3 +138,46 @@ def test_embeddings_are_refused_with_a_reason(tmp_path):
     prepared = tdc_admet.prepare(regression(tmp_path), dataset="caco2_wang")
     with pytest.raises(NotImplementedError, match="not embeddings"):
         tdc_admet.fit_embeddings(prepared, {})
+
+
+@pytest.mark.parametrize("constant", ["predictions", "targets"])
+def test_undefined_spearman_writes_null_and_keeps_prediction_evidence(tmp_path, constant):
+    from scipy.stats import ConstantInputWarning
+
+    source = regression(tmp_path, "vdss_lombardo")
+    if constant == "targets":
+        write(source / "admet_group/vdss_lombardo", "test.csv", [
+            (f"s{i}", "CCN", 0.5) for i in range(5)
+        ])
+    prepared = sdk.prepare(
+        tdc_admet.PROTOCOL_ID, source=source, dataset="vdss_lombardo",
+        output=tmp_path / "prepared",
+    )
+    predictions = {f"s{i}": 0.5 if constant == "predictions" else float(i) for i in range(5)}
+    with pytest.warns(ConstantInputWarning):
+        report = sdk.evaluate(prepared, predictions, output=tmp_path / "run")
+    assert report["metrics"]["spearman"] is None
+    assert "constant" in report["metrics"]["unavailable_reason"]
+    assert report["coverage"] == {"scored": 5, "unscored": 0, "denominator": 5}
+    assert json.loads((tmp_path / "run/report.json").read_text())["metrics"] == report["metrics"]
+    assert json.loads((tmp_path / "run/predictions.json").read_text()) == predictions
+    bundle = sdk.export(report, output=tmp_path / "bundle.json")
+    assert bundle["metrics"] == {"spearman": None, "n": 5}
+
+
+def test_sdk_export_and_submission_of_admet_scalar_metric(tmp_path):
+    from rewirebench.submission import submit
+
+    prepared = sdk.prepare(
+        tdc_admet.PROTOCOL_ID, source=regression(tmp_path), dataset="caco2_wang",
+        output=tmp_path / "prepared",
+    )
+    report = sdk.evaluate(prepared, {f"s{i}": i / 5 for i in range(5)}, output=tmp_path / "run")
+    bundle = sdk.export(report, output=tmp_path / "bundle.json")
+    payload = submit(
+        bundle, title="Local ADMET evaluation", summary="Evaluation of the downloaded copy.",
+        source_url="https://example.org/evaluation", metric="mae", value="0.0",
+        source_locator="Local report", dry_run=True,
+    )
+    assert payload["contribution"]["details"]["rewire_bundle"] == bundle
+    assert bundle["evaluation_claim"] == "local_evaluation_not_paper_reproduction"

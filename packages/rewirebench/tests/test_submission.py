@@ -230,3 +230,110 @@ def test_proteingym_full_assay_wrapper_requires_all_assays():
     payload["scope"] = "full"
     with pytest.raises(ValueError, match="all official assays"):
         submit(payload, **arguments(), dry_run=True)
+
+
+@pytest.mark.parametrize("key", [
+    "/private/customer/checkpoint_sha256", "model_/private/checkpoint_sha256",
+    "private_customer_revision", "unknown_sha256",
+])
+def test_provenance_keys_are_allowlisted_before_submission(key):
+    payload = bundle()
+    payload["provenance"][key] = "a" * (40 if key.endswith("_revision") else 64)
+    with pytest.raises(ValueError, match="allowlisted"):
+        submit(payload, **arguments(), dry_run=True)
+
+
+def local_copy_bundle(protocol="tdc-admet-group-v1", dataset="caco2_wang"):
+    from rewirebench.protocols import genomic_benchmarks as gb
+    from rewirebench.protocols import tdc_admet as tdc
+
+    payload = bundle()
+    is_tdc = protocol == tdc.PROTOCOL_ID
+    payload.update({
+        "protocol_id": protocol,
+        "protocol_version": tdc.UPSTREAM_REVISION if is_tdc else gb.PROTOCOL_VERSION,
+        "dataset_id": ("tdc-admet-" if is_tdc else "genomic-benchmarks-") + dataset,
+        "evaluation_claim": "local_evaluation_not_paper_reproduction",
+        "data_verification": "local_bytes_hashed_not_independently_source_verified",
+        "metrics": {tdc.ADMET_METRICS[dataset]: 0.5, "n": 2} if is_tdc else (
+            {"accuracy": 0.5, "f1_macro": 0.5, "f1_weighted": 0.5, "n": 2}
+            if dataset == "human_ensembl_regulatory" else {"accuracy": 0.5, "f1": 0.5, "n": 2}
+        ),
+        "provenance": {
+            "upstream_revision": tdc.UPSTREAM_REVISION if is_tdc else gb.UPSTREAM_REVISION,
+            "test_sha256": "d" * 64, "train_sha256": "e" * 64,
+        },
+    })
+    return payload
+
+
+@pytest.mark.parametrize("protocol,dataset", [
+    ("tdc-admet-group-v1", "caco2_wang"),
+    ("tdc-admet-group-v1", "hia_hou"),
+    ("tdc-admet-group-v1", "cyp2c9_veith"),
+    ("tdc-admet-group-v1", "vdss_lombardo"),
+    ("genomic-benchmarks-v2", "human_nontata_promoters"),
+    ("genomic-benchmarks-v2", "human_ensembl_regulatory"),
+])
+def test_local_copy_known_metrics_and_partial_coverage_accepted(protocol, dataset):
+    payload = local_copy_bundle(protocol, dataset)
+    for partial in (False, True):
+        if partial:
+            payload["completion"] = "partial"
+            payload["coverage"] = {"denominator": 5, "scored": 2, "unscored": 3}
+        result = submit(payload, **arguments(), dry_run=True)
+        assert result["contribution"]["details"]["rewire_bundle"] == payload
+
+
+@pytest.mark.parametrize("field,value", [
+    ("protocol_version", "unreviewed"),
+    ("dataset_id", "tdc-admet-private_dataset"),
+    ("evaluation_claim", "paper_reproduction"),
+    ("data_verification", "pinned_source_bytes"),
+    ("provenance", {"test_sha256": "d" * 64}),
+    ("provenance", {}),
+    ("metrics", {"roc-auc": 0.5, "n": 2}),
+    ("metrics", {"mae": 0.5, "n": 1}),
+    ("metrics", {"mae": 0.5, "n": 2.0}),
+    ("metrics", {"mae": -0.1, "n": 2}),
+    ("metrics", {"mae": None, "n": 2}),
+    ("metrics", {"mae": 0.5}),
+    ("metrics", {"mae": 0.5, "n": 2, "private_sequence": 1}),
+    ("metrics", {"mae": {"private_sequence": 1}, "n": 2}),
+])
+def test_local_copy_unknown_fields_wrong_metrics_and_unsupported_claims_refused(field, value):
+    payload = local_copy_bundle()
+    payload[field] = value
+    with pytest.raises(ValueError):
+        submit(payload, **arguments(), dry_run=True)
+
+
+@pytest.mark.parametrize("dataset,metric,value", [
+    ("hia_hou", "roc-auc", 1.1),
+    ("cyp2c9_veith", "pr-auc", -0.1),
+    ("vdss_lombardo", "spearman", -1.1),
+])
+def test_tdc_metric_ranges_refused(dataset, metric, value):
+    payload = local_copy_bundle(dataset=dataset)
+    payload["metrics"][metric] = value
+    with pytest.raises(ValueError, match="valid range"):
+        submit(payload, **arguments(), dry_run=True)
+
+
+@pytest.mark.parametrize("dataset,metrics", [
+    ("human_nontata_promoters", {"accuracy": 1.1, "f1": 1.0, "n": 2}),
+    ("human_nontata_promoters", {"accuracy": 0.5, "f1_macro": 0.5, "n": 2}),
+    ("human_ensembl_regulatory", {"accuracy": 0.5, "f1": 0.5, "n": 2}),
+])
+def test_genomic_metric_ranges_and_averaging_are_dataset_specific(dataset, metrics):
+    payload = local_copy_bundle("genomic-benchmarks-v2", dataset)
+    payload["metrics"] = metrics
+    with pytest.raises(ValueError):
+        submit(payload, **arguments(), dry_run=True)
+
+
+def test_genomic_v1_submission_is_retired():
+    payload = local_copy_bundle("genomic-benchmarks-v2", "human_nontata_promoters")
+    payload["protocol_id"] = "genomic-benchmarks-v1"
+    with pytest.raises(ValueError, match="Unsupported protocol"):
+        submit(payload, **arguments(), dry_run=True)

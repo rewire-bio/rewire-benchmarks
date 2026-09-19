@@ -14,6 +14,9 @@ from functools import lru_cache
 from importlib.resources import files
 from pathlib import Path
 
+from rewirebench.provenance import PUBLIC_FIELDS, is_digest
+from rewirebench.sdk import LOCAL_COPY_PROTOCOLS, LOCAL_EVALUATION_CLAIM
+
 DEFAULT_ENDPOINT = "https://benchmarks.rewire.it/api/trpc"
 
 
@@ -35,6 +38,7 @@ MFASS_PERFORMANCE_METRICS = MFASS_METRICS - {"n", "positives", "prevalence", "ca
 PROTEINGYM_METRICS = frozenset({"Spearman", "AUC", "MCC", "NDCG", "Top_recall"})
 SUPPORTED_PROTOCOLS = frozenset({
     "mfass-v2", "mfass-v2-frozen-encoder", "proteingym-v1.3-dms-substitutions",
+    *LOCAL_COPY_PROTOCOLS,
 })
 
 
@@ -71,6 +75,9 @@ def _validate_metrics(bundle):
     protocol = bundle["protocol_id"]
     if protocol not in SUPPORTED_PROTOCOLS:
         raise ValueError("Unsupported protocol for SDK submission")
+    if protocol in LOCAL_COPY_PROTOCOLS:
+        _validate_local_copy_metrics(bundle)
+        return
     value = bundle["metrics"]
     if protocol in {"mfass-v2", "mfass-v2-frozen-encoder"}:
         if not _scalar_metrics(value, MFASS_METRICS, MFASS_PERFORMANCE_METRICS):
@@ -115,6 +122,61 @@ def _validate_metrics(bundle):
         raise ValueError("Full-track summaries must include all official assays")
 
 
+def _validate_local_copy_metrics(bundle):
+    """One named local dataset, prescribed scalar metrics, no reproduction claim."""
+    from rewirebench.protocols import genomic_benchmarks as gb
+    from rewirebench.protocols import tdc_admet as tdc
+
+    if (
+        bundle.get("evaluation_claim") != LOCAL_EVALUATION_CLAIM
+        or bundle.get("data_verification")
+        != "local_bytes_hashed_not_independently_source_verified"
+    ):
+        raise ValueError("Local-copy results must disclaim paper reproduction and source verification")
+    if bundle["protocol_id"] == tdc.PROTOCOL_ID:
+        datasets = {f"tdc-admet-{name}": metric for name, metric in tdc.ADMET_METRICS.items()}
+        if bundle["dataset_id"] not in datasets:
+            raise ValueError("Expected a known TDC ADMET dataset")
+        performance = frozenset({datasets[bundle["dataset_id"]]})
+        version, revision = tdc.UPSTREAM_REVISION, tdc.UPSTREAM_REVISION
+        required_hashes = {"test_sha256"}
+    else:
+        datasets = {f"genomic-benchmarks-{name}" for name in gb.DATASETS}
+        if bundle["dataset_id"] not in datasets:
+            raise ValueError("Expected a known Genomic Benchmarks dataset")
+        performance = frozenset(
+            {"accuracy", "f1_macro", "f1_weighted"}
+            if bundle["dataset_id"] == "genomic-benchmarks-human_ensembl_regulatory"
+            else {"accuracy", "f1"}
+        )
+        version, revision = gb.PROTOCOL_VERSION, gb.UPSTREAM_REVISION
+        required_hashes = {"train_sha256", "test_sha256"}
+    if bundle["protocol_version"] != version:
+        raise ValueError("Unsupported version for this local-copy protocol")
+    provenance = bundle["provenance"]
+    if (
+        not isinstance(provenance, dict)
+        or provenance.get("upstream_revision") != revision
+        or any(not is_digest(provenance.get(key), 64) for key in required_hashes)
+    ):
+        raise ValueError("Local-copy results require the evaluator revision and local source hashes")
+    metrics = bundle["metrics"]
+    allowed = performance | {"n"}
+    if not _scalar_metrics(metrics, allowed, performance):
+        raise ValueError("No numerical performance metrics to submit")
+    if set(metrics) != allowed:
+        raise ValueError("Include all prescribed metrics for the selected dataset")
+    if type(metrics["n"]) is not int or metrics["n"] != bundle["coverage"]["scored"]:
+        raise ValueError("Metric n must reconcile with scored coverage")
+    for key in performance:
+        value = metrics[key]
+        if value is None:
+            continue
+        lower, upper = (-1, 1) if key == "spearman" else (0, math.inf if key == "mae" else 1)
+        if not lower <= value <= upper:
+            raise ValueError(f"Metric {key} is outside its valid range")
+
+
 def _validate_bundle(bundle):
     required = {
         "schema_version",
@@ -137,7 +199,7 @@ def _validate_bundle(bundle):
     if (
         not isinstance(bundle, dict)
         or not required.issubset(bundle)
-        or set(bundle) - required - {"data_verification"}
+        or set(bundle) - required - {"data_verification", "evaluation_claim"}
     ):
         raise ValueError("Submit only the allowlisted bundle produced by rewirebench.export")
     if bundle.get("data_verification", "unreported") not in {
@@ -146,6 +208,8 @@ def _validate_bundle(bundle):
         "unreported",
     }:
         raise ValueError("Invalid data verification declaration")
+    if "evaluation_claim" in bundle and bundle["evaluation_claim"] != LOCAL_EVALUATION_CLAIM:
+        raise ValueError("Invalid evaluation claim")
     if (
         bundle["schema_version"] != "1.0"
         or bundle["kind"] != "rewire_benchmark_submission"
@@ -187,14 +251,11 @@ def _validate_bundle(bundle):
         "prepared_sha256": bundle["prepared_sha256"],
         "predictions_sha256": bundle["predictions_sha256"],
     }.items():
-        length = 64 if key.endswith("_sha256") else 40 if key.endswith("_revision") else 0
-        if (
-            not length
-            or not isinstance(value, str)
-            or len(value) != length
-            or any(c not in "0123456789abcdef" for c in value)
-        ):
-            raise ValueError("Export provenance may contain only revision and checksum fields")
+        length = (
+            64 if key in {"prepared_sha256", "predictions_sha256"} else PUBLIC_FIELDS.get(key)
+        )
+        if length is None or not is_digest(value, length):
+            raise ValueError("Export provenance may contain only allowlisted revision and checksum fields")
 
 
 def submit(

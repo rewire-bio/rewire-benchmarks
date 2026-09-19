@@ -1,5 +1,6 @@
 import json
 from types import SimpleNamespace
+
 import pytest
 from rewirebench import sdk
 
@@ -174,3 +175,38 @@ def test_export_preserves_public_checkpoint_evidence_without_paths(tmp_path, plu
     assert bundle["provenance"]["sif_sha256"] == "e" * 64
     assert "/private" not in json.dumps(evidence)
     assert bundle["data_verification"] == "unreported"
+
+
+def test_export_filters_provenance_names_as_well_as_digest_values(tmp_path, plugin):
+    report = sdk.evaluate(data(), {"test-a": 0, "test-b": 1}, output=tmp_path / "run")
+    report["provenance"].update({
+        "/private/customer-x/data_sha256": "a" * 64,
+        "private_customer_revision": "b" * 40,
+        "upstream_revision": "c" * 40,
+        "test_sha256": "d" * 40,  # Wrong digest length despite a permitted key.
+    })
+    report["execution"]["adapter_provenance"] = {
+        "/private/customer-x/checkpoint_sha256": "e" * 64,
+        "secret_project_revision": "f" * 40,
+        "checkpoint_sha256": "1" * 64,
+        "implementation_sha256": "2" * 64,
+        "checkpoint_revision": "3" * 40,
+        "code_revision": "4" * 40,
+        "configuration_sha256": "5" * 64,
+        "weights_sha256": "6" * 64,
+    }
+    report["model_configuration"] = {"token": "private-api-token"}
+    exported = sdk.export(report, output=tmp_path / "bundle.json")
+    provenance = exported["provenance"]
+    assert provenance["source_sha256"] == "a" * 64
+    assert provenance["upstream_revision"] == "c" * 40
+    assert "test_sha256" not in provenance
+    for key, value in report["execution"]["adapter_provenance"].items():
+        if key in sdk.ADAPTER_FIELDS:
+            assert provenance["model_" + key] == value
+    for path in (tmp_path / "bundle.json", tmp_path / "bundle.evidence.json"):
+        text = path.read_text()
+        assert "customer-x" not in text
+        assert "private_customer" not in text
+        assert "secret_project" not in text
+        assert "private-api-token" not in text
