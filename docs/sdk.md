@@ -122,6 +122,8 @@ Curators review the contribution, and publication occurs only through a dataset 
 
 - [MFASS](mfass.md): canonical assay pairs, baseline and DNABERT-2 frozen encoder.
 - [ProteinGym](proteingym.md): v1.3 zero-shot substitutions and ESM-2.
+- [TDC ADMET](tdc-admet.md): the 22-dataset ADMET benchmark group, scored with each dataset's own metric.
+- [Genomic Benchmarks](genomic-benchmarks.md): nine sequence classification datasets.
 - [HPC and containers](hpc.md): optional Podman and Apptainer execution.
 
 No universal model API coerces arbitrary embeddings, structures or generated sequences

@@ -27,6 +27,8 @@ PROTOCOLS = {
     "mfass-v2": "mfass",
     "mfass-v2-frozen-encoder": "mfass",
     "proteingym-v1.3-dms-substitutions": "proteingym",
+    "tdc-admet-group-v1": "tdc_admet",
+    "genomic-benchmarks-v1": "genomic_benchmarks",
 }
 
 
