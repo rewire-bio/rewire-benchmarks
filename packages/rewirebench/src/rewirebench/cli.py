@@ -1,13 +1,15 @@
 """Command-line counterpart to the local Python SDK."""
 
 from __future__ import annotations
+
 import argparse
 import importlib
 import json
 import os
 from pathlib import Path
+
 from rewirebench import sdk
-from rewirebench.submission import submit, SubmissionError
+from rewirebench.submission import SubmissionError, submit
 
 
 def main(argv=None):
@@ -16,6 +18,8 @@ def main(argv=None):
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("protocols", help="List implemented protocols")
+    inspect = sub.add_parser("inspect", help="Describe protocol inputs, datasets and execution rules")
+    inspect.add_argument("protocol", choices=sdk.PROTOCOLS)
     prepare = sub.add_parser(
         "prepare", help="Validate local upstream resources and prepare a protocol"
     )
@@ -36,8 +40,11 @@ def main(argv=None):
             )
             cmd.add_argument("--adapter-options", default="{}")
             cmd.add_argument("--batch-size", type=int, default=32)
+            cmd.add_argument("--prediction-type", choices=["scalar", "embedding"])
         else:
-            cmd.add_argument("--predictions", required=True)
+            inputs = cmd.add_mutually_exclusive_group(required=True)
+            inputs.add_argument("--predictions")
+            inputs.add_argument("--embeddings", help="Keyed JSON vectors or safe NPZ {ids, embeddings}")
     export = sub.add_parser("export", help="Create a private-data-minimised contribution bundle")
     export.add_argument("--report", required=True)
     export.add_argument("--output", required=True)
@@ -52,6 +59,8 @@ def main(argv=None):
     try:
         if args.command == "protocols":
             result = list(sdk.PROTOCOLS)
+        elif args.command == "inspect":
+            result = sdk.describe(args.protocol)
         elif args.command == "prepare":
             result = sdk.prepare(
                 args.protocol, source=args.source, output=args.output, **json.loads(args.options)
@@ -74,10 +83,13 @@ def main(argv=None):
                     args.prepared,
                     factory(**json.loads(args.adapter_options)),
                     batch_size=args.batch_size,
+                    prediction_type=args.prediction_type,
                     **kwargs,
                 )
             else:
-                result = sdk.evaluate(args.prepared, args.predictions, **kwargs)
+                result = sdk.evaluate(
+                    args.prepared, args.predictions, embeddings=args.embeddings, **kwargs,
+                )
             result = {
                 "coverage": result["coverage"],
                 "metrics": result["metrics"],

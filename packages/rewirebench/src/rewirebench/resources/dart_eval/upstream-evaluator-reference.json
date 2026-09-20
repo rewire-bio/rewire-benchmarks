@@ -1,0 +1,50 @@
+{
+  "upstream_revision": "af2a86d666c35304257c2fa7e15180e1fbcabb01",
+  "source_url": "https://raw.githubusercontent.com/kundajelab/DART-Eval/af2a86d666c35304257c2fa7e15180e1fbcabb01/src/dnalm_bench/task_1_paired_control/zero_shot/evaluators.py",
+  "source_sha256": "faafee81ac286de57b5565baa9ccaf1b49937fec19848fc264e791cef748b38a",
+  "locator": "ZeroShotPairedControlEvaluator.evaluate",
+  "execution_method": "Unedited method extracted with AST and executed in isolated environment; only inference and batching replaced by supplied synthetic scalar scores. No source code redistributed.",
+  "python": "3.11.13",
+  "numpy": "1.26.4",
+  "scipy": "1.12.0",
+  "checked_at": "2026-09-20",
+  "scores": [
+    -3.125,
+    -2.125,
+    -1.125,
+    -0.125,
+    0.875,
+    1.875,
+    2.875,
+    3.875,
+    4.875,
+    5.875,
+    6.875,
+    7.875
+  ],
+  "controls": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "expected_metrics": {
+    "acc": 0.6666666666666666,
+    "pval": 0.03857421875,
+    "signed_rank_sum": 62.0,
+    "mean_diff": 2.375,
+    "q05_diff": -2.575,
+    "q25_diff": -0.375,
+    "median_diff": 2.375,
+    "q75_diff": 5.125,
+    "q95_diff": 7.324999999999999
+  }
+}

@@ -1,0 +1,337 @@
+{
+  "schema_version": "1.0",
+  "evaluation_claim": "local_evaluation_not_paper_reproduction",
+  "data_verification": [
+    "pinned_source_bytes",
+    "local_bytes_hashed_not_independently_source_verified"
+  ],
+  "protocols": {
+    "flip2-fitness-v1": {
+      "protocol_version": "1",
+      "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6",
+      "required_hashes": [
+        "source_sha256",
+        "source_csv_sha256"
+      ],
+      "performance_metrics": [
+        "spearman",
+        "ndcg"
+      ],
+      "metrics": {
+        "spearman": {
+          "minimum": -1,
+          "maximum": 1,
+          "integer": false
+        },
+        "ndcg": {
+          "minimum": 0,
+          "maximum": 1,
+          "integer": false
+        },
+        "n": {
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "integer": true
+        }
+      },
+      "methods_by_execution": {
+        "imported_predictions": [
+          "imported_predictions"
+        ],
+        "imported_embeddings": [
+          "frozen_embedding_probe"
+        ],
+        "local_adapter": [
+          "prefitted_or_zero_shot_adapter",
+          "adapter_fit",
+          "frozen_embedding_probe"
+        ]
+      },
+      "datasets": {
+        "flip2-amylase-one-to-many": {
+          "verified_provenance": {
+            "source_csv_sha256": "6a7bcdd9cf7cc52b01cd4f364e568f333c1ba2809fac49d17d4933db29aa5c7b"
+          },
+          "denominator": 488
+        },
+        "flip2-amylase-close-to-far": {
+          "verified_provenance": {
+            "source_csv_sha256": "d04c2fcb7421ffb6ac8b776ed938f7a97c81f8de57f71257d34d9d3722435297"
+          },
+          "denominator": 1924
+        },
+        "flip2-amylase-far-to-close": {
+          "verified_provenance": {
+            "source_csv_sha256": "de03ddc2fbee9ce293d92ea81bfbd47bdc2b9a037e84649b02c768d34a5f8715"
+          },
+          "denominator": 1782
+        },
+        "flip2-amylase-by-mutation": {
+          "verified_provenance": {
+            "source_csv_sha256": "1bbbbdeea914ae21684be3d6a4c59d1dee68ad9d17a2894d56563b606092e0cc"
+          },
+          "denominator": 702
+        },
+        "flip2-ired-two-to-many": {
+          "verified_provenance": {
+            "source_csv_sha256": "55425e46a5be5b50fb79dbf8be677422355969da065241e11325a61348e19fae"
+          },
+          "denominator": 4178
+        },
+        "flip2-nucb-two-to-many": {
+          "verified_provenance": {
+            "source_csv_sha256": "7e507fe0025a776163df0f870b02d5a22c81b1e4ec1d2412b74bff5b21621d40"
+          },
+          "denominator": 48304
+        },
+        "flip2-trpb-one-to-many": {
+          "verified_provenance": {
+            "source_csv_sha256": "9b554e05fd1ac4baa2ea4fea88d5a33a16c56487ead358fbde0d9bad59def7a1"
+          },
+          "denominator": 227918
+        },
+        "flip2-trpb-two-to-many": {
+          "verified_provenance": {
+            "source_csv_sha256": "99bc898dcc5101c8b5f215b2499ce538def90fe6e0d969e6275486fffd6db8fd"
+          },
+          "denominator": 217507
+        },
+        "flip2-trpb-by-position": {
+          "verified_provenance": {
+            "source_csv_sha256": "299c0bab703781152273d38370a8dbee7e07ef128527753b96b90012ac1e4a45"
+          },
+          "denominator": 188852
+        },
+        "flip2-hydro-three-to-many": {
+          "verified_provenance": {
+            "source_csv_sha256": "24f704e5c0068bc59a068f6798d0368989e919d55ac002fefb5ab43e7b3717a6"
+          },
+          "denominator": 23485
+        },
+        "flip2-hydro-low-to-high": {
+          "verified_provenance": {
+            "source_csv_sha256": "7086f5ad7313c3e572b335d18c378c5bc38fa5ab737820ebed3144749ede4415"
+          },
+          "denominator": 12468
+        },
+        "flip2-hydro-to-p06241": {
+          "verified_provenance": {
+            "source_csv_sha256": "e614ce2cc445732aceca75b9f7db44f6cb2fadd445184ff6748325adb1dd32ec"
+          },
+          "denominator": 9972
+        },
+        "flip2-hydro-to-p0a9x9": {
+          "verified_provenance": {
+            "source_csv_sha256": "dcf8cf46833731f1917a9e86ceab5218c555a615a1e5fd76911fd5944b438e25"
+          },
+          "denominator": 8500
+        },
+        "flip2-hydro-to-p01053": {
+          "verified_provenance": {
+            "source_csv_sha256": "371d24f309f0c9e2087e874125b89a76b7ee8281a6860edb3c418d3edbdbd401"
+          },
+          "denominator": 6463
+        },
+        "flip2-rhomax-by-wild-type": {
+          "verified_provenance": {
+            "source_csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f"
+          },
+          "denominator": 184
+        },
+        "flip2-pdz3-single-to-double": {
+          "verified_provenance": {
+            "source_csv_sha256": "e06fafc6a2b88e835cf9d64952751952150908edeafb205e2f53f0bba54afbd8"
+          },
+          "denominator": 579
+        }
+      }
+    },
+    "mrnabench-sample-mrl-v1": {
+      "protocol_version": "1",
+      "upstream_revision": "74f96b8e6ae9f41cc3cccff089d826a62d5604b8",
+      "required_hashes": [
+        "source_sha256",
+        "split_sha256"
+      ],
+      "performance_metrics": [
+        "mse",
+        "pearson",
+        "spearman"
+      ],
+      "metrics": {
+        "mse": {
+          "minimum": 0,
+          "maximum": null,
+          "integer": false
+        },
+        "pearson": {
+          "minimum": -1,
+          "maximum": 1,
+          "integer": false
+        },
+        "spearman": {
+          "minimum": -1,
+          "maximum": 1,
+          "integer": false
+        }
+      },
+      "methods_by_execution": {
+        "imported_predictions": [
+          "imported_predictions"
+        ],
+        "imported_embeddings": [
+          "frozen_embedding_probe"
+        ],
+        "local_adapter": [
+          "prefitted_or_zero_shot_adapter",
+          "adapter_fit",
+          "frozen_embedding_probe"
+        ]
+      },
+      "datasets": {
+        "mrnabench-sample-mrl-egfp-target_mrl_egfp_m1pseudo": {
+          "verified_provenance": {
+            "source_sha256": "c007cf66cfcea0807e90baf92ac24b6078102729ad050100bde00f7f0ab4c9b3",
+            "split_sha256": "021f745c516276cb6002e17de2a81d687b52ef091aeffbe32c35a72a5915868d",
+            "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95"
+          },
+          "denominator": 47769
+        },
+        "mrnabench-sample-mrl-egfp-target_mrl_egfp_pseudo": {
+          "verified_provenance": {
+            "source_sha256": "c007cf66cfcea0807e90baf92ac24b6078102729ad050100bde00f7f0ab4c9b3",
+            "split_sha256": "d3b830ad8f30e1ad2c1b3c4bd65971963048824ff41f06fd163c0c2754cdcb7f",
+            "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95"
+          },
+          "denominator": 47771
+        },
+        "mrnabench-sample-mrl-egfp-target_mrl_egfp_unmod": {
+          "verified_provenance": {
+            "source_sha256": "c007cf66cfcea0807e90baf92ac24b6078102729ad050100bde00f7f0ab4c9b3",
+            "split_sha256": "d3b830ad8f30e1ad2c1b3c4bd65971963048824ff41f06fd163c0c2754cdcb7f",
+            "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95"
+          },
+          "denominator": 47771
+        },
+        "mrnabench-sample-mrl-mcherry-target_mrl_mcherry": {
+          "verified_provenance": {
+            "source_sha256": "33effdbea1df3b5ed10164632a4fb644eb58ec8b1acec9d6054dfeaf83ea4219",
+            "split_sha256": "946fe05e490bab8d298650719ab4b2fb80e6fa4a055c656805bbaa526d60029b",
+            "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95"
+          },
+          "denominator": 28770
+        },
+        "mrnabench-sample-mrl-designed-target_mrl_designed": {
+          "verified_provenance": {
+            "source_sha256": "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+            "split_sha256": "00e287b18ba4e90cb682af6e3fcdfc97e07f2b4b25d13265cd0eca37996536a2",
+            "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95"
+          },
+          "denominator": 15003
+        },
+        "mrnabench-sample-mrl-varying-target_mrl_varying_length": {
+          "verified_provenance": {
+            "source_sha256": "b057dc51689a8a6482f7e58458116cc970078888307de95942c0716ec50eda50",
+            "split_sha256": "0208b3784723cbdbb8bedcaa6debb741024876c056c04b87c834a35d2411d26d",
+            "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95"
+          },
+          "denominator": 15980
+        }
+      }
+    },
+    "dart-eval-task1-zero-shot-v1": {
+      "protocol_version": "1",
+      "upstream_revision": "af2a86d666c35304257c2fa7e15180e1fbcabb01",
+      "required_hashes": [
+        "source_sha256"
+      ],
+      "performance_metrics": [
+        "acc",
+        "pval",
+        "signed_rank_sum",
+        "mean_diff",
+        "q05_diff",
+        "q25_diff",
+        "median_diff",
+        "q75_diff",
+        "q95_diff"
+      ],
+      "metrics": {
+        "acc": {
+          "minimum": 0,
+          "maximum": 1,
+          "integer": false
+        },
+        "pval": {
+          "minimum": 0,
+          "maximum": 1,
+          "integer": false
+        },
+        "signed_rank_sum": {
+          "minimum": 0,
+          "maximum": null,
+          "integer": false
+        },
+        "mean_diff": {
+          "minimum": null,
+          "maximum": null,
+          "integer": false
+        },
+        "q05_diff": {
+          "minimum": null,
+          "maximum": null,
+          "integer": false
+        },
+        "q25_diff": {
+          "minimum": null,
+          "maximum": null,
+          "integer": false
+        },
+        "median_diff": {
+          "minimum": null,
+          "maximum": null,
+          "integer": false
+        },
+        "q75_diff": {
+          "minimum": null,
+          "maximum": null,
+          "integer": false
+        },
+        "q95_diff": {
+          "minimum": null,
+          "maximum": null,
+          "integer": false
+        },
+        "n": {
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "integer": true
+        },
+        "n_pairs": {
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "integer": true
+        },
+        "pairs_denominator": {
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "integer": true
+        }
+      },
+      "methods_by_execution": {
+        "imported_predictions": [
+          "imported_predictions"
+        ],
+        "local_adapter": [
+          "prefitted_or_zero_shot_adapter"
+        ]
+      },
+      "datasets": {
+        "dart-eval-task1-encode-ccre": {
+          "verified_provenance": {},
+          "denominator": null
+        }
+      }
+    }
+  }
+}

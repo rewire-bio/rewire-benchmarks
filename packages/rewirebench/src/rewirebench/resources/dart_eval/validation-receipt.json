@@ -1,0 +1,40 @@
+{
+  "checked_at": "2026-09-20T14:39:23.683422+00:00",
+  "review_method": "automated native tests and CLI execution",
+  "claim": "Synthetic software validation only; official biological input and published result reproduction not performed",
+  "upstream_revision": "af2a86d666c35304257c2fa7e15180e1fbcabb01",
+  "commands": [
+    "python -m rewirebench.cli prepare dart-eval-task1-zero-shot-v1 --source demo --output <new-dir>/prepared",
+    "python -m rewirebench.cli run --prepared <new-dir>/prepared --adapter rewirebench.adapters.sequence:SeededRandomScore --output <new-dir>/run --model-name \"Seeded random software smoke control\""
+  ],
+  "environment": {
+    "python": "3.11.13",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "h5py": "3.14.0",
+    "system": "Darwin",
+    "architecture": "arm64"
+  },
+  "scope": "smoke",
+  "completion": "partial",
+  "coverage": {
+    "denominator": 24,
+    "scored": 24,
+    "unscored": 0
+  },
+  "pair_coverage": {
+    "denominator": 12,
+    "scored": 12,
+    "selected": 12,
+    "unscored": 0
+  },
+  "prepared_sha256": "def9e5c1682eb73725409080029090edc2ebf89aaec27264d2ec7319e39f76f2",
+  "predictions_sha256": "de3866f1f8b6b92f5574ff9d77095bde618a889fbd2c290f3290c6d4f37fdbcd",
+  "demo_sha256": "99f19079836e616829c4254d5f79debb17dfc7b86e9d56a84842fa545380a94e",
+  "statistical_reference_sha256": "883bc3a5bfb2552c4c71cade2d00110434ab6e8dc3a326af19a51d616519fb48",
+  "tests": {
+    "command": "python -m pytest packages/rewirebench/tests/test_sdk_dart_eval.py -q",
+    "passed": 22
+  },
+  "container_execution": "not tested by this receipt"
+}

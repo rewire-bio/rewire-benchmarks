@@ -1,0 +1,79 @@
+{
+  "upstream_revision": "af2a86d666c35304257c2fa7e15180e1fbcabb01",
+  "retrieved_at": "2026-09-20",
+  "files": [
+    {
+      "path": "demo.json",
+      "source_url": null,
+      "sha256": "99f19079836e616829c4254d5f79debb17dfc7b86e9d56a84842fa545380a94e",
+      "origin": "locally generated synthetic fixture; no biological evidence"
+    },
+    {
+      "path": "statistical-reference.json",
+      "source_url": null,
+      "sha256": "883bc3a5bfb2552c4c71cade2d00110434ab6e8dc3a326af19a51d616519fb48",
+      "origin": "locally generated synthetic fixture; no biological evidence"
+    },
+    {
+      "path": "upstream-evaluator-reference.json",
+      "source_url": null,
+      "sha256": "688fa442aa1f1ed7157521b18074178c7d830543354a917851e38662d852f9d1",
+      "origin": "Synthetic numerical output from pinned upstream evaluator, no biological evidence or source code"
+    }
+  ],
+  "official_dataset": {
+    "synapse_id": "syn64314109",
+    "version": 1,
+    "file_handle_id": "173859510",
+    "sha256": null,
+    "access_check": "Anonymous file and filehandles endpoints returned HTTP 403 on 2026-09-20. Metadata accessible. Authenticated download required; source content not verified."
+  },
+  "limitations": [
+    "Data reuse licence not established; consult Synapse and ENCODE terms.",
+    "No full dataset or public-model inference executed."
+  ],
+  "access_checks": [
+    {
+      "synapse_id": "syn62153297",
+      "version": 1,
+      "description": "DNABERT-2 zero-shot scores.tsv",
+      "status": "anonymous_file_HTTP_403",
+      "checked_at": "2026-09-20"
+    },
+    {
+      "synapse_id": "syn62153294",
+      "version": 1,
+      "description": "DNABERT-2 zero-shot metrics.json",
+      "status": "anonymous_file_HTTP_403",
+      "checked_at": "2026-09-20"
+    }
+  ],
+  "statistics_source": {
+    "source_url": "https://raw.githubusercontent.com/scipy/scipy/v1.12.0/scipy/stats/_morestats.py",
+    "sha256": "0283c554fc1c046cfc36117365132f0c81fe3b7bfef7efc302d496c67658cdc5",
+    "locator": "wilcoxon function; method=auto, alternative=greater, zero_method=wilcox, correction=False"
+  },
+  "upstream_sources": [
+    {
+      "source_url": "https://raw.githubusercontent.com/kundajelab/DART-Eval/af2a86d666c35304257c2fa7e15180e1fbcabb01/src/dnalm_bench/task_1_paired_control/zero_shot/evaluators.py",
+      "sha256": "faafee81ac286de57b5565baa9ccaf1b49937fec19848fc264e791cef748b38a"
+    },
+    {
+      "source_url": "https://raw.githubusercontent.com/kundajelab/DART-Eval/af2a86d666c35304257c2fa7e15180e1fbcabb01/src/dnalm_bench/task_1_paired_control/components.py",
+      "sha256": "17790fb21f21a2a325ca0fdf076a58cda820e159729555be6e8fa47146796068"
+    },
+    {
+      "source_url": "https://raw.githubusercontent.com/kundajelab/DART-Eval/af2a86d666c35304257c2fa7e15180e1fbcabb01/src/dnalm_bench/task_1_paired_control/export.py",
+      "sha256": "5bae3d87c9f8b1cc6dae55d671b300dafebb5738ce557b49e6ab726a81cd15d1"
+    },
+    {
+      "source_url": "https://raw.githubusercontent.com/kundajelab/DART-Eval/af2a86d666c35304257c2fa7e15180e1fbcabb01/src/dnalm_bench/task_1_paired_control/zero_shot/encode_ccre/dnabert2.py",
+      "sha256": "a16dd3c23551aaf99eb3df6515df334d714c69c6f6fb08fc21370308ee058088"
+    },
+    {
+      "source_url": "https://raw.githubusercontent.com/kundajelab/DART-Eval/af2a86d666c35304257c2fa7e15180e1fbcabb01/environment.yml",
+      "sha256": "935dd19ab1c5ffa7c45af1299407a6318e6c7891305229e1b81d9d6f63493eba"
+    }
+  ],
+  "code_licensing": "No explicit software licence found in the pinned DART-Eval repository tree. Upstream code used only for local parity checks; no upstream implementation redistributed."
+}

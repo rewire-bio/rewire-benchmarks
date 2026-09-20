@@ -1,6 +1,6 @@
 [project]
 name = "rewirebench"
-version = "0.3.0"
+version = "0.4.0"
 description = "Shared machinery for rewire.it benchmarks: grouping, splits, metrics, result schema"
 requires-python = ">=3.11"
 dependencies = ["numpy>=1.26", "scikit-learn>=1.4", "scipy>=1.11"]
@@ -16,5 +16,6 @@ packages = ["src/rewirebench"]
 rewirebench = "rewirebench.cli:main"
 
 [project.optional-dependencies]
+sequence = ["pandas>=2,<3", "pyarrow>=17,<24", "h5py>=3.10,<4"]
 dnabert2 = ["torch==2.2.2", "transformers==4.29.2", "einops==0.6.1", "safetensors==0.7.0", "numpy==1.26.4"]
 esm = ["fair-esm==2.0.0", "torch==2.2.2", "numpy==1.26.4"]

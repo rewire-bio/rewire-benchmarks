@@ -1,0 +1,126 @@
+{
+  "numpy": "1.26.4",
+  "scipy": "1.12.0",
+  "source_url": "https://github.com/scipy/scipy/blob/v1.12.0/scipy/stats/_morestats.py",
+  "validation": "Executed scipy.stats.wilcoxon(diffs, alternative=greater) in isolated upstream-version environment; synthetic inputs only",
+  "cases": [
+    {
+      "case": "zero_and_ties",
+      "differences": [
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "signed_rank_sum": 55.5,
+      "pval": 0.02256365863631257
+    },
+    {
+      "case": "fractional_tied_ranks",
+      "differences": [
+        1,
+        1,
+        -1,
+        2,
+        -2
+      ],
+      "signed_rank_sum": 8.5,
+      "pval": 0.5
+    },
+    {
+      "case": "all_positive",
+      "differences": [
+        1,
+        2,
+        3
+      ],
+      "signed_rank_sum": 6.0,
+      "pval": 0.125
+    },
+    {
+      "case": "all_negative",
+      "differences": [
+        -1,
+        -2,
+        -3
+      ],
+      "signed_rank_sum": 0.0,
+      "pval": 1.0
+    },
+    {
+      "case": "large_ties",
+      "differences": [
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0,
+        1,
+        -1,
+        2,
+        -2,
+        0
+      ],
+      "signed_rank_sum": 588.0,
+      "pval": 0.5
+    }
+  ]
+}

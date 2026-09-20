@@ -1,0 +1,122 @@
+{
+  "checked_at": "2026-09-20",
+  "method": "automated execution against pinned upstream Python classes, isolated outside distributed package",
+  "claim": "Small CPU probe and metric parity only; not reproduction of published model results",
+  "upstream_revision": "74f96b8e6ae9f41cc3cccff089d826a62d5604b8",
+  "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95",
+  "tolerance_absolute": 1e-09,
+  "python": "3.11.13",
+  "sklearn": "1.9.1",
+  "numpy": "1.26.4",
+  "scipy": "1.17.1",
+  "checks": [
+    {
+      "dataset": "egfp",
+      "target": "target_mrl_egfp_m1pseudo",
+      "source_sha256": "c007cf66cfcea0807e90baf92ac24b6078102729ad050100bde00f7f0ab4c9b3",
+      "source_rows": "first 80 original row positions",
+      "metrics": {
+        "mse": 2.5460585785334247,
+        "pearson": -0.3818157656511278,
+        "spearman": -0.44755244755244755
+      },
+      "max_absolute_difference": 5.551115123125783e-17,
+      "split_membership_match": true,
+      "canonical_source_count": 318468,
+      "canonical_eligible_count": 318459,
+      "canonical_test_count": 47769,
+      "canonical_split_sha256": "021f745c516276cb6002e17de2a81d687b52ef091aeffbe32c35a72a5915868d",
+      "passed": true
+    },
+    {
+      "dataset": "egfp",
+      "target": "target_mrl_egfp_pseudo",
+      "source_sha256": "c007cf66cfcea0807e90baf92ac24b6078102729ad050100bde00f7f0ab4c9b3",
+      "source_rows": "first 80 original row positions",
+      "metrics": {
+        "mse": 1.2687012856823032,
+        "pearson": -0.22142623472076112,
+        "spearman": -0.18881118881118883
+      },
+      "max_absolute_difference": 1.1102230246251565e-15,
+      "split_membership_match": true,
+      "canonical_source_count": 318468,
+      "canonical_eligible_count": 318468,
+      "canonical_test_count": 47771,
+      "canonical_split_sha256": "d3b830ad8f30e1ad2c1b3c4bd65971963048824ff41f06fd163c0c2754cdcb7f",
+      "passed": true
+    },
+    {
+      "dataset": "egfp",
+      "target": "target_mrl_egfp_unmod",
+      "source_sha256": "c007cf66cfcea0807e90baf92ac24b6078102729ad050100bde00f7f0ab4c9b3",
+      "source_rows": "first 80 original row positions",
+      "metrics": {
+        "mse": 2.8356556114427893,
+        "pearson": -0.36950259497539567,
+        "spearman": -0.27272727272727276
+      },
+      "max_absolute_difference": 8.881784197001252e-16,
+      "split_membership_match": true,
+      "canonical_source_count": 318468,
+      "canonical_eligible_count": 318468,
+      "canonical_test_count": 47771,
+      "canonical_split_sha256": "d3b830ad8f30e1ad2c1b3c4bd65971963048824ff41f06fd163c0c2754cdcb7f",
+      "passed": true
+    },
+    {
+      "dataset": "mcherry",
+      "target": "target_mrl_mcherry",
+      "source_sha256": "33effdbea1df3b5ed10164632a4fb644eb58ec8b1acec9d6054dfeaf83ea4219",
+      "source_rows": "first 80 original row positions",
+      "metrics": {
+        "mse": 1.226410460072288,
+        "pearson": 0.5793419464485101,
+        "spearman": 0.4685314685314686
+      },
+      "max_absolute_difference": 4.440892098500626e-15,
+      "split_membership_match": true,
+      "canonical_source_count": 191797,
+      "canonical_eligible_count": 191797,
+      "canonical_test_count": 28770,
+      "canonical_split_sha256": "946fe05e490bab8d298650719ab4b2fb80e6fa4a055c656805bbaa526d60029b",
+      "passed": true
+    },
+    {
+      "dataset": "designed",
+      "target": "target_mrl_designed",
+      "source_sha256": "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+      "source_rows": "first 80 original row positions",
+      "metrics": {
+        "mse": 2.420731821219385,
+        "pearson": -0.14636779240708947,
+        "spearman": 0.21678321678321683
+      },
+      "max_absolute_difference": 1.3322676295501878e-15,
+      "split_membership_match": true,
+      "canonical_source_count": 100017,
+      "canonical_eligible_count": 100017,
+      "canonical_test_count": 15003,
+      "canonical_split_sha256": "00e287b18ba4e90cb682af6e3fcdfc97e07f2b4b25d13265cd0eca37996536a2",
+      "passed": true
+    },
+    {
+      "dataset": "varying",
+      "target": "target_mrl_varying_length",
+      "source_sha256": "b057dc51689a8a6482f7e58458116cc970078888307de95942c0716ec50eda50",
+      "source_rows": "first 80 original row positions",
+      "metrics": {
+        "mse": 0.3898530863563356,
+        "pearson": 0.11831332881527529,
+        "spearman": 0.21678321678321683
+      },
+      "max_absolute_difference": 1.1102230246251565e-16,
+      "split_membership_match": true,
+      "canonical_source_count": 106530,
+      "canonical_eligible_count": 106530,
+      "canonical_test_count": 15980,
+      "canonical_split_sha256": "0208b3784723cbdbb8bedcaa6debb741024876c056c04b87c834a35d2411d26d",
+      "passed": true
+    }
+  ]
+}

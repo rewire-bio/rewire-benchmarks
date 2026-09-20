@@ -76,6 +76,11 @@ def generate(environment):
     command = ["uv", "export", "--locked", "--no-dev", "--package", "rewirebench", "--extra", environment,
                "--no-emit-workspace", "--format", "requirements-txt"]
     exported = subprocess.check_output(command, cwd=ROOT, text=True)
+    if environment == "sequence":
+        if any(name in exported for name in ("torch==", "nvidia-", "triton==")):
+            raise ValueError("Sequence environment must not acquire model framework dependencies")
+        (ROOT / "containers" / "sequence.lock.txt").write_text(exported)
+        return
     blocks = re.split(r"(?m)(?=^[A-Za-z0-9][A-Za-z0-9_.-]*(?:==| @ ))", exported)[1:]
     output, names = [], set()
     for block in blocks:
@@ -100,5 +105,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.verify_upstream:
         verify()
-    for environment in ("esm", "dnabert2"):
+    for environment in ("esm", "dnabert2", "sequence"):
         generate(environment)

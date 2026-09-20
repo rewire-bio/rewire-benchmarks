@@ -16,6 +16,7 @@ from pathlib import Path
 
 from rewirebench.provenance import PUBLIC_FIELDS, is_digest
 from rewirebench.sdk import LOCAL_COPY_PROTOCOLS, LOCAL_EVALUATION_CLAIM
+from rewirebench.sequence_submission import SEQUENCE_PROTOCOLS, validate_sequence_bundle
 
 DEFAULT_ENDPOINT = "https://benchmarks.rewire.it/api/trpc"
 
@@ -38,7 +39,7 @@ MFASS_PERFORMANCE_METRICS = MFASS_METRICS - {"n", "positives", "prevalence", "ca
 PROTEINGYM_METRICS = frozenset({"Spearman", "AUC", "MCC", "NDCG", "Top_recall"})
 SUPPORTED_PROTOCOLS = frozenset({
     "mfass-v2", "mfass-v2-frozen-encoder", "proteingym-v1.3-dms-substitutions",
-    *LOCAL_COPY_PROTOCOLS,
+    *LOCAL_COPY_PROTOCOLS, *SEQUENCE_PROTOCOLS,
 })
 
 
@@ -75,6 +76,9 @@ def _validate_metrics(bundle):
     protocol = bundle["protocol_id"]
     if protocol not in SUPPORTED_PROTOCOLS:
         raise ValueError("Unsupported protocol for SDK submission")
+    if protocol in SEQUENCE_PROTOCOLS:
+        validate_sequence_bundle(bundle)
+        return
     if protocol in LOCAL_COPY_PROTOCOLS:
         _validate_local_copy_metrics(bundle)
         return
@@ -199,7 +203,7 @@ def _validate_bundle(bundle):
     if (
         not isinstance(bundle, dict)
         or not required.issubset(bundle)
-        or set(bundle) - required - {"data_verification", "evaluation_claim"}
+        or set(bundle) - required - {"data_verification", "evaluation_claim", "evaluation_method"}
     ):
         raise ValueError("Submit only the allowlisted bundle produced by rewirebench.export")
     if bundle.get("data_verification", "unreported") not in {
@@ -217,12 +221,14 @@ def _validate_bundle(bundle):
         or bundle["completion"] not in {"complete", "partial"}
         or bundle["review_status"] != "unreviewed_contribution"
         or bundle["independently_reproduced"] is not False
-        or bundle["execution_status"] not in {"imported_predictions", "local_adapter"}
+        or bundle["execution_status"] not in {"imported_predictions", "local_adapter", "imported_embeddings"}
     ):
         raise ValueError("Invalid bundle status; smoke tests cannot be submitted")
     for key in ("protocol_id", "protocol_version", "dataset_id"):
         if not isinstance(bundle[key], str) or not bundle[key].strip():
             raise ValueError(f"Missing {key}")
+    if bundle["protocol_id"] not in SEQUENCE_PROTOCOLS and ("evaluation_method" in bundle or (bundle["execution_status"] == "imported_embeddings" and bundle["protocol_id"] != "mfass-v2-frozen-encoder")):
+        raise ValueError("Sequence evaluation methods are not valid for this protocol")
     model = bundle["model"]
     if (
         not isinstance(model, dict)

@@ -31,7 +31,14 @@ PROTOCOLS = {
     "proteingym-v1.3-dms-substitutions": "proteingym",
     "tdc-admet-group-v1": "tdc_admet",
     "genomic-benchmarks-v2": "genomic_benchmarks",
+    "flip2-fitness-v1": "flip2",
+    "dart-eval-task1-zero-shot-v1": "dart_eval",
+    "mrnabench-sample-mrl-v1": "mrnabench",
 }
+
+SEQUENCE_PROTOCOLS = frozenset({
+    "flip2-fitness-v1", "dart-eval-task1-zero-shot-v1", "mrnabench-sample-mrl-v1",
+})
 
 LOCAL_COPY_PROTOCOLS = {"tdc-admet-group-v1", "genomic-benchmarks-v2"}
 LOCAL_EVALUATION_CLAIM = "local_evaluation_not_paper_reproduction"
@@ -56,6 +63,26 @@ def _plugin(protocol: str):
     if protocol not in PROTOCOLS:
         raise ValueError(f"Unsupported protocol {protocol!r}; choose {', '.join(PROTOCOLS)}")
     return importlib.import_module(f"rewirebench.protocols.{PROTOCOLS[protocol]}")
+
+
+def capabilities(protocol: str) -> dict:
+    """Execution permissions belong to the protocol, never to an adapter's claims."""
+    plugin = _plugin(protocol)
+    frozen = protocol == "mfass-v2-frozen-encoder"
+    defaults = {
+        "prediction_types": ["embedding" if frozen else "scalar"],
+        "allow_fit": protocol == "mfass-v2",
+        "allow_validation": False,
+        "embedding_kind": "paired" if frozen else None,
+    }
+    return copy.deepcopy(getattr(plugin, "CAPABILITIES", defaults))
+
+
+def describe(protocol: str) -> dict:
+    """Inspect supported inputs and execution rules without obtaining model weights."""
+    plugin = _plugin(protocol)
+    details = plugin.describe() if hasattr(plugin, "describe") else {}
+    return {**details, "protocol_id": protocol, "capabilities": capabilities(protocol)}
 
 
 def _json(value: Any) -> str:
@@ -94,8 +121,11 @@ def _validate_prepared(data: dict) -> None:
     ids = [r.get("id") for r in rows]
     if not ids or any(not isinstance(i, str) or not i for i in ids) or len(set(ids)) != len(ids):
         raise ValueError("Prepared rows must have unique nonempty string IDs")
+    splits = {"train", "test"}
+    if capabilities(data["protocol_id"])["allow_validation"]:
+        splits.add("validation")
     for row in rows:
-        if row.get("split") not in {"train", "test"} or not isinstance(row.get("inputs"), dict):
+        if row.get("split") not in splits or not isinstance(row.get("inputs"), dict):
             raise ValueError("Invalid prepared split or inputs")
         target = row.get("target")
         if not isinstance(target, numbers.Real) or not math.isfinite(target):
@@ -197,6 +227,54 @@ def read_predictions(path: str | Path) -> dict:
     return result
 
 
+def read_embeddings(path: str | Path) -> dict:
+    """Read keyed JSON vectors or NPZ {ids, embeddings}; pickle is never enabled."""
+    path = Path(path)
+    if path.suffix == ".json":
+        return read_predictions(path)
+    if path.suffix != ".npz":
+        raise ValueError("Embeddings require keyed JSON or NPZ with ids and embeddings arrays")
+    import numpy as np
+
+    with np.load(path, allow_pickle=False) as arrays:
+        if set(arrays.files) != {"ids", "embeddings"}:
+            raise ValueError("NPZ must contain only ids and embeddings")
+        ids, vectors = arrays["ids"], arrays["embeddings"]
+        if ids.ndim != 1 or ids.dtype.kind != "U" or vectors.ndim != 2:
+            raise ValueError("NPZ requires Unicode IDs and a two-dimensional numeric matrix")
+        if len(ids) != len(vectors) or len(set(ids.tolist())) != len(ids):
+            raise ValueError("Embedding IDs must be unique and align with matrix rows")
+        if vectors.dtype.kind not in "fiu" or not np.isfinite(vectors).all():
+            raise ValueError("Embedding vectors must contain finite numeric values")
+        return {str(ident): vector.tolist() for ident, vector in zip(ids, vectors, strict=True)}
+
+
+def _embedding_predictions(data: dict, values: Mapping) -> dict:
+    expected = {row["id"] for row in data["rows"]}
+    if not isinstance(values, Mapping) or set(values) != expected:
+        raise ValueError("Embedding probe requires exact complete train/validation/test IDs")
+    cap = capabilities(data["protocol_id"])
+    if "embedding" not in cap["prediction_types"]:
+        raise ValueError("Selected protocol does not support embeddings")
+    if cap["embedding_kind"] == "sequence":
+        import numpy as np
+
+        dimension = None
+        normalized = {}
+        for ident, vector in values.items():
+            vector = np.asarray(vector)
+            if vector.ndim != 1 or not vector.size:
+                raise ValueError("Sequence embeddings must be nonempty one-dimensional vectors")
+            if vector.dtype.kind not in "fiu" or not np.isfinite(vector).all():
+                raise ValueError("Embedding vectors must contain finite numbers")
+            if dimension is not None and len(vector) != dimension:
+                raise ValueError("Embedding dimensions must agree across all splits")
+            dimension = len(vector)
+            normalized[ident] = vector.tolist()
+        values = normalized
+    return _plugin(data["protocol_id"]).fit_embeddings(data, values)
+
+
 def _model_info(model: dict | None) -> dict:
     model = model or {}
     return {
@@ -207,12 +285,13 @@ def _model_info(model: dict | None) -> dict:
 
 def evaluate(
     prepared: dict | str | Path,
-    predictions: Mapping | str | Path,
+    predictions: Mapping | str | Path | None = None,
     *,
     output: str | Path,
     model: dict | None = None,
     allow_partial: bool = False,
     execution: dict | None = None,
+    embeddings: Mapping | str | Path | None = None,
 ) -> dict:
     """Score supplied predictions. Imported scores do not prove model execution."""
     if Path(output).exists():
@@ -220,6 +299,15 @@ def evaluate(
     start = time.perf_counter()
     data = _load(prepared, "prepared.json")
     _validate_prepared(data)
+    if (predictions is None) == (embeddings is None):
+        raise ValueError("Supply exactly one of predictions or embeddings")
+    if embeddings is not None:
+        vectors = read_embeddings(embeddings) if isinstance(embeddings, (str, Path)) else embeddings
+        predictions = _embedding_predictions(data, vectors)
+        execution = {
+            "mode": "imported_embeddings", "inference_seconds": None,
+            "prediction_type": "embedding", "fitting": "protocol_owned_probe",
+        }
     values = read_predictions(predictions) if isinstance(predictions, (str, Path)) else predictions
     expected = {row["id"] for row in data["rows"] if row["split"] == "test"}
     scores, failures = _checked_predictions(values, expected, partial=allow_partial)
@@ -310,6 +398,7 @@ def run(
     model: dict | None = None,
     batch_size: int = 32,
     allow_partial: bool = False,
+    prediction_type: str | None = None,
 ) -> dict:
     """Run caller-supplied Python code locally, then evaluate its outputs."""
     if Path(output).exists():
@@ -320,8 +409,17 @@ def run(
     _validate_prepared(data)
     start = time.perf_counter()
     train = [r for r in data["rows"] if r["split"] == "train"]
+    validation = [r for r in data["rows"] if r["split"] == "validation"]
     test = [r for r in data["rows"] if r["split"] == "test"]
-    embedded = data["protocol_id"] == "mfass-v2-frozen-encoder"
+    cap = capabilities(data["protocol_id"])
+    selected = prediction_type or (
+        "embedding" if cap["prediction_types"] == ["embedding"]
+        or (hasattr(adapter, "embed") and not hasattr(adapter, "predict")) else "scalar"
+    )
+    if selected not in cap["prediction_types"]:
+        raise ValueError("Selected prediction type is forbidden by this protocol")
+    embedded = selected == "embedding"
+    fitting = "none"
     if embedded:
         if not hasattr(adapter, "embed"):
             raise ValueError("Frozen encoder protocol requires adapter.embed(inputs)")
@@ -329,10 +427,22 @@ def run(
     else:
         if not hasattr(adapter, "predict"):
             raise ValueError("Scalar protocol requires adapter.predict(inputs)")
-        if hasattr(adapter, "fit"):
-            if data["protocol_id"] != "mfass-v2":
+        if hasattr(adapter, "fit") or hasattr(adapter, "fit_with_validation"):
+            if not cap["allow_fit"]:
                 raise ValueError("Fitting is forbidden by the selected zero-shot protocol")
-            adapter.fit(_inputs(train), [r["target"] for r in train])
+            if not train:
+                raise ValueError("Fitting requires a nonempty training split")
+            if hasattr(adapter, "fit_with_validation"):
+                if not cap["allow_validation"] or not validation:
+                    raise ValueError("Protocol does not provide permitted validation data")
+                adapter.fit_with_validation(
+                    _inputs(train), [r["target"] for r in train],
+                    _inputs(validation), [r["target"] for r in validation],
+                )
+                fitting = "train_fit_validation_selection"
+            else:
+                adapter.fit(_inputs(train), [r["target"] for r in train])
+                fitting = "train_only"
         rows, method = test, adapter.predict
     outputs = {}
     for offset in range(0, len(rows), batch_size):
@@ -344,14 +454,15 @@ def run(
             raise ValueError("Adapter returned duplicate IDs")
         outputs.update(values)
     if embedded:
-        if set(outputs) != {r["id"] for r in rows}:
-            raise ValueError("Embedding head requires complete train/test embeddings")
-        outputs = _plugin(data["protocol_id"]).fit_embeddings(data, outputs)
+        outputs = _embedding_predictions(data, outputs)
+        fitting = "protocol_owned_probe"
     execution = {
         "mode": "local_adapter",
         "adapter": type(adapter).__name__,
         "inference_and_fit_seconds": time.perf_counter() - start,
         "batch_size": batch_size,
+        "prediction_type": selected,
+        "fitting": fitting,
     }
     # Adapter declarations are local provenance, never automatic verified claims.
     declared = getattr(adapter, "provenance", None)
@@ -473,6 +584,14 @@ def export(report: dict | str | Path, *, output: str | Path) -> dict:
         # These protocols only hash a local copy; they cannot establish an
         # independently verified upstream split, including for old reports.
         bundle["data_verification"] = "local_bytes_hashed_not_independently_source_verified"
+    if data["protocol_id"] in SEQUENCE_PROTOCOLS:
+        bundle["evaluation_claim"] = LOCAL_EVALUATION_CLAIM
+        bundle["evaluation_method"] = (
+            "frozen_embedding_probe" if data["execution"].get("prediction_type") == "embedding"
+            else "adapter_fit" if data["execution"].get("fitting", "none") != "none"
+            else "imported_predictions" if data["execution"]["mode"] == "imported_predictions"
+            else "prefitted_or_zero_shot_adapter"
+        )
     _write(Path(output), bundle)
     _write(evidence_path, evidence)
     return bundle
