@@ -32,3 +32,19 @@ verified; pip must verify the complete wheel hash during installation.
 CI builds each environment on a separate runner, verifies CPU-only torch metadata
 and imports, and compares archived scoring output through native Python, Podman
 and Apptainer. Passing those checks does not claim public-model inference parity.
+
+## Sequence environment
+
+`sequence.lock.txt` exports the `sequence` extra from the same root `uv.lock`.
+It adds pandas, pyarrow and h5py with hashes, without PyTorch, CUDA, model weights
+or upstream assay files. Regenerate it with the same generator; no CPU wheel
+substitution is necessary for this environment. Each release CI matrix includes
+`sequence` alongside `core`, `esm` and `dnabert2`.
+
+`containers/parity.py --environment sequence` preserves the archived MFASS check
+and adds synthetic FLIP2 CSV, mRNABench parquet and DART HDF5 inputs. It runs the
+new protocol evaluators, two train-only embedding probes, a private scalar adapter
+and an imported-embedding check. All synthetic results remain partial/subset.
+`--compare native.json container.json` requires matching fields and scope, with
+absolute and relative numeric tolerance `1e-9`. These are implementation checks,
+not benchmark evidence or public-model inference claims.

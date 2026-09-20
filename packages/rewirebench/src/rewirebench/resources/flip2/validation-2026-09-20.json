@@ -1,0 +1,335 @@
+{
+  "verified_at": "2026-09-20",
+  "kind": "small_cpu_examples_and_source_integrity",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.11.13",
+  "numpy": "1.26.4",
+  "scipy": "1.17.1",
+  "scikit_learn": "1.9.1",
+  "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6",
+  "upstream_evaluator_sha256": "e4df0e547ab72bb659d7235e9a2e366bab6788002bfd73e3238bbf2fbc898313",
+  "upstream_execution": "AST-isolated metric expressions lines131,134,135 of pinned baselines/aggregate.py; not the upstream training pipeline",
+  "full_model_runs": false,
+  "splits": [
+    {
+      "dataset_id": "flip2-amylase-one-to-many",
+      "source_sha256": "03c42ab34e7ba9e420234d44980ae1215b66f8cfca605d344ebd29140df2b711",
+      "source_csv_sha256": "6a7bcdd9cf7cc52b01cd4f364e568f333c1ba2809fac49d17d4933db29aa5c7b",
+      "counts": {
+        "train": 2574,
+        "test": 488,
+        "validation": 644
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": -0.2380952380952381,
+        "ndcg": 0.8130832004698916,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": "Archived file has 2574 train, 644 validation and 488 test rows; paper Table 1 reports 412, 77 and 3217. No split inversion or correction is inferred. This evaluates the archived split, not the paper cohort."
+    },
+    {
+      "dataset_id": "flip2-amylase-close-to-far",
+      "source_sha256": "a72384ae67e424777d51f97c661268e1e83236575c78cfe862921ce664e50695",
+      "source_csv_sha256": "d04c2fcb7421ffb6ac8b776ed938f7a97c81f8de57f71257d34d9d3722435297",
+      "counts": {
+        "train": 1426,
+        "test": 1924,
+        "validation": 356
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": -0.11904761904761905,
+        "ndcg": 0.6222489663723906,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-amylase-far-to-close",
+      "source_sha256": "4af9f927432ee5f1e0b3a20f2f7b969aa778ba6d1f097409a73262be79fe80e8",
+      "source_csv_sha256": "de03ddc2fbee9ce293d92ea81bfbd47bdc2b9a037e84649b02c768d34a5f8715",
+      "counts": {
+        "test": 1782,
+        "train": 1539,
+        "validation": 385
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.6904761904761906,
+        "ndcg": 0.8440541503321991,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-amylase-by-mutation",
+      "source_sha256": "2e76acc9da3ef04a8ccecd8a3f631b84ee2e4e1f0cdea406f18153387b986d04",
+      "source_csv_sha256": "1bbbbdeea914ae21684be3d6a4c59d1dee68ad9d17a2894d56563b606092e0cc",
+      "counts": {
+        "train": 2403,
+        "validation": 601,
+        "test": 702
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": -0.2142857142857143,
+        "ndcg": 0.6209999341489246,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-ired-two-to-many",
+      "source_sha256": "84d31e6c86209868f3993877a928358023f3414b6a18db4933e8222a761c3485",
+      "source_csv_sha256": "55425e46a5be5b50fb79dbf8be677422355969da065241e11325a61348e19fae",
+      "counts": {
+        "train": 3746,
+        "test": 4178,
+        "validation": 662
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.5952380952380953,
+        "ndcg": 0.9506768971775232,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": "Archived file has 8586 rows; paper Table 1 total is 17143 although its split counts sum to 8586."
+    },
+    {
+      "dataset_id": "flip2-nucb-two-to-many",
+      "source_sha256": "9079cc5e2f880ecebfc51ecb8ec1e063b807a58e36ece4b739f98533ab9f1d96",
+      "source_csv_sha256": "7e507fe0025a776163df0f870b02d5a22c81b1e4ec1d2412b74bff5b21621d40",
+      "counts": {
+        "train": 2088,
+        "validation": 5367,
+        "test": 48304
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": -0.5773502691896258,
+        "ndcg": 0.4852962210803321,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": "Archived file has 2088 train, 5367 validation and 48304 test rows (55759 total); paper Table 1 reports 6982, 2027 and 48304 (and total55760). Source inconsistency retained."
+    },
+    {
+      "dataset_id": "flip2-trpb-one-to-many",
+      "source_sha256": "0a60dfff36601d4cb80005be4eb1f754163ecc88e961c3fbe505985d2d8de3ff",
+      "source_csv_sha256": "9b554e05fd1ac4baa2ea4fea88d5a33a16c56487ead358fbde0d9bad59def7a1",
+      "counts": {
+        "test": 227918,
+        "train": 304,
+        "validation": 76
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": -0.09523809523809526,
+        "ndcg": 0.799748977893952,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-trpb-two-to-many",
+      "source_sha256": "2676d06452f4f5dbd52cb5c8cad17d34c94ac8307bda581b527be208a3925ba5",
+      "source_csv_sha256": "99bc898dcc5101c8b5f215b2499ce538def90fe6e0d969e6275486fffd6db8fd",
+      "counts": {
+        "test": 217507,
+        "validation": 2158,
+        "train": 8633
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.4047619047619048,
+        "ndcg": 0.7609796019681314,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-trpb-by-position",
+      "source_sha256": "924a3f4942d89d123856905caac60c2a6739f2bdd92e879caafe9b5e3619cf17",
+      "source_csv_sha256": "299c0bab703781152273d38370a8dbee7e07ef128527753b96b90012ac1e4a45",
+      "counts": {
+        "train": 31557,
+        "validation": 7889,
+        "test": 188852
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.7142857142857144,
+        "ndcg": 0.8472068174440696,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-hydro-three-to-many",
+      "source_sha256": "76befc506e84e0ef0dd96fa4c8e5b41c6ec47e1664eccbf8804862f3ea97cb90",
+      "source_csv_sha256": "24f704e5c0068bc59a068f6798d0368989e919d55ac002fefb5ab43e7b3717a6",
+      "counts": {
+        "train": 1160,
+        "validation": 290,
+        "test": 23485
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.3333333333333334,
+        "ndcg": 0.9125806735811665,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-hydro-low-to-high",
+      "source_sha256": "30b89e3102fe67c1726ebc897a127221c89e224801d60ede509d1ca8dc7d612f",
+      "source_csv_sha256": "7086f5ad7313c3e572b335d18c378c5bc38fa5ab737820ebed3144749ede4415",
+      "counts": {
+        "train": 9974,
+        "validation": 2493,
+        "test": 12468
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": -0.14285714285714288,
+        "ndcg": 0.5420535043720375,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-hydro-to-p06241",
+      "source_sha256": "7b7cb9f0116e851b37c45f2cfaa826ebb5f98ef5b2012cf6f95b36d42a4926c9",
+      "source_csv_sha256": "e614ce2cc445732aceca75b9f7db44f6cb2fadd445184ff6748325adb1dd32ec",
+      "counts": {
+        "train": 11970,
+        "validation": 2993,
+        "test": 9972
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.0,
+        "ndcg": 0.6977447613083345,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-hydro-to-p0a9x9",
+      "source_sha256": "0eb15476975373a13b6e8faa44f71168d347ec364bd410beff9b9b929f6ae0f7",
+      "source_csv_sha256": "dcf8cf46833731f1917a9e86ceab5218c555a615a1e5fd76911fd5944b438e25",
+      "counts": {
+        "train": 13148,
+        "validation": 3287,
+        "test": 8500
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": -0.3333333333333334,
+        "ndcg": 0.7749590407900835,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-hydro-to-p01053",
+      "source_sha256": "99c116848319fcbe56f5fad654bc3c51fbc8c114b2d350425a60a811de43141c",
+      "source_csv_sha256": "371d24f309f0c9e2087e874125b89a76b7ee8281a6860edb3c418d3edbdbd401",
+      "counts": {
+        "train": 14778,
+        "validation": 3694,
+        "test": 6463
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.2142857142857143,
+        "ndcg": 0.721580723565656,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-rhomax-by-wild-type",
+      "source_sha256": "2d4bda268708bf2e161735bf77dd7ec503c233b42d4f4ab1abb3090eae6b6755",
+      "source_csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+      "counts": {
+        "validation": 116,
+        "test": 184,
+        "train": 584
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.5000000000000001,
+        "ndcg": 0.9632433316833914,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    },
+    {
+      "dataset_id": "flip2-pdz3-single-to-double",
+      "source_sha256": "a2183356eb4c758b7686cf5aaa0e12e707fb3e253e8b9f2840e4131038dc7948",
+      "source_csv_sha256": "e06fafc6a2b88e835cf9d64952751952150908edeafb205e2f53f0bba54afbd8",
+      "counts": {
+        "train": 124,
+        "validation": 31,
+        "test": 579
+      },
+      "selected_per_split": 8,
+      "metrics": {
+        "spearman": 0.14638501094227999,
+        "ndcg": 0.7883835084683983,
+        "n": 8
+      },
+      "upstream_metric_agreement_atol": 1e-12,
+      "scope": "smoke",
+      "complete": false,
+      "source_note": null
+    }
+  ]
+}

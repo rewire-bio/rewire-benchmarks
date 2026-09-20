@@ -1,0 +1,66 @@
+{
+  "retrieved_at": "2026-09-20",
+  "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95",
+  "code_revision": "74f96b8e6ae9f41cc3cccff089d826a62d5604b8",
+  "dataset_license": "unreported; Hugging Face card says unknown",
+  "upstream_code_license": "AGPL-3.0",
+  "implementation": "Independent implementation; upstream code is not bundled",
+  "datasets": {
+    "egfp": {
+      "url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-egfp.parquet",
+      "sha256": "c007cf66cfcea0807e90baf92ac24b6078102729ad050100bde00f7f0ab4c9b3",
+      "bytes": 37117316,
+      "targets": [
+        "target_mrl_egfp_m1pseudo",
+        "target_mrl_egfp_pseudo",
+        "target_mrl_egfp_unmod"
+      ]
+    },
+    "mcherry": {
+      "url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-mcherry.parquet",
+      "sha256": "33effdbea1df3b5ed10164632a4fb644eb58ec8b1acec9d6054dfeaf83ea4219",
+      "bytes": 19105239,
+      "targets": [
+        "target_mrl_mcherry"
+      ]
+    },
+    "designed": {
+      "url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+      "sha256": "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+      "bytes": 9778091,
+      "targets": [
+        "target_mrl_designed"
+      ]
+    },
+    "varying": {
+      "url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-varying.parquet",
+      "sha256": "b057dc51689a8a6482f7e58458116cc970078888307de95942c0716ec50eda50",
+      "bytes": 11582354,
+      "targets": [
+        "target_mrl_varying_length"
+      ]
+    }
+  },
+  "code": {
+    "mrna_bench/linear_probe/evaluator.py": {
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/evaluator.py",
+      "sha256": "098c66c32375f520da9b608b64884bc4bf8eb00149fad2cc2ac8cb4210591110"
+    },
+    "mrna_bench/linear_probe/linear_probe.py": {
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/linear_probe.py",
+      "sha256": "122d5df79d120f719cce15f22aea7bbb26c0dd7d48e8ce9025b54c99425ed0fd"
+    },
+    "mrna_bench/data_splitter/data_splitter.py": {
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/data_splitter/data_splitter.py",
+      "sha256": "d07db724189686af7ef5f3003905a2dec9284a0c9b2157fbd6fc7002f95fba28"
+    },
+    "mrna_bench/data_splitter/sklearn_split.py": {
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/data_splitter/sklearn_split.py",
+      "sha256": "00dc7a2cb943bf5864743750273d22f12925cfca2a8ac754ccd4d49e5370a2b5"
+    },
+    "mrna_bench/datasets/mrl_sample.py": {
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/datasets/mrl_sample.py",
+      "sha256": "e5f988c305285d0453b6bf2ba3c923bd33eb3e62352e086085ab5ba46300183e"
+    }
+  }
+}

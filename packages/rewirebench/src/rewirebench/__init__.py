@@ -16,6 +16,6 @@ __all__ = [
 ]
 
 # Local execution and explicit reviewed contribution workflow.
-from rewirebench.sdk import prepare, run, evaluate, export
+from rewirebench.sdk import prepare, run, evaluate, export, describe, read_embeddings
 from rewirebench.submission import submit
-__all__ += ["prepare", "run", "evaluate", "export", "submit"]
+__all__ += ["prepare", "run", "evaluate", "export", "submit", "describe", "read_embeddings"]

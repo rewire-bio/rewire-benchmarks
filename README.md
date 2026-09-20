@@ -150,12 +150,24 @@ reconciliation failure rather than as a quietly different number.
 
 ## Python SDK and private models
 
-The 0.3 SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit `submit`
-interfaces for corrected MFASS v2 and ProteinGym v1.3 zero-shot substitutions.
-Bring a Python adapter or import predictions from your own environment. Optional
-Podman and Apptainer environments use the same interfaces.
+The 0.4 SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit
+`submit` interfaces. Bring a private adapter, keyed predictions or frozen embeddings.
 
-Start with [the SDK guide](docs/sdk.md), [MFASS](docs/mfass.md),
-[ProteinGym](docs/proteingym.md) and [HPC packaging](docs/hpc.md).
+| Protocol | Supported scope | Instructions |
+|---|---|---|
+| MFASS v2 | Corrected assay pairs, scalar scores and frozen paired embeddings | [MFASS](docs/mfass.md) |
+| ProteinGym | v1.3 zero-shot DMS substitutions | [ProteinGym](docs/proteingym.md) |
+| Genomic Benchmarks | Nine sequence classification datasets | [Genomic Benchmarks](docs/genomic-benchmarks.md) |
+| TDC ADMET | 22 dataset-specific ADMET tasks | [TDC ADMET](docs/tdc-admet.md) |
+| FLIP2 | Seven datasets, 16 archived fitness splits, one split per evaluation | [FLIP2](docs/flip2.md) |
+| DART-Eval | Task 1 paired regulatory elements and controls; authenticated source access | [DART-Eval](docs/dart-eval.md) |
+| mRNABench Sample | Four MRL datasets, six targets scored separately | [mRNABench](docs/mrnabench.md) |
+
+Start with [the SDK guide](docs/sdk.md) and [HPC packaging](docs/hpc.md).
+Use `rewirebench inspect PROTOCOL_ID` for exact supported inputs and configurations.
+The new sequence environment adds parquet and HDF5 readers without downloading
+model weights. Podman and Apptainer use the same interfaces. A supported protocol
+is not a claim that every published evaluation has been reproduced.
+
 Submission goes to verified-email private review, never directly to publication.
 Production submissions remain disabled. Existing scientific artifacts are preserved.

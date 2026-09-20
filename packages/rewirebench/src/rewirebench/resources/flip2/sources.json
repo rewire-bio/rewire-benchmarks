@@ -1,0 +1,406 @@
+{
+  "schema_version": 1,
+  "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6",
+  "dataset_version": "zenodo-18433203-v3",
+  "retrieved_at": "2026-09-20",
+  "dataset_doi": "10.5281/zenodo.18433203",
+  "dataset_license": "CC-BY-4.0",
+  "code_license": "AFL-3.0; evaluator formulas independently implemented; no upstream code distributed",
+  "sources": [
+    {
+      "url": "https://flip.protein.properties/",
+      "sha256": "cd991ae6e76a5e84ea5449f91c4ed86ba4f57942682dc3c50d872c366bbbd4b7",
+      "role": "index.html"
+    },
+    {
+      "url": "https://flip.protein.properties/assets/FLIP_manuscipt.pdf",
+      "sha256": "d0e61ca27863c023adddcc225a3e4af1718f2e3fdfe3642bef89c24c93621a17",
+      "role": "paper.pdf"
+    },
+    {
+      "url": "https://zenodo.org/api/records/18433203",
+      "sha256": "b02ad8a94b7272b95a9b630a47ea0fc857cce4bc177de7ce80cd4fa6732e439f",
+      "role": "zenodo.json"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py",
+      "sha256": "e4df0e547ab72bb659d7235e9a2e366bab6788002bfd73e3238bbf2fbc898313",
+      "role": "baselines_aggregate.py"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/linear_models.py",
+      "sha256": "b9a0c656574b3b1be2fd2bad5ee56cac31af89fff6e9c45d1d87b559d82a34ed",
+      "role": "baselines_linear_models.py"
+    }
+  ],
+  "datasets": [
+    {
+      "dataset_id": "flip2-amylase-one-to-many",
+      "dataset": "amylase",
+      "split": "one_to_many",
+      "path": "amylase/one_to_many.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/amylase/one_to_many.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/amylase/one_to_many.csv.gz",
+      "sha256": "03c42ab34e7ba9e420234d44980ae1215b66f8cfca605d344ebd29140df2b711",
+      "csv_sha256": "6a7bcdd9cf7cc52b01cd4f364e568f333c1ba2809fac49d17d4933db29aa5c7b",
+      "mirror_sha256": "68672903e56c9e3c23bd65bb6dde0bb8e31f676a84e3c00df929d539bd48f766",
+      "zenodo_md5": "md5:97006840cd899e93fc011202b7d008c2",
+      "counts": {
+        "train": 2574,
+        "test": 488,
+        "validation": 644
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": "Archived file has 2574 train, 644 validation and 488 test rows; paper Table 1 reports 412, 77 and 3217. No split inversion or correction is inferred. This evaluates the archived split, not the paper cohort.",
+      "attribution_url": "https://flip.protein.properties/assets/splits/amylase/README.md",
+      "attribution_sha256": "7c4022e3c2619508b2d149b8facb90705099d68e7d181533d0a75c980d5c4692",
+      "original_license": "MIT"
+    },
+    {
+      "dataset_id": "flip2-amylase-close-to-far",
+      "dataset": "amylase",
+      "split": "close_to_far",
+      "path": "amylase/close_to_far.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/amylase/close_to_far.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/amylase/close_to_far.csv.gz",
+      "sha256": "a72384ae67e424777d51f97c661268e1e83236575c78cfe862921ce664e50695",
+      "csv_sha256": "d04c2fcb7421ffb6ac8b776ed938f7a97c81f8de57f71257d34d9d3722435297",
+      "mirror_sha256": "e5e5f2475c01434573f26497591bc27b499d73e9e3731ed5437d2dacfdcaef9c",
+      "zenodo_md5": "md5:0846c25b51a92e2c04e7b2d3edc504d2",
+      "counts": {
+        "train": 1426,
+        "test": 1924,
+        "validation": 356
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/amylase/README.md",
+      "attribution_sha256": "7c4022e3c2619508b2d149b8facb90705099d68e7d181533d0a75c980d5c4692",
+      "original_license": "MIT"
+    },
+    {
+      "dataset_id": "flip2-amylase-far-to-close",
+      "dataset": "amylase",
+      "split": "far_to_close",
+      "path": "amylase/far_to_close.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/amylase/far_to_close.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/amylase/far_to_close.csv.gz",
+      "sha256": "4af9f927432ee5f1e0b3a20f2f7b969aa778ba6d1f097409a73262be79fe80e8",
+      "csv_sha256": "de03ddc2fbee9ce293d92ea81bfbd47bdc2b9a037e84649b02c768d34a5f8715",
+      "mirror_sha256": "d64f440071ff4a6145502d069744692b9a614f3509c0db09953b302ac73cd488",
+      "zenodo_md5": "md5:2f0c9bfcaf9164afba66e5632b7fc53c",
+      "counts": {
+        "test": 1782,
+        "train": 1539,
+        "validation": 385
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/amylase/README.md",
+      "attribution_sha256": "7c4022e3c2619508b2d149b8facb90705099d68e7d181533d0a75c980d5c4692",
+      "original_license": "MIT"
+    },
+    {
+      "dataset_id": "flip2-amylase-by-mutation",
+      "dataset": "amylase",
+      "split": "by_mutation",
+      "path": "amylase/by_mutation.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/amylase/by_mutation.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/amylase/by_mutation.csv.gz",
+      "sha256": "2e76acc9da3ef04a8ccecd8a3f631b84ee2e4e1f0cdea406f18153387b986d04",
+      "csv_sha256": "1bbbbdeea914ae21684be3d6a4c59d1dee68ad9d17a2894d56563b606092e0cc",
+      "mirror_sha256": "20e1c9f6d993eb578161f899d491373d4854d218c4690317a445c924d2daa81b",
+      "zenodo_md5": "md5:3acf90685dae45a534c4f12bc9dec6b6",
+      "counts": {
+        "train": 2403,
+        "validation": 601,
+        "test": 702
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/amylase/README.md",
+      "attribution_sha256": "7c4022e3c2619508b2d149b8facb90705099d68e7d181533d0a75c980d5c4692",
+      "original_license": "MIT"
+    },
+    {
+      "dataset_id": "flip2-ired-two-to-many",
+      "dataset": "ired",
+      "split": "two_to_many",
+      "path": "ired/two_to_many.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/ired/two_to_many.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/ired/two_to_many.csv.gz",
+      "sha256": "84d31e6c86209868f3993877a928358023f3414b6a18db4933e8222a761c3485",
+      "csv_sha256": "55425e46a5be5b50fb79dbf8be677422355969da065241e11325a61348e19fae",
+      "mirror_sha256": "aa45a2f85fb1af87b6b0e86397b3f8f292a061dc574be2536673b5bd490b0e74",
+      "zenodo_md5": "md5:f514fa09bb8ba5fd092d9417ed8642d9",
+      "counts": {
+        "train": 3746,
+        "test": 4178,
+        "validation": 662
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": "Archived file has 8586 rows; paper Table 1 total is 17143 although its split counts sum to 8586.",
+      "attribution_url": "https://flip.protein.properties/assets/splits/ired/README.md",
+      "attribution_sha256": "6517ad1600c8705fe3a216a376f70d826571ccbf48f53cd570893502b34708e7",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-nucb-two-to-many",
+      "dataset": "nucb",
+      "split": "two_to_many",
+      "path": "nucb/two_to_many.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/nucb/two_to_many.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/nucb/two_to_many.csv.gz",
+      "sha256": "9079cc5e2f880ecebfc51ecb8ec1e063b807a58e36ece4b739f98533ab9f1d96",
+      "csv_sha256": "7e507fe0025a776163df0f870b02d5a22c81b1e4ec1d2412b74bff5b21621d40",
+      "mirror_sha256": "f4eb78afaec88dbb79233c8df0128981f4479ca3467dc252c10eff4304627339",
+      "zenodo_md5": "md5:cdedaadd57f2b148950b357e9f24c238",
+      "counts": {
+        "train": 2088,
+        "validation": 5367,
+        "test": 48304
+      },
+      "target_units": "activity bin",
+      "input_representation": "amino-acid sequence",
+      "source_note": "Archived file has 2088 train, 5367 validation and 48304 test rows (55759 total); paper Table 1 reports 6982, 2027 and 48304 (and total55760). Source inconsistency retained.",
+      "attribution_url": "https://flip.protein.properties/assets/splits/nucb/README.md",
+      "attribution_sha256": "4490bac832fc374a94f2e679d0e1a917330a9361587ed347b9cd2bab9a0ada3f",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-trpb-one-to-many",
+      "dataset": "trpb",
+      "split": "one_to_many",
+      "path": "trpb/one_to_many.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/trpb/one_to_many.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/trpb/one_to_many.csv.gz",
+      "sha256": "0a60dfff36601d4cb80005be4eb1f754163ecc88e961c3fbe505985d2d8de3ff",
+      "csv_sha256": "9b554e05fd1ac4baa2ea4fea88d5a33a16c56487ead358fbde0d9bad59def7a1",
+      "mirror_sha256": "98d05f5506d28f5f7e0661ebfecc2224a5b9d8fe5192e00a50d94202180e35c9",
+      "zenodo_md5": "md5:09f03ae0f5a9c33cc7be2ef508ba03af",
+      "counts": {
+        "test": 227918,
+        "train": 304,
+        "validation": 76
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/trpb/README.md",
+      "attribution_sha256": "389326e22d195a3aafa86927c4d03f8e3358ed7ba881b54a15e3ef5e27fee2a4",
+      "original_license": "CC0-1.0"
+    },
+    {
+      "dataset_id": "flip2-trpb-two-to-many",
+      "dataset": "trpb",
+      "split": "two_to_many",
+      "path": "trpb/two_to_many.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/trpb/two_to_many.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/trpb/two_to_many.csv.gz",
+      "sha256": "2676d06452f4f5dbd52cb5c8cad17d34c94ac8307bda581b527be208a3925ba5",
+      "csv_sha256": "99bc898dcc5101c8b5f215b2499ce538def90fe6e0d969e6275486fffd6db8fd",
+      "mirror_sha256": "8b5efc0af93d8941a8bc43c6483dee685a59c536a2119656c95d1d2548e17633",
+      "zenodo_md5": "md5:a611408d2db06907a023ddc8a1d94c12",
+      "counts": {
+        "test": 217507,
+        "validation": 2158,
+        "train": 8633
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/trpb/README.md",
+      "attribution_sha256": "389326e22d195a3aafa86927c4d03f8e3358ed7ba881b54a15e3ef5e27fee2a4",
+      "original_license": "CC0-1.0"
+    },
+    {
+      "dataset_id": "flip2-trpb-by-position",
+      "dataset": "trpb",
+      "split": "by_position",
+      "path": "trpb/by_position.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/trpb/by_position.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/trpb/by_position.csv.gz",
+      "sha256": "924a3f4942d89d123856905caac60c2a6739f2bdd92e879caafe9b5e3619cf17",
+      "csv_sha256": "299c0bab703781152273d38370a8dbee7e07ef128527753b96b90012ac1e4a45",
+      "mirror_sha256": "6ab3757dbd4d00334fef303f5b6491b48ee1db8f44fec81abee23cc1893d3bcf",
+      "zenodo_md5": "md5:77121ffe9d56362edb64614ff0e34f45",
+      "counts": {
+        "train": 31557,
+        "validation": 7889,
+        "test": 188852
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/trpb/README.md",
+      "attribution_sha256": "389326e22d195a3aafa86927c4d03f8e3358ed7ba881b54a15e3ef5e27fee2a4",
+      "original_license": "CC0-1.0"
+    },
+    {
+      "dataset_id": "flip2-hydro-three-to-many",
+      "dataset": "hydro",
+      "split": "three_to_many",
+      "path": "hydro/three_to_many.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/hydro/three_to_many.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/hydro/three_to_many.csv.gz",
+      "sha256": "76befc506e84e0ef0dd96fa4c8e5b41c6ec47e1664eccbf8804862f3ea97cb90",
+      "csv_sha256": "24f704e5c0068bc59a068f6798d0368989e919d55ac002fefb5ab43e7b3717a6",
+      "mirror_sha256": "10708234ac646b7b7db38c37baecfb1901b71b2d9e26816e892ea2dcc7b3930d",
+      "zenodo_md5": "md5:a13b01d71faf2e76dd91dc57b7311972",
+      "counts": {
+        "train": 1160,
+        "validation": 290,
+        "test": 23485
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/hydro/README.md",
+      "attribution_sha256": "274e7a53f92088cb156bf9b2a8c4397c89b477884fa63963ed2770de2cdaf406",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-hydro-low-to-high",
+      "dataset": "hydro",
+      "split": "low_to_high",
+      "path": "hydro/low_to_high.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/hydro/low_to_high.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/hydro/low_to_high.csv.gz",
+      "sha256": "30b89e3102fe67c1726ebc897a127221c89e224801d60ede509d1ca8dc7d612f",
+      "csv_sha256": "7086f5ad7313c3e572b335d18c378c5bc38fa5ab737820ebed3144749ede4415",
+      "mirror_sha256": "4d6c778a68e0dc975f7c01967b44e0a08962bd55f89a86e142642f66816494cb",
+      "zenodo_md5": "md5:fb9cfaef56791b90f2ddd154b90da8ed",
+      "counts": {
+        "train": 9974,
+        "validation": 2493,
+        "test": 12468
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/hydro/README.md",
+      "attribution_sha256": "274e7a53f92088cb156bf9b2a8c4397c89b477884fa63963ed2770de2cdaf406",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-hydro-to-p06241",
+      "dataset": "hydro",
+      "split": "to_P06241",
+      "path": "hydro/to_P06241.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/hydro/to_P06241.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/hydro/to_P06241.csv.gz",
+      "sha256": "7b7cb9f0116e851b37c45f2cfaa826ebb5f98ef5b2012cf6f95b36d42a4926c9",
+      "csv_sha256": "e614ce2cc445732aceca75b9f7db44f6cb2fadd445184ff6748325adb1dd32ec",
+      "mirror_sha256": "03d026ba065d1f2a6dc64be696ecd8c981fe69ba9e8acb1201db2f3fc2e2157c",
+      "zenodo_md5": "md5:1b860081da084196b276804b573283cf",
+      "counts": {
+        "train": 11970,
+        "validation": 2993,
+        "test": 9972
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/hydro/README.md",
+      "attribution_sha256": "274e7a53f92088cb156bf9b2a8c4397c89b477884fa63963ed2770de2cdaf406",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-hydro-to-p0a9x9",
+      "dataset": "hydro",
+      "split": "to_P0A9X9",
+      "path": "hydro/to_P0A9X9.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/hydro/to_P0A9X9.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/hydro/to_P0A9X9.csv.gz",
+      "sha256": "0eb15476975373a13b6e8faa44f71168d347ec364bd410beff9b9b929f6ae0f7",
+      "csv_sha256": "dcf8cf46833731f1917a9e86ceab5218c555a615a1e5fd76911fd5944b438e25",
+      "mirror_sha256": "9f5a194f927db30bea62240d9b8d434a1ad13b465d21090f606bf3fd4dbdddcf",
+      "zenodo_md5": "md5:64d1690065aeb0ad90cd1e1b5dd7a581",
+      "counts": {
+        "train": 13148,
+        "validation": 3287,
+        "test": 8500
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/hydro/README.md",
+      "attribution_sha256": "274e7a53f92088cb156bf9b2a8c4397c89b477884fa63963ed2770de2cdaf406",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-hydro-to-p01053",
+      "dataset": "hydro",
+      "split": "to_P01053",
+      "path": "hydro/to_P01053.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/hydro/to_P01053.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/hydro/to_P01053.csv.gz",
+      "sha256": "99c116848319fcbe56f5fad654bc3c51fbc8c114b2d350425a60a811de43141c",
+      "csv_sha256": "371d24f309f0c9e2087e874125b89a76b7ee8281a6860edb3c418d3edbdbd401",
+      "mirror_sha256": "eafceb887b3bbcb044136b8deffcc6dba4272a3062fcebf2d7b46dcb2163039e",
+      "zenodo_md5": "md5:5b7ade3bb837d2d8ade1e75f659d77f7",
+      "counts": {
+        "train": 14778,
+        "validation": 3694,
+        "test": 6463
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/hydro/README.md",
+      "attribution_sha256": "274e7a53f92088cb156bf9b2a8c4397c89b477884fa63963ed2770de2cdaf406",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-rhomax-by-wild-type",
+      "dataset": "rhomax",
+      "split": "by_wild_type",
+      "path": "rhomax/by_wild_type.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/rhomax/by_wild_type.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/rhomax/by_wild_type.csv.gz",
+      "sha256": "2d4bda268708bf2e161735bf77dd7ec503c233b42d4f4ab1abb3090eae6b6755",
+      "csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+      "mirror_sha256": "7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+      "zenodo_md5": "md5:286781669d083104cc399ae8a561afc5",
+      "counts": {
+        "validation": 116,
+        "test": 184,
+        "train": 584
+      },
+      "target_units": "nm",
+      "input_representation": "amino-acid sequence",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/rhomax/README.md",
+      "attribution_sha256": "a966bc2c519732861c85a6f7105268f0329e503fc9104c0b966d565314c80d28",
+      "original_license": "CC-BY-4.0"
+    },
+    {
+      "dataset_id": "flip2-pdz3-single-to-double",
+      "dataset": "pdz3",
+      "split": "single_to_double",
+      "path": "pdz3/single_to_double.csv.gz",
+      "url": "https://zenodo.org/api/records/18433203/files/pdz3/single_to_double.csv.gz/content",
+      "mirror_url": "https://flip.protein.properties/assets/splits/pdz3/single_to_double.csv.gz",
+      "sha256": "a2183356eb4c758b7686cf5aaa0e12e707fb3e253e8b9f2840e4131038dc7948",
+      "csv_sha256": "e06fafc6a2b88e835cf9d64952751952150908edeafb205e2f53f0bba54afbd8",
+      "mirror_sha256": "8c16915fb15343734ca8395dc74c06ced07cde48b3e0820963ab65fc4716f157",
+      "zenodo_md5": "md5:abfea50cbfdd9d101ffa8eef30239766",
+      "counts": {
+        "train": 124,
+        "validation": 31,
+        "test": 579
+      },
+      "target_units": "source-provided fitness units; normalization not inferred",
+      "input_representation": "colon-separated PDZ3:CRIPT pair; empty component retained",
+      "source_note": null,
+      "attribution_url": "https://flip.protein.properties/assets/splits/pdz3/README.md",
+      "attribution_sha256": "bbab3fafce5c7b2c8002fc57c63fa26a3cd69489c24bed8c63248473206fe29d",
+      "original_license": "CC-BY-4.0"
+    }
+  ]
+}

@@ -77,3 +77,45 @@ The optional Linux model locks use the official PyTorch CPU wheel and do not ins
 CUDA dependencies. Regenerate them with `python containers/generate_cpu_locks.py`;
 `--verify-upstream` checks the official index and wheel metadata. See
 `containers/CPU-LOCKS.md`. The native `uv.lock` retains platform-specific installation.
+
+## FLIP2, DART-Eval and mRNABench
+
+Use `--build-arg ENVIRONMENT=sequence` to include pinned parquet/HDF5 readers
+without the ESM or DNABERT-2 dependencies. Build/export/convert as above, replacing
+`core` with `sequence`. A model requiring another framework can generate keyed
+predictions or embeddings in its own environment and evaluate them in this image.
+
+For a prepared mRNABench smoke example:
+
+```sh
+mkdir -p output
+podman run --rm --network none --read-only --userns=keep-id \
+  --tmpfs /tmp:rw,size=512m \
+  -v "$PWD/prepared-mrl:/input:ro" -v "$PWD/output:/output:rw" \
+  localhost/rewirebench:sequence run --prepared /input \
+  --adapter rewirebench.adapters.sequence:SequenceComposition \
+  --prediction-type embedding --output /output/mrl-smoke
+```
+
+The equivalent Apptainer invocation is:
+
+```sh
+apptainer exec --cleanenv --containall \
+  --bind "$PWD/prepared-mrl:/input:ro,$PWD/output:/output:rw" \
+  rewirebench-sequence.sif rewirebench run --prepared /input \
+  --adapter rewirebench.adapters.sequence:SequenceComposition \
+  --prediction-type embedding --output /output/mrl-smoke
+```
+
+Prepare sources on a login node where access is permitted. DART requires its
+Synapse download and local checksum; the image does not bypass authentication.
+All prepared evaluation is local/offline. Keep the SIF/OCI archive, inputs and
+private weights read-only, and direct scratch and outputs to writable directories.
+Use the same commands in a Slurm script with your account, partition, requested
+CPU/memory and walltime. No particular cluster configuration is implied tested.
+
+The sequence CI check runs synthetic native, Podman and Apptainer workflows and
+compares metrics/coverage with absolute and relative tolerance `1e-9`. It includes
+CSV/parquet/HDF5 loading, private-model scoring, embedding fitting and safe import.
+Legacy environments retain archived MFASS parity. Release artifacts include the
+actual reports; only passing execution receipts establish container validation.

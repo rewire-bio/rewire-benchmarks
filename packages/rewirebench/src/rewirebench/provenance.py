@@ -15,6 +15,7 @@ ADAPTER_FIELDS = {
 
 PUBLIC_FIELDS = {
     "source_sha256": 64,
+    "source_csv_sha256": 64,
     "cohort_sha256": 64,
     "split_sha256": 64,
     "raw_sha256": 64,
@@ -22,6 +23,9 @@ PUBLIC_FIELDS = {
     "reference_sha256": 64,
     "train_sha256": 64,
     "test_sha256": 64,
+    "validation_sha256": 64,
+    "dataset_manifest_sha256": 64,
+    "evaluator_sha256": 64,
     "train_val_sha256": 64,
     "sdk_code_sha256": 64,
     "sif_sha256": 64,
@@ -32,6 +36,7 @@ PUBLIC_FIELDS = {
     "protocol_revision": 40,
     "code_revision": 40,
     "source_revision": 40,
+    "dataset_revision": 40,
     **{"model_" + key: length for key, length in ADAPTER_FIELDS.items()},
 }
 

@@ -1,6 +1,6 @@
 # Evaluate a public or private biological model
 
-The `rewirebench` 0.3 Python library runs locally. It does not send model code,
+The `rewirebench` 0.4 Python library runs locally. It does not send model code,
 weights, inputs or predictions to Rewire. Optional `submit` sends an explicitly
 exported contribution to the verified-email review queue; it never publishes a result.
 Production submissions remain disabled until the existing service and email launch checks pass.
@@ -14,6 +14,26 @@ protocols, reference metadata and split resources and works outside a checkout.
 Optional public-model environments: `uv sync --locked --extra dnabert2 --package rewirebench`
 or `uv sync --locked --extra esm --package rewirebench`. These may replace the active
 environment; use separate project environments for incompatible model stacks.
+
+Install the sequence readers for FLIP2, DART-Eval and mRNABench with
+`uv sync --locked --all-packages --extra sequence`, or install the released wheel
+with its `[sequence]` extra in your own environment. It adds pandas, Arrow and
+HDF5 readers, not neural-model weights. The core environment retains earlier
+protocols and optional model dependencies remain separate.
+
+Inspect exact datasets, targets, metrics and fitting rules before preparing:
+
+```sh
+rewirebench protocols
+rewirebench inspect flip2-fitness-v1
+rewirebench inspect dart-eval-task1-zero-shot-v1
+rewirebench inspect mrnabench-sample-mrl-v1
+```
+
+FLIP2 evaluates one archived dataset/split at a time. mRNABench evaluates one
+Sample dataset and target; different RNA chemistries are not averaged. DART's
+source archive requires authenticated access; a synthetic demonstration is
+packaged separately. None is a universal or whole-suite score.
 
 ## Your own model
 
@@ -59,6 +79,19 @@ encoder implements `embed(inputs)` returning `{id: {"reference": vector, "mutant
 Rewire then fits the fixed scaler/head on training embeddings only. The underlying
 model and an encoder-plus-head pipeline remain different evaluated configurations.
 
+For FLIP2 and mRNABench, `embed(inputs)` returns `{id: [float, ...]}` for each
+sequence. A protocol-owned regression head fits training embeddings only.
+Do not return MFASS-style pairs for these single-sequence protocols. Scalar
+adapters can optionally implement `fit_with_validation(train_inputs,
+train_targets, validation_inputs, validation_targets)` where the protocol permits
+validation; no test labels enter fitting. DART is zero-shot and refuses fitted
+adapters. Its opaque independent sequence inputs hide element/control roles and
+pair membership from the model adapter.
+
+The supplied `SequenceComposition` control provides untrained features for the
+protocol-owned head. `TrainMean` is a constant fitted on training labels.
+These are Rewire controls, not claims of reproducing published learned baselines.
+
 ## Evaluate predictions from another environment
 
 ```sh
@@ -71,6 +104,18 @@ CSV/TSV require `id,score` (tabs for TSV); unscored rows need `reason`. JSON is 
 mapping of IDs to scores or explicit unscored objects. Duplicate IDs, unknown IDs,
 nonfinite numbers and missing values without reasons are rejected. Importing scores
 records scoring time only; it does not invent inference runtime.
+
+Frozen single-sequence embeddings can be evaluated separately:
+
+```sh
+rewirebench evaluate --prepared ./prepared-mrl \
+  --embeddings ./private-embeddings.json --output ./scored-mrl
+```
+
+Use keyed JSON vectors or an NPZ with `ids` and `embeddings` arrays. Pickle/object
+arrays, duplicate/unknown IDs, changing vector dimensions and nonfinite values
+are rejected. The protocol requires all selected embeddings for fitting. Imported
+embeddings record fitting/scoring time, without inventing encoder inference time.
 
 Outputs are `report.json`, `predictions.json`, and `unscored.json`. Output directories
 must be new, preventing accidental replacement of earlier results. Reports record
@@ -133,6 +178,9 @@ Curators review the contribution, and publication occurs only through a dataset 
 - [ProteinGym](proteingym.md): v1.3 zero-shot substitutions and ESM-2.
 - [TDC ADMET](tdc-admet.md): the 22-dataset ADMET benchmark group, scored with each dataset's own metric.
 - [Genomic Benchmarks](genomic-benchmarks.md): nine sequence classification datasets.
+- [FLIP2](flip2.md): seven datasets, 16 archived splits; fitness rank metrics.
+- [DART-Eval](dart-eval.md): task 1 zero-shot paired sequence scoring.
+- [mRNABench](mrnabench.md): four Sample MRL datasets with six separate targets.
 - [HPC and containers](hpc.md): optional Podman and Apptainer execution.
 
 No universal model API coerces arbitrary embeddings, structures or generated sequences
