@@ -1,0 +1,9 @@
+{
+  "created_at": "2026-09-20T20:49:13.236448+00:00",
+  "wheel_url": "https://github.com/rewire-bio/rewire-benchmarks/releases/download/v0.4.0/rewirebench-0.4.0-py3-none-any.whl",
+  "wheel_sha256": "f5956f616c20f58299eef4d654b1297b0ce21e0033014cc5cb2c1a406f4b494a",
+  "checkpoint_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t6_8M_UR50D.pt",
+  "checkpoint_sha256": "46f002a9870c9bdecd0ea887acb1f9a38a6b561e8f8bf8a6990b679b9d31b928",
+  "checkpoint_hash_matched_packaged_pin": true,
+  "privacy": "Raw assay rows, sequences, predictions, weights and absolute machine paths retained only in ignored local workbench. Public export contains aggregates and digests."
+}

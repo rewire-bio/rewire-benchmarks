@@ -1,0 +1,51 @@
+{
+  "absolute_tolerance": 1e-12,
+  "checks": {
+    "all_expected_variants_scored": true,
+    "held_out_labels_excluded_from_adapter": true,
+    "network_blocked_during_execution": true,
+    "no_full_suite_metric": true,
+    "no_unscored_variants": true,
+    "rounded_metrics_match_pinned_upstream_formulas": true,
+    "saved_predictions_recompute_exactly": true,
+    "smoke_separate_from_complete_assay": true,
+    "unique_ids_validated_by_sdk": true
+  },
+  "hardware": {
+    "accelerator": "none",
+    "architecture": "arm64",
+    "processor": "arm",
+    "threads": 1
+  },
+  "maximum_rounded_absolute_difference": 0.0,
+  "raw_reference_metrics": {
+    "AUC": 0.3942727915130321,
+    "MCC": -0.1386452708193586,
+    "NDCG": 0.4400883996314255,
+    "Spearman": -0.20876955154203777,
+    "Top_recall": 0.05704697986577181
+  },
+  "reference_sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308",
+  "review_method": "automated_execution_and_source_formula_comparison",
+  "rounded_metrics": {
+    "AUC": 0.394,
+    "MCC": -0.139,
+    "NDCG": 0.44,
+    "Spearman": -0.209,
+    "Top_recall": 0.057
+  },
+  "scientific_reproduction": "new_local_evaluation_not_reproduction_of_a_published_model_score",
+  "scope": "one_complete_assay_of_217; not_a_whole_suite_score",
+  "timing_scope": "SDK inference_and_fit_seconds excludes model loading and data preparation; includes all selected predictions, using cached masked-position logits",
+  "upstream_evaluator_sha256": "0002bc1b031c02dc2d67fde53da092c8fd301415645e8e83b425b4183570eba2",
+  "upstream_revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+  "versions": {
+    "fair-esm": "2.0.0",
+    "numpy": "1.26.4",
+    "pandas": "3.0.6",
+    "rewirebench": "0.4.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.17.1",
+    "torch": "2.2.2"
+  }
+}

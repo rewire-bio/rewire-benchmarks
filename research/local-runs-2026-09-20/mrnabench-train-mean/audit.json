@@ -1,0 +1,160 @@
+{
+  "audit_script_sha256": "e5fe05ec7390a242d4cbbef44a28385eaf26266e5cd53a61c74edb6c36af792d",
+  "checks": [
+    {
+      "check": "source_bytes",
+      "detail": "Official pinned parquet hash 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+      "evidence_location": "complete parquet file",
+      "method": "automated independent calculation",
+      "source_url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+      "status": "passed"
+    },
+    {
+      "check": "source_rows_and_splits",
+      "detail": "All 100017 source rows reconciled; 0 missing targets excluded; independently generated seed-2541 assignments match; split hash 00e287b18ba4e90cb682af6e3fcdfc97e07f2b4b25d13265cd0eca37996536a2; counts {\"test\": 15003, \"train\": 70011, \"validation\": 15003}",
+      "evidence_location": "sequence/target_mrl_designed columns; 70/15/15 split after missing-target removal",
+      "method": "automated independent calculation",
+      "source_url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+      "status": "passed"
+    },
+    {
+      "check": "upstream_source_mrna_bench.linear_probe.evaluator.py",
+      "detail": "Pinned source file SHA-256 098c66c32375f520da9b608b64884bc4bf8eb00149fad2cc2ac8cb4210591110",
+      "evidence_location": "complete source file",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/evaluator.py",
+      "status": "passed"
+    },
+    {
+      "check": "upstream_source_mrna_bench.linear_probe.linear_probe.py",
+      "detail": "Pinned source file SHA-256 122d5df79d120f719cce15f22aea7bbb26c0dd7d48e8ce9025b54c99425ed0fd",
+      "evidence_location": "complete source file",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/linear_probe.py",
+      "status": "passed"
+    },
+    {
+      "check": "upstream_source_mrna_bench.data_splitter.data_splitter.py",
+      "detail": "Pinned source file SHA-256 d07db724189686af7ef5f3003905a2dec9284a0c9b2157fbd6fc7002f95fba28",
+      "evidence_location": "complete source file",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/data_splitter/data_splitter.py",
+      "status": "passed"
+    },
+    {
+      "check": "upstream_source_mrna_bench.data_splitter.sklearn_split.py",
+      "detail": "Pinned source file SHA-256 00dc7a2cb943bf5864743750273d22f12925cfca2a8ac754ccd4d49e5370a2b5",
+      "evidence_location": "complete source file",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/data_splitter/sklearn_split.py",
+      "status": "passed"
+    },
+    {
+      "check": "prepared_scope",
+      "detail": "Complete selected split/target; not a suite aggregate and not a smoke run",
+      "evidence_location": "prepared scope and limit metadata",
+      "method": "automated independent calculation",
+      "source_url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+      "status": "passed"
+    },
+    {
+      "check": "opaque_unique_ids",
+      "detail": "Every prepared ID is unique; allowlisted biological inputs contain only sequence",
+      "evidence_location": "_inputs",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/sdk.py#L162-L163",
+      "status": "passed"
+    },
+    {
+      "check": "adapter_input_allowlist",
+      "detail": "All adapter inputs inspected: only opaque ID and sequence; no target, split or source index",
+      "evidence_location": "_inputs applied to every prepared row",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/sdk.py#L162-L163",
+      "status": "passed"
+    },
+    {
+      "check": "prediction_coverage",
+      "detail": "All 15003 test IDs scored exactly once; no unknown IDs, missing predictions or nonfinite scores",
+      "evidence_location": "prediction file and reported coverage",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/evaluator.py",
+      "status": "passed"
+    },
+    {
+      "check": "independent_train_only_refit",
+      "detail": "Arithmetic mean of training labels only; no validation or test labels used in fit. Maximum absolute prediction difference 0; tolerance 1e-09.",
+      "evidence_location": "independent feature extraction and fitting in verify_sequence.py",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/adapters/sequence.py",
+      "status": "passed"
+    },
+    {
+      "check": "independent_metrics",
+      "detail": "Pinned upstream metric expressions recomputed from saved predictions; undefined constant correlations retained as null; max absolute difference 0.0",
+      "evidence_location": "mrna_bench/linear_probe/evaluator.py:9-36; eval_regression",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/evaluator.py",
+      "status": "passed"
+    },
+    {
+      "check": "artifact_integrity",
+      "detail": "Saved predictions, prepared input, original report and installed released SDK match recorded hashes",
+      "evidence_location": "SHA-256 receipt fields",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/sdk.py",
+      "status": "passed"
+    },
+    {
+      "check": "scope_and_claims",
+      "detail": "Complete selected evaluation, never whole-suite completion or published-score reproduction",
+      "evidence_location": "report completion and scientific scope",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/protocols/mrnabench.py",
+      "status": "passed"
+    }
+  ],
+  "counts": {
+    "test": 15003,
+    "train": 70011,
+    "validation": 15003
+  },
+  "limitations": [
+    "Independent calculation uses the same installed numerical libraries as execution; it is not an independent software-stack reproduction.",
+    "Checks establish agreement for these saved inputs and controls; they do not establish absence of homology or biological overlap between source splits.",
+    "These Rewire controls are not published-model reproductions. No uncertainty interval or repeated-seed estimate was measured.",
+    "Raw data and predictions remain local; public aggregate receipts alone cannot reconstruct individual predictions."
+  ],
+  "metric_max_absolute_error": 0.0,
+  "prediction_max_absolute_error": 0.0,
+  "recomputed_metrics": {
+    "mse": 2.3655294722554605,
+    "pearson": null,
+    "spearman": null
+  },
+  "review_method": "automated independent source reconciliation, train-only refit and metric recalculation",
+  "reviewed_at": "2026-09-20T20:51:22.576123+00:00",
+  "reviewer": "Codex independent audit worker",
+  "run_id": "mrnabench-train-mean",
+  "schema_version": "1.0",
+  "source_references": [
+    {
+      "sha256": "098c66c32375f520da9b608b64884bc4bf8eb00149fad2cc2ac8cb4210591110",
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/evaluator.py"
+    },
+    {
+      "sha256": "122d5df79d120f719cce15f22aea7bbb26c0dd7d48e8ce9025b54c99425ed0fd",
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/linear_probe/linear_probe.py"
+    },
+    {
+      "sha256": "d07db724189686af7ef5f3003905a2dec9284a0c9b2157fbd6fc7002f95fba28",
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/data_splitter/data_splitter.py"
+    },
+    {
+      "sha256": "00dc7a2cb943bf5864743750273d22f12925cfca2a8ac754ccd4d49e5370a2b5",
+      "url": "https://raw.githubusercontent.com/morrislab/mRNABench/74f96b8e6ae9f41cc3cccff089d826a62d5604b8/mrna_bench/data_splitter/sklearn_split.py"
+    }
+  ],
+  "status": "passed",
+  "tolerance_absolute": 1e-09
+}

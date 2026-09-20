@@ -1,0 +1,6 @@
+assay,metric,value,raw_reference_value,higher_is_better,scored,eligible,scope
+AMFR_HUMAN_Tsuboyama_2023_4G3O,AUC,0.394,0.3942727915130321,true,2972,2972,single_complete_assay
+AMFR_HUMAN_Tsuboyama_2023_4G3O,MCC,-0.139,-0.1386452708193586,true,2972,2972,single_complete_assay
+AMFR_HUMAN_Tsuboyama_2023_4G3O,NDCG,0.44,0.4400883996314255,true,2972,2972,single_complete_assay
+AMFR_HUMAN_Tsuboyama_2023_4G3O,Spearman,-0.209,-0.20876955154203777,true,2972,2972,single_complete_assay
+AMFR_HUMAN_Tsuboyama_2023_4G3O,Top_recall,0.057,0.05704697986577181,true,2972,2972,single_complete_assay

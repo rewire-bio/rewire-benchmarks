@@ -1,0 +1,149 @@
+{
+  "completion": "partial",
+  "coverage": {
+    "denominator": 2972,
+    "scored": 2972,
+    "unscored": 0
+  },
+  "coverage_context": {
+    "not_selected": 0,
+    "selected": 2972,
+    "unscored_file_scope": "selected inputs only; not_selected counted separately"
+  },
+  "created_at": "2026-09-20T20:47:24.238432+00:00",
+  "dataset_id": "proteingym-dms-substitutions-v1.3",
+  "environment": {
+    "architecture": "arm64",
+    "container_digest": "unreported",
+    "container_runtime": "unreported",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.13",
+    "rewirebench": "0.4.0",
+    "sdk_code_sha256": "fcc5ab65e6753cf29aabbdae231cbb5cdf72a3dd40ba8f109802c33223b33536",
+    "sif_sha256": "unreported"
+  },
+  "execution": {
+    "adapter": "ESM2Adapter",
+    "adapter_provenance": {
+      "checkpoint_sha256": "46f002a9870c9bdecd0ea887acb1f9a38a6b561e8f8bf8a6990b679b9d31b928",
+      "checkpoint_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t6_8M_UR50D.pt",
+      "device": "cpu",
+      "fair_esm_version": "2.0.0",
+      "implementation_sha256": "4ff38cfbb91d718b52a44da53aa5594fe73d9d1d4d0ce43724807597c3929889",
+      "maximum_sequence_length": 1022,
+      "model": "esm2_t6_8M_UR50D",
+      "published_result_reproduction": false,
+      "strategy": "masked_marginals_wild_type_context_sum_log_odds",
+      "training_overlap": "unreported; UniRef50 pretraining may overlap benchmark proteins"
+    },
+    "batch_size": 32,
+    "fitting": "none",
+    "inference_and_fit_seconds": 0.18779424999956973,
+    "mode": "local_adapter",
+    "prediction_type": "scalar"
+  },
+  "independently_reproduced": false,
+  "input_information": "Wild-type protein sequence and amino-acid substitutions; no MSA, structure or assay labels",
+  "kind": "rewire_local_evaluation",
+  "metrics": {},
+  "model": {
+    "name": "ESM-2 esm2_t6_8M_UR50D masked marginals",
+    "training_overlap": "unreported; UniRef50 pretraining may overlap benchmark proteins"
+  },
+  "model_configuration": {
+    "checkpoint": "esm2_t6_8M_UR50D",
+    "device": "cpu",
+    "seed": 0,
+    "strategy": "masked_marginals",
+    "threads": 1
+  },
+  "predictions_sha256": "7ab0c8901406d5c1ab759038c8beef235721938394cfdf192c46671e98e0bbca",
+  "prepared_sha256": "9f0e0cce34942797364990ef4dc9fb8b382f7b2fd59e6c72de23efc2992fb148",
+  "protocol_configuration": {
+    "aggregation": "round_assay_3dp_then_mean_by_UniProt_and_selection_then_equal_category_mean",
+    "assays": {
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O": {
+        "MSA_Neff_L_category": "Medium",
+        "UniProt_ID": "AMFR_HUMAN",
+        "expected_count": 2972,
+        "prepared_count": 2972,
+        "selection_type": "Stability",
+        "taxon": "Human"
+      }
+    },
+    "binary_labels": "official_DMS_score_bin",
+    "official_assay_count": 217,
+    "official_variant_count": 2465767,
+    "score_direction": "higher_is_better"
+  },
+  "protocol_id": "proteingym-v1.3-dms-substitutions",
+  "protocol_results": {
+    "aggregation": "round_assay_3dp_then_mean_by_UniProt_and_selection_then_equal_category_mean",
+    "by_protein_selection_type": {
+      "AMFR_HUMAN::Stability": {
+        "AUC": 0.394,
+        "MCC": -0.139,
+        "NDCG": 0.44,
+        "Spearman": -0.209,
+        "Top_recall": 0.057
+      }
+    },
+    "by_selection_type": {
+      "Stability": {
+        "AUC": 0.394,
+        "MCC": -0.139,
+        "NDCG": 0.44,
+        "Spearman": -0.209,
+        "Top_recall": 0.057
+      }
+    },
+    "complete_assays": 1,
+    "coverage": {
+      "denominator": 2972,
+      "eligible": 2972,
+      "prepared": 2972,
+      "scored": 2972
+    },
+    "data_verification": "local_bytes_hashed_not_independently_source_verified",
+    "metrics": {},
+    "per_assay": {
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O": {
+        "UniProt_ID": "AMFR_HUMAN",
+        "eligible": 2972,
+        "metrics": {
+          "AUC": 0.394,
+          "MCC": -0.139,
+          "NDCG": 0.44,
+          "Spearman": -0.209,
+          "Top_recall": 0.057
+        },
+        "prepared": 2972,
+        "scored": 2972,
+        "selection_type": "Stability",
+        "status": "complete"
+      }
+    },
+    "status": "partial_track",
+    "total_assays": 217,
+    "uncertainty": "not_estimated; upstream cross-model bootstrap differences are not an absolute score CI"
+  },
+  "protocol_version": "1.3",
+  "provenance": {
+    "assay_sha256": {
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O": "dd911d925eca79329a496eb6cb7b181ab448e15db244daf1c1f9c01e8a704c2a"
+    },
+    "data_verification": "local_bytes_hashed_not_independently_source_verified",
+    "expected_hashes_checked": [
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O"
+    ],
+    "reference_sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308",
+    "source_url": "https://github.com/OATML-Markslab/ProteinGym/tree/144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "upstream_revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c"
+  },
+  "review_status": "unreviewed_local_run",
+  "schema_version": "1.0",
+  "scope": "subset",
+  "timing_seconds": {
+    "evaluation": 0.03425099999731174
+  }
+}

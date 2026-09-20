@@ -1,0 +1,17 @@
+{
+  "absolute_tolerance": 1e-09,
+  "cache_repeat_and_input_immutability": "passed",
+  "compared_variants": 2972,
+  "direction": "log P(mutant)-log P(wild_type), summed for multi-mutants; DMS_score higher is better",
+  "maximum_absolute_prediction_difference": 0.0,
+  "result": "passed",
+  "review_method": "independent_pinned_source_execution",
+  "source_location": "compute_fitness.py label_row lines240-250 and masked-marginals lines486-512; CPU device only",
+  "source_raw_directionality": "1",
+  "source_raw_phenotype": "ddG_ML_float",
+  "source_sha256": "35186603513cae44fb6a2a44c72cb085db469115e145a267bd7b78350b9bb1ba",
+  "timing_note": "Separate verification process, not original inference timing or an end-to-end speed benchmark",
+  "upstream_revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+  "validation_masked_loop_plus_comparison_seconds": 0.2127576249986305,
+  "validation_model_loading_seconds": 0.03968445800273912
+}
