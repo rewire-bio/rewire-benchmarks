@@ -1,0 +1,136 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 184,
+    "scored": 184,
+    "unscored": 0
+  },
+  "coverage_context": {
+    "not_selected": 0,
+    "selected": 184,
+    "unscored_file_scope": "selected inputs only; not_selected counted separately"
+  },
+  "created_at": "2026-09-21T12:05:00.257843+00:00",
+  "dataset_id": "flip2-rhomax-by-wild-type",
+  "environment": {
+    "architecture": "arm64",
+    "container_digest": "unreported",
+    "container_runtime": "unreported",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.13",
+    "rewirebench": "0.4.0",
+    "sdk_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+    "sif_sha256": "unreported"
+  },
+  "execution": {
+    "adapter": "SequenceComposition",
+    "batch_size": 32,
+    "fitting": "protocol_owned_probe",
+    "inference_and_fit_seconds": 0.011504041991429403,
+    "mode": "local_adapter",
+    "prediction_type": "embedding"
+  },
+  "independently_reproduced": false,
+  "input_information": "protocol allowlisted biological inputs; see baseline configuration for extra inputs",
+  "kind": "rewire_local_evaluation",
+  "metrics": {
+    "n": 184,
+    "ndcg": 0.9548154942827918,
+    "spearman": 0.41798958279508075
+  },
+  "model": {
+    "name": "Protein composition + fixed ridge probe",
+    "training_overlap": "protocol-permitted training only; no pretraining"
+  },
+  "model_configuration": {
+    "alphabet": "ACDEFGHIKLMNPQRSTVWY",
+    "baseline_id": "protein-composition-probe-v1",
+    "baseline_version": "1",
+    "features": "log1p length, residue fractions, unknown fraction",
+    "head": "protocol-owned alpha-10 ridge"
+  },
+  "predictions_sha256": "0a214b7dbad99d3684353cf3d56c5c57bae1e2dfa67eb88f67e3f32c66313dd7",
+  "prepared_sha256": "f417d43497e0c8c453bd7c66cfea05959b4d6d47462283096e42a2dae8b72419",
+  "protocol_configuration": {
+    "adapter_input_contract": "opaque-sequence-inputs-v1",
+    "canonical_split_counts": {
+      "test": 184,
+      "train": 584,
+      "validation": 116
+    },
+    "canonical_test_count": 184,
+    "data_verification": "pinned_source_bytes",
+    "dataset": "rhomax",
+    "embedding_probe": {
+      "alpha": 10.0,
+      "feature_scaling": "none",
+      "fit_intercept": true,
+      "max_iter": 1000000,
+      "name": "rewire-frozen-embedding-ridge-v1",
+      "refit": "train only",
+      "relationship_to_published_baseline": "Frozen-embedding extension of upstream alpha-10 ridge. The published baseline uses one-hot features and scales targets using train plus validation rows. This extension is not that published baseline.",
+      "solver": "auto",
+      "target_scaling": "StandardScaler fitted only on train labels",
+      "tol": 1e-05,
+      "validation_use": "none; fixed hyperparameters"
+    },
+    "input_representation": "amino-acid sequence",
+    "metric": "spearman",
+    "metric_direction": "higher",
+    "metrics": [
+      "spearman",
+      "ndcg"
+    ],
+    "prepared_rows_sha256": "d86fe3926529df72649f4638ffa0d89ec62460d831ceb62ad47ff86249469a12",
+    "smoke_limit_per_split": null,
+    "source_note": null,
+    "source_reuse_terms": "CC-BY-4.0 archive; source attribution under resources/flip2",
+    "split": "by_wild_type",
+    "suite_complete": false,
+    "target_units": "nm",
+    "task": "regression"
+  },
+  "protocol_id": "flip2-fitness-v1",
+  "protocol_results": {
+    "complete": true,
+    "coverage": {
+      "denominator": 184,
+      "scored": 184,
+      "selected": 184,
+      "unscored": 0
+    },
+    "metrics": {
+      "n": 184,
+      "ndcg": 0.9548154942827918,
+      "spearman": 0.41798958279508075
+    },
+    "metrics_scope": "Scored test rows of this archived split only; no suite aggregate",
+    "protocol_id": "flip2-fitness-v1",
+    "protocol_notes": [],
+    "scope": "full",
+    "score_direction": "higher",
+    "suite_complete": false,
+    "unavailable_metrics": {},
+    "unscored_reasons": {
+      "missing_prediction": 0,
+      "not_selected": 0
+    }
+  },
+  "protocol_version": "1",
+  "provenance": {
+    "data_verification": "pinned_source_bytes",
+    "dataset_version": "zenodo-18433203-v3",
+    "evaluator_url": "https://github.com/J-SNACKKB/FLIP/blob/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py#L131-L135",
+    "source_csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+    "source_sha256": "7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+    "source_url": "https://zenodo.org/api/records/18433203/files/rhomax/by_wild_type.csv.gz/content",
+    "split_origin": "Archived assignments: validation=True held out of training",
+    "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6"
+  },
+  "review_status": "unreviewed_local_run",
+  "schema_version": "1.0",
+  "scope": "full",
+  "timing_seconds": {
+    "evaluation": 0.024586958010331728
+  }
+}

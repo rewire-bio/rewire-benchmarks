@@ -1,0 +1,7 @@
+# Build with Podman, passing an existing Rewire image pinned by sha256 digest.
+# Clear the CLI entrypoint so Nextflow can launch its task shell.
+ARG REWIRE_IMAGE
+FROM ${REWIRE_IMAGE}
+RUN apt-get update && apt-get install -y --no-install-recommends procps && rm -rf /var/lib/apt/lists/*
+ENTRYPOINT []
+CMD ["python", "-m", "rewirebench.cli", "protocols"]

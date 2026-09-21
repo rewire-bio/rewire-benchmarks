@@ -1,0 +1,30 @@
+[
+  {
+    "id": "synthetic-flip2-train-mean",
+    "kind": "model",
+    "protocol": "flip2-fitness-v1",
+    "source": "workflows/benchmark/examples/smoke.csv",
+    "prepare_options": {
+      "dataset": "flip2-amylase-one-to-many",
+      "allow_unverified": true,
+      "limit": 3
+    },
+    "adapter": "rewirebench.adapters.sequence:TrainMean",
+    "model": {
+      "name": "TrainMean synthetic workflow smoke",
+      "training_overlap": "synthetic fixture only"
+    }
+  },
+  {
+    "id": "synthetic-flip2-baseline",
+    "kind": "baseline",
+    "protocol": "flip2-fitness-v1",
+    "source": "workflows/benchmark/examples/smoke.csv",
+    "prepare_options": {
+      "dataset": "flip2-amylase-one-to-many",
+      "allow_unverified": true,
+      "limit": 3
+    },
+    "baseline": "training-mean-v1"
+  }
+]

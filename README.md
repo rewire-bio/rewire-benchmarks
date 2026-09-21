@@ -34,6 +34,15 @@ Each repository has an independent build and deployment. Running an evaluation h
 
 The database's collection tools own this ingestion and review process. This repository does not require website or contribution-service credentials. For the current MFASS v2 evidence, retain the reviewed revision `bee9133b83f3aedaf2bbb9013f1875515845607e`; a documentation update does not change that scientific source identity.
 
+## Baselines, model evaluations and HPC
+
+The [baseline programme](docs/baseline-programme.md) provides registered controls,
+frozen ESM-2 examples and an explicit private submission queue. The
+[Nextflow workflow](docs/nextflow.md) prepares, runs, rescores and exports model
+matrices, with separate profiles for local execution and future HPC/cloud runs.
+Implemented adapters do not imply complete catalogue coverage; blocked baseline
+choices and unexecuted deployment profiles remain explicit.
+
 ## House rules
 
 These are enforced in `rewirebench`, not merely described here. A result that breaks one is refused

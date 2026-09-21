@@ -1,0 +1,21 @@
+{
+  "review_method": "automated synthetic tensor assertions executed manually in actual run environment",
+  "torch": "2.2.2",
+  "fair-esm": "2.0.0",
+  "layers": [
+    6,
+    12
+  ],
+  "status": "passed",
+  "expected_means": [
+    2.0,
+    4.0
+  ],
+  "specialtoken_padding_values": 999.0,
+  "expected_exclusions": "BOS,EOS,padding",
+  "sequences": [
+    "AC",
+    "ACD"
+  ],
+  "review_date": "2026-09-21"
+}

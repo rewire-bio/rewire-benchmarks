@@ -1,0 +1,72 @@
+{
+  "checkpoint_sha256": "46f002a9870c9bdecd0ea887acb1f9a38a6b561e8f8bf8a6990b679b9d31b928",
+  "code_hash_end": "9350e367b20ec48d9ce1195cb5b73c4bd98ce8530a2d1f7ba2157fc8be75fa34",
+  "code_hash_start": "9350e367b20ec48d9ce1195cb5b73c4bd98ce8530a2d1f7ba2157fc8be75fa34",
+  "dataset_id": "flip2-rhomax-by-wild-type",
+  "environment": {
+    "fair-esm": "2.0.0",
+    "numpy": "1.26.4",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.17.1",
+    "torch": "2.2.2"
+  },
+  "esm2_load_inference_fit_evaluate_seconds": null,
+  "limitations": [
+    "No confidence intervals",
+    "Single task and split",
+    "Unreported pretraining overlap",
+    "No container validation",
+    "No upload/publication performed by this script"
+  ],
+  "prepared_sha256": "f417d43497e0c8c453bd7c66cfea05959b4d6d47462283096e42a2dae8b72419",
+  "review_method": "automated independent metric recomputation from local predictions",
+  "runs": [
+    {
+      "evidence_origin": "Rewire local model execution, not paper reproduction",
+      "independent_metric_recomputation": "passed",
+      "ndcg": 0.8964799835636942,
+      "predictions_sha256": "b975eff8d023c310860b6d8215fbe365a694985950afc95966db632eaa5eeb6c",
+      "run": "esm2",
+      "scored": 184,
+      "spearman": -0.1463506755340845,
+      "tolerance": 1e-12
+    },
+    {
+      "evidence_origin": "Rewire local model execution, not paper reproduction",
+      "independent_metric_recomputation": "passed",
+      "ndcg": 0.9206667522227658,
+      "predictions_sha256": "599dca4e6fa643a7cdfc96ac339033f61e5846ce225af17ac2ac3917ecc14fac",
+      "relationship_to_existing_evidence": {
+        "classification": "validation_only_not_additional_independent_evidence",
+        "database_pr": "https://github.com/rewire-bio/rewire-database/pull/24",
+        "predictions_match_exactly": true,
+        "source_pr": "https://github.com/rewire-bio/rewire-benchmarks/pull/8",
+        "source_revision": "ca73fa47136d182f2d4ddb083d084712198fc0e2",
+        "submit_again": false
+      },
+      "run": "training-mean-v1",
+      "scored": 184,
+      "spearman": null,
+      "tolerance": 1e-12
+    },
+    {
+      "evidence_origin": "Rewire local model execution, not paper reproduction",
+      "independent_metric_recomputation": "passed",
+      "ndcg": 0.9548154942827918,
+      "predictions_sha256": "0a214b7dbad99d3684353cf3d56c5c57bae1e2dfa67eb88f67e3f32c66313dd7",
+      "run": "protein-composition-probe-v1",
+      "scored": 184,
+      "spearman": 0.41798958279508075,
+      "tolerance": 1e-12
+    }
+  ],
+  "schema_version": "1.0",
+  "scope": "one complete Rhomax split; no suite aggregate",
+  "source_verification": "pinned_source_bytes",
+  "split_counts": {
+    "test": 184,
+    "train": 584,
+    "validation": 116
+  },
+  "timing_scope": "elapsed is null when auditing existing outputs; execution.inference_and_fit_seconds in the original report covers encoding plus fitting, excludes checkpoint load/acquisition"
+}

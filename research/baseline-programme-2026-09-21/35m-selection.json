@@ -1,0 +1,15 @@
+{
+  "selected_at": "2026-09-21 before 35M inference",
+  "model": "esm2_t12_35M_UR50D",
+  "layer": 12,
+  "dimension": 480,
+  "torch_seed": 0,
+  "batch_size": 4,
+  "torch_threads": 4,
+  "device": "cpu",
+  "dataset": "flip2-rhomax-by-wild-type",
+  "probe": "unchanged fixed alpha 10 train-only ridge",
+  "readout": "residue mean excluding special tokens",
+  "selection_note": "Second checkpoint in same ESM-2 family; chosen after8M execution, before 35M scores. No tuning on this test split.",
+  "package_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce"
+}

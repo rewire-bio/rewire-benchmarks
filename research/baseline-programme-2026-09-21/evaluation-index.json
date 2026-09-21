@@ -1,0 +1,35 @@
+{
+  "do_not_submit": [
+    "rhomax/training-mean-v1.bundle.json",
+    "rhomax-35m/training-mean-v1.bundle.json",
+    "rhomax-35m/protein-composition-probe-v1.bundle.json"
+  ],
+  "duplicate_policy": "Training mean reproduces PR #8 / database PR #24 exact predictions; 35M batch control repeats are validation receipts only.",
+  "new_evaluations": [
+    {
+      "bundle": "rhomax/esm2.bundle.json",
+      "checkpoint": "esm2_t6_8M_UR50D",
+      "evaluation_key": "rewire-flip2-rhomax-esm2-8m-mean-ridge-20260921",
+      "model_family": "ESM2",
+      "report": "rhomax/esm2.report.json",
+      "submission_status": "not_submitted"
+    },
+    {
+      "bundle": "rhomax-35m/esm2.bundle.json",
+      "checkpoint": "esm2_t12_35M_UR50D",
+      "evaluation_key": "rewire-flip2-rhomax-esm2-35m-mean-ridge-20260921",
+      "model_family": "ESM2",
+      "report": "rhomax-35m/esm2.report.json",
+      "submission_status": "not_submitted"
+    },
+    {
+      "bundle": "rhomax/protein-composition-probe-v1.bundle.json",
+      "distinction": "22 features: log length, 20 residue fractions and unknown fraction; differs from the 40-feature control evaluated on 20 September 2026",
+      "evaluation_key": "rewire-flip2-rhomax-composition22-ridge-20260921",
+      "report": "rhomax/protein-composition-probe-v1.report.json",
+      "submission_status": "not_submitted"
+    }
+  ],
+  "publication_status": "unreviewed_local_evaluations",
+  "schema_version": "1.0"
+}

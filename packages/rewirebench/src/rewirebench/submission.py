@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import math
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -23,6 +24,31 @@ DEFAULT_ENDPOINT = "https://benchmarks.rewire.it/api/trpc"
 
 class SubmissionError(RuntimeError):
     """A failed submission, with no secret-bearing server body in its message."""
+
+    def __init__(self, message: str, *, http_status: int | None = None):
+        super().__init__(message)
+        self.http_status = http_status
+
+
+SUBMISSION_STATUSES = frozenset({
+    "submitted", "in_review", "changes_requested", "rejected", "accepted", "published",
+})
+
+
+def _acknowledgement(value):
+    """Allow only bounded private record IDs and the backend's review status enum."""
+    if (
+        not isinstance(value, dict)
+        or not isinstance(value.get("id"), str)
+        or re.fullmatch(r"[A-Za-z0-9_-]{1,200}", value["id"]) is None
+        or not isinstance(value.get("status"), str)
+        or value["status"] not in SUBMISSION_STATUSES
+    ):
+        raise SubmissionError(
+            "Submission was not acknowledged; retain the bundle and retry with the same key."
+        )
+    # Discard extra response fields, including emails, notes and raw provider bodies.
+    return {"id": value["id"], "status": value["status"]}
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -350,18 +376,21 @@ def submit(
     except urllib.error.HTTPError as exc:
         if exc.code == 503:
             raise SubmissionError(
-                "Rewire submissions are currently disabled. Keep your export and submit later."
+                "Rewire submissions are currently disabled. Keep your export and submit later.",
+                http_status=503,
             ) from None
         if exc.code in (401, 403):
             raise SubmissionError(
-                "Verify your email and refresh your contribution access token."
+                "Verify your email and refresh your contribution access token.", http_status=exc.code,
             ) from None
         if exc.code == 429:
             raise SubmissionError(
-                "Submission rate limit reached; retry later with the same idempotency key."
+                "Submission rate limit reached; retry later with the same idempotency key.",
+                http_status=429,
             ) from None
         raise SubmissionError(
-            f"Submission rejected (HTTP {exc.code}); keep the bundle and idempotency key."
+            f"Submission rejected (HTTP {exc.code}); keep the bundle and idempotency key.",
+            http_status=exc.code,
         ) from None
     except (urllib.error.URLError, TimeoutError, ValueError):
         raise SubmissionError(
@@ -372,12 +401,16 @@ def submit(
         or "error" in result
         or not isinstance(result.get("result"), dict)
         or not isinstance(result["result"].get("data"), dict)
+        or not isinstance(result["result"]["data"].get("id"), str)
+        or not result["result"]["data"]["id"].strip()
+        or not isinstance(result["result"]["data"].get("status"), str)
+        or not result["result"]["data"]["status"].strip()
     ):
         raise SubmissionError(
             "Submission was not acknowledged; retain the bundle and retry with the same key."
         )
     return {
-        "submission": result["result"]["data"],
+        "submission": _acknowledgement(result["result"]["data"]),
         "idempotency_key": key,
         "publication_status": "pending_review",
     }

@@ -71,7 +71,7 @@ def capabilities(protocol: str) -> dict:
     frozen = protocol == "mfass-v2-frozen-encoder"
     defaults = {
         "prediction_types": ["embedding" if frozen else "scalar"],
-        "allow_fit": protocol == "mfass-v2",
+        "allow_fit": protocol in {"mfass-v2", *LOCAL_COPY_PROTOCOLS},
         "allow_validation": False,
         "embedding_kind": "paired" if frozen else None,
     }
