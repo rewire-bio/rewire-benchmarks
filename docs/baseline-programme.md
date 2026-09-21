@@ -126,6 +126,24 @@ Live upload completion requires a real returned ID and successful tracking looku
 a local test or queue file is not an upload. Intake activation and receipt-email
 testing are dependencies tracked in the separate contribution-service PR.
 
+## Delivery status, 21 September 2026
+
+- Runner and evidence review: [PR10](https://github.com/rewire-bio/rewire-benchmarks/pull/10).
+- Website audit and coverage: [database PR26](https://github.com/rewire-bio/rewire-database/pull/26).
+- Live intake dependency: [database PR25](https://github.com/rewire-bio/rewire-database/pull/25).
+- Four new evaluated configurations: ESM-2 8M and 35M frozen Rhomax probes,
+  the 22-feature composition reference, and the [MFASS training-prior control](../research/mfass-null-2026-09-21/README.md).
+- Nine distinct evaluation bundles passed queue dry-run validation: the five
+  prior evaluations plus these four. Repeated controls are excluded. No upload
+  or publication is claimed; production intake returned HTTP 503 while disabled.
+
+Local validation passed 463 Python tests with 11 optional skips. Both ESM pooling
+checks also passed in the actual Torch execution environment. The built 0.5.0
+wheel was installed and imported outside the checkout. Native Nextflow smoke,
+resume, code/configuration invalidation and failure checks passed. The actual
+scientific runs preserve their older development snapshots and exact hashes;
+rebuilding the release wheel does not alter that provenance.
+
 ## Outstanding programme work
 
 - Review baseline choices for catalogue protocols beyond the existing SDK adapters.
