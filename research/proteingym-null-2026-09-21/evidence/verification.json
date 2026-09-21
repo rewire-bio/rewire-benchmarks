@@ -1,0 +1,49 @@
+{
+  "assay": "AMFR_HUMAN_Tsuboyama_2023_4G3O",
+  "assay_status": "complete",
+  "baseline_id": "seeded-random-v1",
+  "code_hash_end": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+  "code_hash_start": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+  "data_verification": "local_bytes_hashed_not_independently_source_verified",
+  "denominator": 2972,
+  "environment": {
+    "numpy": "1.26.4",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.17.1"
+  },
+  "limitation": "One seeded random ranking; not a chance-performance confidence interval or a full-suite score",
+  "official_assays": 217,
+  "prediction_digest_verification": "passed",
+  "predictions_sha256": "37a020ad31e35d57a924397c395c10bfac152417f0a42207400cef789d3d5e02",
+  "prepared_and_code_binding": "passed",
+  "prepared_sha256": "9f0e0cce34942797364990ef4dc9fb8b382f7b2fd59e6c72de23efc2992fb148",
+  "raw_upstream_metrics": {
+    "AUC": 0.5143231172031418,
+    "MCC": 0.018844988266708936,
+    "NDCG": 0.526246985308866,
+    "Spearman": 0.007955624881756931,
+    "Top_recall": 0.087248322147651
+  },
+  "review_date": "2026-09-21",
+  "review_method": "automated independent source alignment and pinned-upstream metric execution",
+  "rounded_maximum_absolute_difference": 0.0,
+  "rounded_metrics": {
+    "AUC": 0.514,
+    "MCC": 0.019,
+    "NDCG": 0.526,
+    "Spearman": 0.008,
+    "Top_recall": 0.087
+  },
+  "scientific_reproduction": false,
+  "scored": 2972,
+  "seed": 0,
+  "seed_search": false,
+  "source_alignment": "all 2972 mutation identities, sequences and labels match prior prepared inputs",
+  "source_assay_sha256": "dd911d925eca79329a496eb6cb7b181ab448e15db244daf1c1f9c01e8a704c2a",
+  "source_hash_status": "observed_local_bytes_not_upstream_published_checksum",
+  "submission_status": "not_submitted",
+  "track_status": "partial_track",
+  "upstream_evaluator_sha256": "0002bc1b031c02dc2d67fde53da092c8fd301415645e8e83b425b4183570eba2",
+  "upstream_revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c"
+}

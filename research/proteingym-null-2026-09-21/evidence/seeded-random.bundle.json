@@ -1,0 +1,45 @@
+{
+  "completion": "partial",
+  "coverage": {
+    "denominator": 2972,
+    "scored": 2972,
+    "unscored": 0
+  },
+  "data_verification": "local_bytes_hashed_not_independently_source_verified",
+  "dataset_id": "proteingym-dms-substitutions-v1.3",
+  "execution_status": "local_adapter",
+  "independently_reproduced": false,
+  "kind": "rewire_benchmark_submission",
+  "metrics": {
+    "per_assay": {
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O": {
+        "denominator": 2972,
+        "metrics": {
+          "AUC": 0.514,
+          "MCC": 0.019,
+          "NDCG": 0.526,
+          "Spearman": 0.008,
+          "Top_recall": 0.087
+        },
+        "scored": 2972
+      }
+    }
+  },
+  "model": {
+    "name": "Seeded random ranking control",
+    "training_overlap": "no labelled fitting"
+  },
+  "predictions_sha256": "37a020ad31e35d57a924397c395c10bfac152417f0a42207400cef789d3d5e02",
+  "prepared_sha256": "9f0e0cce34942797364990ef4dc9fb8b382f7b2fd59e6c72de23efc2992fb148",
+  "protocol_id": "proteingym-v1.3-dms-substitutions",
+  "protocol_version": "1.3",
+  "provenance": {
+    "evidence_manifest_sha256": "38316a222ae4fa28e13afd5335100896b5156a76670361049c3ce0cc3521493c",
+    "reference_sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308",
+    "sdk_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+    "upstream_revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c"
+  },
+  "review_status": "unreviewed_contribution",
+  "schema_version": "1.0",
+  "scope": "subset"
+}
