@@ -61,7 +61,13 @@ def main():
     assert batch["status"] == "evaluated"
     run = args.output / "runs/training-prior-v1"
     report = json.loads((run / "report.json").read_text())
-    predictions = json.loads((run / "predictions.json").read_text())
+    predictions = sdk.read_predictions(run / "predictions.json")
+    if sdk._digest(predictions) != report.get("predictions_sha256"):
+        raise ValueError("Predictions digest differs from the executed report")
+    if report["prepared_sha256"] != prepared["prepared_sha256"]:
+        raise ValueError("Report prepared digest differs from evaluated inputs")
+    if report["environment"]["sdk_code_sha256"] != code_start:
+        raise ValueError("Report code digest differs from frozen implementation")
     train = [r for r in raw if splits[r["id"]]["split"] == "train"]
     test = [r for r in raw if splits[r["id"]]["split"] == "test"]
     assert len(train) == 19409 and len(test) == 8324
@@ -94,6 +100,7 @@ def main():
         "reverse_complement_legacy_rows": reverse_count, "split_groups_disjoint": True,
         "training_prior": prior, "metrics": independent, "absolute_tolerance": 1e-12,
         "predictions_sha256": report["predictions_sha256"], "prepared_sha256": report["prepared_sha256"],
+        "prediction_digest_verification": "passed", "prepared_and_code_binding": "passed",
         "code_hash_start": code_start, "code_hash_end": sdk._code_digest(),
         "source_retrieval": "existing local source files; no network retrieval",
         "scientific_reproduction": False, "submission_status": "not_submitted",

@@ -1,4 +1,5 @@
 {
+  "checkpoint_report_binding": "passed",
   "checkpoint_sha256": "7f21e80e61d16a71735163ef555d3009afb0c98da74c48e29df08606973cc55e",
   "code_hash_end": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
   "code_hash_start": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
@@ -11,6 +12,12 @@
     "torch": "2.2.2"
   },
   "esm2_load_inference_fit_evaluate_seconds": 64.55955554200045,
+  "integrity_reaudit": {
+    "date": "2026-09-21",
+    "method": "--verify-existing on original outputs and checkpoint; no model rerun",
+    "script_sha256": "8fa5094356b3dcc59c048d0a2a28cf90e5138fae8d9712b384f5af608c08e4a5",
+    "timing_policy": "Original execution timing and duplicate-evidence annotations preserved"
+  },
   "limitations": [
     "No confidence intervals",
     "Single task and split",
@@ -25,7 +32,9 @@
       "evidence_origin": "Rewire local model execution, not paper reproduction",
       "independent_metric_recomputation": "passed",
       "ndcg": 0.9072580204736261,
+      "prediction_digest_verification": "passed",
       "predictions_sha256": "96e8a0c6663dd0a471b984fb86506e483d252a6036a9617cf5f4487664274abd",
+      "prepared_and_code_binding": "passed",
       "run": "esm2",
       "scored": 184,
       "spearman": -0.2217595033467806,
@@ -35,7 +44,9 @@
       "evidence_origin": "Rewire local model execution, not paper reproduction",
       "independent_metric_recomputation": "passed",
       "ndcg": 0.9206667522227658,
+      "prediction_digest_verification": "passed",
       "predictions_sha256": "599dca4e6fa643a7cdfc96ac339033f61e5846ce225af17ac2ac3917ecc14fac",
+      "prepared_and_code_binding": "passed",
       "relationship_to_existing_evidence": {
         "classification": "validation_only_not_additional_independent_evidence",
         "original_receipt": "../rhomax/verification.json",
@@ -51,7 +62,9 @@
       "evidence_origin": "Rewire local model execution, not paper reproduction",
       "independent_metric_recomputation": "passed",
       "ndcg": 0.9548154942827918,
+      "prediction_digest_verification": "passed",
       "predictions_sha256": "0a214b7dbad99d3684353cf3d56c5c57bae1e2dfa67eb88f67e3f32c66313dd7",
+      "prepared_and_code_binding": "passed",
       "relationship_to_existing_evidence": {
         "classification": "validation_only_not_additional_independent_evidence",
         "original_receipt": "../rhomax/verification.json",

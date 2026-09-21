@@ -4,6 +4,10 @@
   "code_hash_start": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
   "cohort_count": 27733,
   "cohort_rebuild": "byte-identical from pinned local raw and annotation tables",
+  "integrity_reaudit": {
+    "date": "2026-09-21",
+    "method": "Original prediction canonical digest, prepared identity and frozen package checked without rerunning control"
+  },
   "limitation": "All scores tied: top100 is one fixed label-independent tie break, not a ranking ability estimate or expected chance yield",
   "metrics": {
     "auroc": 0.5,
@@ -15,7 +19,9 @@
     "prevalence": 0.037842383469485825,
     "recall_at_capacity": 0.012698412698412698
   },
+  "prediction_digest_verification": "passed",
   "predictions_sha256": "c9f2d729201ae3dd80fcfa7eb71c75968eb6cb33e30648109e1cbda070a3b9f8",
+  "prepared_and_code_binding": "passed",
   "prepared_sha256": "cbba55d19fea7cb204127343ecb554da169a16f047117eb1db6472a5707f38d3",
   "reverse_complement_legacy_rows": 7770,
   "review_method": "automated independent source parsing and metric recomputation",

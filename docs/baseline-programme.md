@@ -134,10 +134,11 @@ testing are dependencies tracked in the separate contribution-service PR.
 - Four new evaluated configurations: ESM-2 8M and 35M frozen Rhomax probes,
   the 22-feature composition reference, and the [MFASS training-prior control](../research/mfass-null-2026-09-21/README.md).
 - Nine distinct evaluation bundles passed queue dry-run validation: the five
-  prior evaluations plus these four. Repeated controls are excluded. No upload
+  prior evaluations plus these four. All nine payloads also passed the current
+  TypeScript contribution schema. Repeated controls are excluded. No upload
   or publication is claimed; production intake returned HTTP 503 while disabled.
 
-Local validation passed 463 Python tests with 11 optional skips. Both ESM pooling
+Local validation passed 473 Python tests with 11 optional skips. Both ESM pooling
 checks also passed in the actual Torch execution environment. The built 0.5.0
 wheel was installed and imported outside the checkout. Native Nextflow smoke,
 resume, code/configuration invalidation and failure checks passed. The actual
