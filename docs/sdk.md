@@ -151,7 +151,7 @@ scalar metrics and reconciled counts. They explicitly declare a local evaluation
 not paper reproduction, and retain local source hashes without claiming an
 independently verified upstream split. A complete run covers the local copy.
 
-Sign in to the contribution page with your verified email. Its SDK access control
+Sign in to [the contribution page](https://benchmarks.rewire.it/contribute/) with your verified email. Its SDK access control
 provides a short-lived Firebase ID token only when contributions are configured.
 Pass it as the `token=` argument, or set `REWIRE_SUBMISSION_TOKEN` for the CLI.
 Never put tokens in notebooks, command arguments, Git or result artifacts.
@@ -166,11 +166,46 @@ rewirebench submit --bundle ./contribution.json \
   --source-locator 'Evaluation report, results table' --dry-run
 ```
 
-Remove `--dry-run` only after reviewing and supplying an access token. Production
-currently returns a clear disabled-service message. A successful request returns a
+Remove `--dry-run` only after reviewing and supplying an access token. If intake
+is closed, the service returns a clear disabled-service message; keep the bundle
+and try again after intake opens. The contribution page shows current access.
+A successful request returns a
 submission ID, not a public result URL. Identical requests reuse a deterministic
 idempotency key; retry the same payload/key after uncertain network outcomes.
 Curators review the contribution, and publication occurs only through a dataset release.
+
+For Python, prompt for the short-lived token without saving it in a notebook:
+
+```python
+from getpass import getpass
+import rewirebench
+
+# Reuse the exact inspected payload from the dry run above.
+details = payload["contribution"]["details"]
+receipt = rewirebench.submit(
+    bundle,
+    title=payload["contribution"]["title"],
+    summary=payload["contribution"]["summary"],
+    source_url=payload["contribution"]["source_urls"][0],
+    metric=details["metric"],
+    value=details["value"],
+    source_locator=details["source_locator"],
+    idempotency_key=payload["idempotencyKey"],
+    token=getpass("Paste your library access token: "),
+)
+print(receipt["submission"]["id"], receipt["publication_status"])
+```
+
+Save the returned submission ID and idempotency key privately. Refresh the
+contribution page while signed in with the same email to track the request or
+respond to review notes. The receipt means the submission entered the private
+review queue; it does not mean that a result is published or independently verified.
+
+If authentication expires, copy a new token and retry the same payload and key.
+For rate limits, wait before retrying; for a timeout, the request may already have
+arrived, so retain the same key. Fix malformed bundles or missing evidence rather
+than repeatedly sending them. Receipt email can be delayed by provider quotas;
+the owned submission record is the authoritative intake status.
 
 ## Protocol-specific instructions
 
