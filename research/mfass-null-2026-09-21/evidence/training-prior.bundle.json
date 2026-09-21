@@ -1,0 +1,44 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 8324,
+    "scored": 8324,
+    "unscored": 0
+  },
+  "data_verification": "pinned_source_bytes",
+  "dataset_id": "mfass-assay-pairs-v2",
+  "execution_status": "local_adapter",
+  "independently_reproduced": false,
+  "kind": "rewire_benchmark_submission",
+  "metrics": {
+    "auroc": 0.5,
+    "average_precision_sklearn": 0.037842383469485825,
+    "capacity": 100,
+    "n": 8324,
+    "positives": 315,
+    "precision_at_capacity": 0.04,
+    "prevalence": 0.037842383469485825,
+    "recall_at_capacity": 0.012698412698412698
+  },
+  "model": {
+    "name": "Training class prior / majority",
+    "training_overlap": "protocol-permitted training only; no pretraining"
+  },
+  "predictions_sha256": "c9f2d729201ae3dd80fcfa7eb71c75968eb6cb33e30648109e1cbda070a3b9f8",
+  "prepared_sha256": "cbba55d19fea7cb204127343ecb554da169a16f047117eb1db6472a5707f38d3",
+  "protocol_id": "mfass-v2",
+  "protocol_version": "bee9133b83f3aedaf2bbb9013f1875515845607e",
+  "provenance": {
+    "annotation_sha256": "71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1",
+    "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "evidence_manifest_sha256": "2fff9ca99147833225b74eb6894d62dc597731238c74b76322861cf1b0d8f89b",
+    "raw_sha256": "a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8",
+    "runner_revision": "bee9133b83f3aedaf2bbb9013f1875515845607e",
+    "sdk_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+    "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "upstream_revision": "9a8e4f27106be52aeb11acad27f95f5cded663a8"
+  },
+  "review_status": "unreviewed_contribution",
+  "schema_version": "1.0",
+  "scope": "full"
+}

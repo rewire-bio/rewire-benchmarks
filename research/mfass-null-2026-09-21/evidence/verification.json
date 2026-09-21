@@ -1,0 +1,39 @@
+{
+  "absolute_tolerance": 1e-12,
+  "code_hash_end": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+  "code_hash_start": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+  "cohort_count": 27733,
+  "cohort_rebuild": "byte-identical from pinned local raw and annotation tables",
+  "limitation": "All scores tied: top100 is one fixed label-independent tie break, not a ranking ability estimate or expected chance yield",
+  "metrics": {
+    "auroc": 0.5,
+    "average_precision_sklearn": 0.037842383469485825,
+    "capacity": 100,
+    "n": 8324,
+    "positives": 315,
+    "precision_at_capacity": 0.04,
+    "prevalence": 0.037842383469485825,
+    "recall_at_capacity": 0.012698412698412698
+  },
+  "predictions_sha256": "c9f2d729201ae3dd80fcfa7eb71c75968eb6cb33e30648109e1cbda070a3b9f8",
+  "prepared_sha256": "cbba55d19fea7cb204127343ecb554da169a16f047117eb1db6472a5707f38d3",
+  "reverse_complement_legacy_rows": 7770,
+  "review_method": "automated independent source parsing and metric recomputation",
+  "schema_version": "1.0",
+  "scientific_reproduction": false,
+  "source_files_sha256": {
+    "cohort.tsv": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "snv_data_clean.txt": "a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8",
+    "snv_func_annot.txt": "71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1",
+    "split-v2.tsv": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052"
+  },
+  "source_retrieval": "existing local source files; no network retrieval",
+  "split_groups_disjoint": true,
+  "submission_status": "not_submitted",
+  "test_count": 8324,
+  "test_positives": 315,
+  "train_count": 19409,
+  "training_positives": 735,
+  "training_prior": 0.03786902983152146,
+  "verified_at": "2026-09-21"
+}
