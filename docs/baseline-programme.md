@@ -131,10 +131,11 @@ testing are dependencies tracked in the separate contribution-service PR.
 - Runner and evidence review: [PR10](https://github.com/rewire-bio/rewire-benchmarks/pull/10).
 - Website audit and coverage: [database PR26](https://github.com/rewire-bio/rewire-database/pull/26).
 - Live intake dependency: [database PR25](https://github.com/rewire-bio/rewire-database/pull/25).
-- Four new evaluated configurations: ESM-2 8M and 35M frozen Rhomax probes,
-  the 22-feature composition reference, and the [MFASS training-prior control](../research/mfass-null-2026-09-21/README.md).
-- Nine distinct evaluation bundles passed queue dry-run validation: the five
-  prior evaluations plus these four. All nine payloads also passed the current
+- Five new evaluated configurations: ESM-2 8M and 35M frozen Rhomax probes,
+  the 22-feature composition reference, the [MFASS training-prior control](../research/mfass-null-2026-09-21/README.md),
+  and a [fixed-seed ProteinGym AMFR null](../research/proteingym-null-2026-09-21/README.md).
+- Ten distinct evaluation bundles passed queue dry-run validation: the five
+  prior evaluations plus these five. All ten payloads also passed the current
   TypeScript contribution schema. Repeated controls are excluded. No upload
   or publication is claimed; production intake returned HTTP 503 while disabled.
 
