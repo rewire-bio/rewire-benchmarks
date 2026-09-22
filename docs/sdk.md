@@ -14,7 +14,9 @@ The latest published SDK is [v0.4.0](https://github.com/rewire-bio/rewire-benchm
 Version 0.5.0 in this branch is a release candidate, not a published release.
 Use an explicitly selected release wheel, a reviewed CI candidate artifact, or a
 build from a pinned source revision; record which one you used. Neither version
-is published to PyPI. See [0.5 release status](releases/0.5.0.md) for validation scope. From this repository, `uv sync --locked` installs the core tools and MFASS
+is published to PyPI. See [0.5 release status](releases/0.5.0.md) for validation scope.
+
+From this repository, `uv sync --locked` installs the core tools and MFASS
 package. `uv build --package rewirebench` builds a standalone wheel; it contains the
 protocols, reference metadata and split resources and works outside a checkout.
 Optional public-model environments: `uv sync --locked --extra dnabert2 --package rewirebench`
