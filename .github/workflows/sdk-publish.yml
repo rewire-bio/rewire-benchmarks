@@ -23,22 +23,34 @@ jobs:
   publication:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: ${{ inputs.tag }}
       PREPARATION_RUN_ID: ${{ inputs.preparation_run_id }}
       DRY_RUN: ${{ inputs.dry_run }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out reviewed publisher revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: publisher
+          fetch-depth: 0
+      - name: Check out immutable SDK release source
+        uses: actions/checkout@v4
         with:
           ref: refs/tags/${{ inputs.tag }}
+          path: release-source
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Verify source, successful preparation and disk capacity
         run: |
-          python scripts/verify_release_source.py --tag "$RELEASE_TAG" --output dist/publication-source.json
+          set -euo pipefail
+          python publisher/scripts/verify_release_source.py --source-root release-source --tag "$RELEASE_TAG" --output dist/publication-source.json
           [[ "$PREPARATION_RUN_ID" =~ ^[0-9]+$ ]]
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PREPARATION_RUN_ID" > dist/preparation-run.json
           python - <<'PY'
@@ -56,12 +68,14 @@ jobs:
           path: dist/prepared-artifacts
       - name: Verify all assets and optionally publish
         run: |
+          set -euo pipefail
           options=()
           if [ "$DRY_RUN" = false ]; then options+=(--publish); fi
-          python scripts/prepare_sdk_publication.py \
+          python publisher/scripts/prepare_sdk_publication.py \
             --artifacts dist/prepared-artifacts --output dist/publication \
             --source dist/publication-source.json --run dist/preparation-run.json \
-            --repository "$GITHUB_REPOSITORY" "${options[@]}" | tee dist/publication-plan.json
+            --repository "$GITHUB_REPOSITORY" --publisher-sha "$GITHUB_SHA" \
+            "${options[@]}" | tee dist/publication-plan.json
       - uses: actions/upload-artifact@v4
         with:
           name: sdk-publication-plan

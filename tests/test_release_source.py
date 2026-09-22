@@ -67,3 +67,37 @@ def test_reject_dirty_release_source(repository):
     (root / "untracked.py").write_text("print('not in the tag')")
     with pytest.raises(ValueError, match="uncommitted"):
         RELEASE.verify(root, "v0.5.0", "main")
+
+
+def test_cli_can_validate_separate_immutable_source_checkout(repository, tmp_path):
+    root, git = repository
+    output = tmp_path.parent / f"{tmp_path.name}-source-receipt.json"
+    result = subprocess.run([
+        __import__("sys").executable, str(Path(RELEASE.__file__)),
+        "--source-root", str(root), "--tag", "v0.5.0", "--main-ref", "main",
+        "--output", str(output),
+    ], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    import json
+    assert json.loads(output.read_text())["source_commit"] == git("rev-parse", "HEAD")
+
+
+def test_publisher_revision_must_be_clean_exact_and_merged(repository):
+    root, git = repository
+    spec = importlib.util.spec_from_file_location(
+        "publication_for_source_test", Path(__file__).resolve().parents[1] / "scripts/prepare_sdk_publication.py"
+    )
+    publication = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(publication)
+    sha = git("rev-parse", "HEAD")
+    assert publication.verify_publisher(root, sha, "main")["commit"] == sha
+    with pytest.raises(ValueError, match="differs"):
+        publication.verify_publisher(root, "0" * 40, "main")
+    (root / "dirty").write_text("not in reviewed source")
+    with pytest.raises(ValueError, match="uncommitted"):
+        publication.verify_publisher(root, sha, "main")
+    git("switch", "-c", "publisher-change")
+    git("add", ".")
+    git("commit", "-m", "Unreviewed publisher")
+    with pytest.raises(ValueError, match="not merged"):
+        publication.verify_publisher(root, git("rev-parse", "HEAD"), "main")
