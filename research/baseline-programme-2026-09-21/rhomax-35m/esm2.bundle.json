@@ -1,0 +1,40 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 184,
+    "scored": 184,
+    "unscored": 0
+  },
+  "data_verification": "pinned_source_bytes",
+  "dataset_id": "flip2-rhomax-by-wild-type",
+  "evaluation_claim": "local_evaluation_not_paper_reproduction",
+  "evaluation_method": "frozen_embedding_probe",
+  "execution_status": "local_adapter",
+  "independently_reproduced": false,
+  "kind": "rewire_benchmark_submission",
+  "metrics": {
+    "n": 184,
+    "ndcg": 0.9072580204736261,
+    "spearman": -0.2217595033467806
+  },
+  "model": {
+    "name": "ESM-2 35M frozen residue-mean embeddings + fixed ridge (Rewire)",
+    "training_overlap": "UniRef50 pretraining overlap is unreported; the linear head fits only archived training rows"
+  },
+  "predictions_sha256": "96e8a0c6663dd0a471b984fb86506e483d252a6036a9617cf5f4487664274abd",
+  "prepared_sha256": "f417d43497e0c8c453bd7c66cfea05959b4d6d47462283096e42a2dae8b72419",
+  "protocol_id": "flip2-fitness-v1",
+  "protocol_version": "1",
+  "provenance": {
+    "evidence_manifest_sha256": "2fff9ca99147833225b74eb6894d62dc597731238c74b76322861cf1b0d8f89b",
+    "model_checkpoint_sha256": "7f21e80e61d16a71735163ef555d3009afb0c98da74c48e29df08606973cc55e",
+    "model_implementation_sha256": "bb46676af95050012cf0bf8a8309581b400f660d2722519889693f4084559d73",
+    "sdk_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+    "source_csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+    "source_sha256": "7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+    "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6"
+  },
+  "review_status": "unreviewed_contribution",
+  "schema_version": "1.0",
+  "scope": "full"
+}

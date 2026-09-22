@@ -337,3 +337,36 @@ def test_genomic_v1_submission_is_retired():
     payload["protocol_id"] = "genomic-benchmarks-v1"
     with pytest.raises(ValueError, match="Unsupported protocol"):
         submit(payload, **arguments(), dry_run=True)
+
+
+@pytest.mark.parametrize("status", ["submitted", "in_review", "changes_requested", "rejected", "accepted", "published"])
+def test_acknowledgement_retains_only_known_identity_and_status(status):
+    class Opener:
+        def open(self, request, timeout):
+            return io.BytesIO(json.dumps({"result": {"data": {
+                "id": "private-id", "status": status, "email": "private@example.org",
+                "provider_body": "private-secret",
+            }}}).encode())
+    with patch("urllib.request.build_opener", return_value=Opener()):
+        result = submit(bundle(), **arguments(), token="verified")
+    assert result["submission"] == {"id": "private-id", "status": status}
+    assert "private-secret" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("bad", [
+    {"status": "private-secret"}, {"status": ["submitted"]}, {"status": "pending"},
+    {"id": "x" * 201}, {"id": "../private"}, {"id": "name@example.org"},
+    {"id": "with whitespace"}, {"id": "not.as.jwt"},
+])
+def test_invalid_success_receipts_are_redacted(bad):
+    class Opener:
+        def open(self, request, timeout):
+            return io.BytesIO(json.dumps({"result": {"data": {
+                "id": "private-id", "status": "submitted", **bad,
+            }}}).encode())
+    with (
+        patch("urllib.request.build_opener", return_value=Opener()),
+        pytest.raises(SubmissionError, match="not acknowledged") as caught,
+    ):
+        submit(bundle(), **arguments(), token="verified")
+    assert "private-secret" not in str(caught.value)

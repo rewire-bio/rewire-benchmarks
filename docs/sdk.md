@@ -1,14 +1,22 @@
 # Evaluate a public or private biological model
 
-The `rewirebench` 0.4 Python library runs locally. It does not send model code,
+The `rewirebench` Python library runs locally. It does not send model code,
 weights, inputs or predictions to Rewire. Optional `submit` sends an explicitly
 exported contribution to the verified-email review queue; it never publishes a result.
-Production submissions remain disabled until the existing service and email launch checks pass.
+As of 22 September 2026, production intake is enabled for verified contributors.
+Notification delivery remains paused; the signed-in submission record is the
+authoritative status. Intake, notification delivery and public dataset publication
+are separate operations.
 
 ## Install
 
-Use a wheel from the reviewed GitHub Actions artifacts or build it from the pinned
-source revision. This release has not been published to PyPI. From this repository, `uv sync --locked` installs the core tools and MFASS
+The latest published SDK is [v0.4.0](https://github.com/rewire-bio/rewire-benchmarks/releases/tag/v0.4.0).
+Version 0.5.0 in this branch is a release candidate, not a published release.
+Use an explicitly selected release wheel, a reviewed CI candidate artifact, or a
+build from a pinned source revision; record which one you used. Neither version
+is published to PyPI. See [0.5 release status](releases/0.5.0.md) for validation scope.
+
+From this repository, `uv sync --locked` installs the core tools and MFASS
 package. `uv build --package rewirebench` builds a standalone wheel; it contains the
 protocols, reference metadata and split resources and works outside a checkout.
 Optional public-model environments: `uv sync --locked --extra dnabert2 --package rewirebench`
@@ -204,8 +212,9 @@ review queue; it does not mean that a result is published or independently verif
 If authentication expires, copy a new token and retry the same payload and key.
 For rate limits, wait before retrying; for a timeout, the request may already have
 arrived, so retain the same key. Fix malformed bundles or missing evidence rather
-than repeatedly sending them. Receipt email can be delayed by provider quotas;
-the owned submission record is the authoritative intake status.
+than repeatedly sending them. Notification delivery is currently paused.
+Use the owned submission record to confirm intake and track review; lack of email
+is not evidence that submission failed.
 
 ## Protocol-specific instructions
 

@@ -1,0 +1,137 @@
+{
+  "completion": "partial",
+  "coverage": {
+    "denominator": 2972,
+    "scored": 2972,
+    "unscored": 0
+  },
+  "coverage_context": {
+    "not_selected": 0,
+    "selected": 2972,
+    "unscored_file_scope": "selected inputs only; not_selected counted separately"
+  },
+  "created_at": "2026-09-21T12:33:47.008816+00:00",
+  "dataset_id": "proteingym-dms-substitutions-v1.3",
+  "environment": {
+    "architecture": "arm64",
+    "container_digest": "unreported",
+    "container_runtime": "unreported",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.13",
+    "rewirebench": "0.4.0",
+    "sdk_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+    "sif_sha256": "unreported"
+  },
+  "execution": {
+    "adapter": "SeededRandomScore",
+    "batch_size": 32,
+    "fitting": "none",
+    "inference_and_fit_seconds": 0.005387083001551218,
+    "mode": "local_adapter",
+    "prediction_type": "scalar"
+  },
+  "independently_reproduced": false,
+  "input_information": "protocol allowlisted biological inputs; see baseline configuration for extra inputs",
+  "kind": "rewire_local_evaluation",
+  "metrics": {},
+  "model": {
+    "name": "Seeded random ranking control",
+    "training_overlap": "no labelled fitting"
+  },
+  "model_configuration": {
+    "baseline_id": "seeded-random-v1",
+    "baseline_version": "1",
+    "limitation": "One seeded control is not an uncertainty estimate; IDs bind the run",
+    "method": "SHA256(seed:prepared_id), first 64 bits / 2**64",
+    "seed": 0
+  },
+  "predictions_sha256": "37a020ad31e35d57a924397c395c10bfac152417f0a42207400cef789d3d5e02",
+  "prepared_sha256": "9f0e0cce34942797364990ef4dc9fb8b382f7b2fd59e6c72de23efc2992fb148",
+  "protocol_configuration": {
+    "aggregation": "round_assay_3dp_then_mean_by_UniProt_and_selection_then_equal_category_mean",
+    "assays": {
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O": {
+        "MSA_Neff_L_category": "Medium",
+        "UniProt_ID": "AMFR_HUMAN",
+        "expected_count": 2972,
+        "prepared_count": 2972,
+        "selection_type": "Stability",
+        "taxon": "Human"
+      }
+    },
+    "binary_labels": "official_DMS_score_bin",
+    "official_assay_count": 217,
+    "official_variant_count": 2465767,
+    "score_direction": "higher_is_better"
+  },
+  "protocol_id": "proteingym-v1.3-dms-substitutions",
+  "protocol_results": {
+    "aggregation": "round_assay_3dp_then_mean_by_UniProt_and_selection_then_equal_category_mean",
+    "by_protein_selection_type": {
+      "AMFR_HUMAN::Stability": {
+        "AUC": 0.514,
+        "MCC": 0.019,
+        "NDCG": 0.526,
+        "Spearman": 0.008,
+        "Top_recall": 0.087
+      }
+    },
+    "by_selection_type": {
+      "Stability": {
+        "AUC": 0.514,
+        "MCC": 0.019,
+        "NDCG": 0.526,
+        "Spearman": 0.008,
+        "Top_recall": 0.087
+      }
+    },
+    "complete_assays": 1,
+    "coverage": {
+      "denominator": 2972,
+      "eligible": 2972,
+      "prepared": 2972,
+      "scored": 2972
+    },
+    "data_verification": "local_bytes_hashed_not_independently_source_verified",
+    "metrics": {},
+    "per_assay": {
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O": {
+        "UniProt_ID": "AMFR_HUMAN",
+        "eligible": 2972,
+        "metrics": {
+          "AUC": 0.514,
+          "MCC": 0.019,
+          "NDCG": 0.526,
+          "Spearman": 0.008,
+          "Top_recall": 0.087
+        },
+        "prepared": 2972,
+        "scored": 2972,
+        "selection_type": "Stability",
+        "status": "complete"
+      }
+    },
+    "status": "partial_track",
+    "total_assays": 217,
+    "uncertainty": "not_estimated; upstream cross-model bootstrap differences are not an absolute score CI"
+  },
+  "protocol_version": "1.3",
+  "provenance": {
+    "assay_sha256": {
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O": "dd911d925eca79329a496eb6cb7b181ab448e15db244daf1c1f9c01e8a704c2a"
+    },
+    "data_verification": "local_bytes_hashed_not_independently_source_verified",
+    "expected_hashes_checked": [
+      "AMFR_HUMAN_Tsuboyama_2023_4G3O"
+    ],
+    "reference_sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308",
+    "source_url": "https://github.com/OATML-Markslab/ProteinGym/tree/144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "upstream_revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c"
+  },
+  "review_status": "unreviewed_local_run",
+  "schema_version": "1.0",
+  "scope": "subset",
+  "timing_seconds": {
+    "evaluation": 0.05659729200124275
+  }
+}

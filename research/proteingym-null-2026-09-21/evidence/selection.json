@@ -1,0 +1,9 @@
+{
+  "assay": "AMFR_HUMAN_Tsuboyama_2023_4G3O",
+  "baseline_id": "seeded-random-v1",
+  "scope": "one assay; partial ProteinGym track",
+  "seed": 0,
+  "seed_search": false,
+  "selected_before_execution": true,
+  "selection": "One pre-existing complete assay, matched to the prior ESM-2 evaluation"
+}

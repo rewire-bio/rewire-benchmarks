@@ -1,0 +1,36 @@
+{
+  "implementation_distribution": "fair-esm==2.0.0",
+  "models": {
+    "esm2_t12_35M_UR50D": {
+      "checkpoint_sha256": "7f21e80e61d16a71735163ef555d3009afb0c98da74c48e29df08606973cc55e",
+      "checkpoint_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t12_35M_UR50D.pt",
+      "dimension": 480,
+      "layer": 12,
+      "retrieval": "official HTTPS bytes hashed 2026-09-21; not an upstream-published checksum"
+    },
+    "esm2_t6_8M_UR50D": {
+      "checkpoint_sha256": "46f002a9870c9bdecd0ea887acb1f9a38a6b561e8f8bf8a6990b679b9d31b928",
+      "checkpoint_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t6_8M_UR50D.pt",
+      "dimension": 320,
+      "layer": 6,
+      "retrieval": "prior pinned official checkpoint reused"
+    }
+  },
+  "retrieved_at": "2026-09-21",
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "locator": "Available Models table and representation extraction usage",
+      "revision": "2b369911bb5b4b0dda914521b9475cad1656b2ac",
+      "sha256": "8b273c21a322fc9473d1b68d0dd40c8166ab2f89e4a190aa26ca87251b97cba9",
+      "url": "https://raw.githubusercontent.com/facebookresearch/esm/2b369911bb5b4b0dda914521b9475cad1656b2ac/README.md"
+    },
+    {
+      "locator": "esm2_t12_35M_UR50D and load_model_and_alphabet_core",
+      "revision": "2b369911bb5b4b0dda914521b9475cad1656b2ac",
+      "sha256": "1938be9951639bcc57419f18d67ef41a4e5cb276603f76215023ffdfea140c78",
+      "url": "https://raw.githubusercontent.com/facebookresearch/esm/2b369911bb5b4b0dda914521b9475cad1656b2ac/esm/pretrained.py"
+    }
+  ],
+  "upstream_revision": "2b369911bb5b4b0dda914521b9475cad1656b2ac"
+}

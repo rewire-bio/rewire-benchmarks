@@ -19,3 +19,8 @@ __all__ = [
 from rewirebench.sdk import prepare, run, evaluate, export, describe, read_embeddings
 from rewirebench.submission import submit
 __all__ += ["prepare", "run", "evaluate", "export", "submit", "describe", "read_embeddings"]
+
+from rewirebench.baselines import describe_baselines, run_baselines
+from rewirebench.submission_queue import enqueue_submission, drain_submissions, submission_status
+__all__ += ["describe_baselines", "run_baselines", "enqueue_submission", "drain_submissions",
+            "submission_status"]

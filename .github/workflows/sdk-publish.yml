@@ -1,0 +1,72 @@
+name: Publish reviewed SDK artifacts
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Reviewed merged release tag, for example v0.5.0
+        required: true
+      preparation_run_id:
+        description: Successful Prepare SDK release artifacts run ID
+        required: true
+      dry_run:
+        description: Verify artifacts and report the plan without publishing
+        type: boolean
+        default: true
+        required: true
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: sdk-publication-${{ inputs.tag }}
+  cancel-in-progress: false
+jobs:
+  publication:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      PREPARATION_RUN_ID: ${{ inputs.preparation_run_id }}
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify source, successful preparation and disk capacity
+        run: |
+          python scripts/verify_release_source.py --tag "$RELEASE_TAG" --output dist/publication-source.json
+          [[ "$PREPARATION_RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PREPARATION_RUN_ID" > dist/preparation-run.json
+          python - <<'PY'
+          import json, shutil
+          run = json.load(open('dist/preparation-run.json'))
+          assert run['conclusion'] == 'success' and run['event'] == 'workflow_dispatch'
+          assert run['path'] == '.github/workflows/sdk-release.yml'
+          assert shutil.disk_usage('.').free >= 6 * 1024**3, 'Need 6 GiB free on publication runner'
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.preparation_run_id }}
+          pattern: reviewed-sdk-release-candidate-*
+          path: dist/prepared-artifacts
+      - name: Verify all assets and optionally publish
+        run: |
+          options=()
+          if [ "$DRY_RUN" = false ]; then options+=(--publish); fi
+          python scripts/prepare_sdk_publication.py \
+            --artifacts dist/prepared-artifacts --output dist/publication \
+            --source dist/publication-source.json --run dist/preparation-run.json \
+            --repository "$GITHUB_REPOSITORY" "${options[@]}" | tee dist/publication-plan.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-publication-plan
+          path: |
+            dist/publication-plan.json
+            dist/publication/validation-receipt.json
+            dist/publication/SHA256SUMS
+          retention-days: 30

@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Reviewed immutable tag (v0.2.0 or later)
+        description: Reviewed version tag already merged into main (for example v0.5.0)
         required: true
 permissions:
   contents: read
@@ -17,19 +17,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: refs/tags/${{ inputs.tag }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - run: python -m pip install uv==0.8.2
+      - name: Verify reviewed source and record immutable identity
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          python scripts/verify_release_source.py --tag "$RELEASE_TAG" --output dist/release-source.json
+          python -c 'import json, os; r=json.load(open("dist/release-source.json")); open(os.environ["GITHUB_ENV"], "a").write("SOURCE_DATE_EPOCH={}\n".format(r["source_date_epoch"]))'
       - run: uv sync --locked --all-packages --extra sequence
       - run: uv run --no-sync pytest packages/rewirebench/tests tests benchmarks/mfass/tests
       - run: uv build --package rewirebench
-      - name: Install Apptainer
+      - name: Install pinned Apptainer release
+        # Official release asset 485098930; digest and package metadata checked 2026-09-21.
+        # https://github.com/apptainer/apptainer/releases/tag/v1.5.3
+        env:
+          APPTAINER_VERSION: '1.5.3'
+          APPTAINER_SHA256: '82b0bdddf459087d202383360b8318d526ad6826c748a2f669913cc6aef9ee40'
         run: |
-          sudo add-apt-repository -y ppa:apptainer/ppa
-          sudo apt-get update
-          sudo apt-get install -y apptainer
+          set -euo pipefail
+          package_dir=$(mktemp -d)
+          trap 'rm -rf "$package_dir"' EXIT
+          package_path="$package_dir/apptainer_${APPTAINER_VERSION}_amd64.deb"
+          curl --fail --location --retry 5 --retry-all-errors --connect-timeout 15 --max-time 180 \
+            --output "$package_path" \
+            "https://github.com/apptainer/apptainer/releases/download/v${APPTAINER_VERSION}/apptainer_${APPTAINER_VERSION}_amd64.deb"
+          printf '%s  %s\n' "$APPTAINER_SHA256" "$package_path" | sha256sum --check --strict
+          test "$(dpkg-deb --field "$package_path" Package)" = apptainer
+          test "$(dpkg-deb --field "$package_path" Version)" = "$APPTAINER_VERSION"
+          test "$(dpkg-deb --field "$package_path" Architecture)" = amd64
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install -y --no-install-recommends "$package_path"
+          test "$(apptainer version)" = "$APPTAINER_VERSION"
           apptainer version > dist/apptainer-version.txt
       - name: Build OCI and SIF artifacts
         env:
@@ -39,13 +62,23 @@ jobs:
           podman save --format oci-archive -o "dist/rewirebench-$ENVIRONMENT.oci.tar" "localhost/rewirebench:$ENVIRONMENT"
           apptainer build "dist/rewirebench-$ENVIRONMENT.sif" "oci-archive://$PWD/dist/rewirebench-$ENVIRONMENT.oci.tar"
           apptainer exec --cleanenv "dist/rewirebench-$ENVIRONMENT.sif" rewirebench protocols
+          case "$ENVIRONMENT" in
+            esm) import_check="import torch, esm; assert torch.__version__ == '2.2.2+cpu'; assert torch.version.cuda is None" ;;
+            dnabert2) import_check="import torch, transformers; assert torch.__version__ == '2.2.2+cpu'; assert torch.version.cuda is None" ;;
+            sequence) import_check="import pandas, pyarrow, h5py" ;;
+            core) import_check="import numpy, scipy, sklearn, rewirebench" ;;
+          esac
+          podman run --rm --network none --read-only --entrypoint python "localhost/rewirebench:$ENVIRONMENT" -c "$import_check"
+          apptainer exec --cleanenv "dist/rewirebench-$ENVIRONMENT.sif" python -c "$import_check"
+          podman version > dist/podman-version.txt
+          podman image inspect "localhost/rewirebench:$ENVIRONMENT" > dist/oci-image-inspect.json
           uv run --no-sync python containers/parity.py --environment "${{ matrix.environment }}" > dist/native-parity.json
           podman run --rm --network none --read-only --tmpfs /tmp:rw,size=512m --entrypoint python -v "$PWD:/workspace:ro" "localhost/rewirebench:$ENVIRONMENT" /workspace/containers/parity.py --environment "$ENVIRONMENT" > dist/podman-parity.json
           uv run --no-sync python containers/parity.py --compare dist/native-parity.json dist/podman-parity.json
           apptainer exec --cleanenv --bind "$PWD:/workspace:ro" "dist/rewirebench-$ENVIRONMENT.sif" python /workspace/containers/parity.py --environment "${{ matrix.environment }}" > dist/apptainer-parity.json
           uv run --no-sync python containers/parity.py --compare dist/native-parity.json dist/apptainer-parity.json
           cd dist
-          sha256sum *.whl *.tar.gz *.oci.tar *.sif > SHA256SUMS
+          sha256sum *.whl *.tar.gz *.oci.tar *.sif *.json *-version.txt > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: reviewed-sdk-release-candidate-${{ matrix.environment }}

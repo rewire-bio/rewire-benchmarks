@@ -11,3 +11,6 @@ benchmarks/*/data/
 workbench/
 dist/
 *.egg-info/
+.nextflow/
+.nextflow.log*
+work/

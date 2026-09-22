@@ -1,0 +1,39 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 15003,
+    "scored": 15003,
+    "unscored": 0
+  },
+  "data_verification": "pinned_source_bytes",
+  "dataset_id": "mrnabench-sample-mrl-designed-target_mrl_designed",
+  "evaluation_claim": "local_evaluation_not_paper_reproduction",
+  "evaluation_method": "frozen_embedding_probe",
+  "execution_status": "local_adapter",
+  "independently_reproduced": false,
+  "kind": "rewire_benchmark_submission",
+  "metrics": {
+    "mse": 1.914439715839851,
+    "pearson": 0.4367869170170987,
+    "spearman": 0.49477537290902324
+  },
+  "model": {
+    "name": "Sequence composition + RidgeCV (Rewire control)",
+    "training_overlap": "No pretraining; fitted only on this protocol training split. Split is not a claim of homology separation."
+  },
+  "predictions_sha256": "a8f80cfea7ddd197ef9446e161f5a761741b3f778dfc1459275c3355432e15c5",
+  "prepared_sha256": "f4f9777b5119b739437c6a9d85e4e1b937268dafd1307efca5f072d38957738b",
+  "protocol_id": "mrnabench-sample-mrl-v1",
+  "protocol_version": "1",
+  "provenance": {
+    "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95",
+    "evidence_manifest_sha256": "2fff9ca99147833225b74eb6894d62dc597731238c74b76322861cf1b0d8f89b",
+    "sdk_code_sha256": "fcc5ab65e6753cf29aabbdae231cbb5cdf72a3dd40ba8f109802c33223b33536",
+    "source_sha256": "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+    "split_sha256": "00e287b18ba4e90cb682af6e3fcdfc97e07f2b4b25d13265cd0eca37996536a2",
+    "upstream_revision": "74f96b8e6ae9f41cc3cccff089d826a62d5604b8"
+  },
+  "review_status": "unreviewed_contribution",
+  "schema_version": "1.0",
+  "scope": "full"
+}

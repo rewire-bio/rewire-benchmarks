@@ -34,6 +34,15 @@ Each repository has an independent build and deployment. Running an evaluation h
 
 The database's collection tools own this ingestion and review process. This repository does not require website or contribution-service credentials. For the current MFASS v2 evidence, retain the reviewed revision `bee9133b83f3aedaf2bbb9013f1875515845607e`; a documentation update does not change that scientific source identity.
 
+## Baselines, model evaluations and HPC
+
+The [baseline programme](docs/baseline-programme.md) provides registered controls,
+frozen ESM-2 examples and an explicit private submission queue. The
+[Nextflow workflow](docs/nextflow.md) prepares, runs, rescores and exports model
+matrices, with separate profiles for local execution and future HPC/cloud runs.
+Implemented adapters do not imply complete catalogue coverage; blocked baseline
+choices and unexecuted deployment profiles remain explicit.
+
 ## House rules
 
 These are enforced in `rewirebench`, not merely described here. A result that breaks one is refused
@@ -150,7 +159,7 @@ reconciliation failure rather than as a quietly different number.
 
 ## Python SDK and private models
 
-The 0.4 SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit
+The SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit
 `submit` interfaces. Bring a private adapter, keyed predictions or frozen embeddings.
 
 | Protocol | Supported scope | Instructions |
@@ -170,4 +179,7 @@ model weights. Podman and Apptainer use the same interfaces. A supported protoco
 is not a claim that every published evaluation has been reproduced.
 
 Submission goes to verified-email private review, never directly to publication.
-Production submissions remain disabled. Existing scientific artifacts are preserved.
+As of 22 September 2026, production intake is enabled for verified contributors;
+notifications remain paused. Track submissions on the signed-in contribution page.
+The latest published SDK is v0.4.0; [0.5.0 is a release candidate](docs/releases/0.5.0.md).
+Existing scientific artifacts are preserved.

@@ -1,0 +1,70 @@
+run,check,status,method,evidence
+flip2-composition,source_bytes,passed,automated independent calculation,Archived/mirror compressed source hash matches its respective pin: 7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3
+flip2-composition,source_csv_bytes,passed,automated independent calculation,Decompressed source CSV matches canonical v3 hash 8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f
+flip2-composition,source_rows_and_splits,passed,automated independent calculation,"Every source sequence, label and archived assignment retained, including duplicate multiplicity; counts {""test"": 184, ""train"": 584, ""validation"": 116}"
+flip2-composition,upstream_source_baselines_aggregate.py,passed,automated independent calculation,Pinned source file SHA-256 e4df0e547ab72bb659d7235e9a2e366bab6788002bfd73e3238bbf2fbc898313
+flip2-composition,upstream_source_baselines_linear_models.py,passed,automated independent calculation,Pinned source file SHA-256 b9a0c656574b3b1be2fd2bad5ee56cac31af89fff6e9c45d1d87b559d82a34ed
+flip2-composition,prepared_scope,passed,automated independent calculation,Complete selected split/target; not a suite aggregate and not a smoke run
+flip2-composition,opaque_unique_ids,passed,automated independent calculation,Every prepared ID is unique; allowlisted biological inputs contain only sequence
+flip2-composition,adapter_input_allowlist,passed,automated independent calculation,"All adapter inputs inspected: only opaque ID and sequence; no target, split or source index"
+flip2-composition,prediction_coverage,passed,automated independent calculation,"All 184 test IDs scored exactly once; no unknown IDs, missing predictions or nonfinite scores"
+flip2-composition,independent_train_only_refit,passed,automated independent calculation,40 composition features independently constructed; ridge alpha 10 and target scaling fitted on 584 training rows only; validation and test labels unused in fitting. This is not the published one-hot baseline. Maximum absolute prediction difference 0; tolerance 1e-09.
+flip2-composition,independent_metrics,passed,automated independent calculation,Pinned upstream metric expressions recomputed from saved predictions; undefined constant correlations retained as null; max absolute difference 5.551115123125783e-17
+flip2-composition,artifact_integrity,passed,automated independent calculation,"Saved predictions, prepared input, original report and installed released SDK match recorded hashes"
+flip2-composition,scope_and_claims,passed,automated independent calculation,"Complete selected evaluation, never whole-suite completion or published-score reproduction"
+flip2-train-mean,source_bytes,passed,automated independent calculation,Archived/mirror compressed source hash matches its respective pin: 7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3
+flip2-train-mean,source_csv_bytes,passed,automated independent calculation,Decompressed source CSV matches canonical v3 hash 8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f
+flip2-train-mean,source_rows_and_splits,passed,automated independent calculation,"Every source sequence, label and archived assignment retained, including duplicate multiplicity; counts {""test"": 184, ""train"": 584, ""validation"": 116}"
+flip2-train-mean,upstream_source_baselines_aggregate.py,passed,automated independent calculation,Pinned source file SHA-256 e4df0e547ab72bb659d7235e9a2e366bab6788002bfd73e3238bbf2fbc898313
+flip2-train-mean,upstream_source_baselines_linear_models.py,passed,automated independent calculation,Pinned source file SHA-256 b9a0c656574b3b1be2fd2bad5ee56cac31af89fff6e9c45d1d87b559d82a34ed
+flip2-train-mean,prepared_scope,passed,automated independent calculation,Complete selected split/target; not a suite aggregate and not a smoke run
+flip2-train-mean,opaque_unique_ids,passed,automated independent calculation,Every prepared ID is unique; allowlisted biological inputs contain only sequence
+flip2-train-mean,adapter_input_allowlist,passed,automated independent calculation,"All adapter inputs inspected: only opaque ID and sequence; no target, split or source index"
+flip2-train-mean,prediction_coverage,passed,automated independent calculation,"All 184 test IDs scored exactly once; no unknown IDs, missing predictions or nonfinite scores"
+flip2-train-mean,independent_train_only_refit,passed,automated independent calculation,Arithmetic mean of training labels only; no validation or test labels used in fit. Maximum absolute prediction difference 0; tolerance 1e-09.
+flip2-train-mean,independent_metrics,passed,automated independent calculation,Pinned upstream metric expressions recomputed from saved predictions; undefined constant correlations retained as null; max absolute difference 0.0
+flip2-train-mean,artifact_integrity,passed,automated independent calculation,"Saved predictions, prepared input, original report and installed released SDK match recorded hashes"
+flip2-train-mean,scope_and_claims,passed,automated independent calculation,"Complete selected evaluation, never whole-suite completion or published-score reproduction"
+mrnabench-composition,source_bytes,passed,automated independent calculation,Official pinned parquet hash 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4
+mrnabench-composition,source_rows_and_splits,passed,automated independent calculation,"All 100017 source rows reconciled; 0 missing targets excluded; independently generated seed-2541 assignments match; split hash 00e287b18ba4e90cb682af6e3fcdfc97e07f2b4b25d13265cd0eca37996536a2; counts {""test"": 15003, ""train"": 70011, ""validation"": 15003}"
+mrnabench-composition,upstream_source_mrna_bench.linear_probe.evaluator.py,passed,automated independent calculation,Pinned source file SHA-256 098c66c32375f520da9b608b64884bc4bf8eb00149fad2cc2ac8cb4210591110
+mrnabench-composition,upstream_source_mrna_bench.linear_probe.linear_probe.py,passed,automated independent calculation,Pinned source file SHA-256 122d5df79d120f719cce15f22aea7bbb26c0dd7d48e8ce9025b54c99425ed0fd
+mrnabench-composition,upstream_source_mrna_bench.data_splitter.data_splitter.py,passed,automated independent calculation,Pinned source file SHA-256 d07db724189686af7ef5f3003905a2dec9284a0c9b2157fbd6fc7002f95fba28
+mrnabench-composition,upstream_source_mrna_bench.data_splitter.sklearn_split.py,passed,automated independent calculation,Pinned source file SHA-256 00dc7a2cb943bf5864743750273d22f12925cfca2a8ac754ccd4d49e5370a2b5
+mrnabench-composition,prepared_scope,passed,automated independent calculation,Complete selected split/target; not a suite aggregate and not a smoke run
+mrnabench-composition,opaque_unique_ids,passed,automated independent calculation,Every prepared ID is unique; allowlisted biological inputs contain only sequence
+mrnabench-composition,adapter_input_allowlist,passed,automated independent calculation,"All adapter inputs inspected: only opaque ID and sequence; no target, split or source index"
+mrnabench-composition,prediction_coverage,passed,automated independent calculation,"All 15003 test IDs scored exactly once; no unknown IDs, missing predictions or nonfinite scores"
+mrnabench-composition,independent_train_only_refit,passed,automated independent calculation,"6 composition features independently constructed; unnormalized RidgeCV fitted on 70011 training rows only; selected alpha 0.001; validation and test labels unused in fitting. Evaluation uses held-out test, not upstream default validation. Maximum absolute prediction difference 0; tolerance 1e-09."
+mrnabench-composition,independent_metrics,passed,automated independent calculation,Pinned upstream metric expressions recomputed from saved predictions; undefined constant correlations retained as null; max absolute difference 0.0
+mrnabench-composition,artifact_integrity,passed,automated independent calculation,"Saved predictions, prepared input, original report and installed released SDK match recorded hashes"
+mrnabench-composition,scope_and_claims,passed,automated independent calculation,"Complete selected evaluation, never whole-suite completion or published-score reproduction"
+mrnabench-train-mean,source_bytes,passed,automated independent calculation,Official pinned parquet hash 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4
+mrnabench-train-mean,source_rows_and_splits,passed,automated independent calculation,"All 100017 source rows reconciled; 0 missing targets excluded; independently generated seed-2541 assignments match; split hash 00e287b18ba4e90cb682af6e3fcdfc97e07f2b4b25d13265cd0eca37996536a2; counts {""test"": 15003, ""train"": 70011, ""validation"": 15003}"
+mrnabench-train-mean,upstream_source_mrna_bench.linear_probe.evaluator.py,passed,automated independent calculation,Pinned source file SHA-256 098c66c32375f520da9b608b64884bc4bf8eb00149fad2cc2ac8cb4210591110
+mrnabench-train-mean,upstream_source_mrna_bench.linear_probe.linear_probe.py,passed,automated independent calculation,Pinned source file SHA-256 122d5df79d120f719cce15f22aea7bbb26c0dd7d48e8ce9025b54c99425ed0fd
+mrnabench-train-mean,upstream_source_mrna_bench.data_splitter.data_splitter.py,passed,automated independent calculation,Pinned source file SHA-256 d07db724189686af7ef5f3003905a2dec9284a0c9b2157fbd6fc7002f95fba28
+mrnabench-train-mean,upstream_source_mrna_bench.data_splitter.sklearn_split.py,passed,automated independent calculation,Pinned source file SHA-256 00dc7a2cb943bf5864743750273d22f12925cfca2a8ac754ccd4d49e5370a2b5
+mrnabench-train-mean,prepared_scope,passed,automated independent calculation,Complete selected split/target; not a suite aggregate and not a smoke run
+mrnabench-train-mean,opaque_unique_ids,passed,automated independent calculation,Every prepared ID is unique; allowlisted biological inputs contain only sequence
+mrnabench-train-mean,adapter_input_allowlist,passed,automated independent calculation,"All adapter inputs inspected: only opaque ID and sequence; no target, split or source index"
+mrnabench-train-mean,prediction_coverage,passed,automated independent calculation,"All 15003 test IDs scored exactly once; no unknown IDs, missing predictions or nonfinite scores"
+mrnabench-train-mean,independent_train_only_refit,passed,automated independent calculation,Arithmetic mean of training labels only; no validation or test labels used in fit. Maximum absolute prediction difference 0; tolerance 1e-09.
+mrnabench-train-mean,independent_metrics,passed,automated independent calculation,Pinned upstream metric expressions recomputed from saved predictions; undefined constant correlations retained as null; max absolute difference 0.0
+mrnabench-train-mean,artifact_integrity,passed,automated independent calculation,"Saved predictions, prepared input, original report and installed released SDK match recorded hashes"
+mrnabench-train-mean,scope_and_claims,passed,automated independent calculation,"Complete selected evaluation, never whole-suite completion or published-score reproduction"
+proteingym-esm2,all_expected_variants_scored,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,held_out_labels_excluded_from_adapter,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,network_blocked_during_execution,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,no_full_suite_metric,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,no_unscored_variants,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,rounded_metrics_match_pinned_upstream_formulas,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,saved_predictions_recompute_exactly,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,smoke_separate_from_complete_assay,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,unique_ids_validated_by_sdk,passed,automated_execution_and_source_formula_comparison,audit.json; report.json; reproduce.py
+proteingym-esm2,independent_source_checksum,gap,official_download_with_observed_sha256,retrieval.json: source host does not independently establish expected archive hash
+proteingym-esm2,training_overlap,unreported,not_assessed,report.json: UniRef50 pretraining may overlap benchmark proteins
+proteingym-esm2,published_score_reproduction,not_claimed,new_local_evaluation,README.md
+proteingym-esm2,all_saved_predictions_match_upstream_masked_marginals,passed,independent_pinned_source_execution,masking-verification.json; verify_masked_marginals.py
+proteingym-esm2,cache_repeat_and_input_immutability,passed,independent_pinned_source_execution,masking-verification.json; verify_masked_marginals.py
+proteingym-esm2,score_direction_consistent_with_upstream,passed,independent_pinned_source_execution,masking-verification.json; verify_masked_marginals.py

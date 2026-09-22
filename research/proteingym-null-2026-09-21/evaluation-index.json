@@ -1,0 +1,9 @@
+{
+  "bundle": "evidence/seeded-random.bundle.json",
+  "data_verification": "local_bytes_hashed_not_independently_source_verified",
+  "evaluation_key": "rewire-proteingym-amfr-seeded-random-20260921",
+  "publication_status": "unreviewed_local_evaluation",
+  "report": "evidence/seeded-random.report.json",
+  "scope": "one complete AMFR assay, partial track",
+  "submission_status": "not_submitted"
+}

@@ -1,0 +1,26 @@
+{
+  "local_predictions_file_sha256": "a8f80cfea7ddd197ef9446e161f5a761741b3f778dfc1459275c3355432e15c5",
+  "local_prepared_file_sha256": "e5d6fb9e5fadec1f9e6235ca3ed2054ac05f476ccc8f5dc67ec500febeae8237",
+  "local_report_sha256": "cf14fc6d24e433cde18f8569177c600da85f77a4a8f15dc0ba1692c49f1aa05a",
+  "provenance": {
+    "data_verification": "pinned_source_bytes",
+    "dataset_revision": "ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95",
+    "source_license": "unreported",
+    "source_sha256": "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+    "source_url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+    "split_sha256": "00e287b18ba4e90cb682af6e3fcdfc97e07f2b4b25d13265cd0eca37996536a2",
+    "upstream_code_license": "AGPL-3.0",
+    "upstream_revision": "74f96b8e6ae9f41cc3cccff089d826a62d5604b8"
+  },
+  "retrieval": "Reused local source bytes from prior recorded acquisition; checked against package pins before execution",
+  "retrieved_from": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+  "source_bytes_note": "Processed parquet matches the pinned Hugging Face revision.",
+  "source_sha256": "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+  "source_url": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+  "split_counts": {
+    "test": 15003,
+    "train": 70011,
+    "validation": 15003
+  },
+  "verified_at": "2026-09-20T20:46:30.777811+00:00"
+}

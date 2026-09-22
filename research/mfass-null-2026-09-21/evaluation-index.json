@@ -1,0 +1,9 @@
+{
+  "bundle": "evidence/training-prior.bundle.json",
+  "evaluation_key": "rewire-mfass-v2-training-prior-20260921",
+  "publication_status": "unreviewed_local_evaluation",
+  "report": "evidence/training-prior.report.json",
+  "scientific_reproduction": false,
+  "scope": "full canonical MFASS v2 held-out split",
+  "submission_status": "not_submitted"
+}

@@ -1,0 +1,38 @@
+name: Nextflow orchestration checks
+on:
+  pull_request:
+    paths:
+      - 'workflows/**'
+      - 'packages/rewirebench/**'
+      - 'benchmarks/mfass/**'
+      - '.github/workflows/nextflow.yml'
+      - 'uv.lock'
+  push:
+    branches: [main]
+    paths:
+      - 'workflows/**'
+      - 'packages/rewirebench/**'
+      - '.github/workflows/nextflow.yml'
+permissions:
+  contents: read
+jobs:
+  native-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: nf-core/setup-nextflow@v2
+        with:
+          version: '24.10.5'
+          java-version: '21'
+      - run: python -m pip install uv==0.8.2
+      - run: uv sync --locked --all-packages --extra sequence
+      - run: uv run --no-sync pytest workflows/benchmark/tests -q
+      - name: Parse target profiles without submitting jobs
+        run: |
+          for profile in native podman apptainer dgx slurm google_batch; do
+            nextflow config workflows/benchmark -profile "$profile" -flat > /dev/null
+          done

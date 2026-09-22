@@ -1,0 +1,117 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 8324,
+    "scored": 8324,
+    "unscored": 0
+  },
+  "coverage_context": {
+    "not_selected": 0,
+    "selected": 8324,
+    "unscored_file_scope": "selected inputs only; not_selected counted separately"
+  },
+  "created_at": "2026-09-21T12:10:53.120856+00:00",
+  "dataset_id": "mfass-assay-pairs-v2",
+  "environment": {
+    "architecture": "arm64",
+    "container_digest": "unreported",
+    "container_runtime": "unreported",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.13",
+    "rewirebench": "0.4.0",
+    "sdk_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+    "sif_sha256": "unreported"
+  },
+  "execution": {
+    "adapter": "TrainingPrior",
+    "batch_size": 32,
+    "fitting": "train_only",
+    "inference_and_fit_seconds": 0.09625304200744722,
+    "mode": "local_adapter",
+    "prediction_type": "scalar"
+  },
+  "independently_reproduced": false,
+  "input_information": "protocol allowlisted biological inputs; see baseline configuration for extra inputs",
+  "kind": "rewire_local_evaluation",
+  "metrics": {
+    "auroc": 0.5,
+    "average_precision_sklearn": 0.037842383469485825,
+    "capacity": 100,
+    "n": 8324,
+    "positives": 315,
+    "precision_at_capacity": 0.04,
+    "prevalence": 0.037842383469485825,
+    "recall_at_capacity": 0.012698412698412698
+  },
+  "model": {
+    "name": "Training class prior / majority",
+    "training_overlap": "protocol-permitted training only; no pretraining"
+  },
+  "model_configuration": {
+    "baseline_id": "training-prior-v1",
+    "baseline_version": "1",
+    "binary": "positive-class prevalence",
+    "multiclass": "majority; lowest-class tie"
+  },
+  "predictions_sha256": "c9f2d729201ae3dd80fcfa7eb71c75968eb6cb33e30648109e1cbda070a3b9f8",
+  "prepared_sha256": "cbba55d19fea7cb204127343ecb554da169a16f047117eb1db6472a5707f38d3",
+  "protocol_configuration": {
+    "canonical_test_count": 8324,
+    "canonical_train_count": 19409,
+    "capacity": 100,
+    "head": {
+      "C": 0.1,
+      "class_weight": "balanced",
+      "max_iter": 1000,
+      "seed": 20260914,
+      "solver": "liblinear"
+    },
+    "input_context": "170bp assay-oriented pair",
+    "smoke_limit_per_split": null,
+    "source_reuse_terms": "unreported; source data not redistributed"
+  },
+  "protocol_id": "mfass-v2",
+  "protocol_results": {
+    "complete": true,
+    "coverage": {
+      "denominator": 8324,
+      "scored": 8324,
+      "selected": 8324,
+      "unscored": 0
+    },
+    "metrics": {
+      "auroc": 0.5,
+      "average_precision_sklearn": 0.037842383469485825,
+      "capacity": 100,
+      "n": 8324,
+      "positives": 315,
+      "precision_at_capacity": 0.04,
+      "prevalence": 0.037842383469485825,
+      "recall_at_capacity": 0.012698412698412698
+    },
+    "metrics_scope": "scored held-out variants only",
+    "protocol_id": "mfass-v2",
+    "scope": "full",
+    "score_direction": "higher means more splice disruption",
+    "unscored_reasons": {
+      "missing_prediction": 0,
+      "not_selected": 0
+    }
+  },
+  "protocol_version": "bee9133b83f3aedaf2bbb9013f1875515845607e",
+  "provenance": {
+    "annotation_sha256": "71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1",
+    "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "raw_sha256": "a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8",
+    "runner_revision": "bee9133b83f3aedaf2bbb9013f1875515845607e",
+    "source_url": "https://github.com/rewire-bio/rewire-benchmarks/tree/bee9133b83f3aedaf2bbb9013f1875515845607e/benchmarks/mfass",
+    "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "upstream_revision": "9a8e4f27106be52aeb11acad27f95f5cded663a8"
+  },
+  "review_status": "unreviewed_local_run",
+  "schema_version": "1.0",
+  "scope": "full",
+  "timing_seconds": {
+    "evaluation": 0.44232487499539275
+  }
+}

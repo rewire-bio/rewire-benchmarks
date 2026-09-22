@@ -1,0 +1,7 @@
+{
+  "note": "Exact previously frozen package snapshot reused. Installed distribution metadata says 0.4.0; the code digest identifies the development implementation actually executed.",
+  "sdk_code_sha256": "08cbbaac2aa8f60af5c43af7a83410e9690b44c5e4d162fbe1e5766885952fce",
+  "source_archive": "../baseline-programme-2026-09-21/rhomax-35m/package-source.tar.gz",
+  "source_archive_commit": "6d95ece86ef9851db916f49e81a581e306657377",
+  "source_archive_sha256": "9df35e2511ec1062fbe4f899d885f7a29260917e507deb77187c5a2aeca38792"
+}

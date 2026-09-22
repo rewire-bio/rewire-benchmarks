@@ -1,0 +1,33 @@
+{
+  "files": {
+    "__init__.py": "bcb8cb03ff2bcc33a91fa68a09e19ff845734527202053cf0f455fe5a023824a",
+    "adapters/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "adapters/baselines.py": "faefd730bc98b6c6ac38644b97c94896b76f7219694856ae29ee51f6bc5c1e3d",
+    "adapters/esm.py": "4ff38cfbb91d718b52a44da53aa5594fe73d9d1d4d0ce43724807597c3929889",
+    "adapters/esm_embeddings.py": "1f475a084964698145fb07f7d0cd851a486d06a508e266904160d6d6ec9ef9bb",
+    "adapters/mfass.py": "5dc807e1274aa69d81ee2040cccaf17cbd36c9a5a01dfa1268e1a339654a6ad6",
+    "adapters/sequence.py": "b3407940ca4c8a1cdcf3a3bb3849c3e26d7f85272b2ee63087307378ffaa79dc",
+    "baselines.py": "c381ca7d2b9f90f2601cc337e9008bc086b8d2960bf7618c406a4875543a2da6",
+    "cli.py": "58e3f711fd38f9202ac331323b9219d5597d8dcbf0cb718ade8801642005b158",
+    "metrics.py": "4030374ed11d38e523fc9991ddd792f8800e7739ac71588085bfff91f912d7f7",
+    "protocols/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "protocols/dart_eval.py": "c52f546eae85349cd19fe4eff6ee505280168b5e028a901b6c1e6cba699ee362",
+    "protocols/flip2.py": "346560e84621aa68cc8c33b644d7e874ab67a5a1242d86835e072c98271f2d02",
+    "protocols/genomic_benchmarks.py": "c1571097dfaa45781b5149c84fafd662270908f356daeaed1d3002e3c2c81c7f",
+    "protocols/mfass.py": "6d090a6b1622fe571b8c48ecc213b9b6adf3cbf06cc2abc2d3bfc891a3f8ed93",
+    "protocols/mrnabench.py": "31c6fbc8fe963b04f676a26fd922efd68cd68410f296754e5f5c499142261c49",
+    "protocols/proteingym.py": "2d62959db5611b1c7c1c7e8e44056e96c90b3f52975b2080bc36da576f0ac871",
+    "protocols/tdc_admet.py": "9a1a9c61d5e900f0c93d383879a202925470f8e3804d48f442326083298cdc94",
+    "provenance.py": "9b509fc8f563112f0ba523d734995199f21299a6c021eaba0ac79086659a3c32",
+    "resources/flip2/example_adapter.py": "55a4751baf83fb01040e2c17a12d6ffb57fe82850d90d35777c0222a8ef028ea",
+    "resources/proteingym/upstream_esm_compute_fitness.py": "35186603513cae44fb6a2a44c72cb085db469115e145a267bd7b78350b9bb1ba",
+    "resources/proteingym/upstream_performance.py": "0002bc1b031c02dc2d67fde53da092c8fd301415645e8e83b425b4183570eba2",
+    "results.py": "e3b95804fb9cd898a125e78d3abad8022df186d094b89ac0c8588070af4a516d",
+    "sdk.py": "27302872813b9b967a80fc0c1552af7a5b61f6050d52ea72e2c97a4f3ee78e12",
+    "sequence_submission.py": "f4a64864d0819131871c4d1df7db60827a66be792b0f16ee1016672a0a55f9ce",
+    "splits.py": "c1b5cdd014b53522c2ffbd230faaf6141684874ec30633cdd8ef6447d3bbcbff",
+    "submission.py": "684d2459190c9850ad2ffcdd2c009da9e6cfa8ce1f0ab9950572d2d8187dfb16",
+    "submission_queue.py": "079cb53803edfcd563ab346f7ab7d8b27cb51a32c4655e13e41c2da1ef852bc8"
+  },
+  "sdk_code_sha256": "9350e367b20ec48d9ce1195cb5b73c4bd98ce8530a2d1f7ba2157fc8be75fa34"
+}
