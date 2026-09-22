@@ -48,10 +48,12 @@ def verify(root: Path, tag: str, main_ref: str = "origin/main") -> dict:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True)
+    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1],
+                        help="Checkout to validate; defaults to this script’s repository")
     parser.add_argument("--main-ref", default="origin/main")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    receipt = verify(Path(__file__).resolve().parents[1], args.tag, args.main_ref)
+    receipt = verify(args.source_root.resolve(), args.tag, args.main_ref)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(receipt, indent=2) + "\n")
 

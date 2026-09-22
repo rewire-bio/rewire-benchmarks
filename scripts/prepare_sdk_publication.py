@@ -27,7 +27,27 @@ def check_size(size):
         raise ValueError("Release assets must be nonempty and smaller than 2 GiB")
 
 
-def stage(artifacts, output, source, run):
+def verify_publisher(root, expected_sha, main_ref="origin/main"):
+    """Record reviewed publishing code independently of immutable package source."""
+    if not re.fullmatch(r"[0-9a-f]{40}", expected_sha):
+        raise ValueError("Publisher must use an exact commit SHA")
+
+    def git(*args):
+        return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
+
+    if git("rev-parse", "HEAD") != expected_sha:
+        raise ValueError("Publisher checkout differs from the workflow commit")
+    result = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
+                             expected_sha, main_ref], capture_output=True, check=False)
+    if result.returncode:
+        raise ValueError("Publisher revision is not merged into main")
+    if git("status", "--porcelain", "--untracked-files=normal"):
+        raise ValueError("Publisher checkout contains uncommitted files")
+    return {"commit": expected_sha, "tree": git("rev-parse", "HEAD^{tree}"),
+            "main_commit": git("rev-parse", main_ref)}
+
+
+def stage(artifacts, output, source, run, publisher):
     if (run.get("conclusion") != "success" or run.get("event") != "workflow_dispatch"
             or run.get("path") != ".github/workflows/sdk-release.yml"):
         raise ValueError("Artifacts must come from a successful SDK release preparation run")
@@ -90,7 +110,7 @@ def stage(artifacts, output, source, run):
     for name, path in selections.items():
         os.link(path, output / name)  # Same GitHub runner filesystem; no second large copy.
     receipt = {
-        "schema_version": "1.0", "source": source,
+        "schema_version": "1.0", "source": source, "publisher": publisher,
         "preparation_run": {k: run[k] for k in ("id", "html_url", "conclusion", "event")},
         "tested_platform": "Linux amd64 CPU; archived/synthetic scoring and framework imports",
         "not_tested": ["GPU", "DGX", "Slurm", "Google Batch", "Windows", "Linux arm64",
@@ -110,24 +130,30 @@ def publish(output, source, repository):
     tag, commit = source["tag"], source["source_commit"]
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
         raise ValueError("Invalid repository")
-    endpoint = f"repos/{repository}/releases/tags/{tag}"
+    endpoint = f"repos/{repository}/releases"
 
-    def release():
-        result = subprocess.run(["gh", "api", endpoint], capture_output=True, text=True, check=False)
-        if result.returncode:
-            if "HTTP 404" in result.stderr:
-                return None
-            raise RuntimeError("Could not read existing GitHub release")
+    def api(*args):
+        result = subprocess.run(["gh", "api", *args], capture_output=True, text=True, check=True)
         return json.loads(result.stdout)
 
-    remote = release()
-    if remote is None:
-        subprocess.run(["gh", "release", "create", tag, "--repo", repository, "--verify-tag",
-                        "--target", commit, "--draft", "--title", f"rewirebench {source['sdk_version']}",
-                        "--notes", ("Reviewed SDK and Linux amd64 CPU artifacts. See validation-receipt.json "
-                        "for exact source, executed platform checks and limitations. No scientific "
-                        "results or submissions are published by installing these assets.")], check=True)
-        remote = release()
+    # Refuse missing or moved remote tags; creating a release must never create a tag.
+    tag_commit = api(f"repos/{repository}/commits/{tag}")["sha"]
+    if tag_commit != commit:
+        raise ValueError("Remote release tag differs from the reviewed source")
+    # The tag endpoint omits draft releases, including one just created successfully.
+    pages = api("--paginate", "--slurp", f"{endpoint}?per_page=100")
+    matches = [release for page in pages for release in page if release["tag_name"] == tag]
+    if len(matches) > 1:
+        raise ValueError("Multiple releases use this tag; review before resuming")
+    remote = matches[0] if matches else api(
+        "--method", "POST", endpoint,
+        "-f", f"tag_name={tag}", "-f", f"target_commitish={commit}", "-F", "draft=true",
+        "-f", f"name=rewirebench {source['sdk_version']}",
+        "-f", "body=Reviewed SDK and Linux amd64 CPU artifacts. See validation-receipt.json "
+        "for exact source, executed platform checks and limitations. Installing these "
+        "assets does not submit or publish scientific results.",
+    )
+    release_endpoint = f"{endpoint}/{remote['id']}"
     if not remote["draft"] or remote["target_commitish"] != commit:
         raise ValueError("Refusing to modify a published release or unrelated draft")
     expected = {p.name: {"size": p.stat().st_size, "digest": "sha256:" + digest(p)}
@@ -147,11 +173,17 @@ def publish(output, source, repository):
     present = verify_remote(remote["assets"])
     for name in sorted(expected.keys() - present):
         subprocess.run(["gh", "release", "upload", tag, str(output / name),
-                        "--repo", repository], check=True)
-    if verify_remote(release()["assets"]) != expected.keys():
+                        "--repo", repository], check=True, capture_output=True, text=True)
+    if verify_remote(api(release_endpoint)["assets"]) != expected.keys():
         raise ValueError("Incomplete release upload; draft retained")
-    subprocess.run(["gh", "release", "edit", tag, "--repo", repository,
-                    "--draft=false"], check=True)
+    api("--method", "PATCH", release_endpoint, "-F", "draft=false")
+    published = api(release_endpoint)
+    if (published.get("draft") is not False or not published.get("published_at")
+            or published.get("tag_name") != tag or published.get("target_commitish") != commit):
+        raise ValueError("GitHub did not confirm public release; inspect the draft before retrying")
+    if verify_remote(published["assets"]) != expected.keys():
+        raise ValueError("Published release assets differ from the verified plan")
+    return {"url": published["html_url"], "published_at": published["published_at"]}
 
 
 def main():
@@ -162,15 +194,18 @@ def main():
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--repository", required=True)
     parser.add_argument("--publish", action="store_true")
+    parser.add_argument("--publisher-sha", required=True)
     args = parser.parse_args()
     source, run = (json.loads(path.read_text()) for path in (args.source, args.run))
-    stage(args.artifacts, args.output, source, run)
-    print(json.dumps({"publish_requested": args.publish, "tag": source["tag"],
-                      "source_commit": source["source_commit"],
+    publisher = verify_publisher(Path(__file__).resolve().parents[1], args.publisher_sha)
+    stage(args.artifacts, args.output, source, run, publisher)
+    published = publish(args.output, source, args.repository) if args.publish else None
+    print(json.dumps({"publish_requested": args.publish,
+                      "publication_status": "published" if published else "dry_run",
+                      "published_release": published, "tag": source["tag"],
+                      "source_commit": source["source_commit"], "publisher": publisher,
                       "assets": [{"name": p.name, "bytes": p.stat().st_size, "sha256": digest(p)}
                                  for p in sorted(args.output.iterdir())]}, indent=2))
-    if args.publish:
-        publish(args.output, source, args.repository)
 
 
 if __name__ == "__main__":
