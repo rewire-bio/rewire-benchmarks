@@ -1,0 +1,144 @@
+{
+  "audit_script_sha256": "e5fe05ec7390a242d4cbbef44a28385eaf26266e5cd53a61c74edb6c36af792d",
+  "checks": [
+    {
+      "check": "source_bytes",
+      "detail": "Archived/mirror compressed source hash matches its respective pin: 7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+      "evidence_location": "complete gzip file",
+      "method": "automated independent calculation",
+      "source_url": "https://flip.protein.properties/assets/splits/rhomax/by_wild_type.csv.gz",
+      "status": "passed"
+    },
+    {
+      "check": "source_csv_bytes",
+      "detail": "Decompressed source CSV matches canonical v3 hash 8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+      "evidence_location": "complete decompressed CSV",
+      "method": "automated independent calculation",
+      "source_url": "https://zenodo.org/api/records/18433203/files/rhomax/by_wild_type.csv.gz/content",
+      "status": "passed"
+    },
+    {
+      "check": "source_rows_and_splits",
+      "detail": "Every source sequence, label and archived assignment retained, including duplicate multiplicity; counts {\"test\": 184, \"train\": 584, \"validation\": 116}",
+      "evidence_location": "set/validation/sequence/target columns; all 884 source rows",
+      "method": "automated independent calculation",
+      "source_url": "https://zenodo.org/api/records/18433203/files/rhomax/by_wild_type.csv.gz/content",
+      "status": "passed"
+    },
+    {
+      "check": "upstream_source_baselines_aggregate.py",
+      "detail": "Pinned source file SHA-256 e4df0e547ab72bb659d7235e9a2e366bab6788002bfd73e3238bbf2fbc898313",
+      "evidence_location": "complete source file",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py",
+      "status": "passed"
+    },
+    {
+      "check": "upstream_source_baselines_linear_models.py",
+      "detail": "Pinned source file SHA-256 b9a0c656574b3b1be2fd2bad5ee56cac31af89fff6e9c45d1d87b559d82a34ed",
+      "evidence_location": "complete source file",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/linear_models.py",
+      "status": "passed"
+    },
+    {
+      "check": "prepared_scope",
+      "detail": "Complete selected split/target; not a suite aggregate and not a smoke run",
+      "evidence_location": "prepared scope and limit metadata",
+      "method": "automated independent calculation",
+      "source_url": "https://flip.protein.properties/assets/splits/rhomax/by_wild_type.csv.gz",
+      "status": "passed"
+    },
+    {
+      "check": "opaque_unique_ids",
+      "detail": "Every prepared ID is unique; allowlisted biological inputs contain only sequence",
+      "evidence_location": "_inputs",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/sdk.py#L162-L163",
+      "status": "passed"
+    },
+    {
+      "check": "adapter_input_allowlist",
+      "detail": "All adapter inputs inspected: only opaque ID and sequence; no target, split or source index",
+      "evidence_location": "_inputs applied to every prepared row",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/sdk.py#L162-L163",
+      "status": "passed"
+    },
+    {
+      "check": "prediction_coverage",
+      "detail": "All 184 test IDs scored exactly once; no unknown IDs, missing predictions or nonfinite scores",
+      "evidence_location": "prediction file and reported coverage",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py",
+      "status": "passed"
+    },
+    {
+      "check": "independent_train_only_refit",
+      "detail": "40 composition features independently constructed; ridge alpha 10 and target scaling fitted on 584 training rows only; validation and test labels unused in fitting. This is not the published one-hot baseline. Maximum absolute prediction difference 0; tolerance 1e-09.",
+      "evidence_location": "independent feature extraction and fitting in verify_sequence.py",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/protocols/flip2.py",
+      "status": "passed"
+    },
+    {
+      "check": "independent_metrics",
+      "detail": "Pinned upstream metric expressions recomputed from saved predictions; undefined constant correlations retained as null; max absolute difference 5.551115123125783e-17",
+      "evidence_location": "baselines/aggregate.py:131-135; Spearman and shifted-target NDCG",
+      "method": "automated independent calculation",
+      "source_url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py",
+      "status": "passed"
+    },
+    {
+      "check": "artifact_integrity",
+      "detail": "Saved predictions, prepared input, original report and installed released SDK match recorded hashes",
+      "evidence_location": "SHA-256 receipt fields",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/sdk.py",
+      "status": "passed"
+    },
+    {
+      "check": "scope_and_claims",
+      "detail": "Complete selected evaluation, never whole-suite completion or published-score reproduction",
+      "evidence_location": "report completion and scientific scope",
+      "method": "automated independent calculation",
+      "source_url": "https://github.com/rewire-bio/rewire-benchmarks/blob/fcccbbcdbe3d5cd64a1a312d536615273320f7b4/packages/rewirebench/src/rewirebench/protocols/flip2.py",
+      "status": "passed"
+    }
+  ],
+  "counts": {
+    "test": 184,
+    "train": 584,
+    "validation": 116
+  },
+  "limitations": [
+    "Independent calculation uses the same installed numerical libraries as execution; it is not an independent software-stack reproduction.",
+    "Checks establish agreement for these saved inputs and controls; they do not establish absence of homology or biological overlap between source splits.",
+    "These Rewire controls are not published-model reproductions. No uncertainty interval or repeated-seed estimate was measured.",
+    "Raw data and predictions remain local; public aggregate receipts alone cannot reconstruct individual predictions."
+  ],
+  "metric_max_absolute_error": 5.551115123125783e-17,
+  "prediction_max_absolute_error": 0.0,
+  "recomputed_metrics": {
+    "n": 184,
+    "ndcg": 0.954819941821582,
+    "spearman": 0.4181822515580151
+  },
+  "review_method": "automated independent source reconciliation, train-only refit and metric recalculation",
+  "reviewed_at": "2026-09-20T20:51:21.409711+00:00",
+  "reviewer": "Codex independent audit worker",
+  "run_id": "flip2-composition",
+  "schema_version": "1.0",
+  "source_references": [
+    {
+      "sha256": "e4df0e547ab72bb659d7235e9a2e366bab6788002bfd73e3238bbf2fbc898313",
+      "url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py"
+    },
+    {
+      "sha256": "b9a0c656574b3b1be2fd2bad5ee56cac31af89fff6e9c45d1d87b559d82a34ed",
+      "url": "https://raw.githubusercontent.com/J-SNACKKB/FLIP/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/linear_models.py"
+    }
+  ],
+  "status": "passed",
+  "tolerance_absolute": 1e-09
+}

@@ -1,0 +1,26 @@
+{
+  "local_predictions_file_sha256": "599dca4e6fa643a7cdfc96ac339033f61e5846ce225af17ac2ac3917ecc14fac",
+  "local_prepared_file_sha256": "df996aee84bd5ed3e6381f9f6db864a377ab0b4809a9a48ff146d06a3dc069df",
+  "local_report_sha256": "f962e07b5a92dfeb7c3cfbb91749d71d889f69d99ebd89d2d852dd4546ab3ec0",
+  "provenance": {
+    "data_verification": "pinned_source_bytes",
+    "dataset_version": "zenodo-18433203-v3",
+    "evaluator_url": "https://github.com/J-SNACKKB/FLIP/blob/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py#L131-L135",
+    "source_csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+    "source_sha256": "7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+    "source_url": "https://zenodo.org/api/records/18433203/files/rhomax/by_wild_type.csv.gz/content",
+    "split_origin": "Archived assignments: validation=True held out of training",
+    "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6"
+  },
+  "retrieval": "Reused local source bytes from prior recorded acquisition; checked against package pins before execution",
+  "retrieved_from": "https://flip.protein.properties/assets/splits/rhomax/by_wild_type.csv.gz",
+  "source_bytes_note": "Official mirror gzip differs from Zenodo gzip; decompressed CSV matches pinned Zenodo v3 bytes.",
+  "source_sha256": "7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+  "source_url": "https://zenodo.org/api/records/18433203/files/rhomax/by_wild_type.csv.gz/content",
+  "split_counts": {
+    "test": 184,
+    "train": 584,
+    "validation": 116
+  },
+  "verified_at": "2026-09-20T20:46:19.210518+00:00"
+}

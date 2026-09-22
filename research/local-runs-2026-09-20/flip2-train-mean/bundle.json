@@ -1,0 +1,38 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 184,
+    "scored": 184,
+    "unscored": 0
+  },
+  "data_verification": "pinned_source_bytes",
+  "dataset_id": "flip2-rhomax-by-wild-type",
+  "evaluation_claim": "local_evaluation_not_paper_reproduction",
+  "evaluation_method": "adapter_fit",
+  "execution_status": "local_adapter",
+  "independently_reproduced": false,
+  "kind": "rewire_benchmark_submission",
+  "metrics": {
+    "n": 184,
+    "ndcg": 0.9206667522227658,
+    "spearman": null
+  },
+  "model": {
+    "name": "Training mean (Rewire control)",
+    "training_overlap": "No pretraining; fitted only on this protocol training split. Split is not a claim of homology separation."
+  },
+  "predictions_sha256": "599dca4e6fa643a7cdfc96ac339033f61e5846ce225af17ac2ac3917ecc14fac",
+  "prepared_sha256": "f417d43497e0c8c453bd7c66cfea05959b4d6d47462283096e42a2dae8b72419",
+  "protocol_id": "flip2-fitness-v1",
+  "protocol_version": "1",
+  "provenance": {
+    "evidence_manifest_sha256": "2fff9ca99147833225b74eb6894d62dc597731238c74b76322861cf1b0d8f89b",
+    "sdk_code_sha256": "fcc5ab65e6753cf29aabbdae231cbb5cdf72a3dd40ba8f109802c33223b33536",
+    "source_csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+    "source_sha256": "7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+    "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6"
+  },
+  "review_status": "unreviewed_contribution",
+  "schema_version": "1.0",
+  "scope": "full"
+}

@@ -1,0 +1,16 @@
+run,protocol,dataset,metric,value,scored,denominator,scope,source_location
+flip2-composition,flip2-fitness-v1,flip2-rhomax-by-wild-type,ndcg,0.954819941821582,184,184,one complete selected split/target,flip2-composition/report.json
+flip2-composition,flip2-fitness-v1,flip2-rhomax-by-wild-type,spearman,0.41818225155801514,184,184,one complete selected split/target,flip2-composition/report.json
+flip2-train-mean,flip2-fitness-v1,flip2-rhomax-by-wild-type,ndcg,0.9206667522227658,184,184,one complete selected split/target,flip2-train-mean/report.json
+flip2-train-mean,flip2-fitness-v1,flip2-rhomax-by-wild-type,spearman,,184,184,one complete selected split/target,flip2-train-mean/report.json
+mrnabench-composition,mrnabench-sample-mrl-v1,mrnabench-sample-mrl-designed-target_mrl_designed,mse,1.914439715839851,15003,15003,one complete selected split/target,mrnabench-composition/report.json
+mrnabench-composition,mrnabench-sample-mrl-v1,mrnabench-sample-mrl-designed-target_mrl_designed,pearson,0.4367869170170987,15003,15003,one complete selected split/target,mrnabench-composition/report.json
+mrnabench-composition,mrnabench-sample-mrl-v1,mrnabench-sample-mrl-designed-target_mrl_designed,spearman,0.49477537290902324,15003,15003,one complete selected split/target,mrnabench-composition/report.json
+mrnabench-train-mean,mrnabench-sample-mrl-v1,mrnabench-sample-mrl-designed-target_mrl_designed,mse,2.3655294722554605,15003,15003,one complete selected split/target,mrnabench-train-mean/report.json
+mrnabench-train-mean,mrnabench-sample-mrl-v1,mrnabench-sample-mrl-designed-target_mrl_designed,pearson,,15003,15003,one complete selected split/target,mrnabench-train-mean/report.json
+mrnabench-train-mean,mrnabench-sample-mrl-v1,mrnabench-sample-mrl-designed-target_mrl_designed,spearman,,15003,15003,one complete selected split/target,mrnabench-train-mean/report.json
+proteingym-esm2,proteingym-v1.3-dms-substitutions,proteingym-dms-substitutions-v1.3,AUC,0.394,2972,2972,one complete selected assay,proteingym-esm2/report.json
+proteingym-esm2,proteingym-v1.3-dms-substitutions,proteingym-dms-substitutions-v1.3,MCC,-0.139,2972,2972,one complete selected assay,proteingym-esm2/report.json
+proteingym-esm2,proteingym-v1.3-dms-substitutions,proteingym-dms-substitutions-v1.3,NDCG,0.44,2972,2972,one complete selected assay,proteingym-esm2/report.json
+proteingym-esm2,proteingym-v1.3-dms-substitutions,proteingym-dms-substitutions-v1.3,Spearman,-0.209,2972,2972,one complete selected assay,proteingym-esm2/report.json
+proteingym-esm2,proteingym-v1.3-dms-substitutions,proteingym-dms-substitutions-v1.3,Top_recall,0.057,2972,2972,one complete selected assay,proteingym-esm2/report.json

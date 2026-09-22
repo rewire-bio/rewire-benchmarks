@@ -1,0 +1,156 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 184,
+    "scored": 184,
+    "unscored": 0
+  },
+  "coverage_context": {
+    "not_selected": 0,
+    "selected": 184,
+    "unscored_file_scope": "selected inputs only; not_selected counted separately"
+  },
+  "created_at": "2026-09-20T20:46:15.678928+00:00",
+  "dataset_id": "flip2-rhomax-by-wild-type",
+  "environment": {
+    "architecture": "arm64",
+    "container_digest": "unreported",
+    "container_runtime": "unreported",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.11.13",
+    "rewirebench": "0.4.0",
+    "sdk_code_sha256": "fcc5ab65e6753cf29aabbdae231cbb5cdf72a3dd40ba8f109802c33223b33536",
+    "sif_sha256": "unreported"
+  },
+  "execution": {
+    "adapter": "CompositionEmbeddings",
+    "adapter_provenance": {
+      "implementation": "rewire-flip2-composition-v1",
+      "role": "local learning control; not the published one-hot baseline",
+      "training_overlap": "No pretraining; protocol trains the regression head"
+    },
+    "batch_size": 32,
+    "fitting": "protocol_owned_probe",
+    "inference_and_fit_seconds": 0.012007542005449068,
+    "mode": "local_adapter",
+    "prediction_type": "embedding"
+  },
+  "independently_reproduced": false,
+  "input_information": "Complete source sequence only; no assay labels during prediction",
+  "kind": "rewire_local_evaluation",
+  "metrics": {
+    "n": 184,
+    "ndcg": 0.954819941821582,
+    "spearman": 0.41818225155801514
+  },
+  "model": {
+    "name": "Amino-acid composition + fixed ridge (Rewire control)",
+    "training_overlap": "No pretraining; fitted only on this protocol training split. Split is not a claim of homology separation."
+  },
+  "model_configuration": {
+    "alpha": 10,
+    "features": "40 amino-acid fractions; second component zero for Rhomax",
+    "fit_intercept": true,
+    "target_scaling": "training-only StandardScaler",
+    "validation_used": false
+  },
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "pyarrow": "23.0.1",
+    "rewirebench": "0.4.0",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.15.3"
+  },
+  "predictions_sha256": "72ea3c506b8645ae6020207f904fbd5c0b09549cd125fcdcabfb487e68681b9c",
+  "prepared_sha256": "f417d43497e0c8c453bd7c66cfea05959b4d6d47462283096e42a2dae8b72419",
+  "protocol_configuration": {
+    "adapter_input_contract": "opaque-sequence-inputs-v1",
+    "canonical_split_counts": {
+      "test": 184,
+      "train": 584,
+      "validation": 116
+    },
+    "canonical_test_count": 184,
+    "data_verification": "pinned_source_bytes",
+    "dataset": "rhomax",
+    "embedding_probe": {
+      "alpha": 10.0,
+      "feature_scaling": "none",
+      "fit_intercept": true,
+      "max_iter": 1000000,
+      "name": "rewire-frozen-embedding-ridge-v1",
+      "refit": "train only",
+      "relationship_to_published_baseline": "Frozen-embedding extension of upstream alpha-10 ridge. The published baseline uses one-hot features and scales targets using train plus validation rows. This extension is not that published baseline.",
+      "solver": "auto",
+      "target_scaling": "StandardScaler fitted only on train labels",
+      "tol": 1e-05,
+      "validation_use": "none; fixed hyperparameters"
+    },
+    "input_representation": "amino-acid sequence",
+    "metric": "spearman",
+    "metric_direction": "higher",
+    "metrics": [
+      "spearman",
+      "ndcg"
+    ],
+    "prepared_rows_sha256": "d86fe3926529df72649f4638ffa0d89ec62460d831ceb62ad47ff86249469a12",
+    "smoke_limit_per_split": null,
+    "source_note": null,
+    "source_reuse_terms": "CC-BY-4.0 archive; source attribution under resources/flip2",
+    "split": "by_wild_type",
+    "split_counts": {
+      "test": 184,
+      "train": 584,
+      "validation": 116
+    },
+    "suite_complete": false,
+    "target_units": "nm",
+    "task": "regression"
+  },
+  "protocol_id": "flip2-fitness-v1",
+  "protocol_results": {
+    "complete": true,
+    "coverage": {
+      "denominator": 184,
+      "scored": 184,
+      "selected": 184,
+      "unscored": 0
+    },
+    "metrics": {
+      "n": 184,
+      "ndcg": 0.954819941821582,
+      "spearman": 0.41818225155801514
+    },
+    "metrics_scope": "Scored test rows of this archived split only; no suite aggregate",
+    "protocol_id": "flip2-fitness-v1",
+    "protocol_notes": [],
+    "scope": "full",
+    "score_direction": "higher",
+    "suite_complete": false,
+    "unavailable_metrics": {},
+    "unscored_reasons": {
+      "missing_prediction": 0,
+      "not_selected": 0
+    }
+  },
+  "protocol_version": "1",
+  "provenance": {
+    "data_verification": "pinned_source_bytes",
+    "dataset_version": "zenodo-18433203-v3",
+    "evaluator_url": "https://github.com/J-SNACKKB/FLIP/blob/62cace8735f5610e2743cf06ce0f944b37fffaa6/baselines/aggregate.py#L131-L135",
+    "source_csv_sha256": "8e78f6a16cd5298131dca83130d4b94cc0ab4ae9c699460880441c19a65f656f",
+    "source_sha256": "7c6d2f02cb89310378ac9897c321fbbd909fb0757ac88803dcce84f5f6b05ce3",
+    "source_url": "https://zenodo.org/api/records/18433203/files/rhomax/by_wild_type.csv.gz/content",
+    "split_origin": "Archived assignments: validation=True held out of training",
+    "upstream_revision": "62cace8735f5610e2743cf06ce0f944b37fffaa6"
+  },
+  "publication_note": "Sanitized local execution report. Raw inputs, source membership, predictions and machine paths remain local. No published-score reproduction claim.",
+  "release_wheel_sha256": "f5956f616c20f58299eef4d654b1297b0ce21e0033014cc5cb2c1a406f4b494a",
+  "review_status": "unreviewed_local_run",
+  "schema_version": "1.0",
+  "scope": "full",
+  "timing_seconds": {
+    "evaluation": 0.010919874999672174
+  }
+}
