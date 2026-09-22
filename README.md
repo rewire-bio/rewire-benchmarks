@@ -181,5 +181,6 @@ is not a claim that every published evaluation has been reproduced.
 Submission goes to verified-email private review, never directly to publication.
 As of 22 September 2026, production intake is enabled for verified contributors;
 notifications remain paused. Track submissions on the signed-in contribution page.
-The latest published SDK is v0.4.0; [0.5.0 is a release candidate](docs/releases/0.5.0.md).
+The latest published SDK is [v0.5.0](https://github.com/rewire-bio/rewire-benchmarks/releases/tag/v0.5.0).
+[Release validation](docs/releases/0.5.0.md) records exact source, artifact hashes and tested platforms.
 Existing scientific artifacts are preserved.

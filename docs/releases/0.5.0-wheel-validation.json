@@ -1,0 +1,19 @@
+{
+  "version": "0.5.0",
+  "wheel_sha256": "d44c85dedf66008babae026e9f91b12e313764f23bbd56b5b7cbeac36e541385",
+  "outside_checkout": true,
+  "isolated_install": true,
+  "api_exports": 12,
+  "distinct_bundles": 10,
+  "enqueue_calls": 20,
+  "queue_entries": 10,
+  "previewed": 10,
+  "network_blocked": true,
+  "live_submissions": 0,
+  "new_model_inference": false,
+  "verified_date": "2026-09-22",
+  "platform": "macOS arm64",
+  "python": "3.11",
+  "publication_run": "https://github.com/rewire-bio/rewire-benchmarks/actions/runs/35788033502",
+  "release": "https://github.com/rewire-bio/rewire-benchmarks/releases/tag/v0.5.0"
+}

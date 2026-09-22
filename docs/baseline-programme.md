@@ -147,7 +147,7 @@ resume, code/configuration invalidation and failure checks passed. The actual
 scientific runs preserve their older development snapshots and exact hashes;
 rebuilding the release wheel does not alter that provenance.
 
-## Status update, 22 September 2026
+## Historical candidate status, 22 September 2026 (before publication)
 
 The preceding receipt records the state on 21 September; its HTTP 503 and local
 wheel statements are historical. Production intake is now enabled, notifications
@@ -155,6 +155,17 @@ remain paused, and v0.4.0 is still the latest published SDK. A locally built 0.5
 wheel is not a release. Current candidate checks are recorded in the
 [release status](releases/0.5.0.md). Original evidence, checksums and code snapshots
 remain unchanged.
+
+## SDK publication update, 22 September 2026
+
+[SDK v0.5.0](https://github.com/rewire-bio/rewire-benchmarks/releases/tag/v0.5.0)
+was published at 21:42:16 UTC from source `5c1b251`. The
+[release record](releases/0.5.0.md) links the successful preparation/publication
+runs, exact hashes and actual platform coverage. The downloaded public wheel
+passed an isolated installation and offline ten-bundle preview; repeated enqueue
+produced exactly ten entries and no live submissions. Original scientific
+artifacts and their pinned provenance remain unchanged. SDK publication did not
+publish any scientific evaluation or database record.
 
 ## Outstanding programme work
 

@@ -10,11 +10,19 @@ are separate operations.
 
 ## Install
 
-The latest published SDK is [v0.4.0](https://github.com/rewire-bio/rewire-benchmarks/releases/tag/v0.4.0).
-Version 0.5.0 in this branch is a release candidate, not a published release.
-Use an explicitly selected release wheel, a reviewed CI candidate artifact, or a
-build from a pinned source revision; record which one you used. Neither version
-is published to PyPI. See [0.5 release status](releases/0.5.0.md) for validation scope.
+The latest published SDK is [v0.5.0](https://github.com/rewire-bio/rewire-benchmarks/releases/tag/v0.5.0).
+Download its wheel and `SHA256SUMS`, verify the wheel's digest, and install it in
+your Python environment. The package is not published to PyPI.
+[Release validation](releases/0.5.0.md) records exact source and platform coverage.
+Record the release or pinned source revision used for each evaluation.
+
+```bash
+set -euo pipefail
+curl --fail --location --remote-name https://github.com/rewire-bio/rewire-benchmarks/releases/download/v0.5.0/rewirebench-0.5.0-py3-none-any.whl
+curl --fail --location --remote-name https://github.com/rewire-bio/rewire-benchmarks/releases/download/v0.5.0/SHA256SUMS
+awk '$2 == "rewirebench-0.5.0-py3-none-any.whl"' SHA256SUMS | shasum -a 256 --check
+uv pip install rewirebench-0.5.0-py3-none-any.whl
+```
 
 From this repository, `uv sync --locked` installs the core tools and MFASS
 package. `uv build --package rewirebench` builds a standalone wheel; it contains the
