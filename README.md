@@ -159,7 +159,7 @@ reconciliation failure rather than as a quietly different number.
 
 ## Python SDK and private models
 
-The 0.4 SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit
+The SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit
 `submit` interfaces. Bring a private adapter, keyed predictions or frozen embeddings.
 
 | Protocol | Supported scope | Instructions |
@@ -179,4 +179,7 @@ model weights. Podman and Apptainer use the same interfaces. A supported protoco
 is not a claim that every published evaluation has been reproduced.
 
 Submission goes to verified-email private review, never directly to publication.
-Production submissions remain disabled. Existing scientific artifacts are preserved.
+As of 22 September 2026, production intake is enabled for verified contributors;
+notifications remain paused. Track submissions on the signed-in contribution page.
+The latest published SDK is v0.4.0; [0.5.0 is a release candidate](docs/releases/0.5.0.md).
+Existing scientific artifacts are preserved.

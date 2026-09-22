@@ -123,8 +123,9 @@ a second scientific result. Existing contributions need the site's revision flow
 No queue drain occurs inside Nextflow model tasks. This keeps submission credentials
 outside model containers and avoids duplicate contributions on workflow retries.
 Live upload completion requires a real returned ID and successful tracking lookup;
-a local test or queue file is not an upload. Intake activation and receipt-email
-testing are dependencies tracked in the separate contribution-service PR.
+a local test or queue file is not an upload. As of 22 September 2026, production
+intake is enabled and notifications remain paused. Confirm intake through the
+owned submission record; review and public release remain separate steps.
 
 ## Delivery status, 21 September 2026
 
@@ -146,6 +147,15 @@ resume, code/configuration invalidation and failure checks passed. The actual
 scientific runs preserve their older development snapshots and exact hashes;
 rebuilding the release wheel does not alter that provenance.
 
+## Status update, 22 September 2026
+
+The preceding receipt records the state on 21 September; its HTTP 503 and local
+wheel statements are historical. Production intake is now enabled, notifications
+remain paused, and v0.4.0 is still the latest published SDK. A locally built 0.5.0
+wheel is not a release. Current candidate checks are recorded in the
+[release status](releases/0.5.0.md). Original evidence, checksums and code snapshots
+remain unchanged.
+
 ## Outstanding programme work
 
 - Review baseline choices for catalogue protocols beyond the existing SDK adapters.
@@ -153,7 +163,8 @@ rebuilding the release wheel does not alter that provenance.
   reviewed modality batches.
 - Verify more model checkpoints, access conditions and compatible complete tasks.
 - Validate actual DGX/Slurm/cloud execution when compute becomes available.
-- Submit audited runs after live intake and receipt delivery are verified.
+- Reconcile audited runs with existing submissions or the reviewed catalogue PR before
+  sending anything; do not enqueue duplicate evidence merely because email is paused.
 - Release accepted numerical evidence through the database's normal review process.
 
 The downloadable audit must keep implementation, smoke tests, full evaluation,
