@@ -18,6 +18,12 @@ def main(argv=None):
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("protocols", help="List implemented protocols")
+    cleanup = sub.add_parser("clean", help="Preview old expanded references with verified gzip copies")
+    cleanup.add_argument("--root", required=True, help="Repository containing benchmarks/*/data")
+    cleanup.add_argument("--older-than-days", type=float, default=7)
+    cleanup.add_argument(
+        "--apply", action="store_true", help="Remove verified copies; stop benchmark runs first"
+    )
     inspect = sub.add_parser("inspect", help="Describe protocol inputs, datasets and execution rules")
     inspect.add_argument("protocol", choices=sdk.PROTOCOLS)
     baselines = sub.add_parser("baselines", help="Inspect reference baselines and selection gaps")
@@ -75,7 +81,10 @@ def main(argv=None):
     post.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
     try:
-        if args.command == "protocols":
+        if args.command == "clean":
+            from rewirebench.cleanup import clean
+            result = clean(args.root, older_than_days=args.older_than_days, apply=args.apply)
+        elif args.command == "protocols":
             result = list(sdk.PROTOCOLS)
         elif args.command == "inspect":
             result = sdk.describe(args.protocol)

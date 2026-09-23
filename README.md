@@ -184,3 +184,26 @@ notifications remain paused. Track submissions on the signed-in contribution pag
 The latest published SDK is [v0.5.0](https://github.com/rewire-bio/rewire-benchmarks/releases/tag/v0.5.0).
 [Release validation](docs/releases/0.5.0.md) records exact source, artifact hashes and tested platforms.
 Existing scientific artifacts are preserved.
+
+## Cleaning local reference data
+
+Preview old expanded reference files whose adjacent gzip archives contain exactly the same bytes:
+
+```sh
+uv run rewirebench clean --root .
+uv run rewirebench clean --root . --apply
+```
+
+Stop local benchmark runs before applying. The default minimum age is seven days; override it with
+`--older-than-days`. The command verifies both copies with SHA-256 and keeps the compressed source.
+It only considers FASTA, GTF and GFF files under `benchmarks/*/data/`. Results, release archives,
+annotation databases and other datasets are retained. Symlinks and files that change during
+verification are skipped. Reported bytes are logical file sizes; actual freed space can differ.
+
+Restore an expanded file before running a benchmark that needs it:
+
+```sh
+gzip -dk benchmarks/mfass/data/ref/GRCh38.primary_assembly.genome.fa.gz
+```
+
+Python callers can use `rewirebench.cleanup.clean(root, older_than_days=7, apply=False)`.
