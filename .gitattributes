@@ -1,0 +1,2 @@
+# Unified diffs carry required context spaces; only this check is relaxed, only here.
+benchmarks/mfass/patches/*.patch whitespace=-blank-at-eol

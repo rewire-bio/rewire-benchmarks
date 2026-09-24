@@ -1,0 +1,68 @@
+{
+  "patch_id": "pangolin-5cf94b8-mask-per-gene-1",
+  "patch_sha256": "d1c9fb69245f9d256e2547fd8bf61547686cfc3caf6c40c1351ab2d6997cb454",
+  "upstream_repository": "https://github.com/tkzeng/Pangolin",
+  "upstream_revision": "5cf94b8db938c658391b4305cd7ce33297d44ff7",
+  "upstream_source_sha256": "f3f25c4febf64d01ef42f967dc5cf10f6856bf3aa92d26f09803ad408169da9b",
+  "patched_source_sha256": "239c6ba9b1883d712d4856985c6eaa07e5b67f99790a718f93d6316ad076c083",
+  "patched_version": "1.0.2+rewire.maskpergene1",
+  "upstream_files": {
+    "__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    "model.py": {
+      "sha256": "4a1c5c2570aafe1452bb43332255321677e6c6c817adf84b9dd438e3ca4be6f8",
+      "git_blob": "11dfb436b36f9b5783874b2db636a1788bfab619"
+    },
+    "models/final.1.0.3.v2": {
+      "sha256": "f0478fab173b75f7f7e9fe96688bad6c50fa4a46d70557f423b110caaf565501",
+      "git_blob": "fbe03218df2f781a9713b05bfa42001ae548782a"
+    },
+    "models/final.2.0.3.v2": {
+      "sha256": "c4c6bb4880fa6fb28b14182ae3ea0600edb07056158f55325b5e6e6e48fc9f26",
+      "git_blob": "ec4ee767bc83fa0397222f42c0da210a47f13fbb"
+    },
+    "models/final.3.0.3.v2": {
+      "sha256": "ec685a6e7105a4486c1f89a005458a13deb3fe7171f13d434f4877e386d10676",
+      "git_blob": "f31cbae821e38bc4361216c8e87c8db13fd5a9c0"
+    },
+    "models/final.1.2.3.v2": {
+      "sha256": "559c05de3e1ce65c2515ca3e92ef85edb0ec2e47686ca58060e25891ce06eb3a",
+      "git_blob": "39e8756faf1e427cd9a8c6c691532b3683d8916a"
+    },
+    "models/final.2.2.3.v2": {
+      "sha256": "48758ba8b95eee9aa9feea52672ef06ca1b34111299c27f8a710f734d8b9aae5",
+      "git_blob": "6fd0a31789c7de788227e103f33d697ad538def6"
+    },
+    "models/final.3.2.3.v2": {
+      "sha256": "7cb576c2b24db4fdd6970c4ca4fb7c20ae1b1d8ae80645ebbe689848b5743129",
+      "git_blob": "c7f2ae10caab8f5bae167309b2b7d3e6905871e5"
+    },
+    "models/final.1.4.3.v2": {
+      "sha256": "c50b12e0c0af776d5674ca5e346493f8265783494d4df383364de9c1136657f6",
+      "git_blob": "0af4fadb3f3dd54c49d41042befefa19fd4bd32a"
+    },
+    "models/final.2.4.3.v2": {
+      "sha256": "e03303bed4fd6f135ec0f6c1b192cce954ea42d0646f44d17b4a6fbb2b1f610e",
+      "git_blob": "8c003df629c9f1e8072000f8bbc3eeab94850b6c"
+    },
+    "models/final.3.4.3.v2": {
+      "sha256": "9476d2e25520d7ff15bece0cd5d3b657e3b1dd3cc5fcab1d9c3b62bea7a0c5b6",
+      "git_blob": "9ed4fad50ead41761073cdff3d9acafc6f78bdd4"
+    },
+    "models/final.1.6.3.v2": {
+      "sha256": "2aae563fa18a8a9b6699c6c96e0d32b8ec7543f8f805fb3bc9de77302cc9f66e",
+      "git_blob": "98e5539fe339385e9c8b19d2786c4f8c3f186a3b"
+    },
+    "models/final.2.6.3.v2": {
+      "sha256": "7d3c0b1b2a60067b940dec315567874fbc8bcd322f1b7c76bf969f51f0f53f7f",
+      "git_blob": "6a650d629fae6aee8171708241a0f580bb368cfd"
+    },
+    "models/final.3.6.3.v2": {
+      "sha256": "756e7721a382cace24e9bfea5b543af5623f2487d9a3efe7385e9c76367005fd",
+      "git_blob": "4a8e9e33d5832770e6563d0229bdb4bcae5b8398"
+    }
+  },
+  "licence": "GPL-3.0 (Pangolin); the patched tree is a GPL-3.0 derivative"
+}

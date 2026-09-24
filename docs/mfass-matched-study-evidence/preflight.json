@@ -1,0 +1,283 @@
+{
+  "date": "2026-09-24",
+  "status": "prepared; MFASS scoring not started. No S0, S1, P0 or P1 prediction exists. The final manifest is frozen only after this packaging is committed.",
+  "registration": {
+    "file": "docs/mfass-matched-study-registration.md",
+    "sha256": "7f03c13d3c7fa73ffe91d3170fe51f06a277d34b5745476ce45ca8a7cece9162"
+  },
+  "review": {
+    "method": "automated Claude reviews (patch and annotation; integration; final code review PASS; launch-readiness edits inspected by the parent Codex agent)",
+    "human_review": false
+  },
+  "tests": {
+    "command": "MFASS_REQUIRE_GATES=1 pytest packages/rewirebench/tests tests benchmarks/mfass/tests -q -rs",
+    "environment": "uv sync --locked --all-packages --extra sequence --extra pangolin, Python 3.11.13, pinned Pangolin checkout available",
+    "passed": 640,
+    "skipped": 9,
+    "skip_reasons": "all 9 are MFASS source-data tests whose upstream tables the repository does not distribute",
+    "scientific_gate_skips": 0,
+    "gate_modules": [
+      "test_pangolin_patch.py",
+      "test_matched_annotation.py",
+      "test_matched_study.py",
+      "test_specialist_provenance.py"
+    ],
+    "other_checks": [
+      "ruff on new and changed files",
+      "git diff --cached --check",
+      "uv lock --check",
+      "bash -n on launch script"
+    ]
+  },
+  "inference_performed": {
+    "mfass_variants": 0,
+    "synthetic_non_mfass": {
+      "description": "60 synthetic chr21 SNVs chosen from the matched annotation, excluding MFASS coordinates; timing and patched-versus-upstream Pangolin checks; no labels",
+      "pangolin_unmasked_output_identical_to_upstream": "60 of 60",
+      "seconds_per_variant": {
+        "spliceai_tf_intra5_inter1": 0.99,
+        "pangolin_torch_intra6_inter1": 2.36
+      }
+    },
+    "official_compatibility_example": {
+      "tool": "SpliceAI 1.3.1 CLI, TensorFlow 2.21.0, Keras 3.15.1, numpy 1.26.4",
+      "source": {
+        "repository": "https://github.com/Illumina/SpliceAI",
+        "revision": "b3c7f17b4137cb32b30c56c064f8b90b9b8f38d0",
+        "files": {
+          "README.md": {
+            "git_blob": "d8e1d035fd77473407aae1f3677231226a41bb99",
+            "sha256": "27e21cc914a291f28f699aec156f4b9414f66e6024ad86b5fcd17ef4e66d3f63"
+          },
+          "examples/input.vcf": {
+            "git_blob": "8d049d29edef08a416322ef541a7d1b45ad48565",
+            "sha256": "ce40abfc71d5f10e9cea5b778ad647a7527b73ce45d0e52a8017e779db3dd140"
+          },
+          "examples/output.vcf": {
+            "git_blob": "0b58ca90605b380ef7fc7cef3c3e07da03964f38",
+            "sha256": "64514ca14d2b4ee01a416a221196594d12f3d820ec36b902c75582030abd3b8a"
+          }
+        }
+      },
+      "reference": {
+        "source": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/chromosomes/ (UCSC hg19 = GRCh37)",
+        "md5_verified_against_ucsc_md5sum_txt": {
+          "chr2.fa.gz": "1946d3b6b9cf0e8f15f014fe63c75eac",
+          "chr19.fa.gz": "173b9cc2ec39c73668480f4f25701bc3"
+        }
+      },
+      "input_sha256": "a62e8400956be3e07ba0dee4c99bd940b85e36d39bc2690c2c809687b70a03f0",
+      "result": {
+        "expected_file": "expected-chr2-chr19.tsv",
+        "records": 6,
+        "identical": {
+          "upstream": true,
+          "runner_one_hot": true
+        },
+        "outputs_byte_identical_between_modes": true
+      },
+      "summary": "All 6 published README example records on GRCh37 contigs 2 and 19 reproduced exactly at 2-decimal output precision, including T|RYR1|0.00|0.00|0.91|0.08|-28|-46|-2|-31; the runner's one_hot_encode replacement gave byte-identical output.",
+      "limits": "Agreement at 2-decimal precision only; GRCh37 example, not the GRCh38 matched table; not an MFASS result."
+    }
+  },
+  "inputs_sha256": {
+    "cohort": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "split": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "fasta": "e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b",
+    "fai": "a2c323ea4cff34d7123ace4578f7e122b2d2f5a22f40dc23eb8b97d17723d169",
+    "spliceai_annotation": "2383cd148b292b9a6af56da160c9c142ddeb5720b1e9ef7c5966a1744f684c4d",
+    "pangolin_db": "84ae1a18d9d7a32e14e3fe9c8705256a28cd9bde0a55bc46200cbe77178deb27"
+  },
+  "input_notes": {
+    "fasta": "decompressed GENCODE 44 GRCh38.primary_assembly.genome.fa; compressed MD5 9c3fc2ca260a767530dddb0f26721a6b matches the official GENCODE 44 MD5SUMS",
+    "gtf": "gencode.v44.primary_assembly.annotation.gtf.gz, SHA-256 31ae5d8f663834d98014421072ac5643002ffc635dd0a320d09e8e6e1623de58, MD5 b182a9f3b134b9cc2da566a2b1692557 matches the official MD5SUMS",
+    "cohort": "local validated MFASS v2 cohort; not redistributed"
+  },
+  "code_identity": {
+    "spliceai": {
+      "version": "1.3.1",
+      "upstream": "https://github.com/Illumina/SpliceAI",
+      "revision": "b3c7f17b4137cb32b30c56c064f8b90b9b8f38d0",
+      "files_verified_against_upstream_blobs": true,
+      "files": {
+        "__init__.py": {
+          "sha256": "5e0ade84087ee01040dbc3344359cbfdb26e2fcf98c214e15110ac1d05562037",
+          "git_blob": "b5d843e672cfff52c6d050205dead13d7c31533e"
+        },
+        "utils.py": {
+          "sha256": "207e147c73bdc1970fdb176dcbf088883f9a58756bfeb0d93494e75018ae477c",
+          "git_blob": "66f2c3c14198d9020a7913f0412fc91ade008b91"
+        },
+        "__main__.py": {
+          "sha256": "1090e97a5f7d8f937048b7d1f08d98fb593bd86953e9d64178aa3ca096961a77",
+          "git_blob": "2c59acd61ce528dd0ed6d6c14244579354fed146"
+        },
+        "models/spliceai1.h5": {
+          "sha256": "e1fd5adcef7489d604b10e79c40078ef790d51ef048c4ce3869c9119ac5de42b",
+          "git_blob": "e5e6bf5d2f61f9f9f8f1c93386881992a96a82c0"
+        },
+        "models/spliceai2.h5": {
+          "sha256": "6ab042b82ab966b6d3582cb31b96f0859ea08a864f168d69e83aa14450a3b66e",
+          "git_blob": "b6c197b52fc39e81f42a2dfb25eeef11db3c94af"
+        },
+        "models/spliceai3.h5": {
+          "sha256": "e2e790bde53dfdf410c6dc434a86122a7d12f3f38dc2ef45d85986e9ecf22fad",
+          "git_blob": "5009694c892a782faa70f66e23f0f74cf69c6809"
+        },
+        "models/spliceai4.h5": {
+          "sha256": "ca88ac9e58e69ba6fdeed319b72f063f164c9abf7392eaccef903e94c1d99dd6",
+          "git_blob": "81ce1c887855f34abf9af5f5c65d85fd04d3132d"
+        },
+        "models/spliceai5.h5": {
+          "sha256": "791cd22c62a80a08d2ca674615a93ce8159d7b55bd157cfef2983b1bd6b41391",
+          "git_blob": "752679198e4f52f69b93945b2c49e4efc8534860"
+        }
+      }
+    },
+    "pangolin": {
+      "version": "1.0.2+rewire.maskpergene1",
+      "upstream": "https://github.com/tkzeng/Pangolin",
+      "revision": "5cf94b8db938c658391b4305cd7ce33297d44ff7",
+      "patched_source_sha256": "239c6ba9b1883d712d4856985c6eaa07e5b67f99790a718f93d6316ad076c083",
+      "files_verified_against_upstream_blobs": true,
+      "files": {
+        "__init__.py": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+        },
+        "model.py": {
+          "sha256": "4a1c5c2570aafe1452bb43332255321677e6c6c817adf84b9dd438e3ca4be6f8",
+          "git_blob": "11dfb436b36f9b5783874b2db636a1788bfab619"
+        },
+        "models/final.1.0.3.v2": {
+          "sha256": "f0478fab173b75f7f7e9fe96688bad6c50fa4a46d70557f423b110caaf565501",
+          "git_blob": "fbe03218df2f781a9713b05bfa42001ae548782a"
+        },
+        "models/final.2.0.3.v2": {
+          "sha256": "c4c6bb4880fa6fb28b14182ae3ea0600edb07056158f55325b5e6e6e48fc9f26",
+          "git_blob": "ec4ee767bc83fa0397222f42c0da210a47f13fbb"
+        },
+        "models/final.3.0.3.v2": {
+          "sha256": "ec685a6e7105a4486c1f89a005458a13deb3fe7171f13d434f4877e386d10676",
+          "git_blob": "f31cbae821e38bc4361216c8e87c8db13fd5a9c0"
+        },
+        "models/final.1.2.3.v2": {
+          "sha256": "559c05de3e1ce65c2515ca3e92ef85edb0ec2e47686ca58060e25891ce06eb3a",
+          "git_blob": "39e8756faf1e427cd9a8c6c691532b3683d8916a"
+        },
+        "models/final.2.2.3.v2": {
+          "sha256": "48758ba8b95eee9aa9feea52672ef06ca1b34111299c27f8a710f734d8b9aae5",
+          "git_blob": "6fd0a31789c7de788227e103f33d697ad538def6"
+        },
+        "models/final.3.2.3.v2": {
+          "sha256": "7cb576c2b24db4fdd6970c4ca4fb7c20ae1b1d8ae80645ebbe689848b5743129",
+          "git_blob": "c7f2ae10caab8f5bae167309b2b7d3e6905871e5"
+        },
+        "models/final.1.4.3.v2": {
+          "sha256": "c50b12e0c0af776d5674ca5e346493f8265783494d4df383364de9c1136657f6",
+          "git_blob": "0af4fadb3f3dd54c49d41042befefa19fd4bd32a"
+        },
+        "models/final.2.4.3.v2": {
+          "sha256": "e03303bed4fd6f135ec0f6c1b192cce954ea42d0646f44d17b4a6fbb2b1f610e",
+          "git_blob": "8c003df629c9f1e8072000f8bbc3eeab94850b6c"
+        },
+        "models/final.3.4.3.v2": {
+          "sha256": "9476d2e25520d7ff15bece0cd5d3b657e3b1dd3cc5fcab1d9c3b62bea7a0c5b6",
+          "git_blob": "9ed4fad50ead41761073cdff3d9acafc6f78bdd4"
+        },
+        "models/final.1.6.3.v2": {
+          "sha256": "2aae563fa18a8a9b6699c6c96e0d32b8ec7543f8f805fb3bc9de77302cc9f66e",
+          "git_blob": "98e5539fe339385e9c8b19d2786c4f8c3f186a3b"
+        },
+        "models/final.2.6.3.v2": {
+          "sha256": "7d3c0b1b2a60067b940dec315567874fbc8bcd322f1b7c76bf969f51f0f53f7f",
+          "git_blob": "6a650d629fae6aee8171708241a0f580bb368cfd"
+        },
+        "models/final.3.6.3.v2": {
+          "sha256": "756e7721a382cace24e9bfea5b543af5623f2487d9a3efe7385e9c76367005fd",
+          "git_blob": "4a8e9e33d5832770e6563d0229bdb4bcae5b8398"
+        }
+      }
+    }
+  },
+  "environment_distribution_lists_sha256": {
+    "spliceai": "8f0eb1412c265d12f505332f2900c44c03fcc7ba64bcdbe0afb94833cd66302f",
+    "pangolin": "3631d391fa7c2f78cf0469fcb59a068f893e50e1bc521e36e57749fb19be9529"
+  },
+  "threads": {
+    "spliceai": {
+      "intra_op": 5,
+      "inter_op": 1,
+      "env": {
+        "OMP_NUM_THREADS": "5",
+        "MKL_NUM_THREADS": "5",
+        "OPENBLAS_NUM_THREADS": "5",
+        "VECLIB_MAXIMUM_THREADS": "5",
+        "NUMEXPR_NUM_THREADS": "5"
+      }
+    },
+    "pangolin": {
+      "intra_op": 6,
+      "inter_op": 1,
+      "env": {
+        "OMP_NUM_THREADS": "6",
+        "MKL_NUM_THREADS": "6",
+        "OPENBLAS_NUM_THREADS": "6",
+        "VECLIB_MAXIMUM_THREADS": "6",
+        "NUMEXPR_NUM_THREADS": "6"
+      }
+    },
+    "other_steps": {
+      "env": {
+        "OMP_NUM_THREADS": "6",
+        "MKL_NUM_THREADS": "6",
+        "OPENBLAS_NUM_THREADS": "6",
+        "VECLIB_MAXIMUM_THREADS": "6",
+        "NUMEXPR_NUM_THREADS": "6"
+      }
+    },
+    "cpu_threads": 6,
+    "scope": "One step runs at a time. TensorFlow intra-op plus inter-op pools are within the CPU budget. Torch's intra-op pool is within the budget; its inter-op pool is 1 and idle during sequential forward passes. Runtime I/O and Python threads are not counted. Manifest hashing in the parent process is outside all recorded timings."
+  },
+  "source_files_sha256": {
+    "benchmarks/mfass/src/mfass/run_spliceai.py": "3d238f11069049cbae08aa779f2e0857b1f8d2929f4e03a233848b6d5f06c7ba",
+    "benchmarks/mfass/src/mfass/run_pangolin.py": "13ba2ca1d258ca7482f9d627155402284e4ec2324ac04e98876be8df5976dc63",
+    "benchmarks/mfass/src/mfass/checkpoint.py": "dcd271576ec49dba23b9fc30620267de88f7620a647b0a6c53b1a295dc21ecc0",
+    "benchmarks/mfass/src/mfass/compare.py": "53e88e6bb4fff70f202aaaaa0a328535dac33905a418270054475abc3b26ec17",
+    "benchmarks/mfass/src/mfass/specialist_run.py": "242cfaa770f0ae5e27696fe5e2e8d9e8068b5de457a4f0bd0a89dda31075b4de",
+    "benchmarks/mfass/src/mfass/specialist_provenance.py": "0a8bb78598a583b894d3c48b7aa442cd287d5d4de9b987ce60ad9622ca5f14db",
+    "benchmarks/mfass/src/mfass/pangolin_patch.py": "4bb77dde473b8d535a323d92b3d71f8d96c681af766e8419f0d9c7f8d3bee8c6",
+    "benchmarks/mfass/src/mfass/matched_annotation.py": "62d76225d324d249a3d17e624628a83757b31b209e4fe2999b87a874f034df08",
+    "benchmarks/mfass/src/mfass/matched_study.py": "f8782703da70962b5623d467a0cc1505412d409593c68ac765f1a870f50db1b2",
+    "benchmarks/mfass/patches/pangolin-5cf94b8-mask-per-gene-1.patch": "d1c9fb69245f9d256e2547fd8bf61547686cfc3caf6c40c1351ab2d6997cb454",
+    "benchmarks/mfass/patches/LICENSE-pangolin-GPL-3.0": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "benchmarks/mfass/patches/README.md": "a674b28b72036fe7a06fde26198525d4ae824e60a190dbef50f1534164e14944",
+    "benchmarks/mfass/scripts/run_matched_study.sh": "697c77056ba16bc0c36235f6aac68986f1fe0a3abaa1ce15801e6e3aa788b481",
+    "packages/rewirebench/src/rewirebench/metrics.py": "4030374ed11d38e523fc9991ddd792f8800e7739ac71588085bfff91f912d7f7",
+    "packages/rewirebench/src/rewirebench/results.py": "e3b95804fb9cd898a125e78d3abad8022df186d094b89ac0c8588070af4a516d",
+    "packages/rewirebench/src/rewirebench/protocols/mfass.py": "6d090a6b1622fe571b8c48ecc213b9b6adf3cbf06cc2abc2d3bfc891a3f8ed93",
+    "uv.lock": "3f2ec7f464119ec2478ad15aac302f1ba1e16f77725e7d30ffb2af68bf5f4296",
+    ".gitattributes": "e0b378224ef93600f2703702d99bf80e1c62a852883466035ead111e465680af"
+  },
+  "evidence_files_sha256": {
+    "docs/mfass-matched-study-evidence/annotation-summary.json": "0921c19d1f6a71c4afaf94f366dfbdf2e87fb3435e8a7389493c0d99c04de7f8",
+    "docs/mfass-matched-study-evidence/annotation-cross-check.json": "71caa6d5d2e2edfc88bb5bce2dc35a2abd0d0c926c56cf85ffe6eafbee2ee086",
+    "docs/mfass-matched-study-evidence/variant-eligibility-summary.json": "ec2c57b5ac88ca4011ff02351e4a20092e80d7de75f81acbe8ffb00851ddff93",
+    "docs/mfass-matched-study-evidence/pangolin-patch-receipt.json": "26785188fb8c8116bbe3b060b166fad15a39cbafbedd714ffaa71f5e46b023c1"
+  },
+  "expected_coverage_without_labels": {
+    "test_variants": 8324,
+    "scoreable_by_both_tools": 8297,
+    "no_gene_under_canonical_span": 4,
+    "reference_mismatch": 23,
+    "multiple_same_strand_genes": 344
+  },
+  "budget": {
+    "wall_time_hours_limit": 24,
+    "expected_hours": 14.5,
+    "cpu_threads": 6,
+    "sequential": true,
+    "extra_ssd_gb_limit": 50,
+    "paid_compute": false
+  }
+}

@@ -110,7 +110,9 @@ input-context limitations.
 **Not executed.** Preparation, resource acquisition and inference belong to a
 [execution issue #19](https://github.com/rewire-bio/rewire-benchmarks/issues/19). Freeze its input manifest and analysis plan before
 viewing any new condition's scores. The existing MFASS test outcomes have already
-been inspected, so this remains exploratory.
+been inspected, so this remains exploratory. The execution plan and its amendments
+to this protocol, including the Pangolin masking patch, are registered in
+[the study registration](mfass-matched-study-registration.md).
 
 ### Shared resources and preparation gates
 
