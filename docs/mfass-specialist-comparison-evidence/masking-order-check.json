@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-24",
+  "review_method": "automated_synthetic_control_flow_check",
+  "scope": "No model inference, real variants, reference files, weights, database or benchmark metrics. Only original process_variant AST executed with mocked Fasta, get_genes and compute_score.",
+  "source_url": "https://raw.githubusercontent.com/tkzeng/Pangolin/5cf94b8db938c658391b4305cd7ce33297d44ff7/pangolin/pangolin.py",
+  "source_sha256": "f3f25c4febf64d01ef42f967dc5cf10f6856bf3aa92d26f09803ad408169da9b",
+  "source_function": "process_variant",
+  "numpy_version": "1.26.4",
+  "fixture": {
+    "chromosome": "chr1",
+    "position": 10000,
+    "reference": "A",
+    "alternate": "C",
+    "distance": 2,
+    "sequence": "10005 A bases",
+    "gene_boundaries": {
+      "geneA": [
+        9998,
+        10002
+      ],
+      "geneB": [
+        9999,
+        10002
+      ]
+    },
+    "loss": [
+      -0.2,
+      -0.1,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "gain": [
+      0.8,
+      0.7,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mask": "True",
+    "score_exons": "False",
+    "score_cutoff": null
+  },
+  "outputs": [
+    {
+      "gene_order": [
+        "geneA",
+        "geneB"
+      ],
+      "raw_output": "geneA|-1:0.7|-2:-0.2|Warnings:,geneB|-2:0.0|-2:0.0|Warnings:",
+      "max_absolute_reported_score": 0.7
+    },
+    {
+      "gene_order": [
+        "geneB",
+        "geneA"
+      ],
+      "raw_output": "geneB|-2:0.8|-1:-0.1|Warnings:,geneA|-2:0.0|-2:0.0|Warnings:",
+      "max_absolute_reported_score": 0.8
+    }
+  ],
+  "outcome": "Gene-order dependence demonstrated on synthetic overlapping-gene inputs. Matched four-condition execution blocked pending reviewed fix or version change and renewed registration."
+}
