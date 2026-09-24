@@ -24,6 +24,8 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import numpy as np
 from rewirebench.results import BenchmarkResult, write_result
 
+from mfass.specialist_provenance import resolve_spliceai_annotation, specialist_artifacts
+
 # SpliceAI's documented defaults, stated rather than inherited.
 MASK_DEFAULT = 0        # -M in the CLI: unmasked. Pangolin's equivalent defaults to True.
 DISTANCE_DEFAULT = 50   # -D in the CLI: how far to look for a gained or lost site.
@@ -75,8 +77,9 @@ def main():
     ap.add_argument("--split", default="benchmarks/mfass/splits/split-v2.tsv")
     ap.add_argument("--ref", default="benchmarks/mfass/data/ref/GRCh38.primary_assembly.genome.fa")
     ap.add_argument("--annotation", default="grch38", help="'grch38' for the bundled table, or a path")
+    ap.add_argument("--annotation-release", help="Declared release label; not source verification")
     ap.add_argument("--distance", type=int, default=DISTANCE_DEFAULT)
-    ap.add_argument("--mask", type=int, default=MASK_DEFAULT)
+    ap.add_argument("--mask", type=int, choices=(0, 1), default=MASK_DEFAULT)
     ap.add_argument("--out", default="benchmarks/mfass/results/spliceai-1.3.1.json")
     ap.add_argument("--limit", type=int, default=0, help="score only the first N, for smoke tests")
     args = ap.parse_args()
@@ -93,6 +96,11 @@ def main():
         if destination.with_suffix(suffix).exists():
             raise FileExistsError(f"Refusing to overwrite {destination.with_suffix(suffix)}")
 
+    t0 = time.perf_counter()
+    annotation_path = resolve_spliceai_annotation(args.annotation)
+    artifacts = specialist_artifacts(annotation_path, args.ref, args.annotation_release)
+    t_hash = time.perf_counter() - t0
+
     from spliceai.utils import Annotator, get_delta_scores
     _patch_numpy_fromstring()
 
@@ -106,7 +114,7 @@ def main():
         test = test[: args.limit]
 
     t0 = time.perf_counter()
-    ann = Annotator(args.ref, args.annotation)
+    ann = Annotator(args.ref, str(annotation_path))
     t_load = time.perf_counter() - t0
 
     scores, unscored = [], []
@@ -167,9 +175,10 @@ def main():
         metrics=m,
         coverage={key: scored["coverage"][key] for key in ("scored", "unscored", "denominator")},
         timing_seconds={
+            "hash_reference_and_annotation": round(t_hash, 3),
             "load_models_and_reference": round(t_load, 3),
             "score_test": round(t_score, 3),
-            "per_variant_total": round((t_load + t_score) / max(len(test), 1), 6),
+            "per_variant_total": round((t_hash + t_load + t_score) / max(len(test), 1), 6),
         },
         independent_groups=len(set(groups[ok])),
         pretrained=True,
@@ -180,7 +189,8 @@ def main():
         ),
         config={
             "scope": dataset["scope"],
-            "timing_scope": "model/reference load plus prediction; cohort preparation excluded",
+            "timing_scope": ("artifact hashing, model/reference load and prediction; "
+                             "cohort preparation excluded"),
             "selected_test_rows": len(test),
             "canonical_test_rows": 8324,
             "cohort_sha256": dataset["provenance"]["cohort_sha256"],
@@ -190,6 +200,7 @@ def main():
             "version": "1.3.1",
             "models": "bundled 5-model ensemble (spliceai1-5.h5)",
             "annotation": args.annotation,
+            **artifacts,
             "reference": pathlib.Path(args.ref).name,
             "distance_D": args.distance,
             "mask_M": args.mask,

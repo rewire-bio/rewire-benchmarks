@@ -226,7 +226,8 @@ is not evidence that submission failed.
 
 ## Protocol-specific instructions
 
-- [MFASS](mfass.md): canonical assay pairs, baseline and DNABERT-2 frozen encoder.
+- [MFASS](mfass.md): canonical assay pairs, baseline and DNABERT-2 frozen encoder;
+  [specialist comparison limits and proposed sensitivity study](mfass-specialist-comparison.md).
 - [ProteinGym](proteingym.md): v1.3 zero-shot substitutions and ESM-2.
 - [TDC ADMET](tdc-admet.md): the 22-dataset ADMET benchmark group, scored with each dataset's own metric.
 - [Genomic Benchmarks](genomic-benchmarks.md): nine sequence classification datasets.

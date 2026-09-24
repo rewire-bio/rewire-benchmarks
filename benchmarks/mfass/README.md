@@ -201,6 +201,19 @@ use different annotation releases (SpliceAI's bundled v24-derived table
 versus Pangolin's GENCODE v44), leaving a model-versus-annotation confound.
 The exact pretraining sequence overlap for DNABERT-2 has not been checked.
 
+See the [specialist comparison protocol and source audit](../../docs/mfass-specialist-comparison.md)
+for the proposed annotation/masking sensitivity study and the future improvement
+criterion. These analyses have not been executed. Only Pangolin `mask=False`
+predictions are archived; the archived JSON's statement that both settings were
+run is unsupported and is retained only as historical evidence, with an erratum
+in that document. It must not be used to claim a measured masking effect.
+
+Current specialist runners accept an optional `--annotation-release` declaration
+and hash the actual annotation file and reference FASTA. An unspecified release
+is `unreported`; a supplied label remains `declared`, not independently verified.
+New run timing includes artifact hashing as a separate component. This does not
+change the provenance or timing scope of the archived runs.
+
 ## Archived mfass-v1 snapshot
 
 The archived `results/baseline-kmer-position.json` and its predictions

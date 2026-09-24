@@ -8,7 +8,8 @@ The masking default is the point of interest. Pangolin's `-m/--mask` defaults to
 sites. SpliceAI's `-M` defaults to 0, meaning unmasked. Two tools whose defaults
 disagree about what a score means will disagree about a variant for reasons that
 have nothing to do with their networks, so this runner takes an explicit --mask and
-the benchmark reports both settings.
+records only the selected setting. The archived evaluation used mask=False;
+the mask=True comparison remains a proposed sensitivity analysis.
 """
 import argparse
 import csv
@@ -21,6 +22,8 @@ warnings.filterwarnings("ignore")
 
 import numpy as np
 from rewirebench.results import BenchmarkResult, write_result
+
+from mfass.specialist_provenance import specialist_artifacts
 
 MASK_DEFAULT = "True"     # Pangolin's own default. SpliceAI's equivalent is unmasked.
 DISTANCE_DEFAULT = 50     # Matches SpliceAI's -D default. Not the model's input context.
@@ -89,6 +92,7 @@ def main():
     ap.add_argument("--split", default="benchmarks/mfass/splits/split-v2.tsv")
     ap.add_argument("--ref", default="benchmarks/mfass/data/ref/GRCh38.primary_assembly.genome.fa")
     ap.add_argument("--db", default="benchmarks/mfass/data/ref/gencode.v44.annotation.db")
+    ap.add_argument("--annotation-release", help="Declared release label; not source verification")
     ap.add_argument("--distance", type=int, default=DISTANCE_DEFAULT)
     ap.add_argument("--mask", default=MASK_DEFAULT, choices=["True", "False"])
     ap.add_argument("--out", default=None)
@@ -108,6 +112,10 @@ def main():
             raise FileExistsError(f"Refusing to overwrite {destination.with_suffix(suffix)}")
 
     out_path = args.out or f"benchmarks/mfass/results/pangolin-mask{args.mask}.json"
+
+    t0 = time.perf_counter()
+    artifacts = specialist_artifacts(args.db, args.ref, args.annotation_release)
+    t_hash = time.perf_counter() - t0
 
     import os
 
@@ -188,9 +196,10 @@ def main():
         metrics=m,
         coverage={key: scored["coverage"][key] for key in ("scored", "unscored", "denominator")},
         timing_seconds={
+            "hash_reference_and_annotation": round(t_hash, 3),
             "load_models_and_annotation": round(t_load, 3),
             "score_test": round(t_score, 3),
-            "per_variant_total": round((t_load + t_score) / max(len(test), 1), 6),
+            "per_variant_total": round((t_hash + t_load + t_score) / max(len(test), 1), 6),
         },
         independent_groups=len(set(groups[ok])),
         pretrained=True,
@@ -201,7 +210,8 @@ def main():
         ),
         config={
             "scope": dataset["scope"],
-            "timing_scope": "model/reference load plus prediction; cohort preparation excluded",
+            "timing_scope": ("artifact hashing, model/reference load and prediction; "
+                             "cohort preparation excluded"),
             "selected_test_rows": len(test),
             "canonical_test_rows": 8324,
             "cohort_sha256": dataset["provenance"]["cohort_sha256"],
@@ -210,7 +220,7 @@ def main():
             "input_context": "genomic GRCh38; differs from assay-pair encoder inputs",
             "models": "official 12-model ensemble (final.{1,2,3}.{0,2,4,6}.3.v2)",
             "annotation": pathlib.Path(args.db).name,
-            "annotation_release": "GENCODE v44",
+            **artifacts,
             "reference": pathlib.Path(args.ref).name,
             "distance_d": args.distance,
             "mask_m": args.mask,
@@ -221,9 +231,9 @@ def main():
                         "count; performance only, no effect on scores")],
         },
         notes=(
-            "mask=True is Pangolin's own default and zeroes splice gains at annotated sites and "
-            "losses at unannotated sites. mask=False matches SpliceAI's unmasked default. Both are "
-            "run so the effect of the differing defaults is measured rather than assumed."
+            f"This run used mask={args.mask}. Pangolin's mask=True setting zeroes splice gains "
+            "at annotated sites and losses at unannotated sites; mask=False disables that "
+            "masking. This result does not measure the effect of the other setting."
         ),
     )
     import os as _os

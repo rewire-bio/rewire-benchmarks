@@ -8,6 +8,9 @@ components. A larger score means more disruption. The principal operating point 
 The corrected baseline centres sequence windows on validated assay-oriented pairs.
 SpliceAI and Pangolin instead use genomic context. Their required inputs and
 methods are different; a matching metric does not make the procedures equivalent.
+The [specialist comparison protocol](mfass-specialist-comparison.md) documents the
+remaining annotation/masking confounds, the archived Pangolin masking erratum,
+and a proposed sensitivity study. It introduces no new evaluated model scores.
 
 ## Access and preparation
 
@@ -168,6 +171,7 @@ as benchmark contributions.
 
 ## Evidence and verification
 
+- [Specialist comparison evidence and future evaluation criterion](mfass-specialist-comparison.md).
 - [Reviewed MFASS v2 code and correction](https://github.com/rewire-bio/rewire-benchmarks/tree/bee9133b83f3aedaf2bbb9013f1875515845607e/benchmarks/mfass).
 - [DNABERT-2 fixed-head implementation](https://github.com/rewire-bio/rewire-benchmarks/blob/bee9133b83f3aedaf2bbb9013f1875515845607e/benchmarks/mfass/src/mfass/run_dnabert2.py).
 - Packaged `resources/mfass/validation-2026-09-17.json` distinguishes executed smoke
