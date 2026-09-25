@@ -37,6 +37,69 @@ _NGRAM = {"ngram_range": [1, 3], "normalisation": "l2", "vocabulary_fit": "train
           "classification": {"C": 1.0, "solver": "lbfgs", "max_iter": 2000, "seed": 0},
           "regression": {"alpha": 1.0, "solver": "lsqr", "tol": 1e-8, "max_iter": 10000}}
 
+def _artifact_entry(ident, title, configuration, *, prerequisites, options, training_overlap,
+                    input_information):
+    """Implemented code whose execution needs external artifacts named in options.
+
+    Without those options a batch records the entry as blocked. Code, configuration,
+    validation, biological evaluation and released measurement are separate states.
+    """
+    return {
+        **_entry(ident, "conventional", title, configuration, gap=prerequisites),
+        "implementation_status": "implemented",
+        "configuration_status": "blocked_until_artifact_options_supplied",
+        "validation_status": "synthetic_fixtures_and_pinned_upstream_parity_executed",
+        "biological_evaluation_status": "not_executed",
+        "measurement_release_status": "none",
+        "artifact_options": options,
+        "training_overlap": training_overlap,
+        "input_information": input_information,
+    }
+
+
+_EVCOUPLINGS_INDEPENDENT = _artifact_entry(
+    "proteingym-evcouplings-independent-v1",
+    "EVCouplings independent model; ProteinGym scoring convention",
+    {"method": "EVCouplings CouplingsModel.to_independent_model() field refit (zero-initialised BFGS, "
+               "L2 lambda_h stored in the model), J cleared; ProteinGym prediction_independent",
+     "proteingym_model_row": "Site_Independent, directionality +1",
+     "score": "sum over substitutions of h*_i(mutant) - h*_i(wild type); higher is fitter",
+     "evcouplings_revision": "e1362407a0b65d63ca07df55f44cb17b0a3722b7",
+     "proteingym_revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+     "model_format": "plmc_v2 with stored N_eff, lambda_h, alphabet, target and index list",
+     "coordinates": "model index = assay position + 1 - MSA_start (pinned score_mutants.py)",
+     "unscored": "any substitution outside the model index list or alphabet, or an assay without a model; never zero",
+     "preparation": "rewirebench prepare-baseline-artifact proteingym-evcouplings-independent-v1"},
+    prerequisites=("Requires a prepared artifact from reviewed, label-free plmc_v2 EVCouplings models with MSA "
+                   "provenance and checked assay coordinates. No DMS labels, MSA search or Potts training."),
+    options={"artifact": "prepared independent-field JSON",
+             "artifact_sha256": "SHA256 reported by prepare-baseline-artifact"},
+    training_overlap=("No DMS labels. External evolutionary information from a multiple sequence alignment "
+                      "of natural homologues via a plmc_v2 model; independent fields refitted from its stored "
+                      "statistics. Homologue overlap with benchmark proteins is not quantified."),
+    input_information="assay_id, wild_type_sequence, mutant, mutated_sequence; plus the prepared external model artifact",
+)
+_H12CORE_FIMO = _artifact_entry(
+    "dart-h12core-fimo-hit-count-v1",
+    "HOCOMOCO v12 CORE FIMO total motif hits; Rewire Task 1 reference",
+    {"scanner": "FIMO, MEME Suite 5.5.9", "motifs": "HOCOMOCO v12 H12CORE, 1,443 motifs",
+     "motifs_sha256": "3d9c47dc396b3ba4e278cdfd29d526c1eb2fbad4895b5e2dc345f535f98c5f12",
+     "motifs_source": "https://hocomoco12.autosome.org/final_bundle/hocomoco12/H12CORE/formatted_motifs/H12CORE_meme_format.meme",
+     "background": "uniform A=C=G=T=0.25 (packaged file)", "motif_pseudocount": 0.1,
+     "p_value_threshold": 1e-4, "strands": "both", "scan": "full supplied sequence; overlapping hits retained",
+     "aggregation": "total emitted hits per sequence, weight 1; zero hits is 0",
+     "ambiguity": "FIMO skips windows with non-ACGT symbols; no all-ACGT window as wide as the narrowest motif is unscored",
+     "claim": "Rewire motif aggregation using FIMO; not a reproduced DART Task 1 baseline; no measured performance"},
+    prerequisites=("Requires a local FIMO 5.5.9 executable with its recorded SHA256 and the exact H12CORE MEME "
+                   "file. Missing prerequisites block; there is no GC or Markov fallback."),
+    options={"fimo": "path to FIMO 5.5.9 executable", "fimo_sha256": "SHA256 of that executable",
+             "motifs": "path to H12CORE_meme_format.meme"},
+    training_overlap=("No DART labels, pairs or controls. External prior: HOCOMOCO v12 motifs learned from "
+                      "experimental TF-binding data; overlap with ENCODE regions is not quantified."),
+    input_information="sequence only, under an opaque ID; plus pinned scanner, motif and background artifacts",
+)
+
+
 REGISTRY = {
     "mfass-v2": [
         _PRIOR,
@@ -80,13 +143,18 @@ REGISTRY = {
     ],
     "proteingym-v1.3-dms-substitutions": [
         _RANDOM,
-        _entry("proteingym-conventional-pending-v1", "conventional", "Label-free conventional reference pending",
-               gap="Requires a reviewed alignment/frequency method, permitted MSA inputs and pinned implementation. No fitting to DMS labels."),
+        {**_entry("proteingym-conventional-pending-v1", "conventional", "Label-free conventional reference pending",
+                  gap="Requires a reviewed alignment/frequency method, permitted MSA inputs and pinned implementation. No fitting to DMS labels."),
+         "replaced_by": "proteingym-evcouplings-independent-v1"},
+        _EVCOUPLINGS_INDEPENDENT,
     ],
     "dart-eval-task1-zero-shot-v1": [
         _RANDOM,
-        _entry("dart-conventional-pending-v1", "conventional", "Label-free regulatory reference pending",
-               gap="Requires a source-reviewed label-free method with declared reference data. Training on element/control labels is forbidden."),
+        {**_entry("dart-conventional-pending-v1", "conventional", "Label-free regulatory reference pending",
+                  gap="Requires a source-reviewed label-free method with declared reference data. Training on element/control labels is forbidden."),
+         "related": {"dart-h12core-fimo-hit-count-v1": "New Rewire aggregation, not a published Task 1 comparator; "
+                     "no published conventional zero-shot scalar Task 1 baseline was established in our source review"}},
+        _H12CORE_FIMO,
     ],
 }
 
@@ -99,7 +167,7 @@ def describe_baselines(protocol: str) -> dict:
             "baselines": copy.deepcopy(REGISTRY[protocol])}
 
 
-def _adapter(entry, data):
+def _adapter(entry, data, options=None):
     from rewirebench.adapters.baselines import (
         PairedComposition,
         StringNgramReference,
@@ -131,12 +199,18 @@ def _adapter(entry, data):
         if ident == "training-control-v1":
             return TrainingPrior() if classification else TrainMean()
         return StringNgramReference(field="smiles", classification=classification)
+    if ident == "proteingym-evcouplings-independent-v1":
+        from rewirebench.adapters.evcouplings_independent import EVCouplingsIndependent
+        return EVCouplingsIndependent(**options)
+    if ident == "dart-h12core-fimo-hit-count-v1":
+        from rewirebench.adapters.fimo_motifs import H12CoreFimoHitCount
+        return H12CoreFimoHitCount(**options)
     raise ValueError("Baseline has no executable adapter")
 
 
 def run_baselines(prepared: dict | str | Path, *, output: str | Path,
                   baseline_ids: list[str] | None = None, batch_size: int = 32,
-                  fail_fast: bool = False) -> dict:
+                  fail_fast: bool = False, baseline_options: dict | None = None) -> dict:
     """Execute fixed reference methods through SDK validation, never overwrite.
 
     All registry entries are included by default, including explicit blocked
@@ -144,6 +218,11 @@ def run_baselines(prepared: dict | str | Path, *, output: str | Path,
     completion; smoke/subset reports retain their SDK labels. Per-baseline errors
     are recorded by exception class only, avoiding private values or paths in a
     coordinator manifest. Keyboard interrupts terminate rather than being hidden.
+
+    ``baseline_options`` maps an artifact-backed baseline ID to its adapter
+    options (see ``artifact_options`` in the registry). Entries needing artifacts
+    stay blocked without options. Option values, which may be local paths, are
+    never written to the plan or manifest; only the supplied option names are.
     """
     if Path(output).exists():
         raise FileExistsError(output)
@@ -161,6 +240,15 @@ def run_baselines(prepared: dict | str | Path, *, output: str | Path,
             raise ValueError("Unknown or incompatible baseline ID")
         indexed = {e["baseline_id"]: e for e in entries}
         entries = [indexed[i] for i in baseline_ids]
+    options = baseline_options or {}
+    if not isinstance(options, dict):
+        raise ValueError("baseline_options must map baseline IDs to option mappings")  # noqa: TRY004 - public validation API
+    configurable = {e["baseline_id"]: e["artifact_options"] for e in entries if "artifact_options" in e}
+    for ident, values in options.items():
+        if ident not in configurable:
+            raise ValueError("baseline_options names an unselected baseline or one without artifact options")
+        if not isinstance(values, dict) or set(values) - set(configurable[ident]):
+            raise ValueError(f"Unsupported options for {ident}")
     path = sdk._new_output(output)
     manifest = {
         "schema_version": "1.0", "kind": "rewire_baseline_batch", "registry_version": REGISTRY_VERSION,
@@ -174,17 +262,23 @@ def run_baselines(prepared: dict | str | Path, *, output: str | Path,
     for entry in entries:
         ident = entry["baseline_id"]
         record = {"baseline_id": ident, "role": entry["role"], "configuration": entry["configuration"]}
-        if entry["status"] == "blocked":
+        if ident in options:
+            record["artifact_options_supplied"] = sorted(options[ident])
+        if entry["status"] == "blocked" and ident not in options:
             record.update(status="blocked", reason=entry["gap"])
         else:
             try:
                 model = {
                     "name": entry["title"],
-                    "training_overlap": "no labelled fitting" if ident == "seeded-random-v1" else "protocol-permitted training only; no pretraining",
+                    "training_overlap": entry.get("training_overlap") or (
+                        "no labelled fitting" if ident == "seeded-random-v1"
+                        else "protocol-permitted training only; no pretraining"),
                     "configuration": {"baseline_id": ident, "baseline_version": entry["version"], **entry["configuration"]},
-                    "input_information": "protocol allowlisted biological inputs; see baseline configuration for extra inputs",
+                    "input_information": entry.get("input_information",
+                        "protocol allowlisted biological inputs; see baseline configuration for extra inputs"),
                 }
-                report = sdk.run(data, _adapter(entry, data), output=path / ident, model=model,
+                adapter = _adapter(entry, data, options.get(ident))
+                report = sdk.run(data, adapter, output=path / ident, model=model,
                                  batch_size=batch_size, allow_partial=False, prediction_type=entry["prediction_type"])
                 record.update(status="evaluated", report=f"{ident}/report.json",
                               completion=report["completion"], coverage=report["coverage"],

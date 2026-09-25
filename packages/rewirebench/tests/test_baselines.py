@@ -55,6 +55,26 @@ def test_registry_covers_every_sdk_protocol_with_explicit_roles_and_no_execution
         describe_baselines("invented")
 
 
+def test_reviewed_conventional_methods_keep_states_separate_and_old_proposals_blocked():
+    expected = {"proteingym-v1.3-dms-substitutions": ("proteingym-conventional-pending-v1",
+                                                      "proteingym-evcouplings-independent-v1"),
+                "dart-eval-task1-zero-shot-v1": ("dart-conventional-pending-v1",
+                                                 "dart-h12core-fimo-hit-count-v1")}
+    for protocol, (pending, reviewed) in expected.items():
+        entries = {b["baseline_id"]: b for b in describe_baselines(protocol)["baselines"]}
+        assert entries[pending]["status"] == "blocked"
+        entry = entries[reviewed]
+        assert entry["status"] == "blocked" and entry["implementation_status"] == "implemented"
+        assert entry["biological_evaluation_status"] == "not_executed"
+        assert entry["measurement_release_status"] == "none"
+        assert "no pretraining" not in entry["training_overlap"]
+    assert expected["proteingym-v1.3-dms-substitutions"][1] == describe_baselines(
+        "proteingym-v1.3-dms-substitutions")["baselines"][1]["replaced_by"]
+    dart = describe_baselines("dart-eval-task1-zero-shot-v1")["baselines"]
+    assert "not a published Task 1 comparator" in dart[1]["related"]["dart-h12core-fimo-hit-count-v1"]
+    assert "not a reproduced DART Task 1 baseline" in dart[2]["configuration"]["claim"]
+
+
 @pytest.mark.parametrize("classes", [("negative", "positive"), ("enhancer", "ocr", "promoter")])
 def test_genomic_end_to_end_null_and_train_only_conventional(tmp_path, classes):
     prepared = genomic(tmp_path, classes=classes)
@@ -113,7 +133,7 @@ def test_dart_zero_shot_control_runs_without_fitting_and_keeps_gap(tmp_path):
     data = sdk.prepare("dart-eval-task1-zero-shot-v1", source="demo", output=tmp_path / "prepared")
     manifest = run_baselines(data, output=tmp_path / "run")
     assert manifest["status"] == "incomplete"
-    assert [r["status"] for r in manifest["baselines"]] == ["evaluated", "blocked"]
+    assert [r["status"] for r in manifest["baselines"]] == ["evaluated", "blocked", "blocked"]
     report = json.loads((tmp_path / "run/seeded-random-v1/report.json").read_text())
     assert report["execution"]["fitting"] == "none"
     assert report["scope"] == "smoke"
@@ -151,10 +171,10 @@ def test_baseline_failure_is_recorded_redacted_and_others_continue(tmp_path, mon
 
     data = genomic(tmp_path)
     original = baselines._adapter
-    def broken(entry, data):
+    def broken(entry, data, options=None):
         if entry["role"] == "null":
             raise RuntimeError("secret/private/sample must not enter the manifest")
-        return original(entry, data)
+        return original(entry, data, options)
     monkeypatch.setattr(baselines, "_adapter", broken)
     manifest = run_baselines(data, output=tmp_path / "run")
     assert manifest["status"] == "incomplete"

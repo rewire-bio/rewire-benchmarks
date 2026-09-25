@@ -1,0 +1,42 @@
+{
+ "build_tree_fimo_sha256": "3745e5f859517c45a8d7dc75641dde297e906327d0ed6b9061e49bbe475debe7",
+ "built_at": "2026-09-24T23:37:07Z",
+ "command_exit_status": {
+  "configure": 0,
+  "make": 0,
+  "make install": 0
+ },
+ "commands": [
+  "tar xzf meme-5.5.9.tar.gz",
+  "./configure --prefix=/tmp/rw13up/meme/install --enable-build-libxml2 --enable-build-libxslt",
+  "make -j8",
+  "make install"
+ ],
+ "description": "Observed local build of FIMO from the MEME Suite 5.5.9 release tarball; applies only to the executable digest below",
+ "fimo_sha256": "3745e5f859517c45a8d7dc75641dde297e906327d0ed6b9061e49bbe475debe7",
+ "fimo_version_output": "5.5.9",
+ "log_sha256": {
+  "configure.log": "9cc5de01e3ae13e6398f60276aeaa5f92a2748f75893f292b6494414a88dd2d7",
+  "install.log": "ec32f891d65836b0daca1ed5cf4b4f4ec7c945781ce3fd9f357c66146672cfd9",
+  "make.log": "c28c770c3712cae3a497470a4dec22fd352f56c07c2917eb1640f2cd41b04a1d",
+  "meme-5.5.9/config.log": "c29c44f24a094bd2a75cd7a0786fd76083ad78aef8a46ce47b2a78a7fe270195"
+ },
+ "notes": "Built through the space-free symlink /tmp/rw13up -> '/Volumes/Extreme SSD/rewire-benchmarks-issue-13-upstream' because libtool fails on paths with spaces. An earlier attempt directly under the spaced path failed at libxslt linking and produced no executable.",
+ "platform": {
+  "architecture": "arm64",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+  "linked_libraries": [
+   "/usr/lib/libSystem.B.dylib",
+   "/usr/lib/libz.1.dylib"
+  ],
+  "os": "macOS 26.6.2"
+ },
+ "schema": "rewire-fimo-build-receipt-v1",
+ "source": {
+  "bytes": 56535171,
+  "http_last_modified": "Sat, 22 Nov 2025 03:24:31 GMT",
+  "retrieved_at": "2026-09-24T23:35:07Z",
+  "sha256": "0406fb7b1dc27f6aab3d6d3a29ecdf617bbdd946690cfa97ca2129bc210bfd12",
+  "url": "https://meme-suite.org/meme/meme-software/5.5.9/meme-5.5.9.tar.gz"
+ }
+}

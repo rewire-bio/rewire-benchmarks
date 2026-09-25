@@ -33,6 +33,13 @@ def main(argv=None):
     baseline_run.add_argument("--output", required=True)
     baseline_run.add_argument("--baseline", action="append")
     baseline_run.add_argument("--batch-size", type=int, default=32)
+    baseline_run.add_argument("--baseline-options", default="{}",
+                              help='JSON {baseline_id: {option: value}} for artifact-backed baselines')
+    artifact = sub.add_parser("prepare-baseline-artifact",
+                              help="Derive a hashed artifact for an artifact-backed baseline")
+    artifact.add_argument("baseline", choices=["proteingym-evcouplings-independent-v1"])
+    artifact.add_argument("--manifest", required=True, help="Reviewed model manifest JSON")
+    artifact.add_argument("--output", required=True, help="New artifact JSON path")
     enqueue = sub.add_parser("enqueue", help="Freeze a reviewed SDK submission for later delivery")
     enqueue.add_argument("--bundle", required=True)
     enqueue.add_argument("--queue", required=True)
@@ -96,7 +103,11 @@ def main(argv=None):
         elif args.command == "run-baselines":
             from rewirebench.baselines import run_baselines
             result = run_baselines(args.prepared, output=args.output,
-                baseline_ids=args.baseline, batch_size=args.batch_size)
+                baseline_ids=args.baseline, batch_size=args.batch_size,
+                baseline_options=json.loads(args.baseline_options))
+        elif args.command == "prepare-baseline-artifact":
+            from rewirebench.adapters.evcouplings_independent import prepare_artifact
+            result = prepare_artifact(args.manifest, args.output)
         elif args.command == "enqueue":
             from rewirebench.submission_queue import enqueue_submission
             result = enqueue_submission(args.bundle, queue=args.queue, title=args.title,

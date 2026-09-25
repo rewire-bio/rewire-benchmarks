@@ -48,5 +48,50 @@
     "package": "fair-esm==2.0.0",
     "evidence_location": "Complete checkpoint bytes retrieved from official Meta model host; load and inference tested locally",
     "review_method": "automated_source_inspection_and_tests"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/proteingym/baselines/EVmutation/score_mutants.py",
+    "revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "sha256": "9802fcd2e50ac0396a445b3c0bf9e4cfb865f1e57ae0c6382a12214ee0336050",
+    "retrieved_at": "2026-09-24T20:22:00+00:00",
+    "local_file": null,
+    "evidence_location": "score_multi_aa: to_independent_model() and prediction_independent; lines 37-45 model ID exceptions; offset -(MSA_start - 1)",
+    "review_method": "git checkout at pinned revision; unmodified code executed for the independent-model parity receipt"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/proteingym/baselines/EVmutation/calculations.py",
+    "revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "sha256": "07e2059186bdf2f673c46817c0a2c630658269008474b3c05f10585b8d246c6e",
+    "retrieved_at": "2026-09-24T20:22:00+00:00",
+    "local_file": null,
+    "evidence_location": "extract_mutations and predict_mutation_table (full Hamiltonian delta; uncovered mutants raise)",
+    "review_method": "git checkout at pinned revision; unmodified code executed for the independent-model parity receipt"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/config.json",
+    "revision": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+    "sha256": "7cd239d1e4c8b474f6ce2bd6574423b53ab48204f852f219e09a36f25d513608",
+    "retrieved_at": "2026-09-24T20:22:00+00:00",
+    "local_file": null,
+    "evidence_location": "model_list_zero_shot_substitutions_DMS.Site_Independent: prediction_independent, directionality 1",
+    "review_method": "git checkout at pinned revision; unmodified code executed for the independent-model parity receipt"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/debbiemarkslab/EVcouplings/e1362407a0b65d63ca07df55f44cb17b0a3722b7/evcouplings/couplings/model.py",
+    "revision": "e1362407a0b65d63ca07df55f44cb17b0a3722b7",
+    "sha256": "6422cfc7892cb5d076194354b05fe91fe40a49cee28548e62c4e211f32cfa050",
+    "retrieved_at": "2026-09-24T20:22:00+00:00",
+    "local_file": null,
+    "evidence_location": "plmc_v2 reader, delta_hamiltonian and to_independent_model (zero-initialised fmin_bfgs, J cleared)",
+    "review_method": "git checkout at pinned revision; unmodified code executed for the independent-model parity receipt"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/debbiemarkslab/EVcouplings/e1362407a0b65d63ca07df55f44cb17b0a3722b7/LICENSE",
+    "revision": "e1362407a0b65d63ca07df55f44cb17b0a3722b7",
+    "sha256": "2033a41c325c60756d05bfcd909a7ddd9bbf79bea1b585785db7e9a9cabbd0be",
+    "retrieved_at": "2026-09-24T20:22:00+00:00",
+    "local_file": "EVcouplings-LICENSE.upstream",
+    "evidence_location": "Complete EVcouplings MIT notice (c) 2017 EVcouplings development team; applies to the plmc_v2 reader and independent-field objective adapted in rewirebench/adapters/evcouplings_independent.py. The Yale CNS *.inp scripts it excludes, and all upstream models, are not redistributed.",
+    "review_method": "git checkout at pinned revision; file copied byte for byte"
   }
 ]

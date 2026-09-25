@@ -96,6 +96,14 @@ use the common `evaluate` command instead of `run`. Do not negate a loss silentl
 record how the supplied score relates to sequence likelihood. A generic ranker's
 result is not reproduction of a published masked or causal language-model result.
 
+## Motif-hit reference
+
+`dart-h12core-fimo-hit-count-v1` counts FIMO 5.5.9 hits from all HOCOMOCO v12
+H12CORE motifs in each sequence. It is a newly specified Rewire aggregation, not
+a published DART Task 1 baseline, and has no measured performance. It needs a
+local FIMO build and the exact motif file; see
+[conventional references](conventional-references.md).
+
 ## Scoring and coverage
 
 | Field | Meaning |
@@ -105,6 +113,7 @@ result is not reproduction of a published masked or causal language-model result
 | `mean_diff`, `q05_diff`, `q25_diff`, `median_diff`, `q75_diff`, `q95_diff` | Distribution of element-minus-control scores on complete scored pairs |
 | `n` | Scored sequences, including a scored member whose partner is missing |
 | `n_pairs`, `pairs_denominator` | Complete scored pairs and original local-file pair count |
+| `pair_diagnostics.tied_pairs` | Complete scored pairs with equal scores (reported outside `metrics`); these count as incorrect |
 
 Wilcoxon uses the upstream SciPy 1.12 auto rule: the rank-sum distribution for at
 most 50 nonzero differences, otherwise a normal approximation with zero differences

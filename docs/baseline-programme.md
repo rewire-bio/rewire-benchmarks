@@ -33,9 +33,13 @@ coverage and report; `baseline-manifest.json` distinguishes evaluated, blocked a
 failed entries. A manifest is not evidence of successful scientific reproduction.
 Use `--baseline BASELINE_ID` repeatedly to choose an explicit subset.
 
-The registry covers the eight supported SDK protocol identifiers. A proposed
-conventional ProteinGym or DART reference does not produce a score: its missing
-method/input review remains a blocker. The TDC string n-gram reference is explicitly
+The registry covers the eight supported SDK protocol identifiers. The original
+ProteinGym and DART conventional proposals remain blocked. Two sourced references
+are now implemented: the EVCouplings independent model with ProteinGym's
+scoring convention, and a Rewire HOCOMOCO v12 CORE/FIMO motif-hit count for DART
+Task 1. Both stay blocked in a default batch until their external artifacts are
+supplied with `--baseline-options`. They have no biological evaluation or released
+measurement; see [conventional references](conventional-references.md). The TDC string n-gram reference is explicitly
 not a chemical fingerprint model or invariant to alternate SMILES representations.
 
 Python offers the same interfaces:

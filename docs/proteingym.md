@@ -52,6 +52,14 @@ At every mutated position, the adapter masks that residue in the wild-type seque
 
 The example requires `fair-esm==2.0.0` and PyTorch. For valid sequences longer than 1,022 residues it records an explicit unscored reason and continues with other variants; no implicit truncation or unreviewed windowing occurs. Invalid sequences still fail validation. Long-protein variants retain their denominators, so runs containing them remain partial. This example does **not** reproduce a specific published ProteinGym row or promise full-suite inference support. CPU execution is available; full-track preparation/scoring may need substantial RAM and disk because this initial SDK materializes input rows. Start with a selected assay.
 
+## EVCouplings independent reference
+
+`proteingym-evcouplings-independent-v1` implements ProteinGym's `Site_Independent`
+row from an externally prepared, label-free plmc_v2 model. It needs a reviewed
+model manifest and a prepared artifact, checks coordinates against the wild type,
+and leaves uncovered variants unscored. No assay has been evaluated with it. See
+[conventional references](conventional-references.md).
+
 `examples/proteingym/synthetic_smoke.py` performs two small substitutions with no experimental labels. It is useful for checking an offline environment, and prints `benchmark_result: false`.
 
 ## Metrics, aggregation and limitations
