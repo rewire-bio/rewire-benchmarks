@@ -12,6 +12,7 @@ import json
 import math
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +26,11 @@ FIXTURE = Path(__file__).parent / "fixtures" / "proteingym_independent"
 RECEIPT = json.loads((FIXTURE / "upstream-receipt.json").read_text())
 SPEC = json.loads((FIXTURE / "fixture.json").read_text())
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts" / "baseline_parity"))
+import evcouplings_compare as compare
+
+R = "ARGR_ECOLI_Tsuboyama_2023_1AOY"  # ill-conditioned precision-loss stress fixture
+STABLE = ("AMFR_HUMAN_Tsuboyama_2023_4G3O", "KCNH2_HUMAN_Kozek_2020")
 
 
 def sha(path):
@@ -87,17 +93,35 @@ def test_receipt_describes_current_fixture_and_pins():
         assert entry["stdout_offset"] == [f"Offset: {spec['msa_start'] - 1}"]
 
 
-def test_scores_and_fields_agree_with_unmodified_upstream(artifact, adapter):
-    fields = json.loads(Path(artifact["artifact"]).read_text())["assays"]
+def adapter_report(artifact, adapter, receipt):
+    """Compare the adapter with a receipt over all assays, sites and receipt mutants."""
+    assays = json.loads(Path(artifact["artifact"]).read_text())["assays"]
+    predictions = {}
     for assay, spec in SPEC.items():
-        upstream = RECEIPT["assays"][assay]
-        predicted = adapter.predict(rows(assay, spec["scored"]))
-        assert set(upstream["prediction_independent"]) == set(spec["scored"])
-        for mutant, value in upstream["prediction_independent"].items():
-            assert close(predicted[f"{assay}::{mutant}"], value), mutant
-        for model_index, row in upstream["independent_fields"].items():
-            mine = fields[assay]["fields"][str(int(model_index) + spec["msa_start"] - 1)]
-            assert all(close(a, b) for a, b in zip(mine, row))
+        assert set(receipt["assays"][assay]["prediction_independent"]) == set(spec["scored"])
+        scored = adapter.predict(rows(assay, spec["scored"]))
+        predictions[assay] = {k.split("::", 1)[1]: v for k, v in scored.items()}
+    return compare.compare(assays, receipt["assays"], SPEC, predictions)
+
+
+def test_stable_fixtures_match_frozen_upstream_receipt(artifact, adapter):
+    """AMFR and KCNH2: every raw field, WT contrast and score against the frozen receipt."""
+    report, failures = adapter_report(artifact, adapter, RECEIPT)
+    stable = [f for f in failures if f.startswith(STABLE)]
+    assert not stable, json.dumps({"failures": stable, "report": {a: report[a] for a in STABLE}}, indent=1)
+
+
+def test_stress_fixture_selected_scores_match_frozen_receipt(artifact, adapter):
+    """ARGR (N_eff 4e5): the frozen selected scores must hold in every runtime at 1e-6.
+
+    Its raw fields and full contrasts are checked against upstream executed in
+    the same runtime (test_same_runtime_upstream_parity). Against the frozen
+    macOS receipt they are reported on failure, not asserted, because this
+    ill-conditioned fit's iterate depends on the numerical runtime.
+    """
+    report, failures = adapter_report(artifact, adapter, RECEIPT)
+    scores = [f for f in failures if f.startswith(R) and ": score " in f]
+    assert not scores, json.dumps({"failures": scores, "report": report[R]}, indent=1)
 
 
 def test_direction_symmetry_and_additivity(adapter):
@@ -311,36 +335,59 @@ def test_cli_prepares_artifact_and_runs_baseline(tmp_path, capsys):
     assert json.loads(capsys.readouterr().out)["baselines"][0]["status"] == "evaluated"
 
 
-@pytest.mark.skipif(not os.environ.get("REWIRE_EVCOUPLINGS_PYTHON"),
-                    reason="Live upstream rerun needs REWIRE_EVCOUPLINGS_PYTHON and REWIRE_EVCOUPLINGS_UPSTREAM")
-def test_live_upstream_rerun_matches_committed_receipt(tmp_path):
-    output = tmp_path / "receipt.json"
+def test_precision_loss_status_is_accepted_and_propagated(artifact, adapter):
+    """Warning flags belong to one execution: each local state must be accepted
+    and reported faithfully. The macOS receipt keeps its own historical record."""
+    assert RECEIPT["assays"][R]["bfgs_warnflags"] == {"3": 2, "4": 0, "6": 2, "9": 0}
+    sites = json.loads(Path(artifact["artifact"]).read_text())["assays"][R]["optimizer"]["sites"]
+    for site in sites.values():
+        assert site["warnflag"] in (0, 2)
+        if site["warnflag"] == 2:
+            assert site["status"] == "precision_loss_within_stationarity_tolerance"
+            assert site["stationarity_residual"] <= evc.STATIONARITY_TOLERANCE
+        else:
+            assert site["status"] == "converged" and site["gradient_max_abs"] <= evc.BFGS_GTOL
+    summary = adapter.provenance["optimizer"]["assays"][R]
+    assert summary["precision_loss_positions"] == sorted(int(p) for p, s in sites.items() if s["warnflag"] == 2)
+    assert summary["converged_sites"] == sum(s["warnflag"] == 0 for s in sites.values())
+    assert summary["max_stationarity_residual"] == max(s["stationarity_residual"] for s in sites.values())
+
+
+SAME_RUNTIME = bool(os.environ.get("REWIRE_EVCOUPLINGS_PYTHON") and os.environ.get("REWIRE_EVCOUPLINGS_UPSTREAM"))
+
+
+@pytest.mark.skipif(not SAME_RUNTIME and not os.environ.get("REWIRE_REQUIRE_SAME_RUNTIME_UPSTREAM"),
+                    reason="Same-runtime upstream parity needs REWIRE_EVCOUPLINGS_PYTHON and "
+                           "REWIRE_EVCOUPLINGS_UPSTREAM; a skip is not parity evidence")
+def test_same_runtime_upstream_parity(tmp_path, artifact, adapter):
+    """Run the unmodified pinned upstream on this machine, then compare everything.
+
+    Every raw field, every WT-relative contrast, every receipt score (all at
+    1e-6) and the exact BFGS warning flag at every site of all three fixtures.
+    The upstream environment must use this process's NumPy and SciPy versions on
+    the same OS and architecture. With REWIRE_REQUIRE_SAME_RUNTIME_UPSTREAM=1 a
+    missing upstream environment fails instead of skipping (used in CI).
+    """
+    import platform
+
+    import scipy
+    assert SAME_RUNTIME, "REWIRE_REQUIRE_SAME_RUNTIME_UPSTREAM is set but no upstream environment is configured"
+    output = tmp_path / "same-runtime-receipt.json"
     subprocess.run([os.environ["REWIRE_EVCOUPLINGS_PYTHON"],
                     str(ROOT / "scripts/baseline_parity/evcouplings_upstream_receipt.py"),
                     "--upstream", os.environ["REWIRE_EVCOUPLINGS_UPSTREAM"], "--output", str(output)],
                    check=True)
     live = json.loads(output.read_text())
+    environment = live["environment"]
+    assert (environment["numpy"], environment["scipy"]) == (np.__version__, scipy.__version__)
+    assert environment["platform"].split("-")[0] == platform.platform().split("-")[0]
+    assert platform.machine() in environment["platform"]
+    report, failures = adapter_report(artifact, adapter, live)
+    failures += compare.warnflag_mismatches(report)
     for assay in SPEC:
-        for key in ("prediction_independent", "independent_fields", "bfgs_warnflags"):
-            assert live["assays"][assay][key] == RECEIPT["assays"][assay][key]
-
-
-def test_precision_loss_sites_match_upstream_and_stay_visible(artifact, adapter):
-    """ARGR's large N_eff makes BFGS report precision loss, in upstream's own call too."""
-    assay = "ARGR_ECOLI_Tsuboyama_2023_1AOY"
-    upstream = RECEIPT["assays"][assay]["bfgs_warnflags"]
-    assert sorted(p for p, flag in upstream.items() if flag == 2) == ["3", "6"]
-    sites = json.loads(Path(artifact["artifact"]).read_text())["assays"][assay]["optimizer"]["sites"]
-    assert {p: site["warnflag"] for p, site in sites.items()} == upstream  # MSA_start 1
-    for site in sites.values():
-        if site["warnflag"] == 2:
-            assert site["status"] == "precision_loss_within_stationarity_tolerance"
-            assert site["stationarity_residual"] <= evc.STATIONARITY_TOLERANCE
-    summary = adapter.provenance["optimizer"]["assays"][assay]
-    assert summary["precision_loss_positions"] == [3, 6] and summary["converged_sites"] == 2
-    predicted = adapter.predict(rows(assay, SPEC[assay]["scored"]))
-    for mutant, value in RECEIPT["assays"][assay]["prediction_independent"].items():
-        assert close(predicted[f"{assay}::{mutant}"], value)
+        assert live["assays"][assay]["J_ij_cleared"] is True
+        assert all(error and error["type"] == "ValueError" for error in live["assays"][assay]["invalid_mutants"].values())
+    assert not failures, json.dumps({"failures": failures, "report": report}, indent=1)
 
 
 def fake_bfgs(flag, *, x=None, objective=None, gradient=None):
@@ -414,9 +461,6 @@ def _both_alphabets(value):
     return change
 
 
-R = "ARGR_ECOLI_Tsuboyama_2023_1AOY"
-
-
 def _negative_norms(assay, position):
     """Both norms negated: consistent ratio, but impossible as norms."""
     def change(data):
@@ -476,3 +520,65 @@ def test_evcouplings_notice_is_packaged_and_receipted():
     receipt = next(r for r in json.loads(proteingym.resource_path("sources.json").read_text())
                    if r.get("local_file") == "EVcouplings-LICENSE.upstream")
     assert receipt["revision"] == evc.EVCOUPLINGS_REVISION and receipt["sha256"] == sha(notice)
+
+
+def test_comparator_separates_common_offsets_from_contrast_changes(artifact, adapter):
+    """Negative controls for the parity comparator itself, on a copy of the artifact."""
+    assays = json.loads(Path(artifact["artifact"]).read_text())["assays"]
+    predictions = {a: {m: v for m, v in RECEIPT["assays"][a]["prediction_independent"].items()} for a in SPEC}
+    shifted = copy.deepcopy(assays)
+    shifted[A]["fields"]["2"] = [v + 1e-3 for v in shifted[A]["fields"]["2"]]
+    report, failures = compare.compare(shifted, RECEIPT["assays"], SPEC, predictions)
+    site = report[A]["sites"]["2"]
+    assert site["raw_symbols_outside_tolerance"] and not site["contrast_symbols_outside_tolerance"]
+    assert site["mean_difference"] == pytest.approx(1e-3) and site["max_abs_difference_after_mean"] < 1e-12
+    bent = copy.deepcopy(assays)
+    bent[A]["fields"]["2"][bent[A]["alphabet"].index("W")] += 1e-3
+    report, failures = compare.compare(bent, RECEIPT["assays"], SPEC, predictions)
+    assert report[A]["sites"]["2"]["contrast_symbols_outside_tolerance"] == ["W"]
+    predictions[A]["F2W"] += 1e-3
+    _, failures = compare.compare(assays, RECEIPT["assays"], SPEC, predictions)
+    assert any("F2W: score" in f for f in failures)
+
+
+def _drop(path):
+    def change(receipt):
+        target = receipt
+        for key in path[:-1]:
+            target = target[key]
+        del target[path[-1]]
+    return change
+
+
+@pytest.mark.parametrize("change, message", [
+    (_drop(["assays", R, "independent_fields", "6"]), "receipt field sites: missing \\['6'\\]"),
+    (_drop(["assays", R, "bfgs_warnflags", "6"]), "receipt warning flags: missing \\['6'\\]"),
+    (_drop(["assays", A, "bfgs_warnflags"]), "receipt warning flags: missing"),
+    (lambda r: r["assays"][K]["independent_fields"].__setitem__("2", [0.0] * 20), "extra \\['2'\\]"),
+    (lambda r: r["assays"][K]["bfgs_warnflags"].__setitem__("3", None), "must be integers"),
+    (lambda r: r["assays"][A]["independent_fields"]["5"].pop(), "one value per alphabet symbol"),
+    (_drop(["assays", K, "prediction_independent", "K538F"]), "receipt scores: missing \\['K538F'\\]"),
+    (_drop(["assays", K]), "assays"),
+])
+def test_comparator_rejects_incomplete_or_extra_receipt_coverage(artifact, change, message):
+    """A receipt missing, or adding, a site, flag, row entry, score or assay cannot
+    turn the all-site comparison into a partial one."""
+    assays = json.loads(Path(artifact["artifact"]).read_text())["assays"]
+    predictions = {a: dict(RECEIPT["assays"][a]["prediction_independent"]) for a in SPEC}
+    receipt = copy.deepcopy(RECEIPT["assays"])
+    compare.compare(assays, receipt, SPEC, predictions)  # complete receipt: accepted
+    change({"assays": receipt})
+    with pytest.raises(compare.CoverageError, match=message):
+        compare.compare(assays, receipt, SPEC, predictions)
+
+
+def test_comparator_rejects_incomplete_artifact_or_adapter_coverage(artifact):
+    assays = json.loads(Path(artifact["artifact"]).read_text())["assays"]
+    predictions = {a: dict(RECEIPT["assays"][a]["prediction_independent"]) for a in SPEC}
+    partial = copy.deepcopy(assays)
+    del partial[R]["optimizer"]["sites"]["6"]
+    with pytest.raises(compare.CoverageError, match="artifact optimizer sites: missing \\['6'\\]"):
+        compare.compare(partial, RECEIPT["assays"], SPEC, predictions)
+    del predictions[R]["K6I"]
+    with pytest.raises(compare.CoverageError, match="adapter scores: missing \\['K6I'\\]"):
+        compare.compare(assays, RECEIPT["assays"], SPEC, predictions)

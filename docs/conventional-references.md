@@ -170,10 +170,33 @@ errors.
   model.
 - AMFR (47 residues, `MSA_num_cov` 41) may not be fully covered; no coordinate
   audit has been done. Scoring one assay is not a 217-assay suite result.
-- Fields depend on SciPy's BFGS. The receipt used SciPy 1.13.1 upstream and
-  the adapter SciPy 1.17.1; the fixture agreed to 2.2e-16, including sites
-  where both reported precision loss. Other versions may differ slightly; the
-  artifact records the versions used.
+- Fitted fields can depend on the numerical runtime. The evidence so far:
+  - Measured on macOS arm64: SciPy 1.13.1 and 1.17.1 gave bitwise-identical
+    upstream fields and warning flags for all three fixtures. This does not rule
+    out a SciPy-version effect that appears only on Linux.
+  - Mathematical result: summing the gradient over the alphabet shows that the
+    L2 term fixes the exact optimum's common component, a site mean of
+    -N_eff (1 - sum f) / (2 lambda_h q). With float32 frequencies, 1 - sum f is
+    about 1e-8 to 4e-8, so the exact ARGR site means are 0.01 to 0.035. The
+    frozen receipt reproduces them, except precision-loss site 6, which is 3e-5
+    away. This direction has low curvature, 2 lambda_h = 0.02, against roughly
+    N_eff in the others.
+  - Measured sensitivity on macOS, not the Linux mechanism: changing only the
+    order of floating-point sums, with the objective mathematically unchanged,
+    moved ARGR raw fields by up to 3.6e-5. That change was mostly a common
+    shift, but one site changed by 6.3e-6 after removing the shift, and warning
+    flags flipped between 0 and 2. Over 40 such orderings, the five selected
+    ARGR scores moved by at most 4.8e-9. AMFR and KCNH2 moved by at most about
+    1e-12.
+  - Observed in CI: Linux runners using the same locked packages reported ARGR
+    warning positions that differ from macOS and from each other.
+  - Interpretation, pending the Linux diagnostic: a plausible explanation is
+    that the BFGS stopping point in the low-curvature direction varies between
+    runtimes. The actual Linux mechanism is not yet measured.
+
+  Absolute fields and warning flags of this ill-conditioned fit are therefore
+  treated as properties of one execution, not portable identities. The artifact
+  records the runtime versions and each site's status.
 - The optimizer status rule is stricter than upstream, which ignores the status.
   A model that upstream would score can therefore fail preparation here.
 
@@ -282,9 +305,34 @@ The tests are `packages/rewirebench/tests/test_evcouplings_independent.py`,
   pinned `score_mutants.py` command and `to_independent_model()` in a separate
   Python 3.11 environment. It observes each site's BFGS status through a
   pass-through wrapper that returns the identical iterate. The committed
-  `upstream-receipt.json` records the outputs. Adapter scores and fields agree
-  within 1e-6 (observed maximum difference 2.2e-16), and the adapter's
-  per-site statuses equal upstream's. The receipt also shows upstream raising on
+  `upstream-receipt.json` records the outputs (macOS arm64, SciPy 1.13.1).
+  The validation boundary against this frozen receipt, in every runtime, is:
+  - AMFR and KCNH2: every raw field, every wild-type-relative contrast and every
+    receipt score agree within 1e-6 (absolute and relative).
+  - ARGR, the ill-conditioned stress fixture: every receipt score agrees within
+    1e-6. Its raw fields, contrasts and warning flags are reported in the
+    failure message, not asserted against the frozen receipt.
+  - Every local warning state must be an accepted state and must be reported
+    exactly in the run provenance. The macOS flags (precision loss at ARGR
+    positions 3 and 6) are kept as a historical record.
+
+  `test_same_runtime_upstream_parity` runs the unmodified pinned upstream on the
+  same machine, with the same NumPy and SciPy versions. It requires every raw
+  field, every wild-type-relative contrast and every score to agree within
+  1e-6, and every BFGS warning flag to be equal, for all three fixtures.
+  `scripts/baseline_parity/setup_evcouplings_upstream.sh` builds that
+  environment from the pinned commits. The `EVCouplings same-runtime upstream
+  parity` workflow runs the test on two Linux runners with
+  `REWIRE_REQUIRE_SAME_RUNTIME_UPSTREAM=1`, so it cannot pass by skipping.
+  `evcouplings_runtime_diagnostic.py` uploads per-site differences from both
+  receipts, split into common shift, remaining difference after the shift, and
+  contrast, together with the runner's CPU and NumPy dispatch identity. The
+  comparator first requires exact coverage: the same assays, every model site,
+  every mapped artifact position, one value per alphabet symbol, every fixture
+  mutant and a warning flag for every site. A missing or extra entry raises an
+  error instead of shrinking the comparison.
+  On macOS arm64 the adapter matched the frozen receipt to 2.2e-16. The receipt
+  also shows upstream raising on
   each invalid mutant. Injected optimizer results test rejection of unusable
   terminal states: iteration limit, NaN status, a false success at unmoved zeros,
   precision loss far from stationarity, and nonfinite objective or gradient.
