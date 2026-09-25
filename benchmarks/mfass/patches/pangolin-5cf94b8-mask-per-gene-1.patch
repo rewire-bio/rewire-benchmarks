@@ -1,0 +1,52 @@
+Patch: pangolin-5cf94b8-mask-per-gene-1
+Upstream: https://github.com/tkzeng/Pangolin
+Applies to: 5cf94b8db938c658391b4305cd7ce33297d44ff7 (main as of 2026-09-24)
+Upstream pangolin/pangolin.py SHA-256: f3f25c4febf64d01ef42f967dc5cf10f6856bf3aa92d26f09803ad408169da9b
+Patched pangolin/pangolin.py SHA-256: see mfass.pangolin_patch.PATCHED_SOURCE_SHA256
+Installed version identity: 1.0.2+rewire.maskpergene1
+
+process_variant masks the per-strand loss/gain arrays in place inside the
+per-gene loop, so masking for one gene alters the scores reported for every
+later gene on the same strand (upstream issue #29). This patch gives each gene
+its own copy of the strand arrays. With mask=False the arrays are never
+modified, so output is unchanged. Equivalent to unmerged upstream PR #30,
+which its author closed on 2025-07-16 without upstream review.
+
+Licence: this is a modification of Pangolin, which is GPL-3.0. The patch and
+any patched copy of Pangolin are distributed under GPL-3.0, not this
+repository's licence. Apply with: git apply <this file> in a clean checkout
+of the revision above.
+
+diff --git a/pangolin/pangolin.py b/pangolin/pangolin.py
+index 194736f..a3dc91d
+--- a/pangolin/pangolin.py
++++ b/pangolin/pangolin.py
+@@ -130,11 +130,14 @@ def process_variant(lnum, chr, pos, ref, alt, gtf, models, args):
+         loss_neg, gain_neg = compute_score(ref_seq, alt_seq, '-', d, models)
+ 
+     scores_list = []
+-    for (genes, loss, gain) in (
++    for (genes, strand_loss, strand_gain) in (
+         (genes_pos,loss_pos,gain_pos),(genes_neg,loss_neg,gain_neg)
+     ):
+         # Emit a bundle of scores/warnings per gene; join them all later
+         for gene, positions in genes.items():
++            # rewire mask-per-gene patch: masking below edits these arrays in
++            # place, so each gene gets its own copy of the strand's scores.
++            loss, gain = strand_loss.copy(), strand_gain.copy()
+             per_gene_scores = []
+             warnings = "Warnings:"
+             positions = np.array(positions)
+diff --git a/setup.py b/setup.py
+index 01afd7e..db30e03
+--- a/setup.py
++++ b/setup.py
+@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
+ 
+ setuptools.setup(
+     name="pangolin",
+-    version="1.0.2",
++    version="1.0.2+rewire.maskpergene1",
+     author="Tony Zeng",
+     author_email="tkyzeng@gmail.com",
+     description="Pangolin",

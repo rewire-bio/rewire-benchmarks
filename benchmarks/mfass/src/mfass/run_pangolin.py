@@ -10,9 +10,21 @@ disagree about what a score means will disagree about a variant for reasons that
 have nothing to do with their networks, so this runner takes an explicit --mask and
 records only the selected setting. The archived evaluation used mask=False;
 the mask=True comparison remains a proposed sensitivity analysis.
+
+Upstream Pangolin 5cf94b8 applies each gene's mask to arrays shared by every
+gene on the same strand, so masked scores depend on gene order. mask=True is
+refused unless the installed source is the reviewed per-gene patch and model.py
+and all 12 ensemble weights equal the pinned upstream bytes
+(`mfass.pangolin_patch`). Their hashes are recorded in every result.
+
+Expected skips (no coordinate, Pangolin's own -1 skip, nonfinite scores) become
+unscored rows. Any other error stops the run; see `mfass.specialist_run`.
 """
 import argparse
+import contextlib
 import csv
+import hashlib
+import io
 import json
 import pathlib
 import time
@@ -21,9 +33,12 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import numpy as np
-from rewirebench.results import BenchmarkResult, write_result
+from rewirebench.results import BenchmarkResult
 
-from mfass.specialist_provenance import specialist_artifacts
+from mfass.checkpoint import Checkpoint
+from mfass.pangolin_patch import PATCH_ID, installed_identity, require_reviewed
+from mfass.specialist_provenance import file_sha256, specialist_artifacts
+from mfass.specialist_run import refuse_finished, score_all, timing_scope, write_outputs
 
 MASK_DEFAULT = "True"     # Pangolin's own default. SpliceAI's equivalent is unmasked.
 DISTANCE_DEFAULT = 50     # Matches SpliceAI's -D default. Not the model's input context.
@@ -67,23 +82,53 @@ def _load_models():
     return models
 
 
-def _max_abs_score(raw):
-    """Pangolin returns 'gene|pos:gain|pos:loss|Warnings:...' per gene, comma joined."""
-    best = None
+def _reported_values(raw):
+    """Scores in 'gene|pos:gain|pos:loss|Warnings:...' chunks, comma joined."""
+    values = []
     if not raw or raw == -1:
-        return None
+        return values
     for chunk in raw.split(","):
         for field in chunk.split("|"):
             if ":" not in field or field.startswith("Warnings"):
                 continue
             try:
-                value = abs(float(field.split(":", 1)[1]))
-                if not np.isfinite(value):
-                    return None
-                best = value if best is None else max(best, value)
+                values.append(float(field.split(":", 1)[1]))
             except ValueError:
                 continue
-    return best
+    return values
+
+
+def _max_abs_score(raw):
+    """Maximum absolute reported change, or None if absent or any value is nonfinite."""
+    values = _reported_values(raw)
+    if not values or not np.isfinite(values).all():
+        return None
+    return max(abs(v) for v in values)
+
+
+SKIPPED = "skipped by Pangolin (no gene, ref mismatch or unsupported)"
+
+
+def _score_variant(process_variant, i, row, gtf, models, pargs):
+    """Return (score or None, unscored reason, upstream output) for one variant."""
+    pos = row["snp_position_hg38_1based"]
+    if pos in ("NA", "", None):
+        return None, "no hg38 coordinate", ""
+    printed = io.StringIO()
+    # process_variant reports why it skipped a variant only by printing. Unexpected
+    # exceptions propagate and stop the run without a checkpoint row.
+    with contextlib.redirect_stdout(printed):
+        raw = process_variant(i, row["chr"], int(pos), row["ref_allele"], row["alt_allele"],
+                              gtf, models, pargs)
+    if raw == -1:
+        detail = " ".join(printed.getvalue().split())
+        return None, f"{SKIPPED}: {detail}" if detail else SKIPPED, ""
+    values = _reported_values(raw)
+    if not values:
+        raise RuntimeError(f"{row['id']}: Pangolin output has no scores: {raw!r}")
+    if not np.isfinite(values).all():
+        return None, "nonfinite model score", str(raw)
+    return _max_abs_score(raw), "", raw
 
 
 def main():
@@ -97,21 +142,37 @@ def main():
     ap.add_argument("--mask", default=MASK_DEFAULT, choices=["True", "False"])
     ap.add_argument("--out", default=None)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--threads", type=int, default=None,
+                    help="torch intra-op threads; default is every core")
+    ap.add_argument("--interop-threads", type=int, default=None,
+                    help="torch inter-op threads; default is torch's")
+    ap.add_argument("--checkpoint", default=None,
+                    help="resumable per-variant log; resumes only with identical settings")
+    ap.add_argument("--require-verified-code", action="store_true",
+                    help="refuse unless installed code and weights are the reviewed bytes, "
+                         "including the masking patch, whatever the mask setting")
     args = ap.parse_args()
     if args.limit < 0 or args.distance < 0:
         ap.error("limit and distance must be nonnegative")
+    if any(n is not None and n < 1 for n in (args.threads, args.interop_threads)):
+        ap.error("thread counts must be positive")
     from rewirebench.protocols.mfass import prepare as prepare_protocol
     from rewirebench.protocols.mfass import score as score_protocol
     dataset = prepare_protocol(pathlib.Path(args.cohort), split=args.split,
                                **({"limit": args.limit} if args.limit else {}))
-    destination = pathlib.Path(args.out or f"benchmarks/mfass/results/pangolin-mask{args.mask}.json")
-    if destination.exists():
-        raise FileExistsError(f"Refusing to overwrite {destination}")
-    for suffix in (".json", ".predictions.tsv", ".unscored.tsv"):
-        if destination.with_suffix(suffix).exists():
-            raise FileExistsError(f"Refusing to overwrite {destination.with_suffix(suffix)}")
-
     out_path = args.out or f"benchmarks/mfass/results/pangolin-mask{args.mask}.json"
+    refuse_finished(out_path)
+
+    t0 = time.perf_counter()
+    code = installed_identity()
+    try:
+        if args.mask == "True" or args.require_verified_code:
+            # Upstream masks shared arrays in place, so masked scores depend on gene order.
+            require_reviewed(code)
+    except ValueError as error:
+        raise SystemExit(f"Refusing to run: {error}. Install the reviewed patch {PATCH_ID} "
+                         "(see mfass.pangolin_patch).") from None
+    t_code = time.perf_counter() - t0
 
     t0 = time.perf_counter()
     artifacts = specialist_artifacts(args.db, args.ref, args.annotation_release)
@@ -124,9 +185,13 @@ def main():
     import torch
     from pangolin.pangolin import process_variant
 
-    # Performance only, no effect on numerics: process_variant reopens the FASTA on
-    # every call, and torch defaults to a subset of cores.
-    torch.set_num_threads(os.cpu_count() or 4)
+    # Performance only: process_variant reopens the FASTA on every call, and torch
+    # defaults to a subset of cores. Thread counts can change floating-point
+    # reduction order, so they are recorded and must match within a comparison.
+    # The inter-op pool must be sized before any parallel work.
+    if args.interop_threads:
+        torch.set_num_interop_threads(args.interop_threads)
+    torch.set_num_threads(args.threads or os.cpu_count() or 4)
     _fasta_cache = {}
     _orig_fasta = pp.pyfastx.Fasta
 
@@ -152,32 +217,28 @@ def main():
     pargs = _Args(args.ref, args.distance, args.mask)
     t_load = time.perf_counter() - t0
 
-    scores, unscored = [], []
-    t0 = time.perf_counter()
-    for i, r in enumerate(test):
-        pos = r["snp_position_hg38_1based"]
-        if pos in ("NA", "", None):
-            scores.append(np.nan)
-            unscored.append((r["id"], "no hg38 coordinate"))
-            continue
-        try:
-            raw = process_variant(i, r["chr"], int(pos), r["ref_allele"], r["alt_allele"],
-                                  gtf, models, pargs)
-        except Exception as exc:  # noqa: BLE001
-            scores.append(np.nan)
-            unscored.append((r["id"], f"{type(exc).__name__}: {exc}"))
-            continue
-        s = _max_abs_score(raw)
-        if s is None:
-            scores.append(np.nan)
-            unscored.append((r["id"], "skipped by Pangolin (no gene, ref mismatch or unsupported)"))
-        else:
-            scores.append(s)
-        if (i + 1) % 250 == 0:
-            print(f"  {i+1}/{len(test)}  {(time.perf_counter()-t0)/(i+1):.3f}s/variant", flush=True)
-    t_score = time.perf_counter() - t0
-
-    scores = np.asarray(scores, dtype=float)
+    threads = {"intra_op": torch.get_num_threads(),
+               "inter_op": torch.get_num_interop_threads(),
+               "scope": ("torch intra-op and inter-op pools as set. Other runtime threads "
+                         "(I/O, Python) are not counted.")}
+    runner_sha256 = file_sha256(__file__)
+    settings = {
+        "runner": "mfass-pangolin", "runner_sha256": runner_sha256,
+        "cohort_sha256": dataset["provenance"]["cohort_sha256"],
+        "split_sha256": dataset["provenance"]["split_sha256"],
+        "selected_ids_sha256": hashlib.sha256("\n".join(r["id"] for r in test).encode()).hexdigest(),
+        "mask": args.mask, "distance": args.distance, "torch_threads": threads,
+        "torch_version": getattr(torch, "__version__", "unreported"),
+        "annotation_sha256": artifacts["annotation_sha256"],
+        "reference_sha256": artifacts["reference_sha256"], **code,
+    }
+    log = Checkpoint(args.checkpoint, settings) if args.checkpoint else None
+    try:
+        scores, unscored, t_score = score_all(
+            test, lambda i, r: _score_variant(process_variant, i, r, gtf, models, pargs), log)
+    finally:
+        if log:
+            log.close()
     groups = np.asarray([sp[r["id"]][0] for r in test])
     ok = np.isfinite(scores)
 
@@ -196,10 +257,11 @@ def main():
         metrics=m,
         coverage={key: scored["coverage"][key] for key in ("scored", "unscored", "denominator")},
         timing_seconds={
+            "verify_code_and_weights": round(t_code, 3),
             "hash_reference_and_annotation": round(t_hash, 3),
             "load_models_and_annotation": round(t_load, 3),
             "score_test": round(t_score, 3),
-            "per_variant_total": round((t_hash + t_load + t_score) / max(len(test), 1), 6),
+            "per_variant_total": round((t_code + t_hash + t_load + t_score) / max(len(test), 1), 6),
         },
         independent_groups=len(set(groups[ok])),
         pretrained=True,
@@ -210,8 +272,7 @@ def main():
         ),
         config={
             "scope": dataset["scope"],
-            "timing_scope": ("artifact hashing, model/reference load and prediction; "
-                             "cohort preparation excluded"),
+            "timing_scope": timing_scope(log),
             "selected_test_rows": len(test),
             "canonical_test_rows": 8324,
             "cohort_sha256": dataset["provenance"]["cohort_sha256"],
@@ -226,9 +287,20 @@ def main():
             "mask_m": args.mask,
             "score": "max absolute predicted change in splice site usage over reported sites",
             "context_bases": 10000,
-            "torch_threads": None,  # filled below
-            "patches": [("cached the per-call pyfastx.Fasta handle and raised torch thread "
-                        "count; performance only, no effect on scores")],
+            **code,
+            "runner_sha256": runner_sha256,
+            "torch_version": settings["torch_version"],
+            "torch_threads": threads,
+            "selected_ids_sha256": settings["selected_ids_sha256"],
+            "patches": [("cached the per-call pyfastx.Fasta handle and set the torch thread "
+                         "count; performance only")] +
+                       ([(f"{PATCH_ID}: per-gene copy of strand score arrays before masking "
+                          "(installed source; no change when mask=False)")]
+                        if code["pangolin_source_identity"] == PATCH_ID else []),
+            "checkpoint": ({"file": log.path.name, "fingerprint": log.fingerprint,
+                            "resumed": log.resumed,
+                            "discarded_partial_line": log.discarded_partial_line,
+                            "sha256": file_sha256(log.path)} if log else None),
         },
         notes=(
             f"This run used mask={args.mask}. Pangolin's mask=True setting zeroes splice gains "
@@ -236,19 +308,8 @@ def main():
             "masking. This result does not measure the effect of the other setting."
         ),
     )
-    import os as _os
-    result.config["torch_threads"] = _os.cpu_count()
-    out = write_result(result, out_path)
-    with open(out.with_suffix(".predictions.tsv"), "w", newline="") as fh:
-        w = csv.writer(fh, delimiter="\t")
-        w.writerow(["id", "group", "label", "score"])
-        for r, s in zip(test, scores):
-            w.writerow([r["id"], sp[r["id"]][0], r["sdv"], "" if np.isnan(s) else f"{s:.4f}"])
-    if unscored:
-        with open(out.with_suffix(".unscored.tsv"), "w", newline="") as fh:
-            w = csv.writer(fh, delimiter="\t")
-            w.writerow(["id", "reason"])
-            w.writerows(unscored)
+    out = write_outputs(result, out_path, test, {r["id"]: sp[r["id"]][0] for r in test},
+                        scores, unscored)
     print(json.dumps(json.loads(out.read_text())["metrics"], indent=2))
     print(f"coverage: {int(ok.sum())}/{len(test)} scored", flush=True)
 

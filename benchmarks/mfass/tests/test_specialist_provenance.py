@@ -1,6 +1,5 @@
 """Provenance and configuration tests with synthetic inputs, without inference."""
 
-import csv
 import hashlib
 import json
 import sys
@@ -86,36 +85,28 @@ def test_spliceai_invalid_mask_fails_before_preparation_or_model_import(monkeypa
     assert error.value.code == 2
 
 
-@pytest.fixture
-def synthetic_run(tmp_path, monkeypatch):
-    """Replace canonical preparation/scoring; no real biological data or model."""
-    import rewirebench.protocols.mfass as protocol
+PATCHED_IDENTITY = {"pangolin_source_identity": "pangolin-5cf94b8-mask-per-gene-1",
+                    "pangolin_source_sha256": "fixture", "pangolin_upstream_files_verified": True,
+                    "pangolin_upstream_file_mismatches": []}
 
-    cohort, split = tmp_path / "cohort.tsv", tmp_path / "split.tsv"
-    rows = [{"id": str(i), "chr": "chr1", "snp_position_hg38_1based": str(i + 1),
-             "ref_allele": "A", "alt_allele": "G", "sdv": str(i % 2)} for i in range(3)]
-    for path, contents in (
-        (cohort, rows),
-        (split, [{"id": r["id"], "group": r["id"], "split": "test"} for r in rows]),
-    ):
-        with path.open("w", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=contents[0].keys(), delimiter="\t")
-            writer.writeheader()
-            writer.writerows(contents)
-    monkeypatch.setattr(protocol, "prepare", lambda *a, **kw: {
-        "scope": "smoke", "provenance": {"cohort_sha256": "fixture", "split_sha256": "fixture"},
-    })
-    monkeypatch.setattr(protocol, "score", lambda dataset, scores: {
-        "metrics": {}, "coverage": {"scored": len(scores), "unscored": 8324 - len(scores),
-                                      "denominator": 8324},
-    })
-    reference, annotation = tmp_path / "ref.fa", tmp_path / "annotation.db"
-    reference.write_text(">chr1\nAAA\n")
-    annotation.write_text("synthetic annotation")
-    output = tmp_path / "result.json"
-    args = ["--cohort", str(cohort), "--split", str(split), "--ref", str(reference),
-            "--limit", "3", "--out", str(output)]
-    return SimpleNamespace(args=args, reference=reference, annotation=annotation, output=output)
+
+def fake_torch(threads=4):
+    state = {"threads": threads, "interop": 8}
+    return SimpleNamespace(set_num_threads=lambda n: state.update(threads=n),
+                           get_num_threads=lambda: state["threads"],
+                           set_num_interop_threads=lambda n: state.update(interop=n),
+                           get_num_interop_threads=lambda: state["interop"],
+                           __version__="fixture")
+
+
+def fake_tensorflow():
+    state = {"intra": 0, "inter": 0}
+    threading = SimpleNamespace(
+        set_intra_op_parallelism_threads=lambda n: state.update(intra=n),
+        set_inter_op_parallelism_threads=lambda n: state.update(inter=n),
+        get_intra_op_parallelism_threads=lambda: state["intra"],
+        get_inter_op_parallelism_threads=lambda: state["inter"])
+    return SimpleNamespace(config=SimpleNamespace(threading=threading), __version__="fixture")
 
 
 @pytest.mark.parametrize("mask", [None, "0", "1"])
@@ -143,7 +134,9 @@ def test_spliceai_records_and_uses_the_resolved_file(synthetic_run, monkeypatch,
     utils.Annotator, utils.get_delta_scores = annotator, scores
     monkeypatch.setitem(sys.modules, "spliceai", module)
     monkeypatch.setitem(sys.modules, "spliceai.utils", utils)
+    monkeypatch.setitem(sys.modules, "tensorflow", fake_tensorflow())
     monkeypatch.setattr(runner, "_patch_numpy_fromstring", lambda: None)
+    monkeypatch.setattr(runner, "installed_identity", lambda: {"spliceai_version": "fixture"})
     args = ["spliceai", *fixture.args, "--annotation", "./grch38"]
     if mask is not None:
         args += ["--mask", mask]
@@ -177,9 +170,10 @@ def test_pangolin_records_only_the_selected_configuration(
     module.pangolin = pp
     monkeypatch.setitem(sys.modules, "pangolin", module)
     monkeypatch.setitem(sys.modules, "pangolin.pangolin", pp)
-    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(set_num_threads=lambda count: None))
+    monkeypatch.setitem(sys.modules, "torch", fake_torch())
     monkeypatch.setitem(sys.modules, "gffutils", SimpleNamespace(FeatureDB=lambda path: object()))
     monkeypatch.setattr(runner, "_load_models", list)
+    monkeypatch.setattr(runner, "installed_identity", lambda: PATCHED_IDENTITY)
     args = ["pangolin", *fixture.args, "--db", str(fixture.annotation)]
     if mask is not None:
         args += ["--mask", mask]

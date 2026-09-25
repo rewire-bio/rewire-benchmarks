@@ -7,6 +7,7 @@ difference by resampling whole groups.
 """
 import argparse
 import csv
+import hashlib
 import json
 import pathlib
 
@@ -64,11 +65,13 @@ def main():
     ap.add_argument("--capacity", type=int, default=100)
     ap.add_argument("--draws", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=20260914)
+    ap.add_argument("--min-common", type=int, default=1,
+                    help="refuse the comparison below this many commonly scored variants")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
-    if args.capacity < 1 or args.draws < 1:
-        ap.error("capacity and draws must be positive")
+    if args.capacity < 1 or args.draws < 1 or args.min_common < 1:
+        ap.error("capacity, draws and min-common must be positive")
     if args.out and pathlib.Path(args.out).exists():
         raise FileExistsError("Refusing to overwrite an existing comparison")
     compatibility = check_protocol_metadata(args.baseline, args.candidate)
@@ -77,6 +80,9 @@ def main():
     common = sorted(set(b) & set(c))
     if not common:
         raise SystemExit("no variants scored by both methods")
+    if len(common) < args.min_common:
+        raise SystemExit(f"{len(common)} commonly scored variants; at least "
+                         f"{args.min_common} required")
 
     if any(b[i][:2] != c[i][:2] for i in common):
         raise ValueError("Paired predictions disagree on label or independent group")
@@ -91,6 +97,8 @@ def main():
         "compatibility": compatibility,
         "baseline_file": args.baseline,
         "candidate_file": args.candidate,
+        "baseline_sha256": hashlib.sha256(pathlib.Path(args.baseline).read_bytes()).hexdigest(),
+        "candidate_sha256": hashlib.sha256(pathlib.Path(args.candidate).read_bytes()).hexdigest(),
         "capacity": args.capacity,
         "seed": args.seed,
         "denominators": {
@@ -99,7 +107,11 @@ def main():
             "common": len(common),
             "baseline_only": len(set(b) - set(c)),
             "candidate_only": len(set(c) - set(b)),
+            "common_positives": int(labels.sum()),
+            # SHA-256 of the sorted common IDs, one per line, identifying the population.
+            "common_id_sha256": hashlib.sha256("\n".join(common).encode()).hexdigest(),
         },
+        "min_common": args.min_common,
         "on_common_subset": {
             "baseline": M.point_metrics(labels, sb, args.capacity),
             "candidate": M.point_metrics(labels, sc, args.capacity),

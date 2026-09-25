@@ -1,0 +1,28 @@
+id	reason
+ENSE00001002968_015	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131ed9a50>
+ENSE00001002968_017	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132305190>
+ENSE00001321140_001	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13277b350>
+ENSE00001321140_002	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132901710>
+ENSE00001321140_003	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13230e9d0>
+ENSE00001321140_004	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1321da210>
+ENSE00001321140_005	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132901710>
+ENSE00001321140_006	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131f70690>
+ENSE00001321140_010	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1323f7e10>
+ENSE00001321140_012	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1322c0d10>
+ENSE00001321140_014	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1322da650>
+ENSE00001321140_016	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131f70690>
+ENSE00001321140_017	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1323f7e10>
+ENSE00001321140_018	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1322da650>
+ENSE00001321140_019	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132990610>
+ENSE00001321140_020	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131f8ead0>
+ENSE00001321140_022	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1322da650>
+ENSE00001321140_023	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13233ca10>
+ENSE00001321140_024	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131f8ead0>
+ENSE00001321140_025	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13233ca10>
+ENSE00001321140_026	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131f8ead0>
+ENSE00001321140_028	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131e53d90>
+ENSE00001321140_029	skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131e53690>
+ENSE00002361772_001	no annotated gene overlapping the variant
+ENSE00002361772_004	no annotated gene overlapping the variant
+ENSE00002361772_005	no annotated gene overlapping the variant
+ENSE00002361772_008	no annotated gene overlapping the variant

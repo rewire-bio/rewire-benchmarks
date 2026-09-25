@@ -1,0 +1,27 @@
+{
+  "test_variants": 8324,
+  "checked": 8324,
+  "gene_sets_differ": 0,
+  "multiple_genes_same_strand_pangolin": 344,
+  "pangolin_has_gene": 8320,
+  "reference_mismatch_pangolin_rule": 23,
+  "reference_mismatch_spliceai_rule": 23,
+  "scoreable_pangolin": 8297,
+  "scoreable_spliceai": 8297,
+  "spliceai_has_gene": 8320,
+  "labels_read": false,
+  "annotation_dir_summary_sha256": "0921c19d1f6a71c4afaf94f366dfbdf2e87fb3435e8a7389493c0d99c04de7f8",
+  "pangolin_source_sha256": "239c6ba9b1883d712d4856985c6eaa07e5b67f99790a718f93d6316ad076c083",
+  "pangolin_source_identity": "pangolin-5cf94b8-mask-per-gene-1",
+  "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+  "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+  "fasta_sha256": "e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b",
+  "tool_versions": {
+    "python": "3.11.13",
+    "sqlite": "3.49.1",
+    "gffutils": "0.14",
+    "pandas": "2.3.3",
+    "numpy": "1.26.4"
+  },
+  "output_sha256": "a0b1a01c8be33e95bc1e0635a30c0f439f8eb732527982b3db13a194989a66a5"
+}

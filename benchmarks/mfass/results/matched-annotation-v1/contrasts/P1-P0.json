@@ -1,0 +1,108 @@
+{
+  "compatibility": {
+    "checked_hashes": [
+      "split_sha256",
+      "cohort_sha256"
+    ],
+    "status": "shared_dataset_and_split",
+    "note": "Shared IDs, labels and groups are checked. Matching rows alone do not establish matching inputs, training or evaluation protocols."
+  },
+  "baseline_file": "$STUDY_DATA/runs/v1/P0/pangolin-gencode44-canonical-maskFalse.predictions.tsv",
+  "candidate_file": "$STUDY_DATA/runs/v1/P1/pangolin-gencode44-canonical-maskTrue.predictions.tsv",
+  "baseline_sha256": "fbd8861a37c2d041038cfdfb0dd4e9d1f572d72b0eb7e41406739ef740eaf4a1",
+  "candidate_sha256": "9fba694b636899feed60d955506849f68701fc6ecb9cec5c1fc6ba7f92728e1e",
+  "capacity": 100,
+  "seed": 20260914,
+  "denominators": {
+    "baseline_scored": 8297,
+    "candidate_scored": 8297,
+    "common": 8297,
+    "baseline_only": 0,
+    "candidate_only": 0,
+    "common_positives": 314,
+    "common_id_sha256": "89b5568e2d819b892ba5e6db680d85e41224d6a69fec4b09a85c5075cade39d8"
+  },
+  "min_common": 100,
+  "on_common_subset": {
+    "baseline": {
+      "n": 8297,
+      "positives": 314,
+      "prevalence": 0.03784500421839219,
+      "capacity": 100,
+      "precision_at_capacity": 0.65,
+      "recall_at_capacity": 0.2070063694267516,
+      "average_precision_sklearn": 0.3886980279221367,
+      "auroc": 0.8763341447710142
+    },
+    "candidate": {
+      "n": 8297,
+      "positives": 314,
+      "prevalence": 0.03784500421839219,
+      "capacity": 100,
+      "precision_at_capacity": 0.66,
+      "recall_at_capacity": 0.21019108280254778,
+      "average_precision_sklearn": 0.4106314557636091,
+      "auroc": 0.8725933133386153
+    }
+  },
+  "independent_groups": 460,
+  "paired": {
+    "precision_at_capacity": {
+      "metric": "precision_at_capacity",
+      "observed_delta": 0.010000000000000009,
+      "resample_mean_delta": 0.00991722404560311,
+      "bootstrap_bias": -8.277595439689853e-05,
+      "mean_delta": 0.00991722404560311,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 99.864,
+        "min": 83,
+        "max": 126,
+        "list_fraction": 0.01205
+      },
+      "ci95_low": 0.0,
+      "ci95_high": 0.04040404040404044,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 460
+    },
+    "average_precision_sklearn": {
+      "metric": "average_precision_sklearn",
+      "observed_delta": 0.021933427841472397,
+      "resample_mean_delta": 0.02204454200521433,
+      "bootstrap_bias": 0.00011111416374193217,
+      "mean_delta": 0.02204454200521433,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 99.864,
+        "min": 83,
+        "max": 126,
+        "list_fraction": 0.01205
+      },
+      "ci95_low": 0.010910371772330795,
+      "ci95_high": 0.03426749922343786,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 460
+    },
+    "auroc": {
+      "metric": "auroc",
+      "observed_delta": -0.0037408314323988945,
+      "resample_mean_delta": -0.0033573040048234873,
+      "bootstrap_bias": 0.0003835274275754072,
+      "mean_delta": -0.0033573040048234873,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 99.864,
+        "min": 83,
+        "max": 126,
+        "list_fraction": 0.01205
+      },
+      "ci95_low": -0.019082274613302513,
+      "ci95_high": 0.012767019990181715,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 460
+    }
+  }
+}

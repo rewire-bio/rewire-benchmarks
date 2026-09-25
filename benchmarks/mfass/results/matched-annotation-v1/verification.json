@@ -1,0 +1,135 @@
+{
+  "passed": true,
+  "problems": [],
+  "coverage": {
+    "S0": {
+      "scored": 8297,
+      "unscored": 27,
+      "denominator": 8324
+    },
+    "S1": {
+      "scored": 8297,
+      "unscored": 27,
+      "denominator": 8324
+    },
+    "P0": {
+      "scored": 8297,
+      "unscored": 27,
+      "denominator": 8324
+    },
+    "P1": {
+      "scored": 8297,
+      "unscored": 27,
+      "denominator": 8324
+    }
+  },
+  "tables": {
+    "S0": {
+      "predictions_sha256": "fa30a4dc6a05e6e762fbac9411e486869aec5b248cab80146aeab7a42c27320d",
+      "unscored_reasons": {
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13368ead0>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132cb1190>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x134169750>": 3,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x134180f50>": 2,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x133974050>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1332b4650>": 2,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13339ab50>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x133932d90>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x133679790>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1336e28d0>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x133496950>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13381c290>": 2,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1336c6f50>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1336c4210>": 3,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x133401f90>": 2,
+        "no annotated gene overlapping the variant": 4
+      }
+    },
+    "S1": {
+      "predictions_sha256": "84f9d10c367ada32df5f27b49985c35fae68727f1d8e576352c98cfb27be9516",
+      "unscored_reasons": {
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131ed9a50>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132305190>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13277b350>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132901710>": 2,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13230e9d0>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1321da210>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131f70690>": 2,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1323f7e10>": 2,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1322c0d10>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x1322da650>": 3,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x132990610>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131f8ead0>": 3,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x13233ca10>": 2,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131e53d90>": 1,
+        "skipped by SpliceAI: Skipping record (ref issue): <__main__._Record object at 0x131e53690>": 1,
+        "no annotated gene overlapping the variant": 4
+      }
+    },
+    "P0": {
+      "predictions_sha256": "fbd8861a37c2d041038cfdfb0dd4e9d1f572d72b0eb7e41406739ef740eaf4a1",
+      "unscored_reasons": {
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 1974] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 1975] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4213] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4214] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4215] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4216] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4217] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4218] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4219] WARNING, skipping variant: Mismatch between FASTA (ref base: T) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4220] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4221] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4222] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4223] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4224] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4225] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4226] WARNING, skipping variant: Mismatch between FASTA (ref base: T) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4227] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4228] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4229] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4230] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4231] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4232] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4233] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7478] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7479] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7480] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7481] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1
+      }
+    },
+    "P1": {
+      "predictions_sha256": "9fba694b636899feed60d955506849f68701fc6ecb9cec5c1fc6ba7f92728e1e",
+      "unscored_reasons": {
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 1974] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 1975] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4213] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4214] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4215] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4216] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4217] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4218] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4219] WARNING, skipping variant: Mismatch between FASTA (ref base: T) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4220] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4221] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4222] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4223] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4224] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4225] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4226] WARNING, skipping variant: Mismatch between FASTA (ref base: T) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4227] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4228] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4229] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4230] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4231] WARNING, skipping variant: Mismatch between FASTA (ref base: C) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4232] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 4233] WARNING, skipping variant: Mismatch between FASTA (ref base: G) and variant file (ref base: <withheld>).": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7478] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7479] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7480] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1,
+        "skipped by Pangolin (no gene, ref mismatch or unsupported): [Line 7481] WARNING, skipping variant: Variant not contained in a gene body. Do GTF/FASTA chromosome names match?": 1
+      }
+    }
+  },
+  "metrics_reported": false
+}

@@ -1,0 +1,573 @@
+{
+  "study": "mfass-specialist-annotation-matched-sensitivity",
+  "protocol": "docs/mfass-specialist-comparison.md",
+  "registration": "docs/mfass-matched-study-registration.md",
+  "registration_sha256": "7f03c13d3c7fa73ffe91d3170fe51f06a277d34b5745476ce45ca8a7cece9162",
+  "frozen_at_utc": "2026-09-24T19:00:42+00:00",
+  "draft": false,
+  "status": "frozen; the output directory was empty when this manifest was written",
+  "git": {
+    "head": "b52a3daef6e85ee869e70732a586355f83dc30fb",
+    "dirty_paths": []
+  },
+  "runner_files_sha256": {
+    "benchmarks/mfass/src/mfass/run_spliceai.py": "3d238f11069049cbae08aa779f2e0857b1f8d2929f4e03a233848b6d5f06c7ba",
+    "benchmarks/mfass/src/mfass/run_pangolin.py": "13ba2ca1d258ca7482f9d627155402284e4ec2324ac04e98876be8df5976dc63",
+    "benchmarks/mfass/src/mfass/checkpoint.py": "dcd271576ec49dba23b9fc30620267de88f7620a647b0a6c53b1a295dc21ecc0",
+    "benchmarks/mfass/src/mfass/compare.py": "53e88e6bb4fff70f202aaaaa0a328535dac33905a418270054475abc3b26ec17",
+    "benchmarks/mfass/src/mfass/specialist_run.py": "242cfaa770f0ae5e27696fe5e2e8d9e8068b5de457a4f0bd0a89dda31075b4de",
+    "benchmarks/mfass/src/mfass/specialist_provenance.py": "0a8bb78598a583b894d3c48b7aa442cd287d5d4de9b987ce60ad9622ca5f14db",
+    "benchmarks/mfass/src/mfass/pangolin_patch.py": "4bb77dde473b8d535a323d92b3d71f8d96c681af766e8419f0d9c7f8d3bee8c6",
+    "benchmarks/mfass/src/mfass/matched_annotation.py": "62d76225d324d249a3d17e624628a83757b31b209e4fe2999b87a874f034df08",
+    "benchmarks/mfass/src/mfass/matched_study.py": "f8782703da70962b5623d467a0cc1505412d409593c68ac765f1a870f50db1b2",
+    "packages/rewirebench/src/rewirebench/metrics.py": "4030374ed11d38e523fc9991ddd792f8800e7739ac71588085bfff91f912d7f7",
+    "packages/rewirebench/src/rewirebench/results.py": "e3b95804fb9cd898a125e78d3abad8022df186d094b89ac0c8588070af4a516d",
+    "packages/rewirebench/src/rewirebench/protocols/mfass.py": "6d090a6b1622fe571b8c48ecc213b9b6adf3cbf06cc2abc2d3bfc891a3f8ed93",
+    "benchmarks/mfass/patches/pangolin-5cf94b8-mask-per-gene-1.patch": "d1c9fb69245f9d256e2547fd8bf61547686cfc3caf6c40c1351ab2d6997cb454",
+    "benchmarks/mfass/scripts/run_matched_study.sh": "697c77056ba16bc0c36235f6aac68986f1fe0a3abaa1ce15801e6e3aa788b481",
+    "uv.lock": "3f2ec7f464119ec2478ad15aac302f1ba1e16f77725e7d30ffb2af68bf5f4296"
+  },
+  "paths": {
+    "cohort": "$MFASS_DATA/cohort.tsv",
+    "split": "$REPO/benchmarks/mfass/splits/split-v2.tsv",
+    "fasta": "$STUDY_DATA/ref/GRCh38.primary_assembly.genome.fa",
+    "fai": "$STUDY_DATA/ref/GRCh38.primary_assembly.genome.fa.fai",
+    "spliceai_annotation": "$STUDY_DATA/annotation/gencode44-canonical-v1/spliceai.tsv",
+    "pangolin_db": "$STUDY_DATA/annotation/gencode44-canonical-v1/pangolin.db",
+    "annotation_release": "GENCODE v44 primary assembly (MD5 checked against official MD5SUMS)"
+  },
+  "resources_sha256": {
+    "cohort": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "split": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "fasta": "e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b",
+    "fai": "a2c323ea4cff34d7123ace4578f7e122b2d2f5a22f40dc23eb8b97d17723d169",
+    "spliceai_annotation": "2383cd148b292b9a6af56da160c9c142ddeb5720b1e9ef7c5966a1744f684c4d",
+    "pangolin_db": "84ae1a18d9d7a32e14e3fe9c8705256a28cd9bde0a55bc46200cbe77178deb27"
+  },
+  "annotation": {
+    "summary_sha256": "0921c19d1f6a71c4afaf94f366dfbdf2e87fb3435e8a7389493c0d99c04de7f8",
+    "cross_check_sha256": "71caa6d5d2e2edfc88bb5bce2dc35a2abd0d0c926c56cf85ffe6eafbee2ee086",
+    "outputs_sha256": {
+      "selection.tsv": "805726643430ea4625b5bb86b8081ce65f3bddbca57868ba44bbadff08dd0c72",
+      "exclusions.tsv": "110c875c337a8a9ff8904997e93eb768e3d85a44a58ff6c09f7d23d93afd0478",
+      "spliceai.tsv": "2383cd148b292b9a6af56da160c9c142ddeb5720b1e9ef7c5966a1744f684c4d",
+      "pangolin.gtf": "c999d9bc14cf3d05a5994915e32a7e4e0ae2d020cee8b5578f89b2defffb1edc",
+      "cross-check.json": "71caa6d5d2e2edfc88bb5bce2dc35a2abd0d0c926c56cf85ffe6eafbee2ee086",
+      "pangolin.db": "84ae1a18d9d7a32e14e3fe9c8705256a28cd9bde0a55bc46200cbe77178deb27"
+    }
+  },
+  "eligibility": {
+    "summary_sha256": "ec2c57b5ac88ca4011ff02351e4a20092e80d7de75f81acbe8ffb00851ddff93",
+    "test_variants": 8324,
+    "checked": 8324,
+    "gene_sets_differ": 0,
+    "multiple_genes_same_strand_pangolin": 344,
+    "pangolin_has_gene": 8320,
+    "reference_mismatch_pangolin_rule": 23,
+    "reference_mismatch_spliceai_rule": 23,
+    "scoreable_pangolin": 8297,
+    "scoreable_spliceai": 8297,
+    "spliceai_has_gene": 8320,
+    "labels_read": false,
+    "annotation_dir_summary_sha256": "0921c19d1f6a71c4afaf94f366dfbdf2e87fb3435e8a7389493c0d99c04de7f8",
+    "pangolin_source_sha256": "239c6ba9b1883d712d4856985c6eaa07e5b67f99790a718f93d6316ad076c083",
+    "pangolin_source_identity": "pangolin-5cf94b8-mask-per-gene-1",
+    "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "fasta_sha256": "e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b",
+    "tool_versions": {
+      "python": "3.11.13",
+      "sqlite": "3.49.1",
+      "gffutils": "0.14",
+      "pandas": "2.3.3",
+      "numpy": "1.26.4"
+    },
+    "output_sha256": "a0b1a01c8be33e95bc1e0635a30c0f439f8eb732527982b3db13a194989a66a5"
+  },
+  "code": {
+    "spliceai": {
+      "spliceai_version": "1.3.1",
+      "spliceai_files": {
+        "__init__.py": {
+          "sha256": "5e0ade84087ee01040dbc3344359cbfdb26e2fcf98c214e15110ac1d05562037",
+          "git_blob": "b5d843e672cfff52c6d050205dead13d7c31533e"
+        },
+        "utils.py": {
+          "sha256": "207e147c73bdc1970fdb176dcbf088883f9a58756bfeb0d93494e75018ae477c",
+          "git_blob": "66f2c3c14198d9020a7913f0412fc91ade008b91"
+        },
+        "__main__.py": {
+          "sha256": "1090e97a5f7d8f937048b7d1f08d98fb593bd86953e9d64178aa3ca096961a77",
+          "git_blob": "2c59acd61ce528dd0ed6d6c14244579354fed146"
+        },
+        "models/spliceai1.h5": {
+          "sha256": "e1fd5adcef7489d604b10e79c40078ef790d51ef048c4ce3869c9119ac5de42b",
+          "git_blob": "e5e6bf5d2f61f9f9f8f1c93386881992a96a82c0"
+        },
+        "models/spliceai2.h5": {
+          "sha256": "6ab042b82ab966b6d3582cb31b96f0859ea08a864f168d69e83aa14450a3b66e",
+          "git_blob": "b6c197b52fc39e81f42a2dfb25eeef11db3c94af"
+        },
+        "models/spliceai3.h5": {
+          "sha256": "e2e790bde53dfdf410c6dc434a86122a7d12f3f38dc2ef45d85986e9ecf22fad",
+          "git_blob": "5009694c892a782faa70f66e23f0f74cf69c6809"
+        },
+        "models/spliceai4.h5": {
+          "sha256": "ca88ac9e58e69ba6fdeed319b72f063f164c9abf7392eaccef903e94c1d99dd6",
+          "git_blob": "81ce1c887855f34abf9af5f5c65d85fd04d3132d"
+        },
+        "models/spliceai5.h5": {
+          "sha256": "791cd22c62a80a08d2ca674615a93ce8159d7b55bd157cfef2983b1bd6b41391",
+          "git_blob": "752679198e4f52f69b93945b2c49e4efc8534860"
+        }
+      },
+      "spliceai_wheel_only_files_sha256": {
+        "__clean_main__.py": "d91e273a60b1b1c079cd29974f1c9901d997bc6f57226ff094ad15d0c1e49b03",
+        "normalise_chrom.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      "spliceai_source_identity": "upstream-b3c7f17",
+      "spliceai_upstream_files_verified": true,
+      "spliceai_upstream_file_mismatches": []
+    },
+    "pangolin": {
+      "pangolin_source_sha256": "239c6ba9b1883d712d4856985c6eaa07e5b67f99790a718f93d6316ad076c083",
+      "pangolin_source_identity": "pangolin-5cf94b8-mask-per-gene-1",
+      "pangolin_version": "1.0.2+rewire.maskpergene1",
+      "pangolin_patch": {
+        "id": "pangolin-5cf94b8-mask-per-gene-1",
+        "patch_sha256": "d1c9fb69245f9d256e2547fd8bf61547686cfc3caf6c40c1351ab2d6997cb454",
+        "upstream_revision": "5cf94b8db938c658391b4305cd7ce33297d44ff7",
+        "upstream_source_sha256": "f3f25c4febf64d01ef42f967dc5cf10f6856bf3aa92d26f09803ad408169da9b"
+      },
+      "pangolin_files": {
+        "__init__.py": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+        },
+        "model.py": {
+          "sha256": "4a1c5c2570aafe1452bb43332255321677e6c6c817adf84b9dd438e3ca4be6f8",
+          "git_blob": "11dfb436b36f9b5783874b2db636a1788bfab619"
+        },
+        "models/final.1.0.3.v2": {
+          "sha256": "f0478fab173b75f7f7e9fe96688bad6c50fa4a46d70557f423b110caaf565501",
+          "git_blob": "fbe03218df2f781a9713b05bfa42001ae548782a"
+        },
+        "models/final.2.0.3.v2": {
+          "sha256": "c4c6bb4880fa6fb28b14182ae3ea0600edb07056158f55325b5e6e6e48fc9f26",
+          "git_blob": "ec4ee767bc83fa0397222f42c0da210a47f13fbb"
+        },
+        "models/final.3.0.3.v2": {
+          "sha256": "ec685a6e7105a4486c1f89a005458a13deb3fe7171f13d434f4877e386d10676",
+          "git_blob": "f31cbae821e38bc4361216c8e87c8db13fd5a9c0"
+        },
+        "models/final.1.2.3.v2": {
+          "sha256": "559c05de3e1ce65c2515ca3e92ef85edb0ec2e47686ca58060e25891ce06eb3a",
+          "git_blob": "39e8756faf1e427cd9a8c6c691532b3683d8916a"
+        },
+        "models/final.2.2.3.v2": {
+          "sha256": "48758ba8b95eee9aa9feea52672ef06ca1b34111299c27f8a710f734d8b9aae5",
+          "git_blob": "6fd0a31789c7de788227e103f33d697ad538def6"
+        },
+        "models/final.3.2.3.v2": {
+          "sha256": "7cb576c2b24db4fdd6970c4ca4fb7c20ae1b1d8ae80645ebbe689848b5743129",
+          "git_blob": "c7f2ae10caab8f5bae167309b2b7d3e6905871e5"
+        },
+        "models/final.1.4.3.v2": {
+          "sha256": "c50b12e0c0af776d5674ca5e346493f8265783494d4df383364de9c1136657f6",
+          "git_blob": "0af4fadb3f3dd54c49d41042befefa19fd4bd32a"
+        },
+        "models/final.2.4.3.v2": {
+          "sha256": "e03303bed4fd6f135ec0f6c1b192cce954ea42d0646f44d17b4a6fbb2b1f610e",
+          "git_blob": "8c003df629c9f1e8072000f8bbc3eeab94850b6c"
+        },
+        "models/final.3.4.3.v2": {
+          "sha256": "9476d2e25520d7ff15bece0cd5d3b657e3b1dd3cc5fcab1d9c3b62bea7a0c5b6",
+          "git_blob": "9ed4fad50ead41761073cdff3d9acafc6f78bdd4"
+        },
+        "models/final.1.6.3.v2": {
+          "sha256": "2aae563fa18a8a9b6699c6c96e0d32b8ec7543f8f805fb3bc9de77302cc9f66e",
+          "git_blob": "98e5539fe339385e9c8b19d2786c4f8c3f186a3b"
+        },
+        "models/final.2.6.3.v2": {
+          "sha256": "7d3c0b1b2a60067b940dec315567874fbc8bcd322f1b7c76bf969f51f0f53f7f",
+          "git_blob": "6a650d629fae6aee8171708241a0f580bb368cfd"
+        },
+        "models/final.3.6.3.v2": {
+          "sha256": "756e7721a382cace24e9bfea5b543af5623f2487d9a3efe7385e9c76367005fd",
+          "git_blob": "4a8e9e33d5832770e6563d0229bdb4bcae5b8398"
+        }
+      },
+      "pangolin_upstream_files_verified": true,
+      "pangolin_upstream_file_mismatches": []
+    }
+  },
+  "environments": {
+    "spliceai": {
+      "python": "$STUDY_DATA/envs/spliceai/bin/python",
+      "distributions": [
+        "Pygments==2.21.0",
+        "absl-py==2.5.0",
+        "astunparse==1.6.3",
+        "certifi==2026.7.22",
+        "charset-normalizer==3.5.1",
+        "cloudpickle==3.1.2",
+        "flatbuffers==25.12.19",
+        "gast==0.7.0",
+        "google-pasta==0.2.0",
+        "grpcio==1.84.0",
+        "h5py==3.14.0",
+        "idna==3.19",
+        "iniconfig==2.3.0",
+        "joblib==1.6.0",
+        "keras==3.15.1",
+        "libclang==18.1.1",
+        "markdown-it-py==4.2.0",
+        "mdurl==0.1.2",
+        "mfass==0.1.0",
+        "ml_dtypes==0.5.4",
+        "namex==0.1.0",
+        "narwhals==2.26.0",
+        "numpy==1.26.4",
+        "opt_einsum==3.4.0",
+        "optree==0.20.0",
+        "packaging==26.3",
+        "pandas==2.3.3",
+        "pluggy==1.6.0",
+        "protobuf==7.36.1",
+        "pyfaidx==0.9.0.4",
+        "pysam==0.24.1",
+        "pytest==9.1.1",
+        "python-dateutil==2.9.0.post0",
+        "pytz==2026.3.post1",
+        "requests==2.34.2",
+        "rewirebench==0.5.0",
+        "rich==15.0.0",
+        "ruff==0.16.7",
+        "scikit-learn==1.9.1",
+        "scipy==1.17.1",
+        "setuptools==81.0.0",
+        "six==1.17.0",
+        "spliceai==1.3.1",
+        "tensorflow==2.21.0",
+        "termcolor==3.3.0",
+        "threadpoolctl==3.6.0",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.4",
+        "urllib3==2.7.0",
+        "wheel==0.48.0",
+        "wrapt==2.4.1"
+      ],
+      "distributions_sha256": "8f0eb1412c265d12f505332f2900c44c03fcc7ba64bcdbe0afb94833cd66302f"
+    },
+    "pangolin": {
+      "python": "$STUDY_DATA/envs/pangolin/bin/python",
+      "distributions": [
+        "Jinja2==3.1.6",
+        "MarkupSafe==3.0.3",
+        "PyVCF3==1.0.4",
+        "Pygments==2.21.0",
+        "argcomplete==3.7.2",
+        "argh==0.31.3",
+        "cloudpickle==3.1.2",
+        "filelock==3.32.6",
+        "fsspec==2026.7.0",
+        "gffutils==0.14",
+        "iniconfig==2.3.0",
+        "joblib==1.6.0",
+        "mfass==0.1.0",
+        "mpmath==1.3.0",
+        "narwhals==2.26.0",
+        "networkx==3.6.1",
+        "numpy==1.26.4",
+        "packaging==26.3",
+        "pandas==2.3.3",
+        "pangolin==1.0.2+rewire.maskpergene1",
+        "pluggy==1.6.0",
+        "pyfaidx==0.9.0.4",
+        "pyfastx==2.3.1",
+        "pytest==9.1.1",
+        "python-dateutil==2.9.0.post0",
+        "pytz==2026.3.post1",
+        "rewirebench==0.5.0",
+        "ruff==0.16.7",
+        "scikit-learn==1.9.1",
+        "scipy==1.17.1",
+        "setuptools==81.0.0",
+        "simplejson==4.1.2",
+        "six==1.17.0",
+        "sympy==1.14.0",
+        "threadpoolctl==3.6.0",
+        "torch==2.2.2",
+        "typing_extensions==4.16.0",
+        "tzdata==2026.4"
+      ],
+      "distributions_sha256": "3631d391fa7c2f78cf0469fcb59a068f893e50e1bc521e36e57749fb19be9529"
+    }
+  },
+  "threads": {
+    "spliceai": {
+      "intra_op": 5,
+      "inter_op": 1,
+      "env": {
+        "OMP_NUM_THREADS": "5",
+        "MKL_NUM_THREADS": "5",
+        "OPENBLAS_NUM_THREADS": "5",
+        "VECLIB_MAXIMUM_THREADS": "5",
+        "NUMEXPR_NUM_THREADS": "5"
+      }
+    },
+    "pangolin": {
+      "intra_op": 6,
+      "inter_op": 1,
+      "env": {
+        "OMP_NUM_THREADS": "6",
+        "MKL_NUM_THREADS": "6",
+        "OPENBLAS_NUM_THREADS": "6",
+        "VECLIB_MAXIMUM_THREADS": "6",
+        "NUMEXPR_NUM_THREADS": "6"
+      }
+    },
+    "other_steps": {
+      "env": {
+        "OMP_NUM_THREADS": "6",
+        "MKL_NUM_THREADS": "6",
+        "OPENBLAS_NUM_THREADS": "6",
+        "VECLIB_MAXIMUM_THREADS": "6",
+        "NUMEXPR_NUM_THREADS": "6"
+      }
+    },
+    "cpu_threads": 6,
+    "scope": "One step runs at a time. TensorFlow intra-op plus inter-op pools are within the CPU budget. Torch's intra-op pool is within the budget; its inter-op pool is 1 and idle during sequential forward passes. Runtime I/O and Python threads are not counted. Manifest hashing in the parent process is outside all recorded timings."
+  },
+  "distance": 50,
+  "conditions": {
+    "S0": {
+      "tool": "spliceai",
+      "mask": "0",
+      "stem": "spliceai-1.3.1-gencode44-canonical-mask0"
+    },
+    "S1": {
+      "tool": "spliceai",
+      "mask": "1",
+      "stem": "spliceai-1.3.1-gencode44-canonical-mask1"
+    },
+    "P0": {
+      "tool": "pangolin",
+      "mask": "False",
+      "stem": "pangolin-gencode44-canonical-maskFalse"
+    },
+    "P1": {
+      "tool": "pangolin",
+      "mask": "True",
+      "stem": "pangolin-gencode44-canonical-maskTrue"
+    }
+  },
+  "contrasts": [
+    {
+      "name": "S1-S0",
+      "candidate": "S1",
+      "baseline": "S0"
+    },
+    {
+      "name": "P1-P0",
+      "candidate": "P1",
+      "baseline": "P0"
+    },
+    {
+      "name": "P0-S0",
+      "candidate": "P0",
+      "baseline": "S0"
+    }
+  ],
+  "analysis": {
+    "capacity": 100,
+    "draws": 2000,
+    "seed": 20260914,
+    "min_common": 100,
+    "interval": "95% percentile, whole-group",
+    "single_class_refusal": "more than 5% of draws"
+  },
+  "sequence": [
+    "S0",
+    "S1",
+    "P0",
+    "P1",
+    "verify",
+    "S1-S0",
+    "P1-P0",
+    "P0-S0",
+    "report"
+  ],
+  "out_dir": "$STUDY_DATA/runs/v1",
+  "steps": {
+    "S0": [
+      "$STUDY_DATA/envs/spliceai/bin/python",
+      "-m",
+      "mfass.run_spliceai",
+      "--annotation",
+      "$STUDY_DATA/annotation/gencode44-canonical-v1/spliceai.tsv",
+      "--inter-threads",
+      "1",
+      "--cohort",
+      "$MFASS_DATA/cohort.tsv",
+      "--split",
+      "$REPO/benchmarks/mfass/splits/split-v2.tsv",
+      "--ref",
+      "$STUDY_DATA/ref/GRCh38.primary_assembly.genome.fa",
+      "--annotation-release",
+      "GENCODE v44 primary assembly (MD5 checked against official MD5SUMS)",
+      "--distance",
+      "50",
+      "--mask",
+      "0",
+      "--threads",
+      "5",
+      "--out",
+      "$STUDY_DATA/runs/v1/S0/spliceai-1.3.1-gencode44-canonical-mask0.json",
+      "--checkpoint",
+      "$STUDY_DATA/runs/v1/S0/checkpoint.tsv",
+      "--require-verified-code"
+    ],
+    "S1": [
+      "$STUDY_DATA/envs/spliceai/bin/python",
+      "-m",
+      "mfass.run_spliceai",
+      "--annotation",
+      "$STUDY_DATA/annotation/gencode44-canonical-v1/spliceai.tsv",
+      "--inter-threads",
+      "1",
+      "--cohort",
+      "$MFASS_DATA/cohort.tsv",
+      "--split",
+      "$REPO/benchmarks/mfass/splits/split-v2.tsv",
+      "--ref",
+      "$STUDY_DATA/ref/GRCh38.primary_assembly.genome.fa",
+      "--annotation-release",
+      "GENCODE v44 primary assembly (MD5 checked against official MD5SUMS)",
+      "--distance",
+      "50",
+      "--mask",
+      "1",
+      "--threads",
+      "5",
+      "--out",
+      "$STUDY_DATA/runs/v1/S1/spliceai-1.3.1-gencode44-canonical-mask1.json",
+      "--checkpoint",
+      "$STUDY_DATA/runs/v1/S1/checkpoint.tsv",
+      "--require-verified-code"
+    ],
+    "P0": [
+      "$STUDY_DATA/envs/pangolin/bin/python",
+      "-m",
+      "mfass.run_pangolin",
+      "--db",
+      "$STUDY_DATA/annotation/gencode44-canonical-v1/pangolin.db",
+      "--interop-threads",
+      "1",
+      "--cohort",
+      "$MFASS_DATA/cohort.tsv",
+      "--split",
+      "$REPO/benchmarks/mfass/splits/split-v2.tsv",
+      "--ref",
+      "$STUDY_DATA/ref/GRCh38.primary_assembly.genome.fa",
+      "--annotation-release",
+      "GENCODE v44 primary assembly (MD5 checked against official MD5SUMS)",
+      "--distance",
+      "50",
+      "--mask",
+      "False",
+      "--threads",
+      "6",
+      "--out",
+      "$STUDY_DATA/runs/v1/P0/pangolin-gencode44-canonical-maskFalse.json",
+      "--checkpoint",
+      "$STUDY_DATA/runs/v1/P0/checkpoint.tsv",
+      "--require-verified-code"
+    ],
+    "P1": [
+      "$STUDY_DATA/envs/pangolin/bin/python",
+      "-m",
+      "mfass.run_pangolin",
+      "--db",
+      "$STUDY_DATA/annotation/gencode44-canonical-v1/pangolin.db",
+      "--interop-threads",
+      "1",
+      "--cohort",
+      "$MFASS_DATA/cohort.tsv",
+      "--split",
+      "$REPO/benchmarks/mfass/splits/split-v2.tsv",
+      "--ref",
+      "$STUDY_DATA/ref/GRCh38.primary_assembly.genome.fa",
+      "--annotation-release",
+      "GENCODE v44 primary assembly (MD5 checked against official MD5SUMS)",
+      "--distance",
+      "50",
+      "--mask",
+      "True",
+      "--threads",
+      "6",
+      "--out",
+      "$STUDY_DATA/runs/v1/P1/pangolin-gencode44-canonical-maskTrue.json",
+      "--checkpoint",
+      "$STUDY_DATA/runs/v1/P1/checkpoint.tsv",
+      "--require-verified-code"
+    ],
+    "S1-S0": [
+      "$STUDY_DATA/envs/pangolin/bin/python",
+      "-m",
+      "mfass.compare",
+      "--baseline",
+      "$STUDY_DATA/runs/v1/S0/spliceai-1.3.1-gencode44-canonical-mask0.predictions.tsv",
+      "--candidate",
+      "$STUDY_DATA/runs/v1/S1/spliceai-1.3.1-gencode44-canonical-mask1.predictions.tsv",
+      "--capacity",
+      "100",
+      "--draws",
+      "2000",
+      "--seed",
+      "20260914",
+      "--min-common",
+      "100",
+      "--out",
+      "$STUDY_DATA/runs/v1/contrasts/S1-S0.json"
+    ],
+    "P1-P0": [
+      "$STUDY_DATA/envs/pangolin/bin/python",
+      "-m",
+      "mfass.compare",
+      "--baseline",
+      "$STUDY_DATA/runs/v1/P0/pangolin-gencode44-canonical-maskFalse.predictions.tsv",
+      "--candidate",
+      "$STUDY_DATA/runs/v1/P1/pangolin-gencode44-canonical-maskTrue.predictions.tsv",
+      "--capacity",
+      "100",
+      "--draws",
+      "2000",
+      "--seed",
+      "20260914",
+      "--min-common",
+      "100",
+      "--out",
+      "$STUDY_DATA/runs/v1/contrasts/P1-P0.json"
+    ],
+    "P0-S0": [
+      "$STUDY_DATA/envs/pangolin/bin/python",
+      "-m",
+      "mfass.compare",
+      "--baseline",
+      "$STUDY_DATA/runs/v1/S0/spliceai-1.3.1-gencode44-canonical-mask0.predictions.tsv",
+      "--candidate",
+      "$STUDY_DATA/runs/v1/P0/pangolin-gencode44-canonical-maskFalse.predictions.tsv",
+      "--capacity",
+      "100",
+      "--draws",
+      "2000",
+      "--seed",
+      "20260914",
+      "--min-common",
+      "100",
+      "--out",
+      "$STUDY_DATA/runs/v1/contrasts/P0-S0.json"
+    ]
+  }
+}

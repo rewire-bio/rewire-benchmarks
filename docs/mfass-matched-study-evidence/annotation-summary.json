@@ -1,0 +1,48 @@
+{
+  "gtf": {
+    "file": "gencode.v44.primary_assembly.annotation.gtf.gz",
+    "sha256": "31ae5d8f663834d98014421072ac5643002ffc635dd0a320d09e8e6e1623de58",
+    "md5": "b182a9f3b134b9cc2da566a2b1692557",
+    "annotation_release": "GENCODE v44 primary assembly (MD5 checked against official MD5SUMS)"
+  },
+  "reference_index": {
+    "file": "GRCh38.primary_assembly.genome.fa.fai",
+    "sha256": "a2c323ea4cff34d7123ace4578f7e122b2d2f5a22f40dc23eb8b97d17723d169"
+  },
+  "reference_fasta": {
+    "file": "GRCh38.primary_assembly.genome.fa",
+    "sha256": "e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b"
+  },
+  "selection_tag": "Ensembl_canonical",
+  "span_rule": "Gene span is the selected Ensembl_canonical transcript span (GTF 1-based, closed) in both formats",
+  "departures_from_upstream_create_db": [
+    "gene start/end replaced by the selected transcript span",
+    "genes without an Ensembl_canonical transcript are dropped, not kept exon-less"
+  ],
+  "genes_in_gtf": 62754,
+  "genes_selected": 62754,
+  "genes_excluded": 0,
+  "genes_with_span_changed": 16710,
+  "labels_read": false,
+  "cross_check_passed": true,
+  "tool_versions": {
+    "python": "3.11.13",
+    "sqlite": "3.49.1",
+    "gffutils": "0.14",
+    "pandas": "2.3.3",
+    "numpy": "1.26.4"
+  },
+  "pangolin_db_options": {
+    "disable_infer_genes": true,
+    "disable_infer_transcripts": true
+  },
+  "outputs": {
+    "selection.tsv": "805726643430ea4625b5bb86b8081ce65f3bddbca57868ba44bbadff08dd0c72",
+    "exclusions.tsv": "110c875c337a8a9ff8904997e93eb768e3d85a44a58ff6c09f7d23d93afd0478",
+    "spliceai.tsv": "2383cd148b292b9a6af56da160c9c142ddeb5720b1e9ef7c5966a1744f684c4d",
+    "pangolin.gtf": "c999d9bc14cf3d05a5994915e32a7e4e0ae2d020cee8b5578f89b2defffb1edc",
+    "cross-check.json": "71caa6d5d2e2edfc88bb5bce2dc35a2abd0d0c926c56cf85ffe6eafbee2ee086",
+    "pangolin.db": "84ae1a18d9d7a32e14e3fe9c8705256a28cd9bde0a55bc46200cbe77178deb27"
+  },
+  "note": "pangolin.db content is verified by cross-check.json and its bytes are hashed per run. Byte identity across gffutils or SQLite versions is not assumed."
+}

@@ -1,0 +1,5 @@
+# Unified diffs carry required context spaces; only this check is relaxed, only here.
+benchmarks/mfass/patches/*.patch whitespace=-blank-at-eol
+# Frozen issue #19 run tables: exact raw bytes (CRLF rows, empty last fields). Never
+# normalise line endings; allow their trailing CR and tab only here.
+benchmarks/mfass/results/matched-annotation-v1/**/*.tsv -text whitespace=-blank-at-eol,cr-at-eol
