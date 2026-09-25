@@ -12,6 +12,10 @@ review, not human review or independent reproduction. The
 [retrieval receipt](mfass-specialist-comparison-evidence/retrievals.json) also pins
 unchanged historical artifacts. No model was run or rescored for this review.
 
+The [25 September exclusion addendum](mfass-matched-study-exclusions.md) explains
+the 23 assembly-orientation mismatches and four canonical-transcript exclusions.
+The matched study retains the same 8,297 scored variants in all four conditions.
+
 ## What the existing results establish
 
 | Configuration | Annotation recorded | Mask | Scored / eligible |
