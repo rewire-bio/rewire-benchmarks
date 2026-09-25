@@ -19,6 +19,12 @@
       "source_url": null,
       "sha256": "688fa442aa1f1ed7157521b18074178c7d830543354a917851e38662d852f9d1",
       "origin": "Synthetic numerical output from pinned upstream evaluator, no biological evidence or source code"
+    },
+    {
+      "path": "uniform-background.txt",
+      "source_url": null,
+      "sha256": "b496ad5c41c52729451308eede91b375d03ab4f465394a043fc30ffa3e26e223",
+      "origin": "Declared uniform zero-order background for dart-h12core-fimo-hit-count-v1; not estimated from any sequence"
     }
   ],
   "official_dataset": {
@@ -75,5 +81,25 @@
       "sha256": "935dd19ab1c5ffa7c45af1299407a6318e6c7891305229e1b81d9d6f63493eba"
     }
   ],
-  "code_licensing": "No explicit software licence found in the pinned DART-Eval repository tree. Upstream code used only for local parity checks; no upstream implementation redistributed."
+  "code_licensing": "No explicit software licence found in the pinned DART-Eval repository tree. Upstream code used only for local parity checks; no upstream implementation redistributed.",
+  "motif_reference_artifacts": [
+    {
+      "description": "HOCOMOCO v12 H12CORE MEME motifs (1,443); required by dart-h12core-fimo-hit-count-v1, not redistributed",
+      "source_url": "https://hocomoco12.autosome.org/final_bundle/hocomoco12/H12CORE/formatted_motifs/H12CORE_meme_format.meme",
+      "sha256": "3d9c47dc396b3ba4e278cdfd29d526c1eb2fbad4895b5e2dc345f535f98c5f12",
+      "motif_ids_sha256": "7bff4fc55e462150c6694d5a13b3cdf7ad9bae81e78113d18013dddb2d2fc308",
+      "bytes": 1619601,
+      "http_last_modified": "Wed, 04 Oct 2023 14:53:24 GMT",
+      "retrieved_at": "2026-09-24T23:35:07Z",
+      "verification": "Observed bytes from the official HTTPS download; not compared with DART Synapse syn60756095"
+    },
+    {
+      "description": "MEME Suite 5.5.9 source used to build FIMO for parity checks; not redistributed",
+      "source_url": "https://meme-suite.org/meme/meme-software/5.5.9/meme-5.5.9.tar.gz",
+      "sha256": "0406fb7b1dc27f6aab3d6d3a29ecdf617bbdd946690cfa97ca2129bc210bfd12",
+      "http_last_modified": "Sat, 22 Nov 2025 03:24:31 GMT",
+      "retrieved_at": "2026-09-24T23:35:07Z",
+      "verification": "Observed tarball bytes; FIMO binaries are platform builds, so each user records their own executable SHA256"
+    }
+  ]
 }

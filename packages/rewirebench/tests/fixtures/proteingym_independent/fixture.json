@@ -1,0 +1,52 @@
+{
+ "AMFR_HUMAN_Tsuboyama_2023_4G3O": {
+  "model": "amfr-20aa.model",
+  "model_id": "AMFR_HUMAN",
+  "msa_start": 1,
+  "scored": [
+   "F2W",
+   "F2Y",
+   "Q5G",
+   "Q5W",
+   "F2W:Q5G"
+  ],
+  "upstream_errors": {
+   "Q3A": "missing middle model coordinate"
+  }
+ },
+ "ARGR_ECOLI_Tsuboyama_2023_1AOY": {
+  "model": "argr-precision-loss.model",
+  "model_id": "ARGR_ECOLI",
+  "msa_start": 1,
+  "scored": [
+   "E3S",
+   "L4Y",
+   "K6I",
+   "K9P",
+   "E3S:K9P"
+  ],
+  "upstream_errors": {
+   "V5A": "missing middle model coordinate"
+  }
+ },
+ "KCNH2_HUMAN_Kozek_2020": {
+  "model": "kcnh2-gapped.model",
+  "model_id": "KCNH2_HUMAN",
+  "msa_start": 535,
+  "scored": [
+   "V535I",
+   "R537K",
+   "R537E",
+   "K538F",
+   "K538A",
+   "R537K:K538F",
+   "V535I:R537E:K538F"
+  ],
+  "upstream_errors": {
+   "A535I": "wrong wild-type residue",
+   "A536G": "missing middle model coordinate",
+   "K538W": "residue outside model alphabet",
+   "R534A": "position before MSA_start"
+  }
+ }
+}

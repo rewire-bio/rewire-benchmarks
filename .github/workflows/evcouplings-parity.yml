@@ -1,0 +1,64 @@
+name: EVCouplings same-runtime upstream parity
+# Runs the unmodified pinned EVCouplings/ProteinGym scorer on the same Linux
+# runner as the adapter and compares every field, WT contrast, score and BFGS
+# warning flag. The test is required here: a missing upstream environment fails.
+# The diagnostic step records per-site differences from the frozen macOS
+# receipt and the runner's CPU/NumPy identity, even when the tests fail.
+on:
+  pull_request:
+    paths:
+      - 'packages/rewirebench/src/rewirebench/adapters/evcouplings_independent.py'
+      - 'packages/rewirebench/tests/test_evcouplings_independent.py'
+      - 'packages/rewirebench/tests/fixtures/proteingym_independent/**'
+      - 'scripts/baseline_parity/**'
+      - 'uv.lock'
+      - '.github/workflows/evcouplings-parity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/rewirebench/src/rewirebench/adapters/evcouplings_independent.py'
+      - 'packages/rewirebench/tests/fixtures/proteingym_independent/**'
+      - 'scripts/baseline_parity/**'
+      - 'uv.lock'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  same-runtime:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Independent replicate runners: hosted runner CPUs vary, and the
+        # ill-conditioned stress fixture's iterate depends on the runtime.
+        replicate: [1, 2]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      REWIRE_EVCOUPLINGS_PYTHON: /tmp/evcouplings-upstream/venv/bin/python
+      REWIRE_EVCOUPLINGS_UPSTREAM: /tmp/evcouplings-upstream
+      REWIRE_REQUIRE_SAME_RUNTIME_UPSTREAM: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install uv==0.8.2
+      - run: uv sync --locked --all-packages --extra sequence
+      - name: Build pinned upstream environment
+        run: bash scripts/baseline_parity/setup_evcouplings_upstream.sh "$REWIRE_EVCOUPLINGS_UPSTREAM"
+      - name: EVCouplings tests, including required same-runtime upstream parity
+        run: uv run --no-sync pytest packages/rewirebench/tests/test_evcouplings_independent.py -rs -v
+      - name: Runtime diagnostic
+        if: always()
+        run: |
+          mkdir -p diagnostic
+          "$REWIRE_EVCOUPLINGS_PYTHON" scripts/baseline_parity/evcouplings_upstream_receipt.py \
+            --upstream "$REWIRE_EVCOUPLINGS_UPSTREAM" --output diagnostic/same-runtime-receipt.json
+          uv run --no-sync python scripts/baseline_parity/evcouplings_runtime_diagnostic.py \
+            --same-runtime-receipt diagnostic/same-runtime-receipt.json --output diagnostic/diagnostic.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evcouplings-runtime-diagnostic-${{ matrix.replicate }}
+          path: diagnostic/
+          retention-days: 30

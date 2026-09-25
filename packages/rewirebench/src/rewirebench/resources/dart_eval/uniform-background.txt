@@ -1,0 +1,6 @@
+# Uniform zero-order DNA background for dart-h12core-fimo-hit-count-v1 (MEME bfile format).
+# Fixed before any DART score was inspected; not estimated from test sequences.
+A 0.25
+C 0.25
+G 0.25
+T 0.25

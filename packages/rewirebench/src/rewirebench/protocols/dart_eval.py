@@ -286,5 +286,7 @@ def score(data, predictions):
                               "denominator": pair_denominator, "selected": len(pairs)},
             "unscored_reasons": {"not_selected": denominator - len(rows), "missing_prediction": len(rows) - len(predictions)},
             "unscored_pair_reasons": {"not_selected": pair_denominator - len(pairs), **dict(missing)},
+            # Ties count as incorrect in acc; integer scores such as motif counts tie often.
+            "pair_diagnostics": {"tied_pairs": int((diffs == 0).sum())},
             "metrics_scope": "Complete scored pairs only; incomplete pairs excluded with explicit coverage. Local inputs are not source-verified.",
             "evaluation_claim": "local_evaluation_not_paper_reproduction"}
