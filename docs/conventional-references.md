@@ -173,14 +173,19 @@ errors.
 - Fitted fields can depend on the numerical runtime. The evidence so far:
   - Measured on macOS arm64: SciPy 1.13.1 and 1.17.1 gave bitwise-identical
     upstream fields and warning flags for all three fixtures. This does not rule
-    out a SciPy-version effect that appears only on Linux.
-  - Mathematical result: summing the gradient over the alphabet shows that the
-    L2 term fixes the exact optimum's common component, a site mean of
-    -N_eff (1 - sum f) / (2 lambda_h q). With float32 frequencies, 1 - sum f is
-    about 1e-8 to 4e-8, so the exact ARGR site means are 0.01 to 0.035. The
-    frozen receipt reproduces them, except precision-loss site 6, which is 3e-5
-    away. This direction has low curvature, 2 lambda_h = 0.02, against roughly
-    N_eff in the others.
+    out SciPy, build or hardware interactions elsewhere.
+  - Mathematical result, for the objective on the stored rounded frequencies:
+    summing the gradient over the alphabet gives
+    N_eff (1 - sum f) + 2 lambda_h sum h. So at the exact stationary point the
+    site mean is -N_eff (1 - sum f) / (2 lambda_h q). For ARGR's float32
+    frequencies, 1 - sum f is between -3.7e-8 and +2.2e-8 (magnitudes 1.1e-8 to
+    3.7e-8). The exact stationary site means are therefore +0.0355, +0.0195,
+    -0.0208 and +0.0106 at positions 3, 4, 6 and 9. The frozen macOS receipt
+    reproduces them to within 4e-6, except precision-loss site 6, which is 3.3e-5
+    away. The common direction has Hessian eigenvalue 2 lambda_h = 0.02. Some
+    likelihood directions scale with N_eff, but curvature elsewhere depends on
+    the probabilities and can also be small for rare residues. This condition
+    is a diagnostic; it does not by itself explain where any run stopped.
   - Measured sensitivity on macOS, not the Linux mechanism: changing only the
     order of floating-point sums, with the objective mathematically unchanged,
     moved ARGR raw fields by up to 3.6e-5. That change was mostly a common
@@ -188,11 +193,36 @@ errors.
     flags flipped between 0 and 2. Over 40 such orderings, the five selected
     ARGR scores moved by at most 4.8e-9. AMFR and KCNH2 moved by at most about
     1e-12.
-  - Observed in CI: Linux runners using the same locked packages reported ARGR
-    warning positions that differ from macOS and from each other.
-  - Interpretation, pending the Linux diagnostic: a plausible explanation is
-    that the BFGS stopping point in the low-curvature direction varies between
-    runtimes. The actual Linux mechanism is not yet measured.
+  - Measured on Linux, in the [EVCouplings parity run of `a6028e3`](https://github.com/rewire-bio/rewire-benchmarks/actions/runs/36095630583).
+    Two x86_64 runners took part: an AMD EPYC 7763 with AVX2 and an AMD EPYC
+    9V74 with AVX-512. Both used Python 3.11.16, NumPy 1.26.4 and SciPy 1.17.1.
+    - Same-runtime parity: the unmodified pinned upstream and the adapter agreed
+      exactly on every raw field and every WT contrast of all three fixtures.
+      Scores agreed to at most 4.4e-16, and every warning flag was equal.
+      `test_same_runtime_upstream_parity` passed on both runners.
+    - Against the frozen macOS receipt:
+      - ARGR raw fields differed by at most 3.63e-5 and 3.59e-5. They were
+        outside 1e-6 at positions 3 and 6 on one runner and 3, 6 and 9 on the
+        other, which is reported, not asserted. After removing each site's
+        mean, differences were at most 4.7e-6 and 3.5e-6. All WT contrasts were
+        still within the 1e-6 absolute-or-relative tolerance. The maxima, 4.9e-6
+        and 3.7e-6, pass through its relative part. Selected scores differed by at
+        most 2.0e-9 and 2.9e-9.
+      - KCNH2 raw fields differed by at most 8.0e-7, inside the unchanged 1e-6
+        check. Its largest score difference, 8.9e-8 absolute, is on the
+        analytically near-zero V535I contrast and the triple containing it;
+        other KCNH2 scores differed by at most 4e-14.
+      - AMFR differed only at rounding level (at most 8.9e-16).
+    - ARGR warning flags were {3:2, 4:0, 6:0, 9:0} on the EPYC 7763 and
+      {3:2, 4:0, 6:0, 9:2} on the EPYC 9V74, against {3:2, 4:0, 6:2, 9:0} in the
+      macOS receipt. On each runner the adapter's flags equal upstream's own, and
+      every state passes the acceptance guard.
+  - Interpretation: implementation parity with pinned upstream is established
+    on macOS arm64 and on both Linux runners. Cross-runtime differences in the
+    ill-conditioned ARGR fit are measured, and they are not only a common
+    offset. Their exact cause (CPU, vector instruction set, library build or
+    reduction order) has not been isolated. A plausible contributor is where
+    BFGS stops in the low-curvature common direction.
 
   Absolute fields and warning flags of this ill-conditioned fit are therefore
   treated as properties of one execution, not portable identities. The artifact
