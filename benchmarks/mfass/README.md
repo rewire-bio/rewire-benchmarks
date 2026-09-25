@@ -211,6 +211,10 @@ annotations and a per-gene masking patch for Pangolin. See
 - Unmasked Pangolin exceeded SpliceAI in AP and AUROC under the matched annotation, which does
   not isolate architecture.
 
+The [exclusion addendum](../../docs/mfass-matched-study-exclusions.md) explains why
+all four conditions retain the same 8,297 of 8,324 variants: 23 assembly-orientation
+mismatches and four canonical-transcript-scope exclusions remain unscored.
+
 Among the archived runs, only Pangolin `mask=False`
 predictions are archived; the archived JSON's statement that both settings were
 run is unsupported and is retained only as historical evidence, with an erratum

@@ -1,0 +1,21 @@
+{
+  "review_method": "separate Codex review agent; automated, not human",
+  "reviewed_at": "2026-09-25",
+  "errors": [],
+  "checks": [
+    "Archived bundle hashes unchanged",
+    "Receipt hashes match per-condition files",
+    "Identical scored IDs, labels and groups: 8297 variants, 314 positives, 460 groups",
+    "All 27 excluded IDs match original tool outputs and inventory",
+    "Inventory agrees with investigation audit",
+    "23 orientation and 4 canonical exclusions retained",
+    "No private local paths or cohort alleles in new documents",
+    "No author confirmation or human review claimed"
+  ],
+  "files_sha256": {
+    "mfass-matched-study-exclusions.md": "5ea77111fa790ef332d12d1e9854920482a5eda9c937972e8debde66990acdac",
+    "inventory.tsv": "597c6031dbb44bfe5988d24b07a72ad544227c3d643af571d671c4ff377f6c9c",
+    "sources.jsonl": "8b64813d1ddc10e11aa9018b0a0c47ed59dcd57d7999fba348a74518ca9e209a",
+    "verification.json": "5d2099db4cf6f01432fd88c7db949da89ab9917940705fd0eaa1fb7c9354d46a"
+  }
+}
