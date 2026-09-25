@@ -1,0 +1,108 @@
+{
+  "compatibility": {
+    "checked_hashes": [
+      "split_sha256",
+      "cohort_sha256"
+    ],
+    "status": "shared_dataset_and_split",
+    "note": "Shared IDs, labels and groups are checked. Matching rows alone do not establish matching inputs, training or evaluation protocols."
+  },
+  "baseline_file": "$STUDY_DATA/runs/v1/S0/spliceai-1.3.1-gencode44-canonical-mask0.predictions.tsv",
+  "candidate_file": "$STUDY_DATA/runs/v1/S1/spliceai-1.3.1-gencode44-canonical-mask1.predictions.tsv",
+  "baseline_sha256": "fa30a4dc6a05e6e762fbac9411e486869aec5b248cab80146aeab7a42c27320d",
+  "candidate_sha256": "84f9d10c367ada32df5f27b49985c35fae68727f1d8e576352c98cfb27be9516",
+  "capacity": 100,
+  "seed": 20260914,
+  "denominators": {
+    "baseline_scored": 8297,
+    "candidate_scored": 8297,
+    "common": 8297,
+    "baseline_only": 0,
+    "candidate_only": 0,
+    "common_positives": 314,
+    "common_id_sha256": "89b5568e2d819b892ba5e6db680d85e41224d6a69fec4b09a85c5075cade39d8"
+  },
+  "min_common": 100,
+  "on_common_subset": {
+    "baseline": {
+      "n": 8297,
+      "positives": 314,
+      "prevalence": 0.03784500421839219,
+      "capacity": 100,
+      "precision_at_capacity": 0.63,
+      "recall_at_capacity": 0.20063694267515925,
+      "average_precision_sklearn": 0.29537139738069396,
+      "auroc": 0.8035576794956798
+    },
+    "candidate": {
+      "n": 8297,
+      "positives": 314,
+      "prevalence": 0.03784500421839219,
+      "capacity": 100,
+      "precision_at_capacity": 0.65,
+      "recall_at_capacity": 0.2070063694267516,
+      "average_precision_sklearn": 0.3125881842529626,
+      "auroc": 0.8148394159244446
+    }
+  },
+  "independent_groups": 460,
+  "paired": {
+    "precision_at_capacity": {
+      "metric": "precision_at_capacity",
+      "observed_delta": 0.020000000000000018,
+      "resample_mean_delta": 0.018219259120825806,
+      "bootstrap_bias": -0.001780740879174212,
+      "mean_delta": 0.018219259120825806,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 99.864,
+        "min": 83,
+        "max": 126,
+        "list_fraction": 0.01205
+      },
+      "ci95_low": 0.0,
+      "ci95_high": 0.06185795091688714,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 460
+    },
+    "average_precision_sklearn": {
+      "metric": "average_precision_sklearn",
+      "observed_delta": 0.01721678687226863,
+      "resample_mean_delta": 0.017226553764002003,
+      "bootstrap_bias": 9.766891733372501e-06,
+      "mean_delta": 0.017226553764002003,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 99.864,
+        "min": 83,
+        "max": 126,
+        "list_fraction": 0.01205
+      },
+      "ci95_low": 0.006495254914128508,
+      "ci95_high": 0.027800836675382815,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 460
+    },
+    "auroc": {
+      "metric": "auroc",
+      "observed_delta": 0.011281736428764844,
+      "resample_mean_delta": 0.011094091759246222,
+      "bootstrap_bias": -0.0001876446695186218,
+      "mean_delta": 0.011094091759246222,
+      "realised_capacity": {
+        "requested": 100,
+        "mean": 99.864,
+        "min": 83,
+        "max": 126,
+        "list_fraction": 0.01205
+      },
+      "ci95_low": -0.006808681582270115,
+      "ci95_high": 0.02658795477832836,
+      "draws": 2000,
+      "single_class_skipped": 0,
+      "independent_groups": 460
+    }
+  }
+}

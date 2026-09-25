@@ -202,8 +202,16 @@ versus Pangolin's GENCODE v44), leaving a model-versus-annotation confound.
 The exact pretraining sequence overlap for DNABERT-2 has not been checked.
 
 See the [specialist comparison protocol and source audit](../../docs/mfass-specialist-comparison.md)
-for the proposed annotation/masking sensitivity study and the future improvement
-criterion. These analyses have not been executed. Only Pangolin `mask=False`
+for the annotation/masking sensitivity study and the future improvement criterion.
+The sensitivity study has since been run as registered, with matched GENCODE v44 canonical
+annotations and a per-gene masking patch for Pangolin. See
+[`results/matched-annotation-v1`](results/matched-annotation-v1/README.md). It is exploratory:
+- Masking raised average precision for both tools.
+- Masking did not establish a change in AUROC or P@100.
+- Unmasked Pangolin exceeded SpliceAI in AP and AUROC under the matched annotation, which does
+  not isolate architecture.
+
+Among the archived runs, only Pangolin `mask=False`
 predictions are archived; the archived JSON's statement that both settings were
 run is unsupported and is retained only as historical evidence, with an erratum
 in that document. It must not be used to claim a measured masking effect.

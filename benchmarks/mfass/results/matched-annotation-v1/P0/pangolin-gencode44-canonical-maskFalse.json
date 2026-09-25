@@ -1,0 +1,166 @@
+{
+  "benchmark": "mfass-v2",
+  "method": "pangolin-maskFalse",
+  "family": "specialist",
+  "description": "Pangolin official 12-model ensemble, max absolute predicted change in splice site usage, mask=False",
+  "split": "$REPO/benchmarks/mfass/splits/split-v2.tsv",
+  "metrics": {
+    "n": 8297,
+    "positives": 314,
+    "prevalence": 0.03784500421839219,
+    "capacity": 100,
+    "precision_at_capacity": 0.65,
+    "recall_at_capacity": 0.2070063694267516,
+    "average_precision_sklearn": 0.3886980279221367,
+    "auroc": 0.8763341447710142,
+    "scored_subset_note": "metrics computed on scored variants only; see coverage"
+  },
+  "coverage": {
+    "scored": 8297,
+    "unscored": 27,
+    "denominator": 8324
+  },
+  "timing_seconds": {
+    "verify_code_and_weights": 0.027,
+    "hash_reference_and_annotation": 1.363,
+    "load_models_and_annotation": 0.106,
+    "score_test": 19153.128,
+    "per_variant_total": 2.301132
+  },
+  "independent_groups": 460,
+  "config": {
+    "scope": "full",
+    "timing_scope": "code/weight and artifact hashing, model/reference load and prediction; cohort preparation excluded; score_test sums per-variant time over every checkpoint segment, while hashing and load times are from the final segment only",
+    "selected_test_rows": 8324,
+    "canonical_test_rows": 8324,
+    "cohort_sha256": "389702ff4c647d7ce10a90092a6fa811ae777d15997baf39ce9aae0346247bd0",
+    "split_sha256": "999ebcb7e63a5c5eaa8780fa468e59ac1f934260ad50102814174c396317f052",
+    "not_selected_smoke_rows": 0,
+    "input_context": "genomic GRCh38; differs from assay-pair encoder inputs",
+    "models": "official 12-model ensemble (final.{1,2,3}.{0,2,4,6}.3.v2)",
+    "annotation": "pangolin.db",
+    "annotation_artifact": "pangolin.db",
+    "annotation_sha256": "84ae1a18d9d7a32e14e3fe9c8705256a28cd9bde0a55bc46200cbe77178deb27",
+    "reference_sha256": "e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b",
+    "annotation_release": "GENCODE v44 primary assembly (MD5 checked against official MD5SUMS)",
+    "annotation_release_status": "declared",
+    "artifact_identity_status": "local_file_hashes; upstream identity not verified",
+    "reference": "GRCh38.primary_assembly.genome.fa",
+    "distance_d": 50,
+    "mask_m": "False",
+    "score": "max absolute predicted change in splice site usage over reported sites",
+    "context_bases": 10000,
+    "pangolin_source_sha256": "239c6ba9b1883d712d4856985c6eaa07e5b67f99790a718f93d6316ad076c083",
+    "pangolin_source_identity": "pangolin-5cf94b8-mask-per-gene-1",
+    "pangolin_version": "1.0.2+rewire.maskpergene1",
+    "pangolin_patch": {
+      "id": "pangolin-5cf94b8-mask-per-gene-1",
+      "patch_sha256": "d1c9fb69245f9d256e2547fd8bf61547686cfc3caf6c40c1351ab2d6997cb454",
+      "upstream_revision": "5cf94b8db938c658391b4305cd7ce33297d44ff7",
+      "upstream_source_sha256": "f3f25c4febf64d01ef42f967dc5cf10f6856bf3aa92d26f09803ad408169da9b"
+    },
+    "pangolin_files": {
+      "__init__.py": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+      },
+      "model.py": {
+        "sha256": "4a1c5c2570aafe1452bb43332255321677e6c6c817adf84b9dd438e3ca4be6f8",
+        "git_blob": "11dfb436b36f9b5783874b2db636a1788bfab619"
+      },
+      "models/final.1.0.3.v2": {
+        "sha256": "f0478fab173b75f7f7e9fe96688bad6c50fa4a46d70557f423b110caaf565501",
+        "git_blob": "fbe03218df2f781a9713b05bfa42001ae548782a"
+      },
+      "models/final.2.0.3.v2": {
+        "sha256": "c4c6bb4880fa6fb28b14182ae3ea0600edb07056158f55325b5e6e6e48fc9f26",
+        "git_blob": "ec4ee767bc83fa0397222f42c0da210a47f13fbb"
+      },
+      "models/final.3.0.3.v2": {
+        "sha256": "ec685a6e7105a4486c1f89a005458a13deb3fe7171f13d434f4877e386d10676",
+        "git_blob": "f31cbae821e38bc4361216c8e87c8db13fd5a9c0"
+      },
+      "models/final.1.2.3.v2": {
+        "sha256": "559c05de3e1ce65c2515ca3e92ef85edb0ec2e47686ca58060e25891ce06eb3a",
+        "git_blob": "39e8756faf1e427cd9a8c6c691532b3683d8916a"
+      },
+      "models/final.2.2.3.v2": {
+        "sha256": "48758ba8b95eee9aa9feea52672ef06ca1b34111299c27f8a710f734d8b9aae5",
+        "git_blob": "6fd0a31789c7de788227e103f33d697ad538def6"
+      },
+      "models/final.3.2.3.v2": {
+        "sha256": "7cb576c2b24db4fdd6970c4ca4fb7c20ae1b1d8ae80645ebbe689848b5743129",
+        "git_blob": "c7f2ae10caab8f5bae167309b2b7d3e6905871e5"
+      },
+      "models/final.1.4.3.v2": {
+        "sha256": "c50b12e0c0af776d5674ca5e346493f8265783494d4df383364de9c1136657f6",
+        "git_blob": "0af4fadb3f3dd54c49d41042befefa19fd4bd32a"
+      },
+      "models/final.2.4.3.v2": {
+        "sha256": "e03303bed4fd6f135ec0f6c1b192cce954ea42d0646f44d17b4a6fbb2b1f610e",
+        "git_blob": "8c003df629c9f1e8072000f8bbc3eeab94850b6c"
+      },
+      "models/final.3.4.3.v2": {
+        "sha256": "9476d2e25520d7ff15bece0cd5d3b657e3b1dd3cc5fcab1d9c3b62bea7a0c5b6",
+        "git_blob": "9ed4fad50ead41761073cdff3d9acafc6f78bdd4"
+      },
+      "models/final.1.6.3.v2": {
+        "sha256": "2aae563fa18a8a9b6699c6c96e0d32b8ec7543f8f805fb3bc9de77302cc9f66e",
+        "git_blob": "98e5539fe339385e9c8b19d2786c4f8c3f186a3b"
+      },
+      "models/final.2.6.3.v2": {
+        "sha256": "7d3c0b1b2a60067b940dec315567874fbc8bcd322f1b7c76bf969f51f0f53f7f",
+        "git_blob": "6a650d629fae6aee8171708241a0f580bb368cfd"
+      },
+      "models/final.3.6.3.v2": {
+        "sha256": "756e7721a382cace24e9bfea5b543af5623f2487d9a3efe7385e9c76367005fd",
+        "git_blob": "4a8e9e33d5832770e6563d0229bdb4bcae5b8398"
+      }
+    },
+    "pangolin_upstream_files_verified": true,
+    "pangolin_upstream_file_mismatches": [],
+    "runner_sha256": "13ba2ca1d258ca7482f9d627155402284e4ec2324ac04e98876be8df5976dc63",
+    "torch_version": "2.2.2",
+    "torch_threads": {
+      "intra_op": 6,
+      "inter_op": 1,
+      "scope": "torch intra-op and inter-op pools as set. Other runtime threads (I/O, Python) are not counted."
+    },
+    "selected_ids_sha256": "e934a2eefbf0170c1ccbc68882eb577fff0e6e1a82b5ad5067563203bd9784fd",
+    "patches": [
+      "cached the per-call pyfastx.Fasta handle and set the torch thread count; performance only",
+      "pangolin-5cf94b8-mask-per-gene-1: per-gene copy of strand score arrays before masking (installed source; no change when mask=False)"
+    ],
+    "checkpoint": {
+      "file": "checkpoint.tsv",
+      "fingerprint": "99b94e0068a7ca77f9f3f7e840580ece4bd369956b7d60ff23a4fdd927510c42",
+      "resumed": false,
+      "discarded_partial_line": false,
+      "sha256": "d8b42f278be7c442b8c6d8641721dd32fc9c84e0fd2a91f312f79df835ca19dd"
+    },
+    "output_tables": {
+      "predictions": {
+        "file": "pangolin-gencode44-canonical-maskFalse.predictions.tsv",
+        "rows": 8324,
+        "sha256": "fbd8861a37c2d041038cfdfb0dd4e9d1f572d72b0eb7e41406739ef740eaf4a1"
+      },
+      "unscored": {
+        "file": "pangolin-gencode44-canonical-maskFalse.unscored.tsv",
+        "rows": 27,
+        "sha256": "16ca2f9fdd6561eac244d2978d571d2e229425e1e3ee8fb28500a9d40d64535d"
+      }
+    },
+    "orphaned_tables_moved_aside": []
+  },
+  "contamination": "Pangolin was trained on splice site usage across GTEx tissues and four species, not on MFASS assay outcomes, so the labels are independent of its training signal. Whether any assayed exon appeared in its training annotation is unchecked.",
+  "pretrained": true,
+  "notes": "This run used mask=False. Pangolin's mask=True setting zeroes splice gains at annotated sites and losses at unannotated sites; mask=False disables that masking. This result does not measure the effect of the other setting.",
+  "environment": {
+    "python": "3.11.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "created_utc": "2026-09-25T03:59:09.160424+00:00",
+  "git_revision": "b52a3da"
+}

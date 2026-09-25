@@ -1,7 +1,8 @@
 # MFASS specialist comparison: confounds and next analysis
 
-Reviewed 24 September 2026. Status: **protocol documented; sensitivity study not
-executed**. This resolves the documentation work in
+Reviewed 24 September 2026. Status: **protocol documented; the registered
+annotation-matched sensitivity study was executed on 24 and 25 September 2026**
+([results and automated review](../benchmarks/mfass/results/matched-annotation-v1/README.md)). This resolves the documentation work in
 [issue #11](https://github.com/rewire-bio/rewire-benchmarks/issues/11); it does not
 resolve the scientific confounds or establish a stronger model comparison.
 
@@ -107,7 +108,10 @@ input-context limitations.
 
 ## Proposed annotation-matched sensitivity study
 
-**Not executed.** Preparation, resource acquisition and inference belong to a
+**Executed as registered on 24 and 25 September 2026.** The outputs, contrasts, limitations
+and automated scientific review are in
+[`benchmarks/mfass/results/matched-annotation-v1`](../benchmarks/mfass/results/matched-annotation-v1/README.md).
+The text below is the protocol as written before execution. Preparation, resource acquisition and inference belong to a
 [execution issue #19](https://github.com/rewire-bio/rewire-benchmarks/issues/19). Freeze its input manifest and analysis plan before
 viewing any new condition's scores. The existing MFASS test outcomes have already
 been inspected, so this remains exploratory. The execution plan and its amendments

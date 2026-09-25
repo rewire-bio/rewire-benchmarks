@@ -1,0 +1,250 @@
+{
+  "description": "Public copy of the frozen issue #19 run. Only two text transformations were applied: exact private path-prefix substitution, and withholding the MFASS cohort's reference base in Pangolin's reference-mismatch message (regex in allele_redaction). No number, identifier or score changed. Checkpoints and step logs are not copied; raw originals and their hashes are retained on the local study disk.",
+  "allele_redaction": {
+    "pattern": "variant file \\(ref base: [ACGTNacgtn]+\\)",
+    "replacement": "variant file (ref base: <withheld>)"
+  },
+  "substitution_tokens": {
+    "$STUDY_DATA": "local directory, not published",
+    "$REPO": "local directory, not published",
+    "$MFASS_DATA": "local directory, not published"
+  },
+  "manifest_raw_sha256": "203567b9055ae1350a910e100c879cace9567411f4e57d932318feda1b0231dd",
+  "files": {
+    "P0/pangolin-gencode44-canonical-maskFalse.json": {
+      "raw_sha256": "21a4c9341ca66e4f0c7009ade93942ba10b27a46336aad20f86e8d955289c23c",
+      "public_sha256": "2b677f373d3a53f45d8bdf58630546edb508525886825b736f8bd4a5029d0660",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$REPO",
+          "count": 1
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "P0/pangolin-gencode44-canonical-maskFalse.predictions.tsv": {
+      "raw_sha256": "fbd8861a37c2d041038cfdfb0dd4e9d1f572d72b0eb7e41406739ef740eaf4a1",
+      "public_sha256": "fbd8861a37c2d041038cfdfb0dd4e9d1f572d72b0eb7e41406739ef740eaf4a1",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "P0/pangolin-gencode44-canonical-maskFalse.unscored.tsv": {
+      "raw_sha256": "16ca2f9fdd6561eac244d2978d571d2e229425e1e3ee8fb28500a9d40d64535d",
+      "public_sha256": "f8f274522c28f428e97bf84458294e235979466b7c9433746a6ad1adef37fe5a",
+      "transformation": "cohort reference-base redaction",
+      "substitutions": [],
+      "allele_redactions": 23
+    },
+    "P1/pangolin-gencode44-canonical-maskTrue.json": {
+      "raw_sha256": "7f47a4978c895d1ea6c70b44a45027f3cee394ee169e72f51cb50fc6cde746e0",
+      "public_sha256": "4877e83894e59122c1cd8ebdc39e4d1f591e1adf2fd59290f6440863a57de742",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$REPO",
+          "count": 1
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "P1/pangolin-gencode44-canonical-maskTrue.predictions.tsv": {
+      "raw_sha256": "9fba694b636899feed60d955506849f68701fc6ecb9cec5c1fc6ba7f92728e1e",
+      "public_sha256": "9fba694b636899feed60d955506849f68701fc6ecb9cec5c1fc6ba7f92728e1e",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "P1/pangolin-gencode44-canonical-maskTrue.unscored.tsv": {
+      "raw_sha256": "16ca2f9fdd6561eac244d2978d571d2e229425e1e3ee8fb28500a9d40d64535d",
+      "public_sha256": "f8f274522c28f428e97bf84458294e235979466b7c9433746a6ad1adef37fe5a",
+      "transformation": "cohort reference-base redaction",
+      "substitutions": [],
+      "allele_redactions": 23
+    },
+    "S0/spliceai-1.3.1-gencode44-canonical-mask0.json": {
+      "raw_sha256": "767b453e1c963f721b422e1734f6a683e101718ef078a01f387475c9fedadcda",
+      "public_sha256": "477554b7c10ea16600b487affcf562c1fdce987e787b06f34fb406ab2aed4810",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$REPO",
+          "count": 1
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "S0/spliceai-1.3.1-gencode44-canonical-mask0.predictions.tsv": {
+      "raw_sha256": "fa30a4dc6a05e6e762fbac9411e486869aec5b248cab80146aeab7a42c27320d",
+      "public_sha256": "fa30a4dc6a05e6e762fbac9411e486869aec5b248cab80146aeab7a42c27320d",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "S0/spliceai-1.3.1-gencode44-canonical-mask0.unscored.tsv": {
+      "raw_sha256": "cd22dae59572ae7bfeee7d5843f487e093ba5706235cb149ee5fd3704c83efc7",
+      "public_sha256": "cd22dae59572ae7bfeee7d5843f487e093ba5706235cb149ee5fd3704c83efc7",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "S1/spliceai-1.3.1-gencode44-canonical-mask1.json": {
+      "raw_sha256": "3901964514863a8888217c94ab0fcbbaed205582405e68937e38bd4cd6e4d994",
+      "public_sha256": "e8f396107329ffe66ce2ae8bd7aeb74a1daedb3e86b6a1e1cd2cc3fd8af8b8d7",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$REPO",
+          "count": 1
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "S1/spliceai-1.3.1-gencode44-canonical-mask1.predictions.tsv": {
+      "raw_sha256": "84f9d10c367ada32df5f27b49985c35fae68727f1d8e576352c98cfb27be9516",
+      "public_sha256": "84f9d10c367ada32df5f27b49985c35fae68727f1d8e576352c98cfb27be9516",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "S1/spliceai-1.3.1-gencode44-canonical-mask1.unscored.tsv": {
+      "raw_sha256": "ccab724cd00bf0c150b548d1127c08eb562adc5379df1ca00b275424698ec0be",
+      "public_sha256": "ccab724cd00bf0c150b548d1127c08eb562adc5379df1ca00b275424698ec0be",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "contrasts/P0-S0.json": {
+      "raw_sha256": "45d4cc7b1d9f3cba1f7076f8124c68ee4ce386480e912904ece20e321e3134bf",
+      "public_sha256": "d2fd0235757ddcb05b5b00e9c3488389236f82ed966f2e98dffdf6212a160a18",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$STUDY_DATA",
+          "count": 2
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "contrasts/P1-P0.json": {
+      "raw_sha256": "b2c42775524fc0b0e605578da7bc3894318698b10bd2ceee2d973115bacb972f",
+      "public_sha256": "21e9b792de7c2d10f81e4eb6d27b8ba2942791bd236af62d070ce8f36dddb7d3",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$STUDY_DATA",
+          "count": 2
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "contrasts/S1-S0.json": {
+      "raw_sha256": "e48638d3c854e209799abf84dcf5ef6b361c638fde44821e524ffd250fb0f90b",
+      "public_sha256": "43f6b362ad32660ec799af30b842b46ff96a12c4ca877a2b200a38e613f7649d",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$STUDY_DATA",
+          "count": 2
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "logs/events.jsonl": {
+      "raw_sha256": "e6ad7a935d0fac982ca2cde98294fb57d63812b6b3f0d2d5d6bb2430d695eeda",
+      "public_sha256": "4492492d6a8d3f3e20a77d74c5296f63c749b5a08ba9518a9e5bdd1b3c35373f",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$STUDY_DATA",
+          "count": 32
+        },
+        {
+          "from": "<private path prefix>",
+          "to": "$REPO",
+          "count": 4
+        },
+        {
+          "from": "<private path prefix>",
+          "to": "$MFASS_DATA",
+          "count": 4
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "manifest-v1.json": {
+      "raw_sha256": "203567b9055ae1350a910e100c879cace9567411f4e57d932318feda1b0231dd",
+      "public_sha256": "3fce70dd0bd96cb92d9d0e41287f31e62ddc4ecb8d188615093a873e952433e8",
+      "transformation": "path substitution",
+      "substitutions": [
+        {
+          "from": "<private path prefix>",
+          "to": "$STUDY_DATA",
+          "count": 39
+        },
+        {
+          "from": "<private path prefix>",
+          "to": "$REPO",
+          "count": 5
+        },
+        {
+          "from": "<private path prefix>",
+          "to": "$MFASS_DATA",
+          "count": 5
+        }
+      ],
+      "allele_redactions": 0
+    },
+    "report.json": {
+      "raw_sha256": "fdd60c840787125758ef7d0e9fe8bc8d44b5a3ef84d95722ada86261c3211339",
+      "public_sha256": "259eb542313914b9114c21b62891f022c0ec0d9e3337196b8d7b2c6d5ae54ef3",
+      "transformation": "cohort reference-base redaction",
+      "substitutions": [],
+      "allele_redactions": 46
+    },
+    "report.md": {
+      "raw_sha256": "a2b06fa2f942cdb91242ac1280c1ed3bb38ff74735b5f0c1c3a037165ddd234d",
+      "public_sha256": "a2b06fa2f942cdb91242ac1280c1ed3bb38ff74735b5f0c1c3a037165ddd234d",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "reviews/claude-scientific-review.md": {
+      "raw_sha256": "81d9abb7a365cf5c257b489c1ce6cf9d1aee62fe9f81fe34ef71d65e97b53f3e",
+      "public_sha256": "81d9abb7a365cf5c257b489c1ce6cf9d1aee62fe9f81fe34ef71d65e97b53f3e",
+      "transformation": "identical",
+      "substitutions": [],
+      "allele_redactions": 0
+    },
+    "verification.json": {
+      "raw_sha256": "815db8b9c5724bab79af5514bca0c446722077e2aede1d3114b415fcb63daa75",
+      "public_sha256": "13356c3f1bd7055b11cc0ab1b2b86a7ee586c51d0c984fad6e39ce8948d662fa",
+      "transformation": "cohort reference-base redaction",
+      "substitutions": [],
+      "allele_redactions": 46
+    }
+  },
+  "not_copied_raw_sha256": {
+    "logs/P0-S0.log": "40b4db342b6b7f6252bd1b4d0589123cf8d8360b35c3d12b887f6f0f2d961a33",
+    "logs/P0.log": "e3499f83619ac576530005de0bf7df493891feae3b743525e533871f0186c85d",
+    "logs/P1-P0.log": "0142a44874d7a705b1e32e4522278e8bad4b822923c01853fbf366c15afb1244",
+    "logs/P1.log": "5b57afaf2b65a8739478ddd1dd8b9da1266ca9a17060aaef439dcd6171667636",
+    "logs/S0.log": "9ffd502604f6a5b4d4c3a9cf1f04f61d28c67aea62284782256c57f07eaec56e",
+    "logs/S1-S0.log": "f6834faf83f2c13e8819834dd3741f2656a6bb85264739dbb0d0c4290bbf1b3e",
+    "logs/S1.log": "1b4285fa8fc6dbb076f37ca1cf441e155274d777b623fbaaf770e8552095564c",
+    "logs/all.log": "8a215b6d0250e067686537780a269a303dfd932f9cbc55322d05a3ee6c08e03e",
+    "S0/checkpoint.tsv": "52237a039d43756757f8f8e3c630371bd00725496c4b08504eed8d9fec297382",
+    "S1/checkpoint.tsv": "5a9cf44a64b34b9e79a3559293afae84d38672e68aacbb07a5262f519693e5f8",
+    "P0/checkpoint.tsv": "d8b42f278be7c442b8c6d8641721dd32fc9c84e0fd2a91f312f79df835ca19dd",
+    "P1/checkpoint.tsv": "d8772ba42350197013ab3e869bb8f879e26780fc9f9ecde2a8b26338820d8338"
+  }
+}
