@@ -1,0 +1,4879 @@
+{
+  "manifest": {
+    "type": "object",
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,254}$"
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "question": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "catalogue_release_id": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}-[a-f0-9]{12}$"
+      },
+      "dataset_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "evaluation_ids": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 12000
+        },
+        "maxItems": 100
+      },
+      "protocol_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "sdk_protocol_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "runner_code_sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "artifacts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "format": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "uri": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "semantic_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "role",
+            "sha256",
+            "format",
+            "uri"
+          ],
+          "additionalProperties": false
+        },
+        "minItems": 1
+      },
+      "table_artifact_id": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+      },
+      "semantics": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "enum": [
+              "binary",
+              "continuous"
+            ]
+          },
+          "outcome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000
+          },
+          "score_direction": {
+            "type": "string",
+            "const": "higher"
+          },
+          "join_key": {
+            "type": "string",
+            "const": "id"
+          },
+          "independent_unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subgroup_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "maxItems": 100
+          },
+          "exposed": {
+            "type": "boolean"
+          },
+          "split": {
+            "type": "string",
+            "const": "test"
+          }
+        },
+        "required": [
+          "target",
+          "outcome",
+          "unit",
+          "score_direction",
+          "join_key",
+          "independent_unit",
+          "subgroup_fields",
+          "exposed",
+          "split"
+        ],
+        "additionalProperties": false
+      },
+      "expected_metrics": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      },
+      "metric_tolerance": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 0.01
+      },
+      "verification": {
+        "type": "object",
+        "properties": {
+          "verified_at": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "check": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "missing"
+                  ]
+                },
+                "detail": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                }
+              },
+              "required": [
+                "check",
+                "status",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "verified_at",
+          "checks",
+          "limitations"
+        ],
+        "additionalProperties": false
+      },
+      "local_recipes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "sdk:train-mean-v1",
+            "sdk:sequence-composition-v1",
+            "sdk:mfass-kmer-v2",
+            "sdk:seeded-random-v1",
+            "sdk:esm2-8m-v1"
+          ]
+        },
+        "uniqueItems": true
+      }
+    },
+    "required": [
+      "schema_version",
+      "id",
+      "title",
+      "question",
+      "catalogue_release_id",
+      "dataset_id",
+      "evaluation_ids",
+      "protocol_id",
+      "artifacts",
+      "table_artifact_id",
+      "semantics",
+      "expected_metrics",
+      "metric_tolerance",
+      "verification",
+      "local_recipes"
+    ],
+    "additionalProperties": false
+  },
+  "specification": {
+    "type": "object",
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+      },
+      "manifest_id": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+      },
+      "manifest_sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "catalogue_release_id": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}-[a-f0-9]{12}$"
+      },
+      "question": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "created_at": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "round": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "format": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "uri": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "semantic_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "role",
+            "sha256",
+            "format",
+            "uri"
+          ],
+          "additionalProperties": false
+        },
+        "minItems": 1
+      },
+      "plan": {
+        "type": "object",
+        "properties": {
+          "hypotheses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                },
+                "explanation": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "tests": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "verify"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 0,
+                            "maxItems": 0
+                          },
+                          "metric": {
+                            "type": "null"
+                          },
+                          "field": {
+                            "type": "null"
+                          },
+                          "recipe": {
+                            "type": "null"
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "replay"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 0,
+                            "maxItems": 8
+                          },
+                          "metric": {
+                            "type": "null"
+                          },
+                          "field": {
+                            "type": "null"
+                          },
+                          "recipe": {
+                            "type": "null"
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "coverage"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 0,
+                            "maxItems": 8
+                          },
+                          "metric": {
+                            "type": "null"
+                          },
+                          "field": {
+                            "type": "null"
+                          },
+                          "recipe": {
+                            "type": "null"
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "paired"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 2,
+                            "maxItems": 8
+                          },
+                          "metric": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "field": {
+                            "type": "null"
+                          },
+                          "recipe": {
+                            "type": "null"
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "subgroups"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 0,
+                            "maxItems": 8
+                          },
+                          "metric": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "field": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          },
+                          "recipe": {
+                            "type": "null"
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "bootstrap"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 2,
+                            "maxItems": 8
+                          },
+                          "metric": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          },
+                          "field": {
+                            "type": "null"
+                          },
+                          "recipe": {
+                            "type": "null"
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "sensitivity"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 0,
+                            "maxItems": 8
+                          },
+                          "metric": {
+                            "type": "null"
+                          },
+                          "field": {
+                            "type": "null"
+                          },
+                          "recipe": {
+                            "type": "null"
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "local_recipe"
+                          },
+                          "methods": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "minItems": 0,
+                            "maxItems": 0
+                          },
+                          "metric": {
+                            "type": "null"
+                          },
+                          "field": {
+                            "type": "null"
+                          },
+                          "recipe": {
+                            "type": "string",
+                            "enum": [
+                              "sdk:train-mean-v1",
+                              "sdk:sequence-composition-v1",
+                              "sdk:mfass-kmer-v2",
+                              "sdk:seeded-random-v1",
+                              "sdk:esm2-8m-v1"
+                            ]
+                          },
+                          "expected_observation": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "methods",
+                          "metric",
+                          "field",
+                          "recipe",
+                          "expected_observation"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 4
+                }
+              },
+              "required": [
+                "id",
+                "explanation",
+                "tests"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 3
+          },
+          "multiple_testing": {
+            "type": "string",
+            "const": "descriptive_only"
+          },
+          "stopping_rule": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000
+          },
+          "requested_tools": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "maxItems": 8
+          }
+        },
+        "required": [
+          "hypotheses",
+          "multiple_testing",
+          "stopping_rule",
+          "requested_tools"
+        ],
+        "additionalProperties": false
+      },
+      "permitted_actions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "verify",
+            "replay",
+            "coverage",
+            "paired",
+            "subgroups",
+            "bootstrap",
+            "sensitivity",
+            "local_recipe"
+          ]
+        }
+      },
+      "exposure": {
+        "type": "object",
+        "properties": {
+          "previously_exposed": {
+            "type": "boolean"
+          },
+          "usage": {
+            "type": "string",
+            "const": "exploration"
+          },
+          "independent_validation": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "required": [
+          "previously_exposed",
+          "usage",
+          "independent_validation"
+        ],
+        "additionalProperties": false
+      },
+      "budget": {
+        "type": "object",
+        "properties": {
+          "campaign_seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 28800
+          },
+          "experiment_seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 3600
+          },
+          "codex_seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 900
+          },
+          "codex_calls": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 24
+          },
+          "memory_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8589934592
+          },
+          "workspace_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 21474836480
+          },
+          "followup_rounds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2
+          }
+        },
+        "required": [
+          "campaign_seconds",
+          "experiment_seconds",
+          "codex_seconds",
+          "codex_calls",
+          "memory_bytes",
+          "workspace_bytes",
+          "followup_rounds"
+        ],
+        "additionalProperties": false
+      },
+      "question_design": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                },
+                "question": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "population": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "comparison": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "outcome": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "hypothesis": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "alternative_explanation": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "supporting_result": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "contradicting_result": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "confounders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12000
+                  },
+                  "maxItems": 100
+                },
+                "why_interesting": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "missing_evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12000
+                  },
+                  "maxItems": 100
+                },
+                "validation_needed": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "decisive_test": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "verify"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 0,
+                              "maxItems": 0
+                            },
+                            "metric": {
+                              "type": "null"
+                            },
+                            "field": {
+                              "type": "null"
+                            },
+                            "recipe": {
+                              "type": "null"
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "replay"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 0,
+                              "maxItems": 8
+                            },
+                            "metric": {
+                              "type": "null"
+                            },
+                            "field": {
+                              "type": "null"
+                            },
+                            "recipe": {
+                              "type": "null"
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "coverage"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 0,
+                              "maxItems": 8
+                            },
+                            "metric": {
+                              "type": "null"
+                            },
+                            "field": {
+                              "type": "null"
+                            },
+                            "recipe": {
+                              "type": "null"
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "paired"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 2,
+                              "maxItems": 8
+                            },
+                            "metric": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "field": {
+                              "type": "null"
+                            },
+                            "recipe": {
+                              "type": "null"
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "subgroups"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 0,
+                              "maxItems": 8
+                            },
+                            "metric": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "field": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "recipe": {
+                              "type": "null"
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "bootstrap"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 2,
+                              "maxItems": 8
+                            },
+                            "metric": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            },
+                            "field": {
+                              "type": "null"
+                            },
+                            "recipe": {
+                              "type": "null"
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "sensitivity"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 0,
+                              "maxItems": 8
+                            },
+                            "metric": {
+                              "type": "null"
+                            },
+                            "field": {
+                              "type": "null"
+                            },
+                            "recipe": {
+                              "type": "null"
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "const": "local_recipe"
+                            },
+                            "methods": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 12000
+                              },
+                              "minItems": 0,
+                              "maxItems": 0
+                            },
+                            "metric": {
+                              "type": "null"
+                            },
+                            "field": {
+                              "type": "null"
+                            },
+                            "recipe": {
+                              "type": "string",
+                              "enum": [
+                                "sdk:train-mean-v1",
+                                "sdk:sequence-composition-v1",
+                                "sdk:mfass-kmer-v2",
+                                "sdk:seeded-random-v1",
+                                "sdk:esm2-8m-v1"
+                              ]
+                            },
+                            "expected_observation": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 12000
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "kind",
+                            "methods",
+                            "metric",
+                            "field",
+                            "recipe",
+                            "expected_observation"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "blocker": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "question",
+                "population",
+                "comparison",
+                "outcome",
+                "hypothesis",
+                "alternative_explanation",
+                "supporting_result",
+                "contradicting_result",
+                "confounders",
+                "why_interesting",
+                "missing_evidence",
+                "validation_needed",
+                "decisive_test",
+                "blocker"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 3
+          },
+          "selected_candidate_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "selection_reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000
+          },
+          "novelty_status": {
+            "type": "string",
+            "const": "unverified"
+          }
+        },
+        "required": [
+          "candidates",
+          "selected_candidate_id",
+          "selection_reason",
+          "novelty_status"
+        ],
+        "additionalProperties": false
+      },
+      "followup_test": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "verify"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 0,
+                "maxItems": 0
+              },
+              "metric": {
+                "type": "null"
+              },
+              "field": {
+                "type": "null"
+              },
+              "recipe": {
+                "type": "null"
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "replay"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 0,
+                "maxItems": 8
+              },
+              "metric": {
+                "type": "null"
+              },
+              "field": {
+                "type": "null"
+              },
+              "recipe": {
+                "type": "null"
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "coverage"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 0,
+                "maxItems": 8
+              },
+              "metric": {
+                "type": "null"
+              },
+              "field": {
+                "type": "null"
+              },
+              "recipe": {
+                "type": "null"
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "paired"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 2,
+                "maxItems": 8
+              },
+              "metric": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "field": {
+                "type": "null"
+              },
+              "recipe": {
+                "type": "null"
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "subgroups"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 0,
+                "maxItems": 8
+              },
+              "metric": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "field": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              },
+              "recipe": {
+                "type": "null"
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "bootstrap"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 2,
+                "maxItems": 8
+              },
+              "metric": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              },
+              "field": {
+                "type": "null"
+              },
+              "recipe": {
+                "type": "null"
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "sensitivity"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 0,
+                "maxItems": 8
+              },
+              "metric": {
+                "type": "null"
+              },
+              "field": {
+                "type": "null"
+              },
+              "recipe": {
+                "type": "null"
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "local_recipe"
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "minItems": 0,
+                "maxItems": 0
+              },
+              "metric": {
+                "type": "null"
+              },
+              "field": {
+                "type": "null"
+              },
+              "recipe": {
+                "type": "string",
+                "enum": [
+                  "sdk:train-mean-v1",
+                  "sdk:sequence-composition-v1",
+                  "sdk:mfass-kmer-v2",
+                  "sdk:seeded-random-v1",
+                  "sdk:esm2-8m-v1"
+                ]
+              },
+              "expected_observation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "methods",
+              "metric",
+              "field",
+              "recipe",
+              "expected_observation"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "required": [
+      "schema_version",
+      "id",
+      "manifest_id",
+      "manifest_sha256",
+      "catalogue_release_id",
+      "question",
+      "created_at",
+      "round",
+      "evidence",
+      "plan",
+      "permitted_actions",
+      "exposure",
+      "budget"
+    ],
+    "additionalProperties": false
+  },
+  "bundle": {
+    "type": "object",
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,254}$"
+      },
+      "catalogue_release_id": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}-[a-f0-9]{12}$"
+      },
+      "manifest_id": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "question": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "completed",
+          "blocked",
+          "failed",
+          "stopped"
+        ]
+      },
+      "claim_level": {
+        "type": "string",
+        "const": "exploratory"
+      },
+      "outcome": {
+        "type": "string",
+        "enum": [
+          "data_or_method_explanation",
+          "exploratory_biological_hypothesis",
+          "inconclusive",
+          "blocked"
+        ]
+      },
+      "created_at": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12000
+      },
+      "plan_sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "attempts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+            },
+            "plan_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "operation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "verify"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 0
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "replay"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "coverage"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "paired"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 2,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 12000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "subgroups"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 12000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "field": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "bootstrap"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 2,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "sensitivity"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "local_recipe"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 0
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "string",
+                      "enum": [
+                        "sdk:train-mean-v1",
+                        "sdk:sequence-composition-v1",
+                        "sdk:mfass-kmer-v2",
+                        "sdk:seeded-random-v1",
+                        "sdk:esm2-8m-v1"
+                      ]
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "blocked",
+                "interrupted"
+              ]
+            },
+            "started_at": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "finished_at": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "receipt_sha256": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "receipt": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "operation_id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "verify",
+                        "replay",
+                        "coverage",
+                        "paired",
+                        "subgroups",
+                        "bootstrap",
+                        "sensitivity",
+                        "local_recipe"
+                      ]
+                    },
+                    "manifest_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "table_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "code_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "numerical": {
+                      "type": "object"
+                    },
+                    "limitations": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "maxItems": 100
+                    }
+                  },
+                  "required": [
+                    "operation_id",
+                    "kind",
+                    "manifest_sha256",
+                    "table_sha256",
+                    "code_sha256",
+                    "numerical",
+                    "limitations"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "error": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "plan_sha256",
+            "operation",
+            "status",
+            "started_at",
+            "finished_at",
+            "receipt_sha256",
+            "receipt",
+            "error"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "findings": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 12000
+        },
+        "maxItems": 100
+      },
+      "limitations": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 12000
+        },
+        "maxItems": 100
+      },
+      "review": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "pending"
+          },
+          "method": {
+            "type": "string",
+            "const": "ai_assisted"
+          }
+        },
+        "required": [
+          "status",
+          "method"
+        ],
+        "additionalProperties": false
+      },
+      "artifacts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "format": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "uri": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "semantic_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "role",
+            "sha256",
+            "format",
+            "uri"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "specs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "type": "string",
+              "const": "1.0"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+            },
+            "manifest_id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+            },
+            "manifest_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "catalogue_release_id": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}-[a-f0-9]{12}$"
+            },
+            "question": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "created_at": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000
+            },
+            "round": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                  },
+                  "role": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12000
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "format": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12000
+                  },
+                  "uri": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "semantic_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "role",
+                  "sha256",
+                  "format",
+                  "uri"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "plan": {
+              "type": "object",
+              "properties": {
+                "hypotheses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                      },
+                      "explanation": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "tests": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "verify"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 0
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "replay"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "coverage"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "paired"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 2,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "subgroups"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "field": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "bootstrap"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 2,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "sensitivity"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "local_recipe"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 0
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "string",
+                                  "enum": [
+                                    "sdk:train-mean-v1",
+                                    "sdk:sequence-composition-v1",
+                                    "sdk:mfass-kmer-v2",
+                                    "sdk:seeded-random-v1",
+                                    "sdk:esm2-8m-v1"
+                                  ]
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 4
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "explanation",
+                      "tests"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1,
+                  "maxItems": 3
+                },
+                "multiple_testing": {
+                  "type": "string",
+                  "const": "descriptive_only"
+                },
+                "stopping_rule": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "requested_tools": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12000
+                  },
+                  "maxItems": 8
+                }
+              },
+              "required": [
+                "hypotheses",
+                "multiple_testing",
+                "stopping_rule",
+                "requested_tools"
+              ],
+              "additionalProperties": false
+            },
+            "permitted_actions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "verify",
+                  "replay",
+                  "coverage",
+                  "paired",
+                  "subgroups",
+                  "bootstrap",
+                  "sensitivity",
+                  "local_recipe"
+                ]
+              }
+            },
+            "exposure": {
+              "type": "object",
+              "properties": {
+                "previously_exposed": {
+                  "type": "boolean"
+                },
+                "usage": {
+                  "type": "string",
+                  "const": "exploration"
+                },
+                "independent_validation": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "previously_exposed",
+                "usage",
+                "independent_validation"
+              ],
+              "additionalProperties": false
+            },
+            "budget": {
+              "type": "object",
+              "properties": {
+                "campaign_seconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 28800
+                },
+                "experiment_seconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 3600
+                },
+                "codex_seconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 900
+                },
+                "codex_calls": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 24
+                },
+                "memory_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8589934592
+                },
+                "workspace_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 21474836480
+                },
+                "followup_rounds": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              },
+              "required": [
+                "campaign_seconds",
+                "experiment_seconds",
+                "codex_seconds",
+                "codex_calls",
+                "memory_bytes",
+                "workspace_bytes",
+                "followup_rounds"
+              ],
+              "additionalProperties": false
+            },
+            "question_design": {
+              "type": "object",
+              "properties": {
+                "candidates": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                      },
+                      "question": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "population": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "comparison": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "outcome": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "hypothesis": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "alternative_explanation": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "supporting_result": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "contradicting_result": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "confounders": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 12000
+                        },
+                        "maxItems": 100
+                      },
+                      "why_interesting": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "missing_evidence": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 12000
+                        },
+                        "maxItems": 100
+                      },
+                      "validation_needed": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "decisive_test": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "verify"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 0,
+                                    "maxItems": 0
+                                  },
+                                  "metric": {
+                                    "type": "null"
+                                  },
+                                  "field": {
+                                    "type": "null"
+                                  },
+                                  "recipe": {
+                                    "type": "null"
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "replay"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 0,
+                                    "maxItems": 8
+                                  },
+                                  "metric": {
+                                    "type": "null"
+                                  },
+                                  "field": {
+                                    "type": "null"
+                                  },
+                                  "recipe": {
+                                    "type": "null"
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "coverage"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 0,
+                                    "maxItems": 8
+                                  },
+                                  "metric": {
+                                    "type": "null"
+                                  },
+                                  "field": {
+                                    "type": "null"
+                                  },
+                                  "recipe": {
+                                    "type": "null"
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "paired"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 2,
+                                    "maxItems": 8
+                                  },
+                                  "metric": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 12000
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "field": {
+                                    "type": "null"
+                                  },
+                                  "recipe": {
+                                    "type": "null"
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "subgroups"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 0,
+                                    "maxItems": 8
+                                  },
+                                  "metric": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 12000
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "recipe": {
+                                    "type": "null"
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "bootstrap"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 2,
+                                    "maxItems": 8
+                                  },
+                                  "metric": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "field": {
+                                    "type": "null"
+                                  },
+                                  "recipe": {
+                                    "type": "null"
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "sensitivity"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 0,
+                                    "maxItems": 8
+                                  },
+                                  "metric": {
+                                    "type": "null"
+                                  },
+                                  "field": {
+                                    "type": "null"
+                                  },
+                                  "recipe": {
+                                    "type": "null"
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "local_recipe"
+                                  },
+                                  "methods": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    "minItems": 0,
+                                    "maxItems": 0
+                                  },
+                                  "metric": {
+                                    "type": "null"
+                                  },
+                                  "field": {
+                                    "type": "null"
+                                  },
+                                  "recipe": {
+                                    "type": "string",
+                                    "enum": [
+                                      "sdk:train-mean-v1",
+                                      "sdk:sequence-composition-v1",
+                                      "sdk:mfass-kmer-v2",
+                                      "sdk:seeded-random-v1",
+                                      "sdk:esm2-8m-v1"
+                                    ]
+                                  },
+                                  "expected_observation": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "methods",
+                                  "metric",
+                                  "field",
+                                  "recipe",
+                                  "expected_observation"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "blocker": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 12000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "question",
+                      "population",
+                      "comparison",
+                      "outcome",
+                      "hypothesis",
+                      "alternative_explanation",
+                      "supporting_result",
+                      "contradicting_result",
+                      "confounders",
+                      "why_interesting",
+                      "missing_evidence",
+                      "validation_needed",
+                      "decisive_test",
+                      "blocker"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1,
+                  "maxItems": 3
+                },
+                "selected_candidate_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "selection_reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "novelty_status": {
+                  "type": "string",
+                  "const": "unverified"
+                }
+              },
+              "required": [
+                "candidates",
+                "selected_candidate_id",
+                "selection_reason",
+                "novelty_status"
+              ],
+              "additionalProperties": false
+            },
+            "followup_test": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "verify"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 0
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "replay"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "coverage"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "paired"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 2,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 12000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "subgroups"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 12000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "field": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "bootstrap"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 2,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "sensitivity"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 8
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "null"
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "local_recipe"
+                    },
+                    "methods": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "minItems": 0,
+                      "maxItems": 0
+                    },
+                    "metric": {
+                      "type": "null"
+                    },
+                    "field": {
+                      "type": "null"
+                    },
+                    "recipe": {
+                      "type": "string",
+                      "enum": [
+                        "sdk:train-mean-v1",
+                        "sdk:sequence-composition-v1",
+                        "sdk:mfass-kmer-v2",
+                        "sdk:seeded-random-v1",
+                        "sdk:esm2-8m-v1"
+                      ]
+                    },
+                    "expected_observation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "methods",
+                    "metric",
+                    "field",
+                    "recipe",
+                    "expected_observation"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "schema_version",
+            "id",
+            "manifest_id",
+            "manifest_sha256",
+            "catalogue_release_id",
+            "question",
+            "created_at",
+            "round",
+            "evidence",
+            "plan",
+            "permitted_actions",
+            "exposure",
+            "budget"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "execution": {
+        "type": "object",
+        "properties": {
+          "campaign_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+          },
+          "code_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "codex_calls": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reasoning": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "hypothesizer",
+                    "planner",
+                    "critic"
+                  ]
+                },
+                "model": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "cli_version": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "usage": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "role",
+                "model",
+                "cli_version",
+                "usage"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "campaign_id",
+          "code_sha256",
+          "codex_calls",
+          "reasoning"
+        ],
+        "additionalProperties": false
+      },
+      "question_design_artifact": {
+        "type": "object",
+        "properties": {
+          "design": {
+            "type": "object",
+            "properties": {
+              "candidates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                    },
+                    "question": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "population": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "comparison": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "hypothesis": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "alternative_explanation": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "supporting_result": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "contradicting_result": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "confounders": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "maxItems": 100
+                    },
+                    "why_interesting": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "missing_evidence": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 12000
+                      },
+                      "maxItems": 100
+                    },
+                    "validation_needed": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "decisive_test": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "verify"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 0
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "replay"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "coverage"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "paired"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 2,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "subgroups"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 12000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "field": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "bootstrap"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 2,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "sensitivity"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 8
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "null"
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "const": "local_recipe"
+                                },
+                                "methods": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 12000
+                                  },
+                                  "minItems": 0,
+                                  "maxItems": 0
+                                },
+                                "metric": {
+                                  "type": "null"
+                                },
+                                "field": {
+                                  "type": "null"
+                                },
+                                "recipe": {
+                                  "type": "string",
+                                  "enum": [
+                                    "sdk:train-mean-v1",
+                                    "sdk:sequence-composition-v1",
+                                    "sdk:mfass-kmer-v2",
+                                    "sdk:seeded-random-v1",
+                                    "sdk:esm2-8m-v1"
+                                  ]
+                                },
+                                "expected_observation": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 12000
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "methods",
+                                "metric",
+                                "field",
+                                "recipe",
+                                "expected_observation"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "blocker": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 12000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "question",
+                    "population",
+                    "comparison",
+                    "outcome",
+                    "hypothesis",
+                    "alternative_explanation",
+                    "supporting_result",
+                    "contradicting_result",
+                    "confounders",
+                    "why_interesting",
+                    "missing_evidence",
+                    "validation_needed",
+                    "decisive_test",
+                    "blocker"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 3
+              },
+              "selected_candidate_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "selection_reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              },
+              "novelty_status": {
+                "type": "string",
+                "const": "unverified"
+              }
+            },
+            "required": [
+              "candidates",
+              "selected_candidate_id",
+              "selection_reason",
+              "novelty_status"
+            ],
+            "additionalProperties": false
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "design",
+          "sha256"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "schema_version",
+      "id",
+      "catalogue_release_id",
+      "manifest_id",
+      "title",
+      "question",
+      "status",
+      "claim_level",
+      "outcome",
+      "created_at",
+      "plan_sha256",
+      "attempts",
+      "findings",
+      "limitations",
+      "review",
+      "artifacts",
+      "specs"
+    ],
+    "additionalProperties": false
+  }
+}

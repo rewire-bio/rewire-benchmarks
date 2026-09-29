@@ -17,6 +17,8 @@ def main(argv=None):
         prog="rewirebench", description="Local biological benchmark evaluation"
     )
     sub = parser.add_subparsers(dest="command", required=True)
+    from rewirebench.research.cli import add_parser as add_research_parser
+    add_research_parser(sub)
     sub.add_parser("protocols", help="List implemented protocols")
     cleanup = sub.add_parser("clean", help="Preview old expanded references with verified gzip copies")
     cleanup.add_argument("--root", required=True, help="Repository containing benchmarks/*/data")
@@ -91,6 +93,9 @@ def main(argv=None):
         if args.command == "clean":
             from rewirebench.cleanup import clean
             result = clean(args.root, older_than_days=args.older_than_days, apply=args.apply)
+        elif args.command == "research":
+            from rewirebench.research.cli import dispatch
+            result = dispatch(args)
         elif args.command == "protocols":
             result = list(sdk.PROTOCOLS)
         elif args.command == "inspect":
