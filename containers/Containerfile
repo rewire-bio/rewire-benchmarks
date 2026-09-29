@@ -4,7 +4,7 @@ ARG ENVIRONMENT=core
 COPY containers/${ENVIRONMENT}.lock.txt /opt/requirements.lock.txt
 RUN pip install --no-cache-dir --require-hashes -r /opt/requirements.lock.txt
 COPY dist/rewirebench-*.whl /tmp/wheels/
-RUN pip install --no-cache-dir --no-deps /tmp/wheels/*.whl && rm -rf /tmp/wheels
+RUN pip install --no-cache-dir --no-deps /tmp/wheels/*.whl && pip check && rm -rf /tmp/wheels
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 WORKDIR /work
 ENTRYPOINT ["rewirebench"]

@@ -73,13 +73,15 @@ def verify():
 
 
 def generate(environment):
-    command = ["uv", "export", "--locked", "--no-dev", "--package", "rewirebench", "--extra", environment,
+    command = ["uv", "export", "--locked", "--no-dev", "--package", "rewirebench",
                "--no-emit-workspace", "--format", "requirements-txt"]
+    if environment != "core":
+        command += ["--extra", environment]
     exported = subprocess.check_output(command, cwd=ROOT, text=True)
-    if environment == "sequence":
+    if environment in {"core", "sequence"}:
         if any(name in exported for name in ("torch==", "nvidia-", "triton==")):
-            raise ValueError("Sequence environment must not acquire model framework dependencies")
-        (ROOT / "containers" / "sequence.lock.txt").write_text(exported)
+            raise ValueError("Core/sequence environments must not acquire model framework dependencies")
+        (ROOT / "containers" / f"{environment}.lock.txt").write_text(exported)
         return
     blocks = re.split(r"(?m)(?=^[A-Za-z0-9][A-Za-z0-9_.-]*(?:==| @ ))", exported)[1:]
     output, names = [], set()
@@ -105,5 +107,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.verify_upstream:
         verify()
-    for environment in ("esm", "dnabert2", "sequence"):
+    for environment in ("core", "esm", "dnabert2", "sequence"):
         generate(environment)

@@ -33,6 +33,10 @@ CI builds each environment on a separate runner, verifies CPU-only torch metadat
 and imports, and compares archived scoring output through native Python, Podman
 and Apptainer. Passing those checks does not claim public-model inference parity.
 
+Regeneration also exports `core.lock.txt` from the root lock, so all four
+environments include mandatory SDK dependencies. Container builds run `pip check`
+after installing the SDK wheel to catch missing or incompatible dependencies.
+
 ## Sequence environment
 
 `sequence.lock.txt` exports the `sequence` extra from the same root `uv.lock`.
