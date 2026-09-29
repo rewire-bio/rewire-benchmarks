@@ -1,0 +1,875 @@
+{
+  "schema_version": "1.0",
+  "canonicalization": "RFC8785",
+  "valid": {
+    "manifest": {
+      "schema_version": "1.0",
+      "id": "test-investigation",
+      "title": "Test investigation",
+      "question": "Does the result replicate under the registered metric?",
+      "catalogue_release_id": "2026-09-23-0123456789ab",
+      "dataset_id": "test-dataset",
+      "evaluation_ids": [
+        "test-evaluation"
+      ],
+      "protocol_id": "test-protocol",
+      "sdk_protocol_id": "mfass-v2",
+      "runner_code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+      "artifacts": [
+        {
+          "id": "test-table",
+          "role": "table",
+          "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+          "format": "json",
+          "uri": null
+        }
+      ],
+      "table_artifact_id": "test-table",
+      "semantics": {
+        "target": "binary",
+        "outcome": "disruption",
+        "unit": "variant",
+        "score_direction": "higher",
+        "join_key": "id",
+        "independent_unit": "exon",
+        "subgroup_fields": [
+          "region",
+          "distance"
+        ],
+        "exposed": true,
+        "split": "test"
+      },
+      "expected_metrics": {
+        "baseline": {
+          "precision_at_capacity": 0.5,
+          "recall_at_capacity": 1.0,
+          "average_precision_sklearn": 1.0,
+          "auroc": 1.0
+        },
+        "candidate": {
+          "precision_at_capacity": 0.5,
+          "recall_at_capacity": 1.0,
+          "average_precision_sklearn": 1.0,
+          "auroc": 1.0
+        }
+      },
+      "metric_tolerance": 1e-09,
+      "verification": {
+        "verified_at": "2026-09-23T00:00:00Z",
+        "checks": [],
+        "limitations": []
+      },
+      "local_recipes": []
+    },
+    "specification": {
+      "budget": {
+        "campaign_seconds": 28800,
+        "codex_calls": 24,
+        "codex_seconds": 900,
+        "experiment_seconds": 3600,
+        "followup_rounds": 2,
+        "memory_bytes": 8589934592,
+        "workspace_bytes": 21474836480
+      },
+      "catalogue_release_id": "2026-09-23-0123456789ab",
+      "created_at": "2026-09-23T22:45:01.429563Z",
+      "evidence": [
+        {
+          "format": "json",
+          "id": "test-table",
+          "role": "table",
+          "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+          "uri": null
+        }
+      ],
+      "exposure": {
+        "independent_validation": false,
+        "previously_exposed": true,
+        "usage": "exploration"
+      },
+      "id": "test-investigation-round-0",
+      "manifest_id": "test-investigation",
+      "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+      "permitted_actions": [
+        "verify",
+        "replay",
+        "coverage",
+        "paired",
+        "subgroups",
+        "bootstrap",
+        "sensitivity",
+        "local_recipe"
+      ],
+      "plan": {
+        "hypotheses": [
+          {
+            "explanation": "The discrepancy may arise from stale evidence, metric calculation or an inadequate trivial control.",
+            "id": "evidence-and-method",
+            "tests": [
+              {
+                "expected_observation": "All available evidence matches its declared byte hash.",
+                "field": null,
+                "id": "verify-evidence",
+                "kind": "verify",
+                "methods": [],
+                "metric": null,
+                "recipe": null
+              },
+              {
+                "expected_observation": "Recorded metrics replay within the stated tolerance.",
+                "field": null,
+                "id": "replay-metrics",
+                "kind": "replay",
+                "methods": [],
+                "metric": null,
+                "recipe": null
+              }
+            ]
+          }
+        ],
+        "multiple_testing": "descriptive_only",
+        "requested_tools": [],
+        "stopping_rule": "Stop after registered verification and replay. No autonomous hypothesis claims."
+      },
+      "question": "Does the result replicate under the registered metric?",
+      "round": 0,
+      "schema_version": "1.0"
+    },
+    "bundle": {
+      "artifacts": [
+        {
+          "format": "json",
+          "id": "test-table",
+          "role": "table",
+          "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+          "uri": null
+        }
+      ],
+      "attempts": [
+        {
+          "error": null,
+          "finished_at": "2026-09-23T22:45:02.218242Z",
+          "id": "attempt-4d4d94b19682bf49fa2284d9",
+          "operation": {
+            "expected_observation": "All available evidence matches its declared byte hash.",
+            "field": null,
+            "id": "verify-evidence",
+            "kind": "verify",
+            "methods": [],
+            "metric": null,
+            "recipe": null
+          },
+          "plan_sha256": "7de071bf9219f34b4d7febc182fd5a7466438a483fa215f2aa49b5a6304001d3",
+          "receipt": {
+            "code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+            "kind": "verify",
+            "limitations": [
+              "Previously explored benchmark outcomes; this is not independent validation.",
+              "Descriptive analysis only; multiple comparisons are not confirmatory tests."
+            ],
+            "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+            "numerical": {
+              "checks": [
+                {
+                  "artifact_id": "test-table",
+                  "status": "passed"
+                }
+              ],
+              "identifiers_unique": true,
+              "methods": [
+                "baseline",
+                "candidate"
+              ],
+              "rows": 24
+            },
+            "operation_id": "verify-evidence",
+            "table_sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088"
+          },
+          "receipt_sha256": "b87d0b5b046617c6359056a09afa2480cf2bcf5ec321476079bf835b9a52659b",
+          "started_at": "2026-09-23T22:45:01.430225Z",
+          "status": "completed"
+        },
+        {
+          "error": null,
+          "finished_at": "2026-09-23T22:45:03.121828Z",
+          "id": "attempt-5d7590264b48198452ac8b37",
+          "operation": {
+            "expected_observation": "Recorded metrics replay within the stated tolerance.",
+            "field": null,
+            "id": "replay-metrics",
+            "kind": "replay",
+            "methods": [],
+            "metric": null,
+            "recipe": null
+          },
+          "plan_sha256": "7de071bf9219f34b4d7febc182fd5a7466438a483fa215f2aa49b5a6304001d3",
+          "receipt": {
+            "code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+            "kind": "replay",
+            "limitations": [
+              "Previously explored benchmark outcomes; this is not independent validation.",
+              "Descriptive analysis only; multiple comparisons are not confirmatory tests."
+            ],
+            "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+            "numerical": {
+              "checks": [
+                {
+                  "actual": 1,
+                  "expected": 1,
+                  "method": "baseline",
+                  "metric": "auroc",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                },
+                {
+                  "actual": 1,
+                  "expected": 1,
+                  "method": "baseline",
+                  "metric": "average_precision_sklearn",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                },
+                {
+                  "actual": 0.5,
+                  "expected": 0.5,
+                  "method": "baseline",
+                  "metric": "precision_at_capacity",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                },
+                {
+                  "actual": 1,
+                  "expected": 1,
+                  "method": "baseline",
+                  "metric": "recall_at_capacity",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                },
+                {
+                  "actual": 1,
+                  "expected": 1,
+                  "method": "candidate",
+                  "metric": "auroc",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                },
+                {
+                  "actual": 1,
+                  "expected": 1,
+                  "method": "candidate",
+                  "metric": "average_precision_sklearn",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                },
+                {
+                  "actual": 0.5,
+                  "expected": 0.5,
+                  "method": "candidate",
+                  "metric": "precision_at_capacity",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                },
+                {
+                  "actual": 1,
+                  "expected": 1,
+                  "method": "candidate",
+                  "metric": "recall_at_capacity",
+                  "metric_available": true,
+                  "status": "passed",
+                  "tolerance": 1e-09
+                }
+              ],
+              "coverage": {
+                "baseline": {
+                  "denominator": 24,
+                  "missing": 0,
+                  "scored": 24
+                },
+                "candidate": {
+                  "denominator": 24,
+                  "missing": 0,
+                  "scored": 24
+                }
+              },
+              "metrics": {
+                "baseline": {
+                  "auroc": 1,
+                  "average_precision_sklearn": 1,
+                  "precision_at_capacity": 0.5,
+                  "recall_at_capacity": 1
+                },
+                "candidate": {
+                  "auroc": 1,
+                  "average_precision_sklearn": 1,
+                  "precision_at_capacity": 0.5,
+                  "recall_at_capacity": 1
+                }
+              }
+            },
+            "operation_id": "replay-metrics",
+            "table_sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088"
+          },
+          "receipt_sha256": "7d2e893726c36c2de5ad42db205f08e4755f825187212dd8782bd54c617cb690",
+          "started_at": "2026-09-23T22:45:02.218601Z",
+          "status": "completed"
+        }
+      ],
+      "catalogue_release_id": "2026-09-23-0123456789ab",
+      "claim_level": "exploratory",
+      "created_at": "2026-09-23T22:45:01.425284Z",
+      "execution": {
+        "campaign_id": "campaign-d20834c2bae0469f",
+        "code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+        "codex_calls": 0,
+        "reasoning": []
+      },
+      "findings": [
+        "Metric replay: 8/8 checks passed."
+      ],
+      "id": "test-investigation-campaign-d20834c2bae0469f",
+      "limitations": [
+        "Exploratory analysis of exposed outcomes; no independent validation or novelty claim.",
+        "AI-assisted interpretation requires human scientific review before publication.",
+        "All intervals are descriptive and unadjusted; unsuccessful tests remain in the report."
+      ],
+      "manifest_id": "test-investigation",
+      "outcome": "inconclusive",
+      "plan_sha256": "e821b4379d72624dfc3269fbc748d028081c0613b993013be36a9f022446239b",
+      "question": "Does the result replicate under the registered metric?",
+      "review": {
+        "method": "ai_assisted",
+        "status": "pending"
+      },
+      "schema_version": "1.0",
+      "specs": [
+        {
+          "budget": {
+            "campaign_seconds": 28800,
+            "codex_calls": 24,
+            "codex_seconds": 900,
+            "experiment_seconds": 3600,
+            "followup_rounds": 2,
+            "memory_bytes": 8589934592,
+            "workspace_bytes": 21474836480
+          },
+          "catalogue_release_id": "2026-09-23-0123456789ab",
+          "created_at": "2026-09-23T22:45:01.429563Z",
+          "evidence": [
+            {
+              "format": "json",
+              "id": "test-table",
+              "role": "table",
+              "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+              "uri": null
+            }
+          ],
+          "exposure": {
+            "independent_validation": false,
+            "previously_exposed": true,
+            "usage": "exploration"
+          },
+          "id": "test-investigation-round-0",
+          "manifest_id": "test-investigation",
+          "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+          "permitted_actions": [
+            "verify",
+            "replay",
+            "coverage",
+            "paired",
+            "subgroups",
+            "bootstrap",
+            "sensitivity",
+            "local_recipe"
+          ],
+          "plan": {
+            "hypotheses": [
+              {
+                "explanation": "The discrepancy may arise from stale evidence, metric calculation or an inadequate trivial control.",
+                "id": "evidence-and-method",
+                "tests": [
+                  {
+                    "expected_observation": "All available evidence matches its declared byte hash.",
+                    "field": null,
+                    "id": "verify-evidence",
+                    "kind": "verify",
+                    "methods": [],
+                    "metric": null,
+                    "recipe": null
+                  },
+                  {
+                    "expected_observation": "Recorded metrics replay within the stated tolerance.",
+                    "field": null,
+                    "id": "replay-metrics",
+                    "kind": "replay",
+                    "methods": [],
+                    "metric": null,
+                    "recipe": null
+                  }
+                ]
+              }
+            ],
+            "multiple_testing": "descriptive_only",
+            "requested_tools": [],
+            "stopping_rule": "Stop after registered verification and replay. No autonomous hypothesis claims."
+          },
+          "question": "Does the result replicate under the registered metric?",
+          "round": 0,
+          "schema_version": "1.0"
+        }
+      ],
+      "status": "completed",
+      "title": "Test investigation"
+    }
+  },
+  "expected_hashes": {
+    "manifest": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+    "specification": "7de071bf9219f34b4d7febc182fd5a7466438a483fa215f2aa49b5a6304001d3",
+    "bundle": "cfc6d4d5e09012e5573fdfdb4ef0624e4509291071be870b7d0452a58df76fcb"
+  },
+  "invalid": [
+    {
+      "contract": "manifest",
+      "reason": "absent table reference",
+      "value": {
+        "schema_version": "1.0",
+        "id": "test-investigation",
+        "title": "Test investigation",
+        "question": "Does the result replicate under the registered metric?",
+        "catalogue_release_id": "2026-09-23-0123456789ab",
+        "dataset_id": "test-dataset",
+        "evaluation_ids": [
+          "test-evaluation"
+        ],
+        "protocol_id": "test-protocol",
+        "sdk_protocol_id": "mfass-v2",
+        "runner_code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+        "artifacts": [
+          {
+            "id": "test-table",
+            "role": "table",
+            "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+            "format": "json",
+            "uri": null
+          }
+        ],
+        "table_artifact_id": "absent-table",
+        "semantics": {
+          "target": "binary",
+          "outcome": "disruption",
+          "unit": "variant",
+          "score_direction": "higher",
+          "join_key": "id",
+          "independent_unit": "exon",
+          "subgroup_fields": [
+            "region",
+            "distance"
+          ],
+          "exposed": true,
+          "split": "test"
+        },
+        "expected_metrics": {
+          "baseline": {
+            "precision_at_capacity": 0.5,
+            "recall_at_capacity": 1.0,
+            "average_precision_sklearn": 1.0,
+            "auroc": 1.0
+          },
+          "candidate": {
+            "precision_at_capacity": 0.5,
+            "recall_at_capacity": 1.0,
+            "average_precision_sklearn": 1.0,
+            "auroc": 1.0
+          }
+        },
+        "metric_tolerance": 1e-09,
+        "verification": {
+          "verified_at": "2026-09-23T00:00:00Z",
+          "checks": [],
+          "limitations": []
+        },
+        "local_recipes": []
+      }
+    },
+    {
+      "contract": "specification",
+      "reason": "unregistered code execution",
+      "value": {
+        "budget": {
+          "campaign_seconds": 28800,
+          "codex_calls": 24,
+          "codex_seconds": 900,
+          "experiment_seconds": 3600,
+          "followup_rounds": 2,
+          "memory_bytes": 8589934592,
+          "workspace_bytes": 21474836480
+        },
+        "catalogue_release_id": "2026-09-23-0123456789ab",
+        "created_at": "2026-09-23T22:45:01.429563Z",
+        "evidence": [
+          {
+            "format": "json",
+            "id": "test-table",
+            "role": "table",
+            "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+            "uri": null
+          }
+        ],
+        "exposure": {
+          "independent_validation": false,
+          "previously_exposed": true,
+          "usage": "exploration"
+        },
+        "id": "test-investigation-round-0",
+        "manifest_id": "test-investigation",
+        "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+        "permitted_actions": [
+          "verify",
+          "replay",
+          "coverage",
+          "paired",
+          "subgroups",
+          "bootstrap",
+          "sensitivity",
+          "local_recipe"
+        ],
+        "plan": {
+          "hypotheses": [
+            {
+              "explanation": "The discrepancy may arise from stale evidence, metric calculation or an inadequate trivial control.",
+              "id": "evidence-and-method",
+              "tests": [
+                {
+                  "expected_observation": "All available evidence matches its declared byte hash.",
+                  "field": null,
+                  "id": "verify-evidence",
+                  "kind": "shell",
+                  "methods": [],
+                  "metric": null,
+                  "recipe": null
+                },
+                {
+                  "expected_observation": "Recorded metrics replay within the stated tolerance.",
+                  "field": null,
+                  "id": "replay-metrics",
+                  "kind": "replay",
+                  "methods": [],
+                  "metric": null,
+                  "recipe": null
+                }
+              ]
+            }
+          ],
+          "multiple_testing": "descriptive_only",
+          "requested_tools": [],
+          "stopping_rule": "Stop after registered verification and replay. No autonomous hypothesis claims."
+        },
+        "question": "Does the result replicate under the registered metric?",
+        "round": 0,
+        "schema_version": "1.0"
+      }
+    },
+    {
+      "contract": "bundle",
+      "reason": "self-hashed receipt has forged lineage",
+      "value": {
+        "artifacts": [
+          {
+            "format": "json",
+            "id": "test-table",
+            "role": "table",
+            "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+            "uri": null
+          }
+        ],
+        "attempts": [
+          {
+            "error": null,
+            "finished_at": "2026-09-23T22:45:02.218242Z",
+            "id": "attempt-4d4d94b19682bf49fa2284d9",
+            "operation": {
+              "expected_observation": "All available evidence matches its declared byte hash.",
+              "field": null,
+              "id": "verify-evidence",
+              "kind": "verify",
+              "methods": [],
+              "metric": null,
+              "recipe": null
+            },
+            "plan_sha256": "7de071bf9219f34b4d7febc182fd5a7466438a483fa215f2aa49b5a6304001d3",
+            "receipt": {
+              "code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+              "kind": "verify",
+              "limitations": [
+                "Previously explored benchmark outcomes; this is not independent validation.",
+                "Descriptive analysis only; multiple comparisons are not confirmatory tests."
+              ],
+              "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+              "numerical": {
+                "checks": [
+                  {
+                    "artifact_id": "test-table",
+                    "status": "passed"
+                  }
+                ],
+                "identifiers_unique": true,
+                "methods": [
+                  "baseline",
+                  "candidate"
+                ],
+                "rows": 24
+              },
+              "operation_id": "forged-operation",
+              "table_sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088"
+            },
+            "receipt_sha256": "21d4fb76565b15e3c69fb8130088bef399fe5c57e2da8dfc537bae406098b6fe",
+            "started_at": "2026-09-23T22:45:01.430225Z",
+            "status": "completed"
+          },
+          {
+            "error": null,
+            "finished_at": "2026-09-23T22:45:03.121828Z",
+            "id": "attempt-5d7590264b48198452ac8b37",
+            "operation": {
+              "expected_observation": "Recorded metrics replay within the stated tolerance.",
+              "field": null,
+              "id": "replay-metrics",
+              "kind": "replay",
+              "methods": [],
+              "metric": null,
+              "recipe": null
+            },
+            "plan_sha256": "7de071bf9219f34b4d7febc182fd5a7466438a483fa215f2aa49b5a6304001d3",
+            "receipt": {
+              "code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+              "kind": "replay",
+              "limitations": [
+                "Previously explored benchmark outcomes; this is not independent validation.",
+                "Descriptive analysis only; multiple comparisons are not confirmatory tests."
+              ],
+              "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+              "numerical": {
+                "checks": [
+                  {
+                    "actual": 1,
+                    "expected": 1,
+                    "method": "baseline",
+                    "metric": "auroc",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  },
+                  {
+                    "actual": 1,
+                    "expected": 1,
+                    "method": "baseline",
+                    "metric": "average_precision_sklearn",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  },
+                  {
+                    "actual": 0.5,
+                    "expected": 0.5,
+                    "method": "baseline",
+                    "metric": "precision_at_capacity",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  },
+                  {
+                    "actual": 1,
+                    "expected": 1,
+                    "method": "baseline",
+                    "metric": "recall_at_capacity",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  },
+                  {
+                    "actual": 1,
+                    "expected": 1,
+                    "method": "candidate",
+                    "metric": "auroc",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  },
+                  {
+                    "actual": 1,
+                    "expected": 1,
+                    "method": "candidate",
+                    "metric": "average_precision_sklearn",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  },
+                  {
+                    "actual": 0.5,
+                    "expected": 0.5,
+                    "method": "candidate",
+                    "metric": "precision_at_capacity",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  },
+                  {
+                    "actual": 1,
+                    "expected": 1,
+                    "method": "candidate",
+                    "metric": "recall_at_capacity",
+                    "metric_available": true,
+                    "status": "passed",
+                    "tolerance": 1e-09
+                  }
+                ],
+                "coverage": {
+                  "baseline": {
+                    "denominator": 24,
+                    "missing": 0,
+                    "scored": 24
+                  },
+                  "candidate": {
+                    "denominator": 24,
+                    "missing": 0,
+                    "scored": 24
+                  }
+                },
+                "metrics": {
+                  "baseline": {
+                    "auroc": 1,
+                    "average_precision_sklearn": 1,
+                    "precision_at_capacity": 0.5,
+                    "recall_at_capacity": 1
+                  },
+                  "candidate": {
+                    "auroc": 1,
+                    "average_precision_sklearn": 1,
+                    "precision_at_capacity": 0.5,
+                    "recall_at_capacity": 1
+                  }
+                }
+              },
+              "operation_id": "replay-metrics",
+              "table_sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088"
+            },
+            "receipt_sha256": "7d2e893726c36c2de5ad42db205f08e4755f825187212dd8782bd54c617cb690",
+            "started_at": "2026-09-23T22:45:02.218601Z",
+            "status": "completed"
+          }
+        ],
+        "catalogue_release_id": "2026-09-23-0123456789ab",
+        "claim_level": "exploratory",
+        "created_at": "2026-09-23T22:45:01.425284Z",
+        "execution": {
+          "campaign_id": "campaign-d20834c2bae0469f",
+          "code_sha256": "25bb156e31ffd3bbaf348c7868d1b49ae2986db4fc31528d9df5acc98836d2fc",
+          "codex_calls": 0,
+          "reasoning": []
+        },
+        "findings": [
+          "Metric replay: 8/8 checks passed."
+        ],
+        "id": "test-investigation-campaign-d20834c2bae0469f",
+        "limitations": [
+          "Exploratory analysis of exposed outcomes; no independent validation or novelty claim.",
+          "AI-assisted interpretation requires human scientific review before publication.",
+          "All intervals are descriptive and unadjusted; unsuccessful tests remain in the report."
+        ],
+        "manifest_id": "test-investigation",
+        "outcome": "inconclusive",
+        "plan_sha256": "e821b4379d72624dfc3269fbc748d028081c0613b993013be36a9f022446239b",
+        "question": "Does the result replicate under the registered metric?",
+        "review": {
+          "method": "ai_assisted",
+          "status": "pending"
+        },
+        "schema_version": "1.0",
+        "specs": [
+          {
+            "budget": {
+              "campaign_seconds": 28800,
+              "codex_calls": 24,
+              "codex_seconds": 900,
+              "experiment_seconds": 3600,
+              "followup_rounds": 2,
+              "memory_bytes": 8589934592,
+              "workspace_bytes": 21474836480
+            },
+            "catalogue_release_id": "2026-09-23-0123456789ab",
+            "created_at": "2026-09-23T22:45:01.429563Z",
+            "evidence": [
+              {
+                "format": "json",
+                "id": "test-table",
+                "role": "table",
+                "sha256": "23ed5d2cb9b0336ea25a693bca748ecbd6640bf7d718eb042965778028c2f088",
+                "uri": null
+              }
+            ],
+            "exposure": {
+              "independent_validation": false,
+              "previously_exposed": true,
+              "usage": "exploration"
+            },
+            "id": "test-investigation-round-0",
+            "manifest_id": "test-investigation",
+            "manifest_sha256": "70cb531a46a6045b9bcc3a2a131756b57b0ae005ebb867cc4a8ef56c3a9d0e2a",
+            "permitted_actions": [
+              "verify",
+              "replay",
+              "coverage",
+              "paired",
+              "subgroups",
+              "bootstrap",
+              "sensitivity",
+              "local_recipe"
+            ],
+            "plan": {
+              "hypotheses": [
+                {
+                  "explanation": "The discrepancy may arise from stale evidence, metric calculation or an inadequate trivial control.",
+                  "id": "evidence-and-method",
+                  "tests": [
+                    {
+                      "expected_observation": "All available evidence matches its declared byte hash.",
+                      "field": null,
+                      "id": "verify-evidence",
+                      "kind": "verify",
+                      "methods": [],
+                      "metric": null,
+                      "recipe": null
+                    },
+                    {
+                      "expected_observation": "Recorded metrics replay within the stated tolerance.",
+                      "field": null,
+                      "id": "replay-metrics",
+                      "kind": "replay",
+                      "methods": [],
+                      "metric": null,
+                      "recipe": null
+                    }
+                  ]
+                }
+              ],
+              "multiple_testing": "descriptive_only",
+              "requested_tools": [],
+              "stopping_rule": "Stop after registered verification and replay. No autonomous hypothesis claims."
+            },
+            "question": "Does the result replicate under the registered metric?",
+            "round": 0,
+            "schema_version": "1.0"
+          }
+        ],
+        "status": "completed",
+        "title": "Test investigation"
+      }
+    }
+  ]
+}
