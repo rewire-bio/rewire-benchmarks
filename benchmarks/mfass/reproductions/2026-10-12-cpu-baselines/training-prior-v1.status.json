@@ -1,0 +1,17 @@
+{
+  "baseline_id": "training-prior-v1",
+  "completion": "complete",
+  "configuration": {
+    "binary": "positive-class prevalence",
+    "multiclass": "majority; lowest-class tie"
+  },
+  "coverage": {
+    "denominator": 8324,
+    "scored": 8324,
+    "unscored": 0
+  },
+  "report": "training-prior-v1/report.json",
+  "role": "null",
+  "scientific_reproduction": "not_established",
+  "status": "evaluated"
+}

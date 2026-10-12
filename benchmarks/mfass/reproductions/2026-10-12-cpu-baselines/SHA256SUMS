@@ -1,0 +1,10 @@
+e06488fb76ca5bbbbcdcef4589ed55545030618e8968fabf52c643803044d342  ./baseline-manifest.json
+cd29b94594da020217bd0040337a6327a8b3dce7c7fd3646d6e8f66a8ca900e5  ./baseline-plan.json
+4e49ffc6914cbfddea818e98b1cf6973749ab6529665cb939b18dfa15fb90f81  ./mfass-kmer-position-v2.status.json
+2683ef05f0fdf4690529b8630386471a650fb86376c6f6419ad5c8503661b198  ./mfass-kmer-position-v2/predictions.json
+1cba80f08af3b50393c710527c3ae81dc2cc49c07d036015be1cbfde4bd985c9  ./mfass-kmer-position-v2/report.json
+ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356  ./mfass-kmer-position-v2/unscored.json
+6cbc0c21bdd3c725c428b23bca14e985224ac22038400997929b5f230208c92b  ./training-prior-v1.status.json
+c9f2d729201ae3dd80fcfa7eb71c75968eb6cb33e30648109e1cbda070a3b9f8  ./training-prior-v1/predictions.json
+20856121df84b83eca5fbcb9dbc93e8472203c32d630ccf2283d0f30d5c4a3af  ./training-prior-v1/report.json
+ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356  ./training-prior-v1/unscored.json

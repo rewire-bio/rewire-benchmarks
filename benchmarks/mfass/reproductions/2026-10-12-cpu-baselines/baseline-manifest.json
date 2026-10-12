@@ -1,0 +1,62 @@
+{
+  "baselines": [
+    {
+      "baseline_id": "training-prior-v1",
+      "completion": "complete",
+      "configuration": {
+        "binary": "positive-class prevalence",
+        "multiclass": "majority; lowest-class tie"
+      },
+      "coverage": {
+        "denominator": 8324,
+        "scored": 8324,
+        "unscored": 0
+      },
+      "report": "training-prior-v1/report.json",
+      "role": "null",
+      "scientific_reproduction": "not_established",
+      "status": "evaluated"
+    },
+    {
+      "baseline_id": "mfass-kmer-position-v2",
+      "completion": "complete",
+      "configuration": {
+        "additional_inputs": [
+          "position",
+          "region",
+          "phyloP",
+          "phastCons"
+        ],
+        "k": 3,
+        "l2_regularization": 1.0,
+        "learning_rate": 0.06,
+        "max_iter": 300,
+        "max_leaf_nodes": 31,
+        "orientation": "validated assay-oriented mutant",
+        "reference_revision": "bee9133b83f3aedaf2bbb9013f1875515845607e",
+        "seed": 20260914,
+        "window": 21
+      },
+      "coverage": {
+        "denominator": 8324,
+        "scored": 8324,
+        "unscored": 0
+      },
+      "report": "mfass-kmer-position-v2/report.json",
+      "role": "conventional",
+      "scientific_reproduction": "not_established",
+      "status": "evaluated"
+    }
+  ],
+  "created_at": "2026-10-12T11:47:51.947337+00:00",
+  "dataset_id": "mfass-assay-pairs-v2",
+  "kind": "rewire_baseline_batch",
+  "prepared_sha256": "cbba55d19fea7cb204127343ecb554da169a16f047117eb1db6472a5707f38d3",
+  "protocol_id": "mfass-v2",
+  "publication": "local_only_not_submitted",
+  "registry_version": "1",
+  "schema_version": "1.0",
+  "scope": "full",
+  "sdk_code_sha256": "ac1615768c09a5a1ed785d95af2bdaf32673fc9a268fcd47b875a7491e6d5eba",
+  "status": "evaluated"
+}
