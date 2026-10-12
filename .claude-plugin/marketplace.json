@@ -1,0 +1,23 @@
+{
+  "name": "rewire-benchmarks",
+  "owner": {
+    "name": "Rewire",
+    "url": "https://github.com/rewire-bio"
+  },
+  "metadata": {
+    "description": "Agent plugins for finding and reproducing biological model benchmarks."
+  },
+  "plugins": [
+    {
+      "name": "bio-model-benchmarks",
+      "source": "./plugins/bio-model-benchmarks",
+      "description": "Find published results for DNA, RNA, protein and cell models in the Rewire benchmark graph, and reproduce or run benchmarks locally with rewirebench.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "homepage": "https://benchmarks.rewire.it/",
+      "repository": "https://github.com/rewire-bio/rewire-benchmarks",
+      "keywords": ["benchmarks", "biology", "genomics", "proteins", "reproducibility"],
+      "category": "science"
+    }
+  ]
+}

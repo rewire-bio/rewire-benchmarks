@@ -185,6 +185,55 @@ The latest published SDK is [v0.5.0](https://github.com/rewire-bio/rewire-benchm
 [Release validation](docs/releases/0.5.0.md) records exact source, artifact hashes and tested platforms.
 Existing scientific artifacts are preserved.
 
+## Use with an agent
+
+The `bio-model-benchmarks` plugin gives a coding agent two things: a skill that
+explains how to find published results and run each protocol with `rewirebench`, and
+the read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp) as
+an MCP server named `rewire-benchmark-graph`. Runs stay local. The skill never exports
+or submits a result unless you ask for it.
+
+In Claude Code:
+
+```text
+/plugin marketplace add rewire-bio/rewire-benchmarks
+/plugin install bio-model-benchmarks@rewire-benchmarks
+```
+
+Claude Code 2.1.275 or later can do both in one step:
+
+```text
+/plugin install bio-model-benchmarks --marketplace rewire-bio/rewire-benchmarks
+```
+
+The MCP server needs [uv](https://docs.astral.sh/uv/); it downloads and verifies the
+current graph bundle on first start. Then ask, for example, "Reproduce the published
+MFASS-v2 baseline and compare it with the result in the benchmark graph."
+
+For other MCP clients, add the server:
+
+```json
+{
+  "mcpServers": {
+    "rewire-benchmark-graph": {
+      "command": "uvx",
+      "args": [
+        "--from", "git+https://github.com/rewire-bio/rdf-kg-mcp@v0.1.0",
+        "rdf-kg-mcp", "serve", "https://benchmarks.rewirebio.io/agents/kg.tar.gz"
+      ]
+    }
+  }
+}
+```
+
+That URL redirects to the latest graph release. For an exact, reproducible graph, use
+a release asset instead, such as
+`https://github.com/rewire-bio/rewire-benchmark-data/releases/download/kg/2026-10-12-cba623554ce3/kg-2026-10-12-cba623554ce3.tar.gz`.
+Then give the agent the skill: copy [`skills/bio-model-benchmarks`](skills/bio-model-benchmarks)
+into the client's skills directory, or paste `SKILL.md` into its instructions and keep the
+`reference/` files beside it. The copy under `plugins/` is kept byte-identical by
+`tests/test_agent_plugin.py`; edit `skills/bio-model-benchmarks` and copy it across.
+
 ## Cleaning local reference data
 
 Preview old expanded reference files whose adjacent gzip archives contain exactly the same bytes:

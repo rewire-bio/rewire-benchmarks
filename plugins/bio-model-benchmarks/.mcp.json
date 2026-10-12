@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "rewire-benchmark-graph": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/rewire-bio/rdf-kg-mcp@v0.1.0",
+        "rdf-kg-mcp",
+        "serve",
+        "https://benchmarks.rewirebio.io/agents/kg.tar.gz"
+      ]
+    }
+  }
+}
