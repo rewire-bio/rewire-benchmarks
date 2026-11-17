@@ -1,0 +1,67 @@
+{
+ "limitations": [
+  "The README VSC command references a configuration absent from the pinned repository. This guide uses the checked-in GSD example instead and does not claim VSC results.",
+  "The Docker tags are not image-digest pinned by the README; this code revision alone does not freeze algorithm containers.",
+  "Ground-truth network availability and matching input/configuration paths are prerequisites; no data-download command is invented.",
+  "The inspected instructions do not establish a minimum RAM/VRAM requirement, wall-clock runtime or monetary cost; none is inferred."
+ ],
+ "outputs": [
+  "Ranked edges under outputs/example_run_GSD/GSD/<run_id>/<algorithm_id>/rankedEdges.csv, using output_settings in the supplied config.",
+  "AUPRC and AUROC plot files under ./plots in PDF and PNG formats."
+ ],
+ "prerequisites": [
+  "Git, conda and a functioning Docker installation; the repository executes supported algorithms in containers.",
+  "The supplied config-files/config.yaml expects GSD expression, pseudotime and ground-truth files under inputs/example/GSD. Verify the local data layout before running."
+ ],
+ "record_id": "discovery-benchmark-beeline",
+ "review": {
+  "date": "2026-09-17",
+  "method": "official_repository_review"
+ },
+ "source_ids": [
+  "run-doc-beeline-readme-md-37464085",
+  "run-doc-beeline-config-yaml-37464085"
+ ],
+ "status": "source_reviewed_not_executed",
+ "steps": [
+  {
+   "explanation": "Repository checkout wrapper: the detached revision selects the exact official source inspected for this guide.",
+   "shell": "git clone https://github.com/Murali-group/Beeline.git\ncd Beeline\ngit checkout --detach 37464085eb8a95d6cc6a3d3a3c649d36db6052ed",
+   "source_ids": [
+    "run-doc-beeline-readme-md-37464085"
+   ],
+   "source_locator": "Pinned repository revision; README.md",
+   "title": "Check out the reviewed repository"
+  },
+  {
+   "explanation": "These setup commands use the official default image-pull behavior. Conda must already be initialized in the shell; the README illustrates a Miniconda-specific initialization path.",
+   "shell": "bash utils/setupAnacondaVENV.sh\nbash utils/initialize.sh\nconda activate BEELINE",
+   "source_ids": [
+    "run-doc-beeline-readme-md-37464085"
+   ],
+   "source_locator": "README.md lines 9\u201336",
+   "title": "Set up the environment and algorithm images"
+  },
+  {
+   "explanation": "This executes the algorithms and datasets enabled by the YAML file. The README points to a missing VSC file; this guide explicitly substitutes the supplied GSD example config, so it is a different example dataset.",
+   "shell": "python BLRunner.py -c config-files/config.yaml",
+   "source_ids": [
+    "run-doc-beeline-readme-md-37464085",
+    "run-doc-beeline-config-yaml-37464085"
+   ],
+   "source_locator": "README.md lines 40\u201352; config-files/config.yaml (input_settings/datasets and output_settings)",
+   "title": "Run the configured algorithms"
+  },
+  {
+   "explanation": "The flags are selected from the official tables: evaluator -a computes AUPRC/AUROC; plotter -a and -r produce their corresponding figures. The README points to a missing VSC file; this guide explicitly substitutes the supplied GSD example config, so it is a different example dataset.",
+   "shell": "python BLEvaluator.py -c config-files/config.yaml -a\npython BLPlotter.py -c config-files/config.yaml -o ./plots -a -r",
+   "source_ids": [
+    "run-doc-beeline-readme-md-37464085",
+    "run-doc-beeline-config-yaml-37464085"
+   ],
+   "source_locator": "README.md lines 54\u201385; config-files/config.yaml (input_settings/datasets and output_settings)",
+   "title": "Evaluate and plot ROC/precision-recall performance"
+  }
+ ],
+ "summary": "Run and evaluate the supplied BEELINE GSD example configuration, then generate AUPRC/AUROC plots."
+}
