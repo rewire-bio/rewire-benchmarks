@@ -25,6 +25,8 @@ jobs:
             timeout: 30
           - recipe: beeline
             timeout: 60
+          - recipe: scib
+            timeout: 120
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.timeout }}
     steps:
@@ -34,6 +36,13 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           version: '0.8.2'
+      - name: User-writable Miniforge (scIB needs mamba and a writable package cache)
+        if: matrix.recipe == 'scib'
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          auto-activate-base: true
+          activate-environment: ''
       - name: Run guide smoke
         run: bash scripts/recipe_smoke/${{ matrix.recipe }}.sh
       - name: Disk after run
