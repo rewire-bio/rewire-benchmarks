@@ -1,0 +1,53 @@
+{
+ "limitations": [
+  "This is the README tutorial model, not a claim to reproduce a published leaderboard checkpoint.",
+  "The example explicitly runs on CPU; runtime, memory demand and storage capacity are not stated.",
+  "The PyPI installation, transitive dependencies and downloaded data are not hash-locked. The Python script wrapper has been source-reviewed only, not executed."
+ ],
+ "outputs": [
+  "Lightning training/validation logs followed by retrieval test metrics from trainer.test on the official data module."
+ ],
+ "prerequisites": [
+  "Conda and Git; the official README recommends a Python 3.11 environment.",
+  "Internet access for MassSpecGym dataset/candidate downloads from Hugging Face. The dataset loader downloads data as needed."
+ ],
+ "record_id": "discovery-benchmark-massspecgym",
+ "review": {
+  "date": "2026-09-17",
+  "method": "official_repository_review"
+ },
+ "source_ids": [
+  "run-doc-massspecgym-readme-md-f259fe37"
+ ],
+ "status": "source_reviewed_not_executed",
+ "steps": [
+  {
+   "explanation": "Repository checkout wrapper: the detached revision selects the exact official source inspected for this guide.",
+   "shell": "git clone https://github.com/pluskal-lab/MassSpecGym.git\ncd MassSpecGym\ngit checkout --detach f259fe3780d5bd227fc6ece36ce6f397c2eef716",
+   "source_ids": [
+    "run-doc-massspecgym-readme-md-f259fe37"
+   ],
+   "source_locator": "Pinned repository revision; README.md",
+   "title": "Check out the reviewed repository"
+  },
+  {
+   "explanation": "The README package-install command is unversioned. Record the installed version; the pinned documentation commit is not an installed-package lock.",
+   "shell": "conda create -n massspecgym python==3.11\nconda activate massspecgym\npip install massspecgym",
+   "source_ids": [
+    "run-doc-massspecgym-readme-md-f259fe37"
+   ],
+   "source_locator": "README.md lines 38\u201351",
+   "title": "Install into the recommended environment"
+  },
+  {
+   "explanation": "The four official Python blocks are combined in a local script. A standard main guard is added around execution for the documented four data workers; model, CPU trainer, one device, five epochs and batch size 32 are unchanged.",
+   "shell": "cat > massspecgym_retrieval_example.py <<'PY'\nimport torch\nimport torch.nn as nn\nimport pytorch_lightning as pl\nfrom pytorch_lightning import Trainer\n\nfrom massspecgym.data import RetrievalDataset, MassSpecDataModule\nfrom massspecgym.data.transforms import SpecTokenizer, MolFingerprinter\nfrom massspecgym.models.base import Stage\nfrom massspecgym.models.retrieval.base import RetrievalMassSpecGymModel\n\nclass MyDeepSetsRetrievalModel(RetrievalMassSpecGymModel):\n    def __init__(\n        self,\n        hidden_channels: int = 128,\n        out_channels: int = 4096,  # fingerprint size\n        *args,\n        **kwargs\n    ):\n        \"\"\"Implement your architecture.\"\"\"\n        super().__init__(*args, **kwargs)\n\n        self.phi = nn.Sequential(\n            nn.Linear(2, hidden_channels),\n            nn.ReLU(),\n            nn.Linear(hidden_channels, hidden_channels),\n            nn.ReLU(),\n        )\n        self.rho = nn.Sequential(\n            nn.Linear(hidden_channels, hidden_channels),\n            nn.ReLU(),\n            nn.Linear(hidden_channels, out_channels),\n            nn.Sigmoid()\n        )\n\n    def forward(self, x: torch.Tensor) -> torch.Tensor:\n        \"\"\"Implement your prediction logic.\"\"\"\n        x = self.phi(x)\n        x = x.sum(dim=-2)  # sum over peaks\n        x = self.rho(x)\n        return x\n\n    def step(\n        self, batch: dict, stage: Stage\n    ) -> tuple[torch.Tensor, torch.Tensor]:\n        \"\"\"Implement your custom logic of using predictions for training and inference.\"\"\"\n        # Unpack inputs\n        x = batch[\"spec\"]  # input spectra\n        fp_true = batch[\"mol\"]  # true fingerprints\n        cands = batch[\"candidates\"]  # candidate fingerprints concatenated for a batch\n        batch_ptr = batch[\"batch_ptr\"]  # number of candidates per sample in a batch\n\n        # Predict fingerprint\n        fp_pred = self.forward(x)\n\n        # Calculate loss\n        loss = nn.functional.mse_loss(fp_true, fp_pred)\n\n        # Calculate final similarity scores between predicted fingerprints and retrieval candidates\n        fp_pred_repeated = fp_pred.repeat_interleave(batch_ptr, dim=0)\n        scores = nn.functional.cosine_similarity(fp_pred_repeated, cands)\n\n        return dict(loss=loss, scores=scores)\n\nif __name__ == '__main__':\n    # Init hyperparameters\n    n_peaks = 60\n    fp_size = 4096\n    batch_size = 32\n\n    # Load dataset\n    dataset = RetrievalDataset(\n        spec_transform=SpecTokenizer(n_peaks=n_peaks),\n        mol_transform=MolFingerprinter(fp_size=fp_size),\n    )\n\n    # Init data module\n    data_module = MassSpecDataModule(\n        dataset=dataset,\n        batch_size=batch_size,\n        num_workers=4\n    )\n\n    # Init model\n    model = MyDeepSetsRetrievalModel(out_channels=fp_size)\n\n    # Init trainer\n    trainer = Trainer(accelerator=\"cpu\", devices=1, max_epochs=5)\n\n    # Train\n    trainer.fit(model, datamodule=data_module)\n\n    # Test\n    trainer.test(model, datamodule=data_module)\nPY\npython massspecgym_retrieval_example.py",
+   "source_ids": [
+    "run-doc-massspecgym-readme-md-f259fe37"
+   ],
+   "source_locator": "README.md lines 111\u2013218",
+   "title": "Run the documented CPU training and test example"
+  }
+ ],
+ "summary": "Run the official CPU DeepSets retrieval tutorial: train a small spectrum-to-fingerprint model, then evaluate retrieval on the provided test split."
+}

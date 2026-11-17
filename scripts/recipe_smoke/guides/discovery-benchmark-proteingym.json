@@ -1,0 +1,62 @@
+{
+ "limitations": [
+  "This recomputes metrics for supplied scores; it does not reproduce the models that generated those scores.",
+  "The README download example describes predictions but names the assay-data archive; the guide uses the separate filenames in its resource table.",
+  "The README lists 4.4 GB for unpacked substitution scores while the config comment lists 31 GB. Storage requirements are therefore unresolved between these two inspected files.",
+  "The environment, remote archive bytes and file contents are not verified by execution. The inspected instructions do not establish a minimum RAM/VRAM requirement, wall-clock runtime or monetary cost; none is inferred."
+ ],
+ "outputs": [
+  "One merged score file per assay at the configured DMS_merged_score_folder_subs.",
+  "Metric and aggregate performance files under benchmarks/DMS_zero_shot/substitutions, including assay-, UniProt- and functional-category summaries."
+ ],
+ "prerequisites": [
+  "A working conda environment named proteingym_env with the evaluation dependencies; merge_all_scores.sh explicitly activates that name. The inspected README does not provide a complete installation recipe.",
+  "Download and unpack the v1.3 DMS substitution data and zero-shot substitution scores from the official Resources table; update scripts/zero_shot_config.sh to their actual locations.",
+  "The reference files and config.json must agree with the chosen data/model-score release. No model checkpoint is needed for recomputing metrics from existing scores."
+ ],
+ "record_id": "discovery-benchmark-proteingym",
+ "review": {
+  "date": "2026-09-17",
+  "method": "official_repository_review"
+ },
+ "source_ids": [
+  "run-doc-proteingym-readme-md-144fe22b",
+  "run-doc-proteingym-config-sh-144fe22b",
+  "run-doc-proteingym-merge-sh-144fe22b",
+  "run-doc-proteingym-performance-sh-144fe22b"
+ ],
+ "status": "source_reviewed_not_executed",
+ "steps": [
+  {
+   "explanation": "Repository checkout wrapper: the detached revision selects the exact official source inspected for this guide.",
+   "shell": "git clone https://github.com/OATML-Markslab/ProteinGym.git\ncd ProteinGym\ngit checkout --detach 144fe22b07dfaeec2b366f2346203a9838a55b4c",
+   "source_ids": [
+    "run-doc-proteingym-readme-md-144fe22b"
+   ],
+   "source_locator": "Pinned repository revision; README.md",
+   "title": "Check out the reviewed repository"
+  },
+  {
+   "explanation": "Adapted from the official download template with filenames selected from its table. Configure the unpacked paths in scripts/zero_shot_config.sh before the next step; downloading into the checkout does not automatically match its default cache paths.",
+   "shell": "VERSION=\"v1.3\"\nFILENAME=\"DMS_ProteinGym_substitutions.zip\"\ncurl -o \"${FILENAME}\" \"https://marks.hms.harvard.edu/proteingym/ProteinGym_${VERSION}/${FILENAME}\"\nunzip \"${FILENAME}\"\nFILENAME=\"zero_shot_substitutions_scores.zip\"\ncurl -o \"${FILENAME}\" \"https://marks.hms.harvard.edu/proteingym/ProteinGym_${VERSION}/${FILENAME}\"\nunzip \"${FILENAME}\"",
+   "source_ids": [
+    "run-doc-proteingym-readme-md-144fe22b",
+    "run-doc-proteingym-config-sh-144fe22b"
+   ],
+   "source_locator": "README.md lines 108\u2013138, 175\u2013182; scripts/zero_shot_config.sh lines 9\u201335",
+   "title": "Download the two documented resource archives"
+  },
+  {
+   "explanation": "Run from this directory: both scripts source ../zero_shot_config.sh and use ../../ paths. The README root-relative invocation alone does not establish this working directory.",
+   "shell": "cd scripts/scoring_DMS_zero_shot\nbash merge_all_scores.sh\nbash performance_substitutions.sh",
+   "source_ids": [
+    "run-doc-proteingym-readme-md-144fe22b",
+    "run-doc-proteingym-merge-sh-144fe22b",
+    "run-doc-proteingym-performance-sh-144fe22b"
+   ],
+   "source_locator": "README.md lines 175\u2013182; scripts/scoring_DMS_zero_shot/merge_all_scores.sh lines 1\u201312; performance_substitutions.sh lines 1\u201311",
+   "title": "Merge scores and calculate substitution metrics"
+  }
+ ],
+ "summary": "Recompute zero-shot substitution benchmark metrics from published prediction files, without running protein models."
+}

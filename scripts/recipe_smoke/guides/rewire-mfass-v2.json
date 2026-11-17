@@ -1,0 +1,66 @@
+{
+ "limitations": [
+  "The source reports a local run without paid APIs or cloud compute; that is not a runtime or cost guarantee for a different machine.",
+  "MFASS labels reflect exon recognition in an assay construct; they are not patient-RNA outcomes.",
+  "This command sequence does not rerun SpliceAI or Pangolin and must not relabel their previously published genomic-context predictions.",
+  "Do not use mfass-v1 baseline or split-cost results as current evidence."
+ ],
+ "outputs": [
+  "Validated assay-oriented cohort and corrected baseline results.",
+  "If selected, pilot runtime/memory/disk/failure measurements and model/code provenance checks; no pilot accuracy score."
+ ],
+ "prerequisites": [
+  "Git, curl and uv; the package declares Python >=3.11. The README commands run from the rewire-benchmarks repository root.",
+  "The checked-in split-v2.tsv is canonical. The README records SHA-256 hashes for both source tables and the split; inspect them before treating a rerun as matching the published protocol."
+ ],
+ "record_id": "rewire-mfass-v2",
+ "review": {
+  "date": "2026-09-17",
+  "method": "official_repository_review"
+ },
+ "source_ids": [
+  "run-doc-mfass-readme-md-68d1ee53",
+  "run-doc-mfass-pyproject-toml-68d1ee53"
+ ],
+ "status": "source_reviewed_not_executed",
+ "steps": [
+  {
+   "explanation": "Repository checkout wrapper: the detached revision selects the exact official source inspected for this guide.",
+   "shell": "git clone https://github.com/rewire-bio/rewire-benchmarks.git\ncd rewire-benchmarks\ngit checkout --detach 68d1ee53a0fcd1104d9f427d68dedffdccf2c47f",
+   "source_ids": [
+    "run-doc-mfass-readme-md-68d1ee53"
+   ],
+   "source_locator": "Pinned repository revision; benchmarks/mfass/README.md",
+   "title": "Check out the reviewed repository"
+  },
+  {
+   "explanation": "Official download commands. These upstream master URLs are mutable; the source README records the expected input hashes.",
+   "shell": "mkdir -p benchmarks/mfass/data\ncurl -L -o benchmarks/mfass/data/snv_data_clean.txt \\\n  https://raw.githubusercontent.com/KosuriLab/MFASS/master/processed_data/snv/snv_data_clean.txt\ncurl -L -o benchmarks/mfass/data/snv_func_annot.txt \\\n  https://raw.githubusercontent.com/KosuriLab/MFASS/master/processed_data/snv/snv_func_annot.txt",
+   "source_ids": [
+    "run-doc-mfass-readme-md-68d1ee53"
+   ],
+   "source_locator": "benchmarks/mfass/README.md lines 90\u2013106",
+   "title": "Fetch the two published input tables"
+  },
+  {
+   "explanation": "Preserves the official v2 command sequence. The baseline and encoder head are supervised on the predeclared training split.",
+   "shell": "uv sync --package mfass --extra dnabert2-pilot\nuv run --package mfass --extra dnabert2-pilot mfass-build --check\nuv run --package mfass --extra dnabert2-pilot mfass-build\nuv run --package mfass --extra dnabert2-pilot mfass-baseline",
+   "source_ids": [
+    "run-doc-mfass-readme-md-68d1ee53",
+    "run-doc-mfass-pyproject-toml-68d1ee53"
+   ],
+   "source_locator": "benchmarks/mfass/README.md lines 107\u2013110; benchmarks/mfass/pyproject.toml lines 1\u201333",
+   "title": "Install, validate the cohort and run the corrected baseline"
+  },
+  {
+   "explanation": "The pilot measures feasibility and validates checkpoint provenance; it does not calculate accuracy. The README gates any subsequent full encoder run on projected runtime and free disk; the full run is intentionally a separate decision.",
+   "shell": "uv run --package mfass --extra dnabert2-pilot mfass-dnabert2-pilot",
+   "source_ids": [
+    "run-doc-mfass-readme-md-68d1ee53"
+   ],
+   "source_locator": "benchmarks/mfass/README.md lines 111\u2013139",
+   "title": "Optionally run the resource pilot"
+  }
+ ],
+ "summary": "Run the corrected MFASS v2 cohort validation and baseline, with an optional DNABERT-2 resource pilot. Keep this protocol separate from the superseded v1 run."
+}

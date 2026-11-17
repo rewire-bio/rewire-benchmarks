@@ -1,0 +1,54 @@
+{
+ "limitations": [
+  "The official README warns that this PyTorch repository deliberately differs from the original paper and directs exact paper reproduction to tape-neurips2019.",
+  "The maintainers no longer recommend the bundled training code and do not maintain newer-PyTorch training compatibility. This guide covers evaluation only.",
+  "The README does not pin the package environment or checkpoint/data hashes; supply and record these before treating a run as reproducible.",
+  "The inspected instructions do not establish a minimum RAM/VRAM requirement, wall-clock runtime or monetary cost; none is inferred."
+ ],
+ "outputs": [
+  "Reported overall secondary-structure accuracy and a results.pkl file written into the trained model directory."
+ ],
+ "prerequisites": [
+  "An isolated Python environment and an existing TAPE-compatible transformer checkpoint fine-tuned for secondary structure; a pretrained language-model checkpoint alone is insufficient.",
+  "Place the secondary-structure LMDB dataset linked in README.md under ./data. The README reports approximately 120 MB compressed / 2 GB unpacked for all supervised datasets."
+ ],
+ "record_id": "discovery-benchmark-tape",
+ "review": {
+  "date": "2026-09-17",
+  "method": "official_repository_review"
+ },
+ "source_ids": [
+  "run-doc-tape-readme-md-6d345c2b"
+ ],
+ "status": "source_reviewed_not_executed",
+ "steps": [
+  {
+   "explanation": "Repository checkout wrapper: the detached revision selects the exact official source inspected for this guide.",
+   "shell": "git clone https://github.com/songlab-cal/tape.git\ncd tape\ngit checkout --detach 6d345c2b2bbf52cd32cf179325c222afd92aec7e",
+   "source_ids": [
+    "run-doc-tape-readme-md-6d345c2b"
+   ],
+   "source_locator": "Pinned repository revision; README.md",
+   "title": "Check out the reviewed repository"
+  },
+  {
+   "explanation": "This is the README installation command. It does not pin the PyPI package version; record the resolved environment before comparing runs.",
+   "shell": "pip install tape_proteins",
+   "source_ids": [
+    "run-doc-tape-readme-md-6d345c2b"
+   ],
+   "source_locator": "README.md lines 40\u201346",
+   "title": "Install the documented package"
+  },
+  {
+   "explanation": "Set TAPE_TRAINED_MODEL to the directory containing your fine-tuned model. This shell variable replaces the README placeholder results/<path_to_trained_model> without inventing a checkpoint.",
+   "shell": "tape-eval transformer secondary_structure \"${TAPE_TRAINED_MODEL:?Set TAPE_TRAINED_MODEL to your task-trained model directory}\" --metrics accuracy",
+   "source_ids": [
+    "run-doc-tape-readme-md-6d345c2b"
+   ],
+   "source_locator": "README.md lines 172\u2013188; Data lines 240\u2013254",
+   "title": "Evaluate the task-trained checkpoint"
+  }
+ ],
+ "summary": "Evaluate an already fine-tuned secondary-structure model with the official PyTorch TAPE CLI. This is not a reproduction recipe for the original TensorFlow paper."
+}

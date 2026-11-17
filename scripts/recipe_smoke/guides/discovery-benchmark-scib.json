@@ -1,0 +1,78 @@
+{
+ "limitations": [
+  "The pipeline is tailored to the historical scIB study and the maintainers redirect general-purpose use to newer projects; this guide does not claim current Open Problems equivalence.",
+  "The test-data configuration is not the original 85-batch study dataset.",
+  "Old R/Python environment resolution and method-specific hardware support were not executed or verified.",
+  "The inspected instructions do not establish a minimum RAM/VRAM requirement, wall-clock runtime or monetary cost; none is inferred."
+ ],
+ "outputs": [
+  "data/adata_norm.h5ad from the test-data generator.",
+  "Integration and metric outputs produced by the Snakemake targets selected in the configuration."
+ ],
+ "prerequisites": [
+  "Conda or Mambaforge/Mamba and Git; the official setup creates separate Python and R environments.",
+  "The R 4.0 example uses scib-pipeline-R4.0 and scib-R4.0. Data must contain normalized log counts in adata.X and raw counts in adata.layers[\"counts\"]."
+ ],
+ "record_id": "discovery-benchmark-scib",
+ "review": {
+  "date": "2026-09-17",
+  "method": "official_repository_review"
+ },
+ "source_ids": [
+  "run-doc-scib-readme-md-cd679133",
+  "run-doc-scib-pipeline-readme-md-e97631a4",
+  "run-doc-scib-pipeline-data-readme-md-e97631a4",
+  "run-doc-scib-test-config-yaml-e97631a4"
+ ],
+ "status": "source_reviewed_not_executed",
+ "steps": [
+  {
+   "explanation": "Repository checkout wrapper: the detached revision selects the exact official source inspected for this guide.",
+   "shell": "git clone https://github.com/theislab/scib-pipeline.git\ncd scib-pipeline\ngit checkout --detach e97631a478e063883cee5db0dcebbf42d8268ab0",
+   "source_ids": [
+    "run-doc-scib-pipeline-readme-md-e97631a4"
+   ],
+   "source_locator": "Pinned repository revision; README.md",
+   "title": "Check out the reviewed repository"
+  },
+  {
+   "explanation": "The setup invocation is official; environment activation selects the Python environment named in the README. Conda shell initialization is a prerequisite.",
+   "shell": "bash envs/create_conda_environments.sh -r 4.0\nconda activate scib-pipeline-R4.0",
+   "source_ids": [
+    "run-doc-scib-pipeline-readme-md-e97631a4"
+   ],
+   "source_locator": "README.md lines 33\u201368",
+   "title": "Create and activate the documented environments"
+  },
+  {
+   "explanation": "The subshell supplies the data-directory working context required by the official data README. Existing output is not overwritten by default.",
+   "shell": "(cd data && python generate_data.py)",
+   "source_ids": [
+    "run-doc-scib-pipeline-data-readme-md-e97631a4"
+   ],
+   "source_locator": "data/README.md lines 1\u201310",
+   "title": "Generate the included test data"
+  },
+  {
+   "explanation": "Dry run: shows the jobs without executing integrations or metrics. The .yaml suffix is verified in the pinned repository; the README installation table contains a conflicting .yml spelling.",
+   "shell": "snakemake --configfile configs/test_data-R4.0.yaml -n",
+   "source_ids": [
+    "run-doc-scib-pipeline-readme-md-e97631a4",
+    "run-doc-scib-test-config-yaml-e97631a4"
+   ],
+   "source_locator": "README.md lines 91\u201399; configs/test_data-R4.0.yaml",
+   "title": "Inspect scheduled work"
+  },
+  {
+   "explanation": "Official example permits up to ten cores. Inspect the configuration first: it includes several Python and R integration methods, so this is not a single-method smoke test.",
+   "shell": "snakemake --configfile configs/test_data-R4.0.yaml --cores 10",
+   "source_ids": [
+    "run-doc-scib-pipeline-readme-md-e97631a4",
+    "run-doc-scib-test-config-yaml-e97631a4"
+   ],
+   "source_locator": "README.md lines 99\u2013104; configs/test_data-R4.0.yaml",
+   "title": "Run the supplied test-data benchmark"
+  }
+ ],
+ "summary": "Run the historical scIB pipeline on its supplied test-data configuration, beginning with a Snakemake dry run."
+}
