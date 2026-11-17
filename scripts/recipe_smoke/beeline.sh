@@ -45,7 +45,8 @@ python BLPlotter.py -c config-files/config-smoke.yaml -o ./plots -a -r
 
 find outputs plots -type f | sort | tee "$RUNNER_TEMP/beeline-outputs.txt"
 mapfile -t RANKED < <(find outputs -name rankedEdges.csv | sort)
-mapfile -t EVALS < <(find outputs -maxdepth 2 -name '*AUPRC*.csv' -o -maxdepth 2 -name '*AUROC*.csv' | sort)
+mapfile -t EVALS < <(find outputs \( -name 'AUPRC.csv' -o -name 'AUROC.csv' \) | sort)
+[ -n "$(find outputs -name AUPRC.csv)" ] || { echo "BLEvaluator wrote no AUPRC.csv"; exit 1; }
 mapfile -t PLOTS < <(find plots -type f | sort)
 [ "${#RANKED[@]}" -eq "${#KEEP[@]}" ] || { echo "expected ${#KEEP[@]} rankedEdges.csv"; exit 1; }
 python3 "$HERE/receipt.py" --recipe discovery-benchmark-beeline --revision "$REV" \

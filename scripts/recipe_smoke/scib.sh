@@ -15,6 +15,8 @@ git checkout --quiet --detach "$REV"
 
 # Step 2: create and activate the documented environments.
 source "$CONDA/etc/profile.d/conda.sh"
+# Prerequisite "Conda or Mambaforge/Mamba": the setup script calls mamba.
+conda install -q -y -n base -c conda-forge mamba >/dev/null
 bash envs/create_conda_environments.sh -r 4.0
 conda activate scib-pipeline-R4.0
 pip freeze > "$RUNNER_TEMP/scib-freeze.txt"

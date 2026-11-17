@@ -21,7 +21,16 @@ git checkout --quiet --detach "$REV"
 source "$CONDA/etc/profile.d/conda.sh"
 conda create -q -y -n proteingym_env python=3.10 >/dev/null
 conda activate proteingym_env
-pip install -q -r environments/proteingym_env.txt
+# The pinned list cannot be installed today (jaxlib==0.4.14 is no longer on PyPI). If the full
+# install fails, install the scoring scripts' own dependencies at the pinned versions.
+ENV_NOTE="Full environments/proteingym_env.txt installed."
+if ! pip install -q -r environments/proteingym_env.txt 2> "$RUNNER_TEMP/proteingym-pip-error.txt"; then
+  grep -E "ERROR: (No matching|Could not find)" "$RUNNER_TEMP/proteingym-pip-error.txt" | tee /dev/stderr
+  grep -E '^(numpy|pandas|scipy|scikit-learn|tqdm|joblib|threadpoolctl|pytz|python-dateutil|six|tzdata)==' \
+    environments/proteingym_env.txt > "$RUNNER_TEMP/proteingym-eval-requirements.txt"
+  pip install -q -r "$RUNNER_TEMP/proteingym-eval-requirements.txt"
+  ENV_NOTE="environments/proteingym_env.txt failed to install ($(grep -o 'No matching distribution found for [^ ]*' "$RUNNER_TEMP/proteingym-pip-error.txt" | head -1)); installed only the scoring scripts' dependencies at their pinned versions."
+fi
 pip freeze > "$RUNNER_TEMP/proteingym-freeze.txt"
 conda deactivate
 export PATH="$CONDA/bin:$PATH"   # so `source activate` in the upstream script resolves
@@ -53,5 +62,6 @@ mapfile -t FILES < "$RUNNER_TEMP/proteingym-outputs.txt"
 python3 "$HERE/receipt.py" --recipe discovery-benchmark-proteingym --revision "$REV" \
   --started "$STARTED" --out "$RUNNER_TEMP/receipt-proteingym.json" \
   --deviation "Three assays (${ASSAYS[*]}) instead of all 217; score files taken by HTTP range." \
-  --deviation "Environment created from environments/proteingym_env.txt with Python 3.10; the guide gives no install step." \
+  --deviation "Conda environment proteingym_env created with Python 3.10 (torch==1.13.1 in the pinned list needs <=3.10); the guide gives no install step." \
+  --note "$ENV_NOTE" \
   "${FILES[@]}" "$RUNNER_TEMP/proteingym-freeze.txt"

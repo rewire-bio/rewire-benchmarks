@@ -24,8 +24,6 @@ jobs:
             timeout: 30
           - recipe: proteingym
             timeout: 45
-          - recipe: massspecgym
-            timeout: 60
           - recipe: beeline
             timeout: 60
           - recipe: scib

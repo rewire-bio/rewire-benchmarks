@@ -27,6 +27,9 @@ a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8  benchmarks/mfa
 SUMS
 
 # Step 3: install, validate the cohort and run the corrected baseline.
+# The guide requires Python >=3.11. Under 3.12, tokenizers 0.13.3 (from the dnabert2-pilot extra)
+# has no wheel and its source build fails, so the lowest documented version is used.
+export UV_PYTHON=3.11
 uv sync --package mfass --extra dnabert2-pilot
 uv run --package mfass --extra dnabert2-pilot mfass-build --check
 uv run --package mfass --extra dnabert2-pilot mfass-build
@@ -48,4 +51,5 @@ python3 "$HERE/receipt.py" --recipe rewire-mfass-v2 --revision "$REV" --started 
   --out "$RUNNER_TEMP/receipt-mfass-v2.json" \
   --deviation "Optional DNABERT-2 resource pilot not run (optional in the guide; measures resources only)." \
   --note "Input tables verified against the README SHA-256 values." \
+  --note "Python 3.11 (guide: >=3.11). Under Python 3.12, uv sync fails building tokenizers 0.13.3 from source." \
   "$OUT" "$RUNNER_TEMP/mfass-freeze.txt"
