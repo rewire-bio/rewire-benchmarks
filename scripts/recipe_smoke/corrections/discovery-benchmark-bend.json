@@ -1,0 +1,110 @@
+{
+ "corrections": [
+  {
+   "found": "2026-11-17",
+   "id": "bend-c1-missing-requirements",
+   "origin": "upstream",
+   "recipe_change": "The 17 Nov correction added an explicit pip install of lxml h5py pysam. At 58ad410 requirements.txt lists all three, so the guide uses it as written.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-18",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "store_claim_ids": [
+    "bend-recipe-corrections-20261119-missing-dependencies",
+    "bend-recipe-corrections-20261119-guide-checkout"
+   ],
+   "store_note": null,
+   "upstream_refs": [
+    "https://github.com/frederikkemarin/BEND/issues/53",
+    "https://github.com/frederikkemarin/BEND/pull/79",
+    "https://github.com/frederikkemarin/BEND/commit/58ad41011125cfca339d511e9b8eb536a54b582a"
+   ],
+   "upstream_reply": "No maintainer reply on issue #53, which was still open on 2026-11-19. It has two user comments: the reporter added on 2024-04-02, \"For running `precompute_embeddings.py` two more packages are missing: h5py and pysam\", and another user wrote on 2025-02-14, \"I had the same errors\". Commit 58ad410 (PR #79, merged 2026-11-18) added h5py, pysam and lxml to requirements.txt, with numpy<2 and setuptools<81; the PR says it \"adds dependencies needed by the tested workflow\".",
+   "what_was_wrong": "requirements.txt at ac6e80c omitted lxml (needed by scripts/download_bend.py) and h5py and pysam (needed by scripts/precompute_embeddings.py), so pip install -r requirements.txt as the README says stopped at the download step."
+  },
+  {
+   "found": "2026-11-17",
+   "id": "bend-c2-dead-checkpoint-links",
+   "origin": "upstream",
+   "recipe_change": "The 17 Nov correction fetched the checkpoints with curl from share f6hdp1zTzh and renamed the folders to the names embed.yaml expected. At 58ad410 embed.yaml points resnetlm at pretrained_models/convnet/ and awdlstm at pretrained_models/awd_lstm/, and the embedders download the checkpoints themselves when those folders are missing, so the guide drops the curl loop. The precompute explanation names download_model with destination_dir for anyone fetching ahead of time; its default destination_dir writes into ./pretrained_models/ directly.",
+   "reported_by_rewire": true,
+   "resolved": "2026-11-18",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "store_claim_ids": [
+    "bend-recipe-corrections-20261119-checkpoint-links",
+    "bend-recipe-corrections-20261119-guide-checkout",
+    "bend-recipe-corrections-20261119-repin-58ad410"
+   ],
+   "store_note": null,
+   "upstream_refs": [
+    "https://github.com/frederikkemarin/BEND/issues/78",
+    "https://github.com/frederikkemarin/BEND/pull/79",
+    "https://github.com/frederikkemarin/BEND/commit/58ad41011125cfca339d511e9b8eb536a54b582a"
+   ],
+   "upstream_reply": "Fixed by the maintainer in PR #79, merged 2026-11-18 as commit 58ad410; issue closed the same day. Maintainer's reply on issue #78, 2026-11-18T16:19:32Z: \"Thank you for letting us know and identifying the old share and directory mismatch. The fix should be on main now. However, the pretrained_models/resnetlm directory is still empty. It appears there has been a duplication and naming mismatch at some point and that the (Dilated) ResNet from the paper is actually in the folder pretrained_models/convnet. I apologise for the confusion. I have tested the automatic download as well as the download script and they both appear to work now. Please let me know if you still have issues. Then I will reopen the issue.\" The maintainer's only comment on PR #79, 2026-11-18T16:17:51Z: \"Looks fine but then again I am approving my own PR\", followed by a shrug emoji. PR #79 says the full benchmark and GPU execution were not tested.",
+   "what_was_wrong": "At ac6e80c, download_model in bend/utils/download.py fetched from share dbQM0pgSlM and the README linked share eXAmVvbRSW; both returned 403. The checkpoints were in the data share, but under pretrained_models/convnet and pretrained_models/awd_lstm, while embed.yaml expected pretrained_models/resnetlm and pretrained_models/awdlstm."
+  },
+  {
+   "found": "2026-11-19",
+   "id": "bend-c3-data-share-moved",
+   "origin": "upstream",
+   "recipe_change": "The gene-finding download uses share aNQa0Oz2lY, as download_bend.py and the README do at 58ad410.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-19",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "store_claim_ids": [],
+   "store_note": "No store field held a share ID before (the store guide called download_bend.py), so this has no claim of its own. It is recorded in the rationales of bend-recipe-corrections-20261119-gene-finding-download and bend-recipe-corrections-20261119-checkpoint-links.",
+   "upstream_refs": [
+    "https://github.com/frederikkemarin/BEND/pull/79",
+    "https://github.com/frederikkemarin/BEND/commit/58ad41011125cfca339d511e9b8eb536a54b582a"
+   ],
+   "upstream_reply": null,
+   "what_was_wrong": "At ac6e80c the share differed by file: scripts/download_bend.py used f6hdp1zTzh; download_model in bend/utils/download.py used dbQM0pgSlM (403); the README Embedders table (lines 72-73) linked eXAmVvbRSW (403); the README data links (lines 18 and 48) already used aNQa0Oz2lY. Commit 58ad410 moved download_bend.py, download_model and the README model links to aNQa0Oz2lY. The 17 Nov recipe on #71 used f6hdp1zTzh, the download script's share, although the README already linked aNQa0Oz2lY for data; that choice was ours. f6hdp1zTzh still returned 200 on 19 Nov 2026."
+  },
+  {
+   "found": "2026-11-17",
+   "id": "bend-c4-whole-share-download",
+   "origin": "rewire",
+   "recipe_change": "The install step keeps its two pip commands and downloads only the four gene-finding inputs with curl, in place of python scripts/download_bend.py.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-19",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "store_claim_ids": [
+    "bend-recipe-corrections-20261119-gene-finding-download"
+   ],
+   "store_note": null,
+   "upstream_refs": [],
+   "upstream_reply": null,
+   "what_was_wrong": "Our guide ran python scripts/download_bend.py, which downloads the whole share (about 7.25 GB, including the 3.2 GB GRCh37 FASTA used only by chromatin accessibility). Gene finding needs about 3.51 GB."
+  },
+  {
+   "found": "2026-11-19",
+   "id": "bend-c5-extra-task-in-precompute",
+   "origin": "rewire",
+   "recipe_change": "The precompute step uses task=gene_finding.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-19",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "store_claim_ids": [
+    "bend-recipe-corrections-20261119-precompute-task"
+   ],
+   "store_note": null,
+   "upstream_refs": [],
+   "upstream_reply": null,
+   "what_was_wrong": "Our precompute step copied the README example task=gene_finding,enhancer_annotation. The guide only trains gene finding, and the gene-finding-only download has no enhancer data, so that step would fail on the second task."
+  }
+ ],
+ "guide": "guides/discovery-benchmark-bend.json",
+ "record_id": "discovery-benchmark-bend",
+ "store_batch": "rewire-bio/rewire-benchmark-data data/omics/bend-recipe-corrections-20261119",
+ "store_review": "rewire-bio/rewire-benchmark-data docs/reviews/2026-11-19-bend-recipe-corrections.md"
+}
