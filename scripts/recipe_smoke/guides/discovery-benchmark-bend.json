@@ -1,20 +1,106 @@
 {
+ "corrections": [
+  {
+   "found": "2026-11-17",
+   "id": "bend-c1-missing-requirements",
+   "origin": "upstream",
+   "recipe_change": "The 17 Nov correction added an explicit pip install of lxml h5py pysam. At 58ad410 requirements.txt lists all three, so the guide uses it as written.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-18",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "upstream_refs": [
+    "https://github.com/frederikkemarin/BEND/issues/53",
+    "https://github.com/frederikkemarin/BEND/pull/79",
+    "https://github.com/frederikkemarin/BEND/commit/58ad41011125cfca339d511e9b8eb536a54b582a"
+   ],
+   "upstream_reply": "No reply on #53. The packages were added in PR #79. #53 was still open on 19 Nov 2026.",
+   "what_was_wrong": "requirements.txt at ac6e80c omitted lxml (needed by scripts/download_bend.py) and h5py and pysam (needed by scripts/precompute_embeddings.py), so pip install -r requirements.txt as the README says stopped at the download step."
+  },
+  {
+   "found": "2026-11-17",
+   "id": "bend-c2-dead-checkpoint-links",
+   "origin": "upstream",
+   "recipe_change": "The 17 Nov correction fetched the checkpoints by hand from the data share and renamed the folders. At 58ad410 the guide calls bend.utils.download.download_model('convnet') and download_model('awd_lstm') into the folders embed.yaml now expects.",
+   "reported_by_rewire": true,
+   "resolved": "2026-11-18",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "upstream_refs": [
+    "https://github.com/frederikkemarin/BEND/issues/78",
+    "https://github.com/frederikkemarin/BEND/pull/79",
+    "https://github.com/frederikkemarin/BEND/commit/58ad41011125cfca339d511e9b8eb536a54b582a"
+   ],
+   "upstream_reply": "The maintainer fixed it on main the same day (PR #79, merged 18 Nov 2026) and said the pretrained_models/resnetlm folder is empty: the dilated ResNet from the paper is in pretrained_models/convnet. embed.yaml now points resnetlm at convnet/ and awdlstm at awd_lstm/.",
+   "what_was_wrong": "At ac6e80c, download_model in bend/utils/download.py fetched from share dbQM0pgSlM and the README linked share eXAmVvbRSW; both returned 403. The checkpoints were in the data share, but under pretrained_models/convnet and pretrained_models/awd_lstm, while embed.yaml expected pretrained_models/resnetlm and pretrained_models/awdlstm."
+  },
+  {
+   "found": "2026-11-19",
+   "id": "bend-c3-data-share-moved",
+   "origin": "upstream",
+   "recipe_change": "The gene-finding download uses share aNQa0Oz2lY.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-19",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "upstream_refs": [
+    "https://github.com/frederikkemarin/BEND/pull/79",
+    "https://github.com/frederikkemarin/BEND/commit/58ad41011125cfca339d511e9b8eb536a54b582a"
+   ],
+   "upstream_reply": null,
+   "what_was_wrong": "58ad410 moved the data and checkpoint share from f6hdp1zTzh to aNQa0Oz2lY (scripts/download_bend.py, download_model and the README). f6hdp1zTzh still returned 200 on 19 Nov 2026, but upstream no longer uses it."
+  },
+  {
+   "found": "2026-11-17",
+   "id": "bend-c4-whole-share-download",
+   "origin": "rewire",
+   "recipe_change": "The guide downloads only the four gene-finding inputs with curl.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-19",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "upstream_refs": [],
+   "upstream_reply": null,
+   "what_was_wrong": "Our guide ran python scripts/download_bend.py, which downloads the whole share (about 7.25 GB, including the 3.2 GB GRCh37 FASTA used only by chromatin accessibility). Gene finding needs about 3.51 GB."
+  },
+  {
+   "found": "2026-11-19",
+   "id": "bend-c5-extra-task-in-precompute",
+   "origin": "rewire",
+   "recipe_change": "The precompute step uses task=gene_finding.",
+   "reported_by_rewire": false,
+   "resolved": "2026-11-19",
+   "rewire_refs": [
+    "https://github.com/rewire-bio/rewire-benchmarks/issues/71"
+   ],
+   "upstream_refs": [],
+   "upstream_reply": null,
+   "what_was_wrong": "Our precompute step copied the README example task=gene_finding,enhancer_annotation. The guide only trains gene finding, and the gene-finding-only download has no enhancer data, so that step would fail on the second task."
+  }
+ ],
  "limitations": [
   "No hardware minimum, runtime or monetary cost is stated in these README sections; no cost estimate is inferred.",
   "Checkpoint downloads, dataset bytes and transitive dependencies are not checksum-pinned by this guide. Pinning the repository does not pin those external resources.",
-  "Changing the data, embedder or Hydra settings changes the evaluation configuration; this example does not establish reproduction of a published score."
+  "Changing the data, embedder or Hydra settings changes the evaluation configuration; this example does not establish reproduction of a published score.",
+  "Not executed. The commands were checked against the code at 58ad410 and the download URLs by HTTP HEAD on 19 Nov 2026."
  ],
  "outputs": [
-  "Embedding shards under data/<task_name>/<embedder>/*.tar.gz.",
+  "Embedding shards under data/gene_finding/<embedder>/*.tar.gz.",
   "Downstream run results under downstream_tasks/gene_finding/<embedder>/."
  ],
  "prerequisites": [
   "Git and a conda environment with Python 3.10; the README recommends this Python version.",
-  "Internet access to the official data host and the model resources selected by the configuration. Preserve the downloaded data directory structure."
+  "curl and wget on PATH. bend.utils.download.download_model calls wget.",
+  "About 3.6 GB of disk for the gene-finding inputs and the two checkpoints, plus space for the embedding shards.",
+  "Internet access to the BEND data share aNQa0Oz2lY on sid.erda.dk. Keep the data/ and pretrained_models/ folder names shown in the steps; conf/embedding/embed.yaml expects them."
  ],
  "record_id": "discovery-benchmark-bend",
  "review": {
-  "date": "2026-09-17",
+  "date": "2026-11-19",
   "method": "official_repository_review"
  },
  "source_ids": [
@@ -23,31 +109,49 @@
  "status": "source_reviewed_not_executed",
  "steps": [
   {
-   "explanation": "The clone command comes from the README; the detached checkout is added to select the exact revision reviewed here.",
-   "shell": "git clone https://github.com/frederikkemarin/BEND.git\ncd BEND\ngit checkout --detach ac6e80c75e09d83cf47a7b4bcf0e44599c5706cf",
+   "explanation": "The clone command comes from the README; the detached checkout selects commit 58ad410 (merge of frederikkemarin/BEND#79, 18 Nov 2026), which fixed the checkpoint links and the missing requirements.",
+   "shell": "git clone https://github.com/frederikkemarin/BEND.git\ncd BEND\ngit checkout --detach 58ad41011125cfca339d511e9b8eb536a54b582a",
    "source_ids": [
     "run-doc-bend-readme-md-ac6e80c7"
    ],
-   "source_locator": "README.md lines 36\u201343; pinned repository revision",
+   "source_locator": "README.md lines 36 to 43, unchanged at 58ad410; pinned repository revision",
    "title": "Check out the reviewed code"
   },
   {
-   "explanation": "Run within the prepared Python 3.10 environment. This downloads data; it is not a small smoke test.",
-   "shell": "pip install -r requirements.txt\npip install -e .\npython scripts/download_bend.py",
+   "explanation": "At 58ad410 requirements.txt includes lxml, h5py and pysam, so no extra install is needed. At the previous pin, ac6e80c, they were missing (frederikkemarin/BEND#53).",
+   "shell": "conda create -n bend python=3.10\nconda activate bend\npip install -r requirements.txt\npip install -e .",
    "source_ids": [
     "run-doc-bend-readme-md-ac6e80c7"
    ],
-   "source_locator": "README.md lines 36\u201343",
-   "title": "Install and download the benchmark data"
+   "source_locator": "README.md lines 36 to 43; requirements.txt at 58ad410",
+   "title": "Install the environment"
   },
   {
-   "explanation": "This is the README example verbatim; it computes two models and two tasks. Embeddings are stored as Webdataset tar.gz shards; the next step uses the gene-finding subset.",
-   "shell": "python scripts/precompute_embeddings.py model=resnetlm,awdlstm task=gene_finding,enhancer_annotation",
+   "explanation": "Replaces python scripts/download_bend.py, which fetches the whole share (about 7.25 GB). Gene finding reads only the GRCh38 FASTA (with its index) and the gene_finding BED and HDF5 files, about 3.51 GB in total. The share id is the one scripts/download_bend.py uses at 58ad410.",
+   "shell": "S=https://sid.erda.dk/share_redirect/aNQa0Oz2lY\nmkdir -p data/genomes data/gene_finding\nfor f in GRCh38.primary_assembly.genome.fa GRCh38.primary_assembly.genome.fa.fai; do\n  curl -fL -o \"data/genomes/$f\" \"$S/data/genomes/$f\"\ndone\nfor f in gene_finding.bed gene_finding.hdf5; do\n  curl -fL -o \"data/gene_finding/$f\" \"$S/data/gene_finding/$f\"\ndone",
    "source_ids": [
     "run-doc-bend-readme-md-ac6e80c7"
    ],
-   "source_locator": "README.md lines 45\u201360",
-   "title": "Precompute the documented embeddings"
+   "source_locator": "README.md line 48 at 58ad410; conf/embedding/embed.yaml gene_finding entry and scripts/download_bend.py SHARE_ID at 58ad410; file sizes from HTTP HEAD on 19 Nov 2026",
+   "title": "Download only the gene-finding inputs"
+  },
+  {
+   "explanation": "download_model writes the five checkpoint files straight into destination_dir, so each model needs its own folder; the default ./pretrained_models/ would mix the two. The folder names match model_path in conf/embedding/embed.yaml at 58ad410 (convnet for the resnetlm embedder, awd_lstm for awdlstm). The embedders also call download_model when the folder is missing; downloading first makes a failure show here rather than during embedding.",
+   "shell": "python -c \"from bend.utils.download import download_model; download_model('convnet', destination_dir='pretrained_models/convnet'); download_model('awd_lstm', destination_dir='pretrained_models/awd_lstm')\"",
+   "source_ids": [
+    "run-doc-bend-readme-md-ac6e80c7"
+   ],
+   "source_locator": "bend/utils/download.py download_model and conf/embedding/embed.yaml resnetlm and awdlstm entries at 58ad410",
+   "title": "Download the two BEND checkpoints"
+  },
+  {
+   "explanation": "The README example with task restricted to gene_finding, since only those inputs were downloaded. The Hydra keys are still resnetlm and awdlstm at 58ad410; only their model_path changed. Embeddings are stored as Webdataset tar.gz shards.",
+   "shell": "python scripts/precompute_embeddings.py model=resnetlm,awdlstm task=gene_finding",
+   "source_ids": [
+    "run-doc-bend-readme-md-ac6e80c7"
+   ],
+   "source_locator": "README.md lines 45 to 60",
+   "title": "Precompute gene-finding embeddings"
   },
   {
    "explanation": "Run after gene-finding embeddings are present in data/gene_finding/<embedder>/. Task-specific Hydra configuration supplies the data, model and evaluation settings.",
@@ -55,9 +159,9 @@
    "source_ids": [
     "run-doc-bend-readme-md-ac6e80c7"
    ],
-   "source_locator": "README.md lines 101\u2013117, 148\u2013155",
+   "source_locator": "README.md lines 101 to 117, 148 to 155",
    "title": "Train and evaluate gene finding"
   }
  ],
- "summary": "Run the official gene-finding downstream example using precomputed ResNetLM and AWD-LSTM embeddings. This is one BEND task, not the entire suite."
+ "summary": "Run the official gene-finding downstream example using the BEND ResNetLM (dilated ResNet) and AWD-LSTM embeddings. This is one BEND task, not the entire suite. Only the gene-finding inputs are downloaded."
 }
