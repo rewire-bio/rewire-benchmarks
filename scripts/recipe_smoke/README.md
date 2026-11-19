@@ -7,7 +7,7 @@
 - the SHA-256 of each output;
 - the resolved package versions.
 
-`guides/` holds the seven run guides as published in the rewire benchmark store (`rb:runGuide`, release `2026-11-17-793d9cca4ad1`).
+`guides/` holds the seven run guides as published in the rewire benchmark store (`rb:runGuide`, release `2026-11-17-793d9cca4ad1`), except BEND. `discovery-benchmark-bend.json` is the corrected guide pinned to BEND commit 58ad410, copied verbatim from the store's `run_guide` in rewire-bio/rewire-benchmark-data#307; it will match the first store release after that PR. `corrections/discovery-benchmark-bend.json` lists each correction: what was wrong, whether it was upstream or ours, the upstream issue, PR or commit, the upstream reply as quoted, the dates found and resolved, and the store claim IDs that record it. The store keeps the same corrections as claims that hold each previous value; the file here is a cross-reference, kept separate so the guide stays an exact copy.
 
 | Guide | Status | Smoke inputs and deviations |
 | --- | --- | --- |
@@ -17,6 +17,6 @@
 | MassSpecGym | #68 | `pip install massspecgym` gives an environment where `import pytorch_lightning` fails (`pkg_resources`). |
 | scIB | #69 | The R 4.0 environment could not be built on the hosted runner (mamba cache permissions); the recipe is untested. |
 | TAPE | #70 | It needs a fine-tuned secondary-structure checkpoint that is not published. |
-| BEND | #71 | A 7.25 GB download and full embedding precompute, with no reduced-input path. |
+| BEND | #71 | Corrected and pinned to 58ad410, which fixed the checkpoint links and requirements upstream. The guide now downloads only the gene-finding inputs (about 3.5 GB, or 3.7 GB with the two checkpoints). Embedding precompute has no smoke-sized input yet, so it is not smoke-tested. |
 
 Run one locally with `RUNNER_TEMP=$(mktemp -d) bash scripts/recipe_smoke/mfass_v2.sh`. BEELINE needs conda (`$CONDA`) and Docker.
