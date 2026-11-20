@@ -464,6 +464,496 @@
     "status": "reviewed"
    },
    "planned_work": []
+  },
+  {
+   "id": "use-case-plasma-ctdna-fragmentomics",
+   "slug": "plasma-ctdna-fragmentomics",
+   "title": "Select a plasma ctDNA fragmentomics detection workflow",
+   "question": "Which fragmentomics workflow detects tumour-derived plasma DNA under realistic low tumour fractions and fixed false-positive constraints?",
+   "area": "dna-genomes",
+   "contexts": [
+    "clinical_research"
+   ],
+   "search_terms": [
+    "plasma ctdna fragmentomics"
+   ],
+   "intended_users": [
+    "Clinical researchers scoping the available diagnostic-genomics evidence",
+    "Computational researchers comparing exact evaluated configurations"
+   ],
+   "decision": "Compare the fragmentomic feature sets and classifiers with printed detection results on shared plasma cohorts, including one source stratified by ichorCNA tumour fraction, before selecting a workflow and a validation design with a fixed specificity for the intended screening or diagnostic population.",
+   "inputs": [
+    "Plasma cell-free DNA whole-genome sequencing reads",
+    "The target specificity (false-positive) constraint for the intended use"
+   ],
+   "output": "Sourced AUC and sensitivity-at-fixed-specificity figures for fragmentomic workflows from internal cross-validation, independent validations and one developer same-participant comparison, and AUCs within ichorCNA tumour-fraction strata from one developer study; no prospective screening-validation claim.",
+   "setting": "Retrospective case-control plasma cfDNA whole-genome sequencing. The DELFI classifier achieves 73% (152 of 208) sensitivity at a reported 98% specificity in repeated 10-fold cross-validation (10 repeats) across 208 cancer patients (seven cancer types) and 215 healthy individuals. Hou et al. 2024 re-implemented ten published fragmentation patterns and DELFI with one support vector machine each on the same cohort, on a liver cancer cohort and on three independent validation cohorts. Wang et al. 2026 (UNITE) cross-validated five shallow-WGS fragmentomic feature sets, their combination and an ichorCNA tumour-fraction classifier within ichorCNA tumour-fraction strata, on pooled public and new data that include samples of the DELFI and Jiang et al. cohorts. Jamshidi et al. 2022 (CCGA substudy 1) scored fragment endpoint and fragment length classifiers from 30x cfDNA whole-genome sequencing against methylation, copy-number and mutation classifiers on the same participants at a post hoc 98% specificity.",
+   "exclusions": [
+    "A combined mutation+DELFI configuration (115/126, 91%), a different subset/configuration not ingested here",
+    "Prospective screening performance and clinical benefit: no prospective or intended-use cohort was ingested"
+   ],
+   "clinical_scope": "Clinical applicability is not established. Every result comes from a retrospective case-control cohort, with internal cross-validation, small independent validations (8 to 129 cancers) or one developer validation set (464 cancers) on which the fragment classifiers were developed after unblinding, not from a prospective screening trial. The clinically identified cancers and healthy comparators differ from an intended screening population, and tumour fractions are ichorCNA estimates, not measured values.",
+   "evidence_gaps": [
+    "4 of 215 healthy individuals were misclassified at the source-labelled 98% specificity; the printed specificity is retained rather than recomputed.",
+    "cfDNA signal reflects total circulating DNA, not purified ctDNA.",
+    "Tumour-fraction-stratified evidence comes from two developer studies: cross-validation in Wang et al. 2026 and an independent test cohort in the Fragmentia-AI WGS paper (Molecular Biomedicine 2026), both using ichorCNA estimates rather than measured tumour fractions. In the extracted UNITE tables, sensitivity at a fixed specificity within a tumour-fraction stratum is printed only for the ichorCNA tumour-fraction comparator. The fragmentomic models' values are in Data file S2 sheet STATS_xgb_all_feat, which was not extracted; that sheet prints identical sensitivity at 98% and 99% specificity for every feature set in the lowest stratum and needs checking before use. The Fragmentia-AI WGS strata cover one model with no comparator.",
+    "Hou et al. 2024 Supporting Information Table S2 pan-cancer and liver cancer sensitivities conflict with other tables of the same file and are not shown.",
+    "No independent dilution-series or limit-of-detection comparison of fragmentomic tools (Griffin, LIQUORICE, FinaleToolkit, DELFI) with printed values was found.",
+    "No specificity in patients with inflammatory, autoimmune or vascular disease was ingested; Curtis et al. 2025 (PNAS) report false positives in these groups with per-sample data only.",
+    "No result is comparable across sources: cohorts, feature implementations, classifiers and validation designs differ, and the sources share samples of the DELFI 2019 and Jiang et al. cohorts.",
+    "Jamshidi et al. 2022 fragment endpoint, fragment length and allelic imbalance classifiers were developed after validation blinding was lifted, so their validation values are not a blinded validation; their clinical limits of detection by tumour allele fraction are in figures only.",
+    "Helzer et al. 2025 compare panel fragmentomic metrics at low ctDNA fraction by in silico mixing, but the values are in Figure 6B only.",
+    "The Fragmentia-AI (Cell Reports Medicine 2026) and Fragmentia-AI WGS (Molecular Biomedicine 2026) cohorts both come from the Geneseeq repository and report the same number of non-cancer controls (1,245) at 0.1x, so they may share samples; the Fragmentia-AI WGS external cohort is the public DELFI cohort, which overlaps the DELFI 2019 samples above.",
+    "Zeng et al. 2026 compute fragmentomic features from cfMeDIP-seq (methylation-enriched) reads, not whole-genome sequencing, and Helzer et al. 2025 from targeted exon panels."
+   ],
+   "citations": [
+    {
+     "source_id": "amp-20261007-ctdna-fragmentomics-source",
+     "locator": "See data/omics/use-case-coverage-amp-20261007/clinical/sources.md"
+    },
+    {
+     "source_id": "ctdnafrag-20261009-source-hou2024",
+     "locator": "Table 1; Experimental Section P24-P45"
+    },
+    {
+     "source_id": "ctdnafrag-20261009-source-wang2026",
+     "locator": "Results P9-P18; Methods P38-P49"
+    },
+    {
+     "source_id": "ctdnajam-20261010-source-jamshidi2022",
+     "locator": "Table 3 and footnotes; STAR Methods, WGS fragment classifiers and performance comparison"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude Sonnet AMP-integration worker, bounded transcription of Codex-checked primary values; independently reviewed by Codex (workbench/amp-supervision/primary-review.md, integration-review-corrections.md)",
+    "reviewed_at": "2026-10-07T13:38:59Z",
+    "note": "Bounded primary-source transcription, independently Codex-checked. No new model execution, independent experimental reproduction, qualified human scientific review or clinical validation."
+   },
+   "collection_plan": {
+    "status": "collecting",
+    "comparison_question": "Which fragmentomics workflow detects tumour-derived plasma DNA under realistic low tumour fractions and fixed false-positive constraints?",
+    "baselines": [
+     "The conventional/author-introduced workflow measured in the linked primary source(s)."
+    ],
+    "outcomes": [
+     "The declared endpoint in this use case's active mapping(s); see evidence_gaps for what remains open."
+    ],
+    "validation_requirements": [
+     "Independent held-out population matched to the intended clinical setting.",
+     "Qualified human scientific review before any clinical-validation claim."
+    ],
+    "next_step": "A dedicated rewire-benchmarks protocol/run task with an independent, prospectively collected held-out validation cohort."
+   },
+   "evidence_checked": {
+    "date": "2026-10-11",
+    "cutoff_date": "2026-10-11",
+    "next_due": "2026-11-11",
+    "records": [
+     "data/omics/lit-search-20261011-uc-ctdna/ledger.jsonl",
+     "docs/reviews/use-cases/plasma-ctdna-use-cases-2026-10-12.md"
+    ]
+   },
+   "baseline": {
+    "name": "ichorCNA",
+    "method_ids": [
+     "ctdnafrag-20261009-method-ichorcna"
+    ],
+    "rationale": "ichorCNA estimates tumour fraction from genome-wide copy-number changes in shallow plasma sequencing, without training on cancer labels. Wang et al. 2026 use its tumour fraction, through a one-feature logistic regression, as a published comparator for their fragmentomic classifiers.",
+    "source_ids": [
+     "ctdnafrag-20261009-source-wang2026"
+    ]
+   },
+   "summary": {
+    "text": "Eight sources compare plasma cfDNA fragmentomic workflows on retrospective case-control cohorts. None is a prospective screening study and none measures clinical benefit. Cristiano et al. 2019, the DELFI developers, report 73% sensitivity (152 of 208 cancers) at a reported 98% specificity for DELFI in repeated cross-validation against 215 healthy individuals. Hou et al. 2024 re-implemented ten published fragmentation patterns and DELFI with one support vector machine each on the same cohort. They are independent of every pattern except IFS, which their corresponding author developed. In 10 x 10-fold cross-validation, pan-cancer AUC within open chromatin regions ranged from 0.8741 (fragment length) to 0.9736 (5' end motif), and their DELFI re-implementation reached 0.9575. Rankings changed on independent cohorts. On 46 lung cancers and 385 healthy individuals, with a model trained on 12 lung cancers, the end-motif model fell to AUC 0.5355 and sensitivity 0.0652 at 95% specificity, while fragment size distribution reached 0.9386 and 0.7174. Hou et al.'s supplementary pan-cancer and liver cancer sensitivities conflict with other tables of the same file and are not shown. Wang et al. 2026, the UNITE developers, stratified cancers by ichorCNA tumour fraction in pooled public and new 0.1x data that include samples of the DELFI and Jiang et al. cohorts used above. For cancers with an estimated tumour fraction of 3% or less, cross-validated AUC was 0.878 for all five features combined, 0.873 for fragment length, 0.857 for the SD of length counts, 0.736 for copy number, 0.715 for the C/T end-motif ratio and 0.651 for the short/long ratio, against 0.603 for a classifier using the ichorCNA tumour fraction alone, which detected 0.058 of these cancers at 95% specificity. For cancers with an estimated fraction above 3% and up to 10%, the ichorCNA classifier reached 0.983, above the combined model (0.962) and copy number alone (0.926). The extracted UNITE tables give sensitivity at a fixed specificity only for the ichorCNA comparator; the fragmentomic models' values are in a sheet not yet extracted. Jamshidi et al. 2022 (Cancer Cell), by the GRAIL developers, scored fragment length and fragment endpoint classifiers from 30x cfDNA whole-genome sequencing on the same CCGA substudy 1 participants as their methylation, copy-number and variant classifiers, at a 98% specificity threshold set post hoc within each set. On the validation set of 464 cancers and 362 non-cancers the fragment length classifier detected 29% (95% CI 25% to 34%) and the fragment endpoint classifier 18% (15% to 22%), against 34% for whole-genome methylation analysed double-blinded; both fragment classifiers were developed after the validation set had been unblinded, so these are not blinded validation results, and no tumour-fraction-stratified sensitivity is printed. Zeng et al. 2026 (Nature Cancer), by the cfMeDIP-seq developers, computed fragmentomic features from cfMeDIP-seq reads, which are enriched for methylated fragments rather than drawn from whole-genome sequencing, and report means over 10 fold models. On an independent paired-end validation set, a fragment-ratio classifier reached AUC 0.848 and detected 0.533 of cancers at 99% specificity, and fragment ratios combined with methylation reached 0.954 and 0.766. The validation set has 17 healthy controls, so its 99% specificity allows no false positive among them, and Li-Fraumeni syndrome carriers without current cancer count as cancers in its sensitivities. Three of the five classifiers that include end motifs scored below AUC 0.5 there, which the authors attribute to healthy controls processed with a different laboratory protocol, so validation results for all five are not shown. Helzer et al. 2025 (Nature Communications) compared twelve fragmentomic metrics adapted to targeted exon panels, including the authors' own fragment-size entropy metrics, their combination and Griffin, with one classifier and shared folds, on plasma from patients with metastatic cancer. The healthy-versus-cancer one-vs-rest AUROC ranged from 0.835 (open-chromatin entropy) to 0.989 (first-exon depth) in a UW cohort of 404 cancers and 27 healthy donors, with Griffin at 0.944, and from 0.951 to 1.000 in public GRAIL panel data from 151 cancers and 47 healthy donors. In a developer comparison on 0.1x whole-genome sequencing (Cell Reports Medicine 2026), a fragment-level language model (Fragmentia-AI) reached AUC 0.9561 on a held-out set of unstated size, against 0.9209 to 0.935 for the developers' re-implementation of DELFI features and 0.881 to 0.8863 for Griffin features under three classifiers. The same company's whole-genome model (Molecular Biomedicine 2026), on an independent test cohort of 2,952 cancers and 3,044 non-cancer controls, reached AUC 0.910 for cancers with an ichorCNA tumour fraction below 3% and detected 0.46 of them at a cutoff set to 98% specificity in training (observed test specificity 0.97); among those low-fraction cancers it detected 0.391 at stage I/II (637 of 1,628) and 0.708 at stage III/IV (345 of 487). Its tumour-fraction strata are ichorCNA estimates, no comparator was run on its cohorts, and its training cohort has the same number of non-cancer controls (1,245) as the Cell Reports Medicine cohort, so the two studies may share samples. Three of these four studies report on their authors' own method, and in the fourth the authors' own entropy metrics are among those compared. Cohorts, feature implementations, classifiers and validation designs differ, so no value is comparable across sources.",
+    "status": "reviewed"
+   },
+   "planned_work": [
+    {
+     "title": "Focused benchmark/run task for rewire-benchmark-data issue #15",
+     "url": "https://github.com/rewire-bio/rewire-benchmark-data/issues/15",
+     "status": "planned",
+     "reason": "Reviewed literature evidence is bounded (see evidence_gaps); closing the remaining decision gap needs a dedicated protocol/run task with frozen population and matched controls, tracked in rewire-benchmarks."
+    }
+   ]
+  },
+  {
+   "id": "use-case-plasma-ctdna-methylation",
+   "slug": "plasma-ctdna-methylation",
+   "title": "Select a plasma ctDNA methylation detection workflow",
+   "question": "Which measured methylation workflow detects tumour-derived plasma DNA and, where separately supported, identifies tissue of origin?",
+   "area": "dna-genomes",
+   "contexts": [
+    "clinical_research"
+   ],
+   "search_terms": [
+    "plasma ctdna methylation"
+   ],
+   "intended_users": [
+    "Clinical researchers scoping the available diagnostic-genomics evidence",
+    "Computational researchers comparing exact evaluated configurations"
+   ],
+   "decision": "Inspect the cfMethyl-Seq repeated-split sensitivity/specificity evidence, the same-participant comparison of whole-genome methylation with other cfDNA classifiers at a post hoc 98% specificity (CCGA substudy 1), and the proxy comparisons of deconvolution methods and tissue-of-origin classifiers, before selecting a workflow and validation design for the intended cancer-detection population.",
+   "inputs": [
+    "Plasma cell-free DNA for targeted/genome-wide methylation sequencing",
+    "The target specificity constraint for the intended use"
+   ],
+   "output": "A sourced all-stage cancer-detection sensitivity at a declared specificity where one is reported, otherwise the reported proxy endpoint (detection ROC-AUC on patient plasma, tumour-fraction limit of detection in in silico mixtures, or tissue-of-origin accuracy among cancer patients), each with the method, cohort and validation design it comes from.",
+   "setting": "cfMethyl-Seq achieves 80.7% all-stage cancer-detection sensitivity (95% CI 68.6-90.7) at 97.9% specificity, under a repeated random 25% test split (cohort 217 cancers/191 non-cancers, test n=102). The other evidence is a developer comparison of a whole-genome bisulfite methylation classifier with mutation, copy-number, fragment and clinical classifiers on the same CCGA substudy 1 participants, an independent benchmark of five deconvolution methods on two plasma cohorts, a preprint benchmark of ten deconvolution tools on in silico mixtures, and one author-reported tissue-of-origin comparison on cancer patients recruited in Vietnam.",
+   "exclusions": [
+    "Prospective screening validation",
+    "Tissue-of-origin identification as a screening result: the ingested tissue-of-origin results classify cancer patients only, and Jamshidi et al. 2022 only cancers already detected by three classifiers, so origin calls in people without cancer are not measured"
+   ],
+   "clinical_scope": "Clinical applicability is not established as prospective screening performance. The cfMethyl-Seq figure comes from a repeated random test split on one assembled cohort, and the CCGA substudy 1 figures from a developer case-control validation set with a post hoc 98% specificity threshold; the other comparisons are proxies (a random forest AUC with no stated validation split, in silico mixtures, and tissue of origin among cancer patients only), and none is an independent prospective validation.",
+   "evidence_gaps": [
+    "No per-run scored denominator beyond the printed test n=102 is inferred.",
+    "A correction/source-reuse note on this source is tracked separately from the assay sensitivity/specificity values and must not be conflated with them.",
+    "No result is comparable across sources: cohorts, inputs, metrics and validation designs differ.",
+    "The only same-participant comparison at a declared specificity (Jamshidi et al. 2022) is developer-run on prototype assays in a case-control set, with the 98% specificity threshold set post hoc within each set; four of its classifiers, including the pan-feature classifier, were developed after validation unblinding and are not shown here.",
+    "Sun et al. 2024 does not state the random forest validation split for its AUCs.",
+    "Giuili et al. 2025 is a preprint on in silico mixtures; in its Supplementary Table 3 the RRBS-CL values of five tools (UXM, MetDecode, meth_atlas, PRMeth and CIBERSORT) conflict with Figure 4A, and those values are not shown.",
+    "Nguyen et al. 2023 is author-reported by the assay developer; its Table S9 breast stage strata disagree with the per-patient table and are not shown, and its graph network was trained with the validation samples in its graph.",
+    "No independent methylation-only tissue-of-origin comparison on patient plasma with printed per-method values was found.",
+    "No assay-level comparison (cfMeDIP-seq, WGBS, EM-seq or targeted bisulfite) with a detection endpoint on the same plasma samples was found.",
+    "Jamshidi et al. 2022 tissue-of-origin accuracy is scored on 127 cancers detected by all three classifiers, comes from origin classifiers developed after unblinding, and counts 'other' as correct for six cancer types; the Results and Methods name different classifier triples for that set.",
+    "Zeng et al. 2026 compare methylation with fragmentomic features from one assay (cfMeDIP-seq) and one group; their sensitivities at 99% specificity are read on few healthy controls (six or seven per cross-validation fold, 17 in the validation set), and their methylation-only validation AUC is printed as 0.694 in the Source Data and 0.674 in the text.",
+    "Xu and Feng 2026 is a preprint whose candidate CpGs were selected using all 300 samples, including the test partitions of about 30 samples each.",
+    "No machine-learning method has been compared with MethAtlas or CelFiE on the same data in the linked evidence. The learned cancer-detection classifiers are evaluated on other cohorts."
+   ],
+   "citations": [
+    {
+     "source_id": "amp-source-cfmethyl",
+     "locator": "See data/omics/use-case-coverage-amp-20261007/clinical/sources.md"
+    },
+    {
+     "source_id": "amp-source-cfmethyl-correction",
+     "locator": "See data/omics/use-case-coverage-amp-20261007/clinical/sources.md"
+    },
+    {
+     "source_id": "ctdnameth-20261009-source-sun2024",
+     "locator": "Methods P30 (cohorts) and P49 (detection ROC-AUC); Results P20 and P21"
+    },
+    {
+     "source_id": "ctdnameth-20261009-source-sun2024-additional-file-1",
+     "locator": "Table S7, AUC block H2:M9"
+    },
+    {
+     "source_id": "ctdnajam-20261010-source-jamshidi2022",
+     "locator": "Table 3 and footnotes; Results, cancer signal origin prediction; STAR Methods, performance comparison and statistical analysis"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude Sonnet AMP-integration worker, bounded transcription of Codex-checked primary values; independently reviewed by Codex (workbench/amp-supervision/primary-review.md, integration-review-corrections.md)",
+    "reviewed_at": "2026-10-07T13:38:59Z",
+    "note": "Bounded primary-source transcription, independently Codex-checked. No new model execution, independent experimental reproduction, qualified human scientific review or clinical validation."
+   },
+   "collection_plan": {
+    "status": "collecting",
+    "comparison_question": "Which measured methylation workflow detects tumour-derived plasma DNA and, where separately supported, identifies tissue of origin?",
+    "baselines": [
+     "The conventional/author-introduced workflow measured in the linked primary source(s)."
+    ],
+    "outcomes": [
+     "The declared endpoint in this use case's active mapping(s); see evidence_gaps for what remains open."
+    ],
+    "validation_requirements": [
+     "Independent held-out population matched to the intended clinical setting.",
+     "Qualified human scientific review before any clinical-validation claim."
+    ],
+    "next_step": "A dedicated rewire-benchmarks protocol/run task with an independent prospective cohort and an explicit tissue-of-origin evaluation if pursued."
+   },
+   "evidence_checked": {
+    "date": "2026-10-11",
+    "cutoff_date": "2026-10-11",
+    "next_due": "2026-11-11",
+    "records": [
+     "data/omics/lit-search-20261011-uc-ctdna/ledger.jsonl",
+     "docs/reviews/use-cases/plasma-ctdna-use-cases-2026-10-12.md"
+    ]
+   },
+   "baseline": {
+    "name": "MethAtlas and CelFiE deconvolution",
+    "method_ids": [
+     "ctdnameth-20261009-method-methatlas",
+     "ctdnameth-20261009-method-celfie"
+    ],
+    "rationale": "MethAtlas (non-negative least squares) and CelFiE (expectation-maximisation) estimate tissue contributions to plasma DNA from a reference methylation atlas, without a trained classifier. Sun et al. 2024 benchmark them with three later deconvolution methods and found CelFEER and UXM performed best.",
+    "source_ids": [
+     "ctdnameth-20261009-source-sun2024"
+    ]
+   },
+   "summary": {
+    "text": "Six bounded sources compare cfDNA methylation methods. None is a prospective screening study and none measures clinical benefit. Jamshidi et al. 2022 (Cancer Cell), by the GRAIL developers, compared prototype cfDNA classifiers on the same CCGA substudy 1 participants at a 98% specificity threshold set post hoc within each set. On the validation set of 464 cancers and 362 non-cancers, analysed double-blinded, the whole-genome bisulfite methylation classifier detected 34% of cancers (95% CI 30% to 39%; 158 of 464), against 33% for variants with white-blood-cell correction, 30% for copy number with that correction, 27% for copy number, 16% for uncorrected variants and 2.6% for clinical risk factors alone; only the gap to the corrected variant classifier was not marked as significant. Among 127 validation cancers detected by all three representative classifiers, a methylation origin classifier developed after unblinding assigned the correct tissue for 75% (95 of 127), against 41% for copy number and 35% for corrected variants, with 'other' counted as correct for six cancer types. These are case-control results from the assay developer, not screening performance. Sun et al. 2024 (Genome Biology), an independent benchmark whose authors did not develop the tools, deconvolved real plasma with five methods and reported the ROC-AUC of a random forest trained on the estimated cell-type fractions; the paper does not state how the random forest was validated, so the AUCs may be in-sample. For 24 liver cancer patients and 32 healthy individuals (WGBS), AUCs were 0.96 (CelFEER), 0.93 (CelFiE), 0.91 (MethAtlas), 0.77 (cfNOMe) and 0.72 (UXM). On cfMethyl-Seq plasma (30 to 67 patients per cancer type, each against the same 193 healthy individuals), AUCs ranged from 0.72 (UXM, lung squamous cell carcinoma) to 0.93 (CelFiE, gastric cancer), and no method was highest for every cancer type. Giuili et al. 2025, a bioRxiv preprint not yet peer reviewed, ran ten reference-based tools inside the authors' DecoNFlow pipeline on in silico mixtures of tumour tissue or cell-line reads in healthy plasma reads. CelFiE had the lowest overall median tumour-fraction limit of detection in each dataset: 0.0070 (WGBS-TT), 0.0100 (RRBS-TT) and 0.0010 (RRBS-CL). CIBERSORT and EpiDISH had overall medians of 0.1000 to 0.2500 on WGBS-TT and RRBS-TT. For five tools the RRBS-CL values disagree between the supplementary table and Figure 4A and are not shown. Nguyen et al. 2023 (eLife), by the developers of the SPOT-MAS assay at Gene Solutions, compared three tissue-of-origin classifiers on combined methylation, fragment-length, copy-number and end-motif features from cancer patients only. In the validation cohort of 239 patients, overall accuracy was 0.53 (random forest), 0.69 (deep neural network) and 0.69 (graph convolutional network); the graph network was trained with the validation samples in its graph. Zeng et al. 2026 (Nature Cancer), by the cfMeDIP-seq developers, compared a cfMeDIP-seq methylation classifier with fragmentomic features of the same reads and their combinations, reporting means over 10 fold models. In cross-validation on 356 cancers and 64 healthy donors, methylation alone reached AUC 0.986 and detected 0.949 of cancers at 99% specificity; on an independent validation set its sensitivity at 99% specificity was 0.633, against 0.766 for methylation combined with fragment ratios. These sensitivities are read on few healthy controls (six or seven per cross-validation fold and 17 in the validation set), so 99% specificity there allows no false positive among them, and Li-Fraumeni syndrome carriers without current cancer count as cancers in the validation sensitivities. The Source Data give the methylation-only validation AUC as 0.694 and the text as 0.674, so that value is not shown. Xu and Feng 2026, a medRxiv preprint not yet peer reviewed, by authors who did not develop CpGPT, fine-tuned the CpGPT methylation foundation model on public targeted bisulfite cfDNA data from 254 gastrointestinal cancers and 46 non-cancer controls and built four classical classifiers themselves. On three train/validation/test splits with test partitions of about 30 samples, mean test AUROC was 0.9904 for CpGPT against 0.9573 (SVM), 0.9420 (elastic net), 0.8460 (gradient boosting) and 0.8408 (random forest); the candidate CpGs were selected using all 300 samples, including the test partitions. Neither study reports performance in a screening population. Tissue-of-origin evidence here comes from two developer studies, one methylation-only classifier scored on already detected cancers and one multimodal workflow, and neither classifies people without cancer.",
+    "status": "reviewed"
+   },
+   "planned_work": [
+    {
+     "title": "Focused benchmark/run task for rewire-benchmark-data issue #16",
+     "url": "https://github.com/rewire-bio/rewire-benchmark-data/issues/16",
+     "status": "planned",
+     "reason": "Reviewed literature evidence is bounded (see evidence_gaps); closing the remaining decision gap needs a dedicated protocol/run task with frozen population and matched controls, tracked in rewire-benchmarks."
+    }
+   ]
+  },
+  {
+   "id": "use-case-tumour-dna-somatic-variant-detection",
+   "slug": "tumour-dna-somatic-variant-detection",
+   "title": "Select a tumour DNA somatic variant-calling workflow",
+   "question": "Which calling or rescoring workflow reliably detects tumour SNVs and small indels under the available sequencing and normal-sample regime?",
+   "area": "dna-genomes",
+   "contexts": [
+    "clinical_research"
+   ],
+   "search_terms": [
+    "tumour dna somatic variant detection"
+   ],
+   "intended_users": [
+    "Clinical researchers scoping the available diagnostic-genomics evidence",
+    "Computational researchers comparing exact evaluated configurations"
+   ],
+   "decision": "Inspect the per-dataset precision, recall and F1 of the callers and ensembles in the linked comparisons, matched to the intended sequencing type, coverage and normal-sample regime, before selecting a caller and designing a validation protocol.",
+   "inputs": [
+    "Tumour and matched-normal aligned sequencing reads",
+    "The intended variant-fraction, coverage and genomic-context strata"
+   ],
+   "output": "A sourced set of exact evaluated caller precision/recall/F1 values and remaining validation needs; no patient-level variant classification or clinical recommendation.",
+   "setting": "Published tumour-normal comparisons: a real-read virtual-tumour spike-in (Lancet paper, 80x/40x WGS), four simulated DREAM WGS pairs and four real tumour or cell-line WGS pairs with curated truth sets (Wang et al. 2020), and a validation WES replicate of the SEQC2 HCC1395 cell line (Guille et al. 2025), each measuring per-caller SNV and indel precision, recall and F1.",
+   "exclusions": [
+    "FFPE samples, targeted panels, ctDNA, tumour-only calling, copy-number and structural variation",
+    "Lancet paper: its Strelka, MuTect, MuTect2 and LoFreq rows are not ingested; the unselected LoFreq and MuTect2 rows are internally inconsistent in the source.",
+    "Callers evaluated only with a pre-trained model built from the test cell line or simulator (excluded from the affected judgements)."
+   ],
+   "clinical_scope": "Clinical applicability is not established. The linked studies score callers on synthetic tumours, cell lines and research tumour samples against research truth sets; they do not validate any caller for clinical use, FFPE specimens, gene panels or ctDNA, or for copy-number or structural variants.",
+   "evidence_gaps": [
+    "Lancet paper: individual-condition confidence intervals are unreported in the source tables.",
+    "Lancet paper: exact caller release versions are not extracted from the primary article.",
+    "No foundation-model component is evaluated in this bounded intake.",
+    "Tumour-only calling is covered only by proxy evidence from two developer papers (ClairS-TO, VarNet-T) on cell lines and research tumours; no linked comparison covers FFPE tissue, ctDNA or targeted panels.",
+    "The only linked HG008 small-variant caller comparison is a single-author preprint scored on the draft HG008-T v0.3 benchmark.",
+    "The SEQC2 consortium's own whole-genome caller comparison (Xiao et al. 2021) was not retrieved (not open access through Europe PMC); Sahraeian et al. 2022 Tables S5 to S10 (WES, AmpliSeq, FFPE, sample-specific models, runtime) are not linked.",
+    "Guille et al. 2025 Tables S1-S2 (four development datasets, including PERMED-01 clinical breast cancer exomes, under four post-alignment procedures) and Wang et al. 2020 Tables S3-S8 (deep targeted and exome dilution series) are not transcribed in this bounded intake.",
+    "Only the HG008 preprint (Hasan 2026) reports interval estimates, for F1 only (genomic block bootstrap within one sample); no other linked study reports interval estimates for per-caller precision, recall or F1.",
+    "Caller versions differ between studies (for example MuTect2 from GATK v3.7-0 in Wang et al. 2020 and Mutect2 4.2.2.0 in Guille et al. 2025); no study evaluates current releases of every caller.",
+    "The SEQC2 whole-genome comparison is a developer study on one cell line, and the developers' SEQC2-trained NeuSomatic models and Octopus-RF are excluded for training on that cell line; no linked comparison tests those models on an independent tumour.",
+    "Both linked tumour-only comparisons are developer papers (ClairS-TO, VarNet-T); no independent tumour-only comparison with printed per-caller values was found in the 2025-10 to 2026-10 window.",
+    "Tumour-only precision, recall and F1 in Chen et al. 2025 are at a threshold chosen on the test data; Krishnamachari et al. 2026 is extracted as AUPRC only.",
+    "The two tumour-only papers used different COLO829 sequencing data and truth sets (NYGC in Chen et al. 2025, TGen in Krishnamachari et al. 2026), so their COLO829 values are not comparable.",
+    "Long-read tumour-normal calling (ClairS, Nature Methods 2026) and the peer-reviewed DeepSomatic paper (Nature Biotechnology 2025, not open access) are not linked.",
+    "The amplicon-panel tumour-only comparison found in this pass (Bharne and Gaston 2026 preprint, HD789 reference standard) prints detection per variant but no per-caller performance metric, so panels remain uncovered."
+   ],
+   "citations": [
+    {
+     "source_id": "amp-oncology-rna-20261007-source-pmc6123722",
+     "locator": "See data/omics/use-case-coverage-amp-20261007/clinical/sources.md"
+    },
+    {
+     "source_id": "somatic-20261009-source-wang2020-tables",
+     "locator": "Supplementary Tables S1-S2; see data/omics/use-case-coverage-somatic-20261009/claims.csv"
+    },
+    {
+     "source_id": "somatic-20261009-source-guille2025-table-s7",
+     "locator": "Supplementary Table S7; see data/omics/use-case-coverage-somatic-20261009/claims.csv"
+    },
+    {
+     "source_id": "somatic-neusomatic-20261010-source-sahraeian2022-additional-file-2",
+     "locator": "Additional file 2 Tables S1-S4; see data/omics/use-case-coverage-somatic-neusomatic-20261010/claims.csv"
+    },
+    {
+     "source_id": "somatic-clairs-to-20261011-source-chen2025",
+     "locator": "See data/omics/use-case-coverage-somatic-clairs-to-20261011/claims.csv"
+    },
+    {
+     "source_id": "somatic-varnet-t-20261011-source-krishnamachari2026",
+     "locator": "See data/omics/use-case-coverage-somatic-varnet-t-20261011/claims.csv"
+    },
+    {
+     "source_id": "somatic-hg008-20261011-source-hasan2026",
+     "locator": "See data/omics/use-case-coverage-somatic-hg008-20261011/claims.csv"
+    },
+    {
+     "source_id": "somatic-wes-synthetic-20261011-source-lopezcade2025",
+     "locator": "See data/omics/use-case-coverage-somatic-wes-synthetic-20261011/claims.csv"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude Sonnet AMP-integration worker, bounded transcription of Codex-checked primary values; independently reviewed by Codex (workbench/amp-supervision/primary-review.md, integration-review-corrections.md)",
+    "reviewed_at": "2026-10-07T13:38:59Z",
+    "note": "Bounded primary-source transcription, independently Codex-checked. No new model execution, independent experimental reproduction, qualified human scientific review or clinical validation."
+   },
+   "collection_plan": {
+    "status": "collecting",
+    "comparison_question": "Which calling or rescoring workflow reliably detects tumour SNVs and small indels under the available sequencing and normal-sample regime?",
+    "baselines": [
+     "The conventional/author-introduced workflow measured in the linked primary source(s)."
+    ],
+    "outcomes": [
+     "The declared endpoint in this use case's active mapping(s); see evidence_gaps for what remains open."
+    ],
+    "validation_requirements": [
+     "Independent held-out population matched to the intended clinical setting.",
+     "Qualified human scientific review before any clinical-validation claim."
+    ],
+    "next_step": "A dedicated rewire-benchmarks protocol/run task with a real clinical tumour cohort, pinned truth set, purity/platform/assembly strata and an explicit foundation-model eligibility check."
+   },
+   "evidence_checked": {
+    "date": "2026-10-11",
+    "cutoff_date": "2026-10-11",
+    "next_due": "2026-11-11",
+    "records": [
+     "data/omics/lit-search-20261011-uc-oncology/ledger.jsonl",
+     "docs/reviews/use-cases/tumour-dna-somatic-variant-detection-2026-10-11.md"
+    ]
+   },
+   "baseline": {
+    "name": "Mutect2 and Strelka2",
+    "method_ids": [
+     "somatic-20261009-method-mutect2",
+     "somatic-20261009-method-strelka"
+    ],
+    "rationale": "Mutect2 and Strelka2 are widely used tumour-normal callers, scored in most linked somatic benchmarks. Both call variants with statistical models of read evidence rather than trained classifiers.",
+    "source_ids": [
+     "somatic-20261009-source-wang2020",
+     "somatic-20261009-source-guille2025"
+    ]
+   },
+   "summary": {
+    "text": "Eight studies are linked, and their values cannot be pooled: truth sets, sequencing, caller versions and scoring scripts differ. Values are rounded to two decimals, except where the source prints percentages. In the Lancet developers' own virtual-tumour test, Lancet and Strelka2 both reached SNV F1 0.85, with indel F1 0.81 and 0.77. Wang et al. 2020 ran eight callers, NeuSomatic and their own majority-vote ensembles on eight whole-genome tumour-normal pairs, with older caller versions (for example MuTect2 from GATK 3.7). An ensemble had the highest SNV F1 on seven of the eight pairs; on DREAM set 4, NeuSomatic, whose model was trained on DREAM set 3, was highest at 0.86. The best single configuration reached SNV F1 0.92 to 0.96 on the simulated DREAM sets 1 to 3 but 0.70 to 0.81 on the CLL, AML and MB tumours, where most callers had precision below 0.6 against curated truth sets that the authors say may be incomplete, so precision there is a lower bound. Indel F1 on the CLL and MB tumours and the COLO829 cell line (AML has no indel truth set) was at most 0.72 for every configuration. Guille et al. 2025, who did not develop the callers, scored them on a WES replicate of the SEQC2 HCC1395 cell line (1,160 truth SNVs, 50 truth indels); another replicate with the same truth set was used to choose their ensembles. Leaving out DeepSomatic and NeuSomatic, whose pre-trained models were built with HCC1395 data, the best single caller reached SNV F1 0.85 (Mutect) and indel F1 0.66 (VarNet), and the authors' ensembles reached 0.88 for SNVs and 0.75 and 0.74 for indels. Strelka reached SNV F1 0.64 there, with precision 0.51, against 0.85 for Strelka2 in the Lancet test, which shows how much results depend on the study. Sahraeian et al. 2022, the NeuSomatic developers, scored callers on SEQC2 HCC1395 whole-genome data in the half of the genome held out from their model training: 21 replicate pairs from six centres, 47 tumour purity and coverage mixtures, and six library preparations. Their NeuSomatic and NeuSomatic-S models trained on SEQC2 data (SEQC-WGS-Spike, SEQC-WGS-GT-50 and SEQC-WGS-GT50-SpikeWGS10) and Octopus-RF, whose random forest is not identified, are left out because they were built from the same cell line or may have been. Among the rest, mean F1 over the 21 replicates was 92.3% for DRAGEN, 91.8% for NeuSomatic with its DREAM3 model and 89.0% for Strelka2 for SNVs, and 81.7%, 79.3% and 72.8% for indels. Over the purity and coverage mixtures (10x to 300x, 5% to 100% tumour), mean SNV F1 was at most 67.7% (Octopus with hard filters). With 5% tumour in an 80x normal, SNV F1 for a pure tumour fell from 88.6% to 43.8% for MuTect2 and from 93.3% to 47.8% for Lancet, but only from 92.4% to 90.9% for Strelka2. Hasan 2026, a single-author preprint run under the author's own company by someone who developed none of the callers, scored Mutect2, Strelka2, DeepSomatic and three ensembles defined by the author on the GIAB HG008 tumour-normal pair against a draft truth set of clonal and truncal variants; the original scoring code was not retained. In the primary region (14,014 truth variants, excluding sites with germline interference), F1 was 0.91 for a two-of-three majority vote, 0.90 for Mutect2 and DeepSomatic and 0.78 for Strelka2; for indels Mutect2 reached 0.82 and DeepSomatic and Strelka2 0.69. Over the whole draft benchmark, F1 was 0.70 to 0.79 for all six. Two developer papers tested tumour-only calling, without the matched normal this use case assumes, so they are linked as proxy evidence. On Illumina COLO829 at 50x, ClairS-TO's developers report SNV F1 0.77 for ClairS-TO against 0.62 for DeepSomatic, 0.58 for Mutect2, 0.40 for Octopus and 0.22 for Pisces, with indel F1 at most 0.29; each F1 is at the threshold that gave that caller its best F1 on the test data, and truth variants with fewer than three supporting reads or VAF below 0.05 in the tested data were not scored. The VarNet-T developers report SNV AUPRC 0.77 for VarNet-T on SEQC2 and 0.66 on COLO829, against 0.54 and 0.27 for ClairS-TO and 0.08 and 0.07 for Mutect2; on three low-burden tumours every tumour-only caller had AUPRC at most 0.11. The two papers used different COLO829 sequencing data and truth sets: the same ClairS-TO model (Illumina SSRS, v0.4.0) had COLO829 SNV AUPRC 0.65 in its developers' paper and 0.27 in the VarNet-T paper. On a synthetic WES pair, where inserted SNVs make precision near 1 by construction, Mutect2 recalled 0.63 of inserted SNVs and Strelka2 0.46 with default nf-core/sarek settings. Only the HG008 preprint reports interval estimates; no linked study covers FFPE tissue, ctDNA or targeted panels, and none establishes clinical performance.",
+    "status": "reviewed"
+   },
+   "planned_work": [
+    {
+     "title": "Focused benchmark/run task for rewire-benchmark-data issue #10",
+     "url": "https://github.com/rewire-bio/rewire-benchmark-data/issues/10",
+     "status": "planned",
+     "reason": "Reviewed literature evidence is bounded (see evidence_gaps); closing the remaining decision gap needs a dedicated protocol/run task with frozen population and matched controls, tracked in rewire-benchmarks."
+    }
+   ]
+  },
+  {
+   "id": "use-case-tumour-rna-fusion-detection",
+   "slug": "tumour-rna-fusion-detection",
+   "title": "Select a tumour RNA fusion-detection workflow",
+   "question": "Which RNA-sequencing workflow detects and prioritises tumour gene fusions with useful sensitivity and a manageable false-positive review burden?",
+   "area": "dna-genomes",
+   "contexts": [
+    "clinical_research"
+   ],
+   "search_terms": [
+    "tumour rna fusion detection"
+   ],
+   "intended_users": [
+    "Clinical researchers scoping the available diagnostic-genomics evidence",
+    "Computational researchers comparing exact evaluated configurations"
+   ],
+   "decision": "Inspect per-caller sensitivity for validated driver fusions, the single-caller call counts that drive review burden, and the Seraseq and NCH evidence, matched to the intended specimen type and sequencing (short or long reads, conventional or targeted capture), before selecting a workflow and review burden.",
+   "inputs": [
+    "Tumour RNA-seq reads: paired-end short reads (conventional or targeted capture) or long reads",
+    "The intended specimen type (frozen, FFPE or other) and acceptable false-positive review burden"
+   ],
+   "output": "A sourced set of exact evaluated sensitivity/precision values on a synthetic reference standard and a real clinical cohort, with the ascertainment-bias caveat explicit; no patient-level fusion classification.",
+   "setting": "A 14-fusion synthetic Seraseq reference standard and a 229-sample paediatric cancer and haematologic cohort (67 ensemble-ascertained clinically relevant fusions) for Arriba, STAR-Fusion and the EnFusion ensemble; 12 short-read callers on conventional and targeted RNA-seq of haematologic cancer cell lines, scored against literature-supported driver fusions and against a consensus of the other callers (Tamura et al. 2026); and four long-read callers on nanopore whole-transcriptome sequencing of paediatric B-ALL at two depths, scored by dominant-fusion classification (Lin et al. 2026).",
+   "exclusions": [
+    "Novel-fusion discovery performance (the optimised known-fusion rescue measures recovery of 14 known synthetic fusions, not novel-fusion discovery)",
+    "Adult solid-tumour cohorts outside the transcribed NCH cohort",
+    "Non-Seraseq background fusions, all counted false positive in this intake though some may be real endogenous fusions"
+   ],
+   "clinical_scope": "Clinical applicability is bounded: the NCH clinical-cohort sensitivity figures are ascertained against the optimised EnFusion ensemble's own calls, not an independent exhaustive truth set, so a false-negative rate for fusions the ensemble itself missed cannot be derived from this evidence.",
+   "evidence_gaps": [
+    "Table 2 caption (v3) vs the optimisation narrative (v2) is an unresolved source version conflict.",
+    "STAR-Fusion precision is printed as both 43.6% (Table 2) and 43.8% (paragraph) in the source; both are preserved, neither is silently reconciled.",
+    "No confidence interval or dispersion is printed for the Seraseq Table 2 rows.",
+    "No linked comparison of several callers on adult solid tumours or FFPE tissue with printed per-caller values; Br J Cancer 2026 (1,233 FFPE solid tumours) reports Arriba and DRAGEN against panel assays only in figures.",
+    "Driver-fusion truth sets in Tamura et al. 2026 were selected mostly from fusions called by at least four algorithms, including the algorithm scored, so sensitivity for fusions most callers miss is not measured.",
+    "Per-caller results on 165 clinical haematologic samples in Tamura et al. 2026 are shown only in a figure.",
+    "Lin et al. 2026 scores only the dominant fusion among 74 listed B-ALL fusions, so the review burden of long-read callers' full output is not measured.",
+    "Short- and long-read evidence on the same RNA comes from one cell line (Huh7), with calls pooled over callers per platform (Dorney et al. 2026 preprint); no per-caller comparison across platforms on the same samples is linked.",
+    "The DREAM SMC-RNA fusion challenge results (Cell Systems 2021) were not retrieved, and Haas et al. 2019 prints per-method accuracy only in figures.",
+    "No linked study reports interval estimates for per-caller sensitivity or precision.",
+    "Only one workflow (Arriba with manual review) is scored against orthogonal clinical assays (Kim et al. 2026, acute leukaemia); its specificity counts RNA-seq-only fusions as errors, although some are well-known recurrent fusions and one was confirmed by RT-PCR and Sanger sequencing.",
+    "Long-read caller precision and recall come from simulated reads only; on cancer cell lines only counts of known and other calls are available.",
+    "The only machine-learning method compared with STAR-Fusion or Arriba on the same data in the linked evidence is EricScript (Tamura et al. 2026), an alignment-based caller that ranks its candidates with a trained AdaBoost score; no caller that learns fusion detection itself is compared."
+   ],
+   "citations": [
+    {
+     "source_id": "amp-oncology-rna-20261007-source-pmc8642973",
+     "locator": "See data/omics/use-case-coverage-amp-20261007/clinical/sources.md"
+    },
+    {
+     "source_id": "rna-fusion-20261009-source-tamura2026-supplementary",
+     "locator": "Supplementary Tables 1, 3 and 5; see data/omics/use-case-coverage-rna-fusion-20261009/claims.csv"
+    },
+    {
+     "source_id": "rna-fusion-20261009-source-tamura2026",
+     "locator": "Methods 'Comparison of detection algorithms'; Author contributions"
+    },
+    {
+     "source_id": "rna-fusion-20261009-source-lin2026",
+     "locator": "Tables 3, 5 and 6; Materials and Methods 'Fusion Performance Evaluations'; see data/omics/use-case-coverage-rna-fusion-20261009/claims.csv"
+    },
+    {
+     "source_id": "rna-fusion-longread-20261011-source-dorney2026",
+     "locator": "See data/omics/use-case-coverage-rna-fusion-longread-20261011/claims.csv"
+    },
+    {
+     "source_id": "rna-fusion-leukaemia-20261011-source-kim2025",
+     "locator": "See data/omics/use-case-coverage-rna-fusion-leukaemia-20261011/claims.csv"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude Sonnet AMP-integration worker, bounded transcription of Codex-checked primary values; independently reviewed by Codex (workbench/amp-supervision/primary-review.md, integration-review-corrections.md)",
+    "reviewed_at": "2026-10-07T13:38:59Z",
+    "note": "Bounded primary-source transcription, independently Codex-checked. No new model execution, independent experimental reproduction, qualified human scientific review or clinical validation."
+   },
+   "collection_plan": {
+    "status": "collecting",
+    "comparison_question": "Which RNA-sequencing workflow detects and prioritises tumour gene fusions with useful sensitivity and a manageable false-positive review burden?",
+    "baselines": [
+     "The conventional/author-introduced workflow measured in the linked primary source(s)."
+    ],
+    "outcomes": [
+     "The declared endpoint in this use case's active mapping(s); see evidence_gaps for what remains open."
+    ],
+    "validation_requirements": [
+     "Independent held-out population matched to the intended clinical setting.",
+     "Qualified human scientific review before any clinical-validation claim."
+    ],
+    "next_step": "A dedicated rewire-benchmarks protocol/run task with an independent fusion truth set not ascertained by the same ensemble being evaluated."
+   },
+   "evidence_checked": {
+    "date": "2026-10-11",
+    "cutoff_date": "2026-10-11",
+    "next_due": "2026-11-11",
+    "records": [
+     "data/omics/lit-search-20261011-uc-oncology/ledger.jsonl",
+     "docs/reviews/use-cases/tumour-rna-fusion-detection-2026-10-11.md"
+    ]
+   },
+   "baseline": {
+    "name": "STAR-Fusion and Arriba",
+    "method_ids": [
+     "rna-fusion-20261009-method-star-fusion",
+     "rna-fusion-20261009-method-arriba"
+    ],
+    "rationale": "Earlier benchmarks rank STAR-Fusion and Arriba as the most accurate short-read fusion callers, as Tamura et al. 2026 report. Both call fusions from chimeric STAR alignments with fixed filters, not a trained classifier.",
+    "source_ids": [
+     "rna-fusion-20261009-source-tamura2026"
+    ]
+   },
+   "summary": {
+    "text": "Four comparisons join the Seraseq reference and paediatric NCH cohort evidence; values cannot be pooled across studies. Tamura et al. 2026 ran 12 short-read callers on haematologic cancer cell lines; one, Genomon, comes from a co-author's group. On 61 driver fusions in conventional RNA-seq of 170 cell lines, Arriba detected all 61 (TPR 1), FusionCatcher 0.98, STAR-Fusion 0.93, InFusion 0.43 and STARChip 0.41. On 24 driver fusions in targeted RNA-seq of 26 cell lines, Arriba again reached 1 and STAR-Fusion 0.92, InFusion 0.17 and STARChip 0. A driver fusion entered these truth sets only if at least four callers, including the one scored, found it and it had literature or RT-PCR support, so fusions that most callers miss are under-represented and these values may overstate sensitivity. Against a consensus of the other callers, the number of single-caller calls, a measure of review burden, ranged on conventional RNA-seq from 327 for TrinityFusion-D and 1,061 for STAR-Fusion (PPV 0.39) to 9,567 for Arriba (PPV 0.08), 22,445 for FusionCatcher and 695,295 for Pizzly. On nanopore long reads from 51 paediatric B-ALL samples (Lin et al. 2026), scored on the dominant fusion per sample, JAFFAL reached sensitivity 0.76, LongGF 0.70 and FusionSeeker 0.63, with precision 0.79 to 0.95; the authors' own FUSILLI reached 0.81. At about one eighth of the depth, sensitivity was 0.09 to 0.27. In an independent long-read benchmark (Dorney et al. 2026 preprint), no caller exceeded F1 0.35 on 400 simulated fusions at 100 Gb and 95% read identity: CTAT-LR-Fusion 0.35 (recall 0.28, precision 0.46), JAFFAL 0.29, Genion 0.20, FusionSeeker 0.14, GFSeeker 0.07 and LongGF 0.04. On all ONT PCR-cDNA reads of the MCF7 cell line, CTAT-LR-Fusion's calls matched 20 of 53 previously reported fusions, with 51 other calls; JAFFAL matched 19 with 38 other calls and FusionSeeker 11 with 359. The other calls mix real fusions missing from the literature list and false calls. On the Huh7 cell line, pooling six long-read callers per long-read platform and three short-read callers for Illumina, PacBio Kinnex recovered 20 of 34 previously reported fusions, ONT PCR-cDNA 17 and Illumina 15. Against karyotyping, FISH and RT-PCR in 101 adult and paediatric acute leukaemia patients (Kim et al. 2026), an Arriba workflow with manual review detected 40 of 48 conventionally detected fusions (sensitivity 83.3%) and called fusions in 21.4% of 56 conventionally negative results; these count against specificity, although the authors describe several as well-known recurrent fusions and confirmed one by RT-PCR and Sanger sequencing. These are cell lines, simulations and leukaemia samples: no linked comparison covers solid-tumour specimens, FFPE tissue or novel-fusion discovery, only Kim et al. score against orthogonal clinical assays, none reports interval estimates, and none establishes clinical performance.",
+    "status": "reviewed"
+   },
+   "planned_work": [
+    {
+     "title": "Focused benchmark/run task for rewire-benchmark-data issue #11",
+     "url": "https://github.com/rewire-bio/rewire-benchmark-data/issues/11",
+     "status": "planned",
+     "reason": "Reviewed literature evidence is bounded (see evidence_gaps); closing the remaining decision gap needs a dedicated protocol/run task with frozen population and matched controls, tracked in rewire-benchmarks."
+    }
+   ]
   }
  ],
  "mappings": [
@@ -2347,6 +2837,316 @@
     "stratum_label": "Reanalysis of 219 unresolved cases",
     "stratum_order": 1,
     "headline_metric": "count"
+   }
+  },
+  {
+   "id": "use-case-mapping-amp-20261007-issue10-lancet-virtual-tumor",
+   "use_case_id": "use-case-tumour-dna-somatic-variant-detection",
+   "lifecycle": "active",
+   "revision": 1,
+   "reason": "Add Codex-checked primary-source protocol evidence from the bounded AMP intake (rewire.it#365).",
+   "protocol_id": "amp-oncology-rna-20261007-protocol-lancet-virtual-tumor",
+   "evaluation_ids": [
+    "amp-oncology-rna-20261007-issue-10-eval-lancet",
+    "amp-oncology-rna-20261007-issue-10-eval-strelka2"
+   ],
+   "endpoint": "Virtual-tumour SNV and indel precision/recall/F1, true/false positive and false negative counts for Lancet and Strelka2 on a real-read synthetic tumour/normal pair",
+   "relevance": "direct",
+   "rationale": "Real-read virtual-tumour spike-in directly measures somatic SNV/indel calling precision and recall, the declared benchmark endpoint, under one sequencing/normal regime.",
+   "constraints": [
+    "Inspect every linked evaluation's source locator and preserved conflicts before citing a result.",
+    "Do not combine this mapping's evaluations with any other protocol's results."
+   ],
+   "limitations": [
+    "Author-developed-caller evaluation, not independent reproduction.",
+    "Virtual tumor endpoint does not establish sensitivity in clinical tumors, FFPE samples, panels, ctDNA, copy-number or structural variation.",
+    "SNV printed counts agree with 31,592 truth variants. Do not repair MuTect table #calls=50,228 versus TP+FP=26,505; its row is not proposed for numerical ingestion.",
+    "Indel Lancet and Strelka2 counts agree with 4,945 truth variants. Preserve Table 1 rounding and do not recompute percentages.",
+    "Individual-condition confidence intervals unreported in Tables 1\u20132."
+   ],
+   "citations": [
+    {
+     "source_id": "amp-oncology-rna-20261007-source-pmc6123722",
+     "locator": "See clinical/claims.csv and clinical/sources.md in data/omics/use-case-coverage-amp-20261007/"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude Sonnet AMP-integration worker, bounded transcription of Codex-checked primary values; independently reviewed by Codex (workbench/amp-supervision/primary-review.md, integration-review-corrections.md)",
+    "reviewed_at": "2026-10-07T13:38:59Z",
+    "note": "Bounded primary-source transcription, independently Codex-checked. No new model execution, independent experimental reproduction, qualified human scientific review or clinical validation."
+   },
+   "evidence_sha256": "998c5226ede0dd0b158ef1181a95448d9a3aa011d1ad7db8a198064e8accc5a4"
+  },
+  {
+   "id": "use-case-mapping-amp-20261007-issue11-enfusion-seraseq",
+   "use_case_id": "use-case-tumour-rna-fusion-detection",
+   "lifecycle": "active",
+   "revision": 1,
+   "reason": "Add Codex-checked primary-source protocol evidence from the bounded AMP intake (rewire.it#365).",
+   "protocol_id": "amp-oncology-rna-20261007-protocol-enfusion-seraseq",
+   "evaluation_ids": [
+    "amp-oncology-rna-20261007-issue-11-eval-enfusion-3-callers-filter-known-fusion-list",
+    "amp-oncology-rna-20261007-issue-11-eval-arriba",
+    "amp-oncology-rna-20261007-issue-11-eval-enfusion-3-callers",
+    "amp-oncology-rna-20261007-issue-11-eval-star-fusion"
+   ],
+   "endpoint": "Synthetic 14-fusion Seraseq reference-standard sensitivity, precision and total/true fusion counts for Arriba, STAR-Fusion and EnFusion ensemble configurations (undiluted duplicate libraries)",
+   "relevance": "direct",
+   "rationale": "A synthetic reference standard with a known fusion set directly measures fusion-calling sensitivity and precision, the declared benchmark endpoint.",
+   "constraints": [
+    "Inspect every linked evaluation's source locator and preserved conflicts before citing a result.",
+    "Do not combine this mapping's evaluations with any other protocol's results."
+   ],
+   "limitations": [
+    "The optimized known-fusion rescue uses prior knowledge of true reference fusions; 100% precision/sensitivity is an optimization-control observation, not unbiased generalization.",
+    "Table2 caption v3 versus optimization narrative v2 is unresolved; dataset_version=null and automatic comparison blocked.",
+    "STAR-Fusion precision 43.6% in Table2 vs 43.8% Par31; numeric candidate retains printed table value but requires disputed-result warning or omission pending resolution.",
+    "All non-Seraseq fusions counted false positives although endogenous background fusions may exist.",
+    "No CI or dispersion printed for Table2 rows.",
+    "Clinical Table1 sensitivity is relative to 67 fusions ascertained through optimized ensemble, not independently exhaustive truth or treatment benefit."
+   ],
+   "citations": [
+    {
+     "source_id": "amp-oncology-rna-20261007-source-pmc8642973",
+     "locator": "See clinical/claims.csv and clinical/sources.md in data/omics/use-case-coverage-amp-20261007/"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude Sonnet AMP-integration worker, bounded transcription of Codex-checked primary values; independently reviewed by Codex (workbench/amp-supervision/primary-review.md, integration-review-corrections.md)",
+    "reviewed_at": "2026-10-07T13:38:59Z",
+    "note": "Bounded primary-source transcription, independently Codex-checked. No new model execution, independent experimental reproduction, qualified human scientific review or clinical validation."
+   },
+   "evidence_sha256": "9cf77c762a99e7e6c1615a85b8923f65ae7911466a07d7f9eb56f00e1b9292d8"
+  },
+  {
+   "id": "use-case-mapping-ctdna-jamshidi-20261010-frag-validation",
+   "use_case_id": "use-case-plasma-ctdna-fragmentomics",
+   "lifecycle": "active",
+   "revision": 1,
+   "reason": "Add the CCGA substudy 1 same-sample comparison of cfDNA classifiers (Jamshidi et al. 2022), retrieved 2026-10-10.",
+   "protocol_id": "ctdnajam-20261010-protocol-ccga1-validation-sens-98spec",
+   "evaluation_ids": [
+    "ctdnajam-20261010-eval-validation-clinical-data",
+    "ctdnajam-20261010-eval-validation-allelic-imbalance",
+    "ctdnajam-20261010-eval-validation-fragment-endpoints",
+    "ctdnajam-20261010-eval-validation-fragment-lengths",
+    "ctdnajam-20261010-eval-validation-scna",
+    "ctdnajam-20261010-eval-validation-scna-wbc",
+    "ctdnajam-20261010-eval-validation-snv",
+    "ctdnajam-20261010-eval-validation-snv-wbc",
+    "ctdnajam-20261010-eval-validation-wg-methylation"
+   ],
+   "endpoint": "Sensitivity (95% CI, TP/total) at 98% specificity on the validation set, after unblinding for the fragment classifiers, for the fragment endpoint (18%) and fragment length (29%) classifiers from 30x cfDNA WGS, against whole-genome methylation (34%) and other classifiers on the same participants",
+   "relevance": "proxy",
+   "rationale": "A same-sample comparison on the validation set of fragmentomic classifiers with other cfDNA features at a fixed false-positive rate. Proxy evidence for the same reasons as the training result: no tumour-fraction strata, post hoc development of the fragment classifiers, post hoc threshold. The CCGA samples are not public and none of the cohorts behind this use case's existing judgements comes from CCGA, so the samples do not overlap.",
+   "constraints": [
+    "Inspect every linked evaluation's source locator and preserved limitations before citing a result.",
+    "Do not combine this mapping's evaluations with any other protocol's results; cohorts, assays and thresholds differ.",
+    "The 98% specificity threshold was set post hoc within each set and is not a locked screening threshold."
+   ],
+   "limitations": [
+    "Developer study: GRAIL designed the assays and classifiers, ran every arm, and reports the comparison.",
+    "The 98% specificity threshold was set post hoc within each set, including the validation set, so it is not a threshold locked before validation.",
+    "Case-control enrolment of clinically diagnosed cancers and matched non-cancer participants, not an intended-use screening population.",
+    "Prototype assays; the targeted methylation test developed afterwards is a different assay and is not scored here.",
+    "The fragment endpoints, fragment lengths, allelic imbalance and pan-feature classifiers were developed after validation blinding was lifted; the other classifiers were blinded.",
+    "Table 3 scores 833 training and 464 validation cancers against 854 and 485 analysable cancers in Table 1. STAR Methods restrict detection to solid cancers, and Table 1 lists 11 plasma cell neoplasms and 10 leukaemias in training and 8 and 13 in validation, which is 21 in each set; lymphomas stay in.",
+    "Specificity was 97.9% (548/560) in training and 97.8% (354/362) in validation for every cfDNA classifier, slightly below the 98% target.",
+    "No sensitivity within tumour-fraction strata is printed; per-classifier clinical limits of detection by cTAF are in figures only.",
+    "The fragment endpoint, fragment length and allelic imbalance classifiers were developed after validation blinding was lifted, so their validation values are not a blinded validation, even though the source calls the cohort held-out; the copy-number, mutation, methylation and clinical rows were analysed double-blinded."
+   ],
+   "citations": [
+    {
+     "source_id": "ctdnajam-20261010-source-jamshidi2022",
+     "locator": "Table 3, validation columns and footnotes"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Separate Claude review agent, independent of the extractor; no human review claimed",
+    "reviewed_at": "2026-10-10T09:00:00Z",
+    "note": "Independent review of endpoint fit, relevance grade, limitations, exclusions and grouping against the use case and the article; every value of the listed evaluations was checked against Table 3 or the Results text, with percentages and Clopper-Pearson intervals recomputed. Developer study; no execution, reproduction, human scientific review or clinical validation."
+   },
+   "evidence_sha256": "27912d74bc496d1434d2f999b35c7f5726eb3f4f07f70cc582ca59c83c61cbd4",
+   "presentation": {
+    "group": "jamshidi2022-ccga1-detection",
+    "title": "CCGA substudy 1: cfDNA classifiers on the same participants at a post hoc 98% specificity",
+    "stratum_label": "Validation set (fragment classifiers developed after unblinding)",
+    "stratum_order": 2,
+    "headline_metric": "sensitivity-at-98-percent-specificity"
+   }
+  },
+  {
+   "id": "use-case-mapping-ctdna-jamshidi-20261010-meth-validation",
+   "use_case_id": "use-case-plasma-ctdna-methylation",
+   "lifecycle": "active",
+   "revision": 1,
+   "reason": "Add the CCGA substudy 1 same-sample comparison of cfDNA classifiers (Jamshidi et al. 2022), retrieved 2026-10-10.",
+   "protocol_id": "ctdnajam-20261010-protocol-ccga1-validation-sens-98spec",
+   "evaluation_ids": [
+    "ctdnajam-20261010-eval-validation-clinical-data",
+    "ctdnajam-20261010-eval-validation-scna",
+    "ctdnajam-20261010-eval-validation-scna-wbc",
+    "ctdnajam-20261010-eval-validation-snv",
+    "ctdnajam-20261010-eval-validation-snv-wbc",
+    "ctdnajam-20261010-eval-validation-wg-methylation"
+   ],
+   "endpoint": "Sensitivity (95% CI, TP/total) at 98% specificity on the validation set (464 cancers, 362 non-cancers) for the whole-genome methylation classifier and the five other classifiers analysed double-blinded, with paired McNemar tests against whole-genome methylation",
+   "relevance": "direct",
+   "rationale": "Measures the use case's endpoint, all-stage detection sensitivity at a declared specificity, for a locked whole-genome bisulfite methylation classifier on a validation set analysed double-blinded: 34% (30%-39%; 158 of 464), against 16% to 33% for the blinded mutation and copy-number classifiers on the same participants and 2.6% for clinical data alone. Direct despite the post hoc threshold: the classifier was locked before unblinding, and the 98% cutoff was read off the validation non-cancer scores, which is how a sensitivity at a declared specificity is read; it is not a threshold fixed in advance. Developer-run and case-control. The CCGA samples are not public and do not overlap the cohorts of this use case's other judgements.",
+   "constraints": [
+    "Inspect every linked evaluation's source locator and preserved limitations before citing a result.",
+    "Do not combine this mapping's evaluations with any other protocol's results; cohorts, assays and thresholds differ.",
+    "The 98% specificity threshold was set post hoc within each set and is not a locked screening threshold."
+   ],
+   "limitations": [
+    "Developer study: GRAIL designed the assays and classifiers, ran every arm, and reports the comparison.",
+    "The 98% specificity threshold was set post hoc within each set, including the validation set, so it is not a threshold locked before validation.",
+    "Case-control enrolment of clinically diagnosed cancers and matched non-cancer participants, not an intended-use screening population.",
+    "Prototype assays; the targeted methylation test developed afterwards is a different assay and is not scored here.",
+    "The fragment endpoints, fragment lengths, allelic imbalance and pan-feature classifiers were developed after validation blinding was lifted; the other classifiers were blinded.",
+    "Table 3 scores 833 training and 464 validation cancers against 854 and 485 analysable cancers in Table 1. STAR Methods restrict detection to solid cancers, and Table 1 lists 11 plasma cell neoplasms and 10 leukaemias in training and 8 and 13 in validation, which is 21 in each set; lymphomas stay in.",
+    "Specificity was 97.9% (548/560) in training and 97.8% (354/362) in validation for every cfDNA classifier, slightly below the 98% target.",
+    "Only the six classifiers analysed double-blinded are shown; the four developed after unblinding are excluded."
+   ],
+   "citations": [
+    {
+     "source_id": "ctdnajam-20261010-source-jamshidi2022",
+     "locator": "Table 3, validation columns and footnotes"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Separate Claude review agent, independent of the extractor; no human review claimed",
+    "reviewed_at": "2026-10-10T09:00:00Z",
+    "note": "Independent review of endpoint fit, relevance grade, limitations, exclusions and grouping against the use case and the article; every value of the listed evaluations was checked against Table 3 or the Results text, with percentages and Clopper-Pearson intervals recomputed. Developer study; no execution, reproduction, human scientific review or clinical validation."
+   },
+   "evidence_sha256": "a8eb21165df7dbf112e1f004275bb118b5a4a7519df481ec92918517f0f5a2d8",
+   "presentation": {
+    "group": "jamshidi2022-ccga1-detection",
+    "title": "CCGA substudy 1: cfDNA classifiers on the same participants at a post hoc 98% specificity",
+    "stratum_label": "Validation set, double-blinded classifiers",
+    "stratum_order": 2,
+    "headline_metric": "sensitivity-at-98-percent-specificity"
+   }
+  },
+  {
+   "id": "use-case-mapping-rna-fusion-20261009-lin2026-high-depth",
+   "use_case_id": "use-case-tumour-rna-fusion-detection",
+   "lifecycle": "active",
+   "revision": 1,
+   "reason": "Add primary-source fusion caller comparison evidence from the tumour RNA fusion use-case pass (2026-10-09).",
+   "protocol_id": "rna-fusion-20261009-protocol-lin2026-high-depth",
+   "evaluation_ids": [
+    "rna-fusion-20261009-eval-lin2026-fusilli-high-depth",
+    "rna-fusion-20261009-eval-lin2026-fusionseeker-high-depth",
+    "rna-fusion-20261009-eval-lin2026-jaffal-high-depth",
+    "rna-fusion-20261009-eval-lin2026-longgf-high-depth"
+   ],
+   "endpoint": "Per-sample sensitivity, specificity, precision and F1 for FusionSeeker, JAFFAL, LongGF and FUSILLI on nanopore WTS, high-depth cohort",
+   "relevance": "direct",
+   "rationale": "Real paediatric B-ALL samples with clinically established fusion subtypes directly measure long-read callers' detection and prioritisation of the dominant fusion. One of the four callers (FUSILLI) is the authors' own.",
+   "constraints": [
+    "Inspect every linked evaluation's source locator before citing a result.",
+    "Do not combine this mapping's evaluations with any other protocol's results; truth sets, specimens, sequencing and caller versions differ between sources."
+   ],
+   "limitations": [
+    "FUSILLI was developed by the authors and is author_reported. Its filters (two supporting reads, gene distance and overlap) were set from analyses of candidate fusion-supporting reads (Methods 'FUSILLI'; Supplemental Figure S1), and the source does not say these were held out from the evaluated cohorts. FusionSeeker, JAFFAL and LongGF were run by the same authors, who did not develop them.",
+    "Per-sample classification by the dominant fusion among detected B-ALL list fusions (74 fusions); calls outside the list and secondary fusions are not scored, so this does not measure the review burden of a caller's full output.",
+    "A sample with a known fusion whose dominant call is a different fusion counts as a false positive, not a false negative, so sensitivity is not the fraction of known-fusion samples correctly typed.",
+    "Truth is the clinical genomic subtype from cytogenetics, FISH and short-read RNA-seq (CICERO, FusionCatcher and manual review).",
+    "Paediatric B-ALL only; PAX5::ZCCHC7 excluded from scoring; the authors note IGH::DUX4, KMT2A and ZNF384 rearrangements were not tested.",
+    "Caller versions are not printed; JAFFAL ran from the 'latest' container image.",
+    "51 samples, 27 with a known B-ALL fusion; the samples are a subset of the low-depth cohort."
+   ],
+   "citations": [
+    {
+     "source_id": "rna-fusion-20261009-source-lin2026",
+     "locator": "Table 3; Materials and Methods 'Fusion Performance Evaluations'; Materials and Methods 'Samples', 'FUSILLI' and 'B-ALL Gene Fusion Master'; Abstract; Discussion"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude (Opus 5.5) research agent extracted; a separate Claude review agent checked every value against the pinned sources and judged relevance (data/omics/use-case-coverage-rna-fusion-20261009/review.json)",
+    "reviewed_at": "2026-10-09T20:55:00Z",
+    "note": "Bounded primary-source transcription with independent automated cell check and relevance review. No execution, reproduction, qualified human scientific review or clinical validation."
+   },
+   "evidence_sha256": "0b12f8f85b39c3fb54a9614cc376e74b5f210dd0c989a9fb8c51ab8ee28bb377",
+   "presentation": {
+    "group": "lin2026-longread",
+    "title": "Long-read fusion callers in paediatric B-ALL (Lin et al. 2026)",
+    "stratum_label": "High depth (11.2 M reads)",
+    "stratum_order": 1,
+    "headline_metric": "recall"
+   }
+  },
+  {
+   "id": "use-case-mapping-somatic-20261009-guille2025-seqc2-fd-wes-indel",
+   "use_case_id": "use-case-tumour-dna-somatic-variant-detection",
+   "lifecycle": "active",
+   "revision": 1,
+   "reason": "Add primary-source protocol evidence from the somatic SNV and indel use-case pass (2026-10-09).",
+   "protocol_id": "somatic-20261009-protocol-guille2025-seqc2-fd-wes-indel",
+   "evaluation_ids": [
+    "somatic-20261009-eval-guille2025-freebayes-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-lancet-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-lofreq-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-mutect2-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-pindel-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-scalpel-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-seurat-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-strelka-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-vardict-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-varnet-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-varscan2-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-vote-3indel-min2-seqc2-fd-wes-indel",
+    "somatic-20261009-eval-guille2025-vote-4indel-min2-seqc2-fd-wes-indel"
+   ],
+   "endpoint": "TP, FP, recall, false-positive rate, precision and F1 for somatic indels on a held-out SEQC2 HCC1395 WES sample for 13 individual callers and 2 retained voting ensembles",
+   "relevance": "direct",
+   "rationale": "A real tumour-normal cell-line WES pair scored against the SEQC2 high-confidence somatic call set; directly measures somatic indel detection by classic callers, VarNet and two voting ensembles, run by an academic group that did not develop the individual callers. The validation sample is a separate replicate of a cell line also used in development.",
+   "constraints": [
+    "Inspect every linked evaluation's source locator before citing a result.",
+    "Do not combine this mapping's evaluations with any other protocol's results; truth sets, inputs and caller versions differ between sources.",
+    "The ensemble rows were selected by the authors on development data that include the same cell line and truth set; treat them as the authors' own method."
+   ],
+   "limitations": [
+    "Single WES sample of one cell line; no replicate or interval estimates.",
+    "Small truth set: 50 indels in SEQC2 high-confidence regions, so one variant moves recall by 0.02.",
+    "Not fully independent of development: the ensembles were selected on four datasets that include another WES replicate of the same HCC1395 pair with the same truth set (Table 2 row 'SEQC2').",
+    "Post-alignment procedure for Table S7 is not stated (Tables S1-S2 compare four procedures on the development datasets).",
+    "DeepSomatic and NeuSomatic pre-trained models were built with SEQC2 HCC1395 data (Discussion paragraph 5; supplementary methods checkpoint name), so their rows are not held out.",
+    "The authors' 'best individual tool' comparison in Results 'Validation' covers the classic callers only (gains of 2.7 and 10.2 points over Mutect and Mutect2); it excludes the deep-learning callers, as the ensemble search did (Methods 'Ensemble approach')."
+   ],
+   "citations": [
+    {
+     "source_id": "somatic-20261009-source-guille2025-table-s7",
+     "locator": "Sheet 'Results', rows 22-36"
+    },
+    {
+     "source_id": "somatic-20261009-source-guille2025",
+     "locator": "Table 1; Table 2 rows 'SEQC2' and 'SEQC2-FD'; Methods 'SEQC2 dataset', 'Ensemble approach' and 'Evaluation and metrics'; Results 'Validation'; Discussion paragraph 5"
+    },
+    {
+     "source_id": "somatic-20261009-source-guille2025-supplementary-methods",
+     "locator": "Command lines per caller, including '#NeuSomatic' (--checkpoint) and '#DeepSomatic' (--model_type)"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Claude (Opus 5.5) research agent extracted; a separate Claude review agent checked every value against the pinned sources and judged relevance (data/omics/use-case-coverage-somatic-20261009/review.json)",
+    "reviewed_at": "2026-10-09T20:30:00Z",
+    "note": "Bounded primary-source transcription with independent automated cell check and relevance review. No execution, reproduction, qualified human scientific review or clinical validation."
+   },
+   "evidence_sha256": "733e247f894f592d4cc165ef0cb8f86f032ac6ef7d6471b55fa94f7055bd16d2",
+   "presentation": {
+    "group": "guille2025-seqc2-fd-wes",
+    "title": "SEQC2 HCC1395 WES validation sample (Guille et al. 2025)",
+    "stratum_label": "Indels",
+    "stratum_order": 2,
+    "headline_metric": "f1-score"
    }
   }
  ]

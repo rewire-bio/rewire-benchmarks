@@ -6,10 +6,11 @@
 //   - open discrepancies between studies that a rerun on a shared protocol would settle;
 //   - run recipes nobody has executed (no receipt).
 // Each gap gets a value (clinical relevance of its use cases and how many rankings it could
-// change) and, where the data gives a basis, a GPU-hour and dollar estimate. A gap whose system
-// cannot be run by software (people perform it, a laboratory test, nothing released) is left out
-// and listed in the summary (runnability below). The best few are
-// filed here as "Proposed verification run" or "Proposed benchmark" issues, labelled proposal
+// change) and, where the data gives a basis, a GPU-hour and dollar estimate. A gap is filed only
+// when the release shows released code, weights, a container or a recipe for every system, shows
+// where the benchmark data can be obtained, and records no successor to its systems; otherwise it
+// is blocked and listed in the summary for a person to look at (runnability, dataAccess and
+// successorOf below). No model call decides what is filed. The best few are filed here as "Proposed verification run" or "Proposed benchmark" issues, labelled proposal
 // and tier-1.
 //
 // Every number, name, command and link in an issue comes from the release data or this
@@ -77,6 +78,7 @@ const GENOMIC_AREAS = ['dna-genomes', 'rna-transcriptomes'];
 const PROTEIN_AREAS = ['proteins-complexes', 'protein-function', 'protein-structure'];
 const NOT_EXECUTED = 'source_reviewed_not_executed';
 const RERUNNABLE_SCOPES = ['same-protocol', 'same-task'];
+const SYSTEM_KINDS = ['model', 'method', 'configuration', 'pipeline', 'baseline', 'service'];
 
 export const TYPES = {
   'no-direct-evidence': 'Use case with no direct evidence',
@@ -119,6 +121,8 @@ export function clean(text) {
 
 const RESULT_LINE = /^\{"id":\s*"(?:[^"\\]|\\.)*",\s*"kind":\s*"result"/;
 
+const recipesOf = (a) => [...(Array.isArray(a.run_recipes) ? a.run_recipes : []), ...(a.run_guide && typeof a.run_guide === 'object' ? [a.run_guide] : [])];
+
 function slim(r) {
   const a = r.attributes ?? {};
   return {
@@ -150,6 +154,14 @@ function slim(r) {
     baselineType: a.baseline_type ?? null,
     artifacts: ARTIFACT_KEYS.filter((k) => a[k] !== undefined && a[k] !== null && !/^(?:unreported|not stated|unknown|none)\b/i.test(String(a[k]))),
     adaptation: typeof (a.comparison?.adaptation ?? a.adaptation) === 'string' ? (a.comparison?.adaptation ?? a.adaptation) : null,
+    // What says whether a dataset, protocol or benchmark's data can be obtained (dataAccess below).
+    dataAccessNotes: [a.access, a.reuse_restrictions].filter((x) => typeof x === 'string'),
+    notes: [a.scope_note, ...(Array.isArray(a.limitations) ? a.limitations : []), ...recipesOf(a).flatMap((r) => (Array.isArray(r?.limitations) ? r.limitations : []))].filter((x) => typeof x === 'string'),
+    // What the run recipes and run guide say the data needs.
+    recipeDataNotes: recipesOf(a).map((r) => r?.requirements?.data).filter((x) => typeof x === 'string'),
+    dataRefs: DATA_REF_KEYS.filter((k) => typeof a[k] === 'string' && a[k].trim() && !/^(?:unreported|not stated|unknown|none)\b/i.test(a[k])).map((k) => `${k} ${a[k]}`),
+    privateData: a.private_data_not_included === true,
+    supersededBy: typeof a.superseded_by === 'string' ? a.superseded_by : null,
   };
 }
 
@@ -342,7 +354,7 @@ export function buildIndex({ recs, runtimes = [] }) {
     if (!members) {
       members = new Map();
       for (const r of recs.values()) {
-        if (!['model', 'method', 'configuration', 'pipeline', 'baseline', 'service'].includes(r.kind)) continue;
+        if (!SYSTEM_KINDS.includes(r.kind)) continue;
         const s = resolveSystem(r.id);
         members.set(s, [...(members.get(s) ?? []), r.id]);
       }
@@ -750,26 +762,57 @@ export function scoreGaps(ix, gaps) {
     || a.key.localeCompare(b.key));
 }
 
-// ---------- Runnability ----------
+// ---------- Runnability, data access and successors ----------
+//
+// A proposal is filed only when the release data shows both that every system in it can be run
+// by software and that the benchmark's data can be obtained. When either is not shown, the gap is
+// blocked and listed in the summary with the reason, for a person to look at. A wrong proposal
+// costs more than a missed one, so silence in the data blocks: nothing passes by default.
 
 // Attributes that pin something a machine runs: a checkpoint, weights, code, packages or an
 // environment. Any of them on a system or its configurations means it can be run by software.
 const ARTIFACT_KEYS = ['checkpoint', 'checkpoint_revision', 'checkpoint_sha256', 'weights_sha256', 'code', 'code_commit', 'software_commit', 'packages', 'environment', 'container'];
 // An access statement that names released code, weights, a package, a container or an API.
 const RELEASED = /github\.com|gitlab|huggingface\.co|hugging face|bioconda|bioconductor|pypi|docker|zenodo|\bapi\b|\b(?:public|open|released|downloadable|open-source)\b[^.;]*\b(?:code|weights|checkpoints?|software|package|source|models?)\b|\b(?:code|source code|software) at\b/i;
+// Code an access statement names that is not the system: the evaluation's own analysis code
+// ("calibration code at https://github.com/...") does not run the system.
+const OTHER_CODE = /\b(?:calibration|evaluation|analysis|benchmark(?:ing)?|scoring|plotting|comparison) (?:code|scripts?)\b[^;]*/gi;
 // An access statement that says nothing runnable was released.
 // "Trained models are not released" alone does not count: the tool itself may be public.
-const NO_RELEASE = /\bno (?:public )?(?:code|model weights|weights)\b[^.;]*\b(?:code|weights)\b|\bnot (?:openly |publicly )?available\b|\bnot released as software\b|\bclosed system\b/i;
+const NO_RELEASE = /\bno (?:public )?(?:code|model weights|weights)\b[^.;]*\b(?:code|weights)\b|\bnot (?:openly |publicly )?available\b|\bnot released as software\b|\bclosed system\b|\bno released (?:implementation|code|software)\b|\bno executable code\b/i;
 // An access statement that says the system is a laboratory test or workflow, not software.
 const LABORATORY = /\blaboratory (?:tests?|workflow)\b|\b(?:commercial|clinical) assay\b/i;
 // A description or evaluation adaptation that says people perform the method.
 const BY_PEOPLE = /\b(?:expert|manual|human)[- ](?:re-?)?(?:interpretation|analysis|reanalysis|review|curation|classification|annotation|reading)\b|\bby (?:laboratory |clinical |trained |human )?(?:experts?|clinicians?|curators?|pathologists?|geneticists?|annotators?)\b/i;
 const NEGATED = /\b(?:no|not|without)\s+$/i;
+// Dataset attributes that point at where the data is: an accession, a repository, an archive.
+const DATA_REF_KEYS = ['accession', 'repository', 'archive_doi'];
+// A statement that the data cannot be obtained openly: "Sequencing data are not public",
+// controlled access, on request, not released.
+const DATA_CLOSED = /\bnot (?:openly |publicly |yet )?(?:public|available|released|shared|deposited|published|downloadable|openly downloadable)\b|\bcontrolled[- ]access\b|\bdbgap\b|\bdata access (?:committee|agreement)\b|\bon (?:reasonable )?request\b|\bproprietary\b|\baccess not established\b|\bauthenticated access\b|\bno (?:public )?(?:data|structure|design file)s? (?:is |are )?(?:released|public|available)\b/i;
+// A statement that says where the data can be downloaded.
+const DATA_OPEN = /https?:\/\/|\bftp\b|\bdoi[: ]|\b10\.\d{4,}\/|zenodo|figshare|dryad|synapse|\b(?:SRA|ENA|GEO|SRR|SRP|SRX|ERR|ERP|PRJNA|PRJEB|GSE|GSM)\d*\b|\bsupplementary (?:data|table|file|dataset)s?\b|\bpublic(?:ly)? (?:download|available|release)\b|\bopen access\b/i;
 
 /** The first match of `re` in `text` that is not negated ("no manual curation" is not manual). */
 function affirmed(re, text) {
   const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
   for (const m of String(text ?? '').matchAll(g)) if (!NEGATED.test(String(text).slice(Math.max(0, m.index - 12), m.index))) return m[0];
+  return null;
+}
+
+// Words that make a sentence in a scope note or limitation about data, so "intervals are not
+// available" in a protocol's limitations does not read as closed data.
+const DATA_WORDS = /\b(?:data(?:sets?)?|reads?|sequenc\w*|samples?|genomes?|cohorts?|participants?|variants?|files?|bams?|fastqs?|lists?|truth(?: sets?)?)\b/i;
+
+/**
+ * The first sentence (or semicolon clause) of `text` that says the data is not public, or null.
+ * With `needData`, the sentence must also be about data (DATA_WORDS).
+ */
+function closedSentence(text, needData) {
+  for (const raw of clean(text).split(/(?<=[.;])\s+/)) {
+    const s = raw.trim();
+    if (DATA_CLOSED.test(s) && (!needData || DATA_WORDS.test(s))) return s.length > 240 ? `${s.slice(0, 237)}...` : s;
+  }
   return null;
 }
 
@@ -784,12 +827,14 @@ export const RUNNABILITY_OVERRIDES = {};
  * 1. An entry in RUNNABILITY_OVERRIDES decides.
  * 2. Runnable when the system or one of its configurations has a run recipe or run guide, an
  *    attribute that pins a checkpoint, weights, code, packages or an environment, or an access
- *    statement that names released code, weights, a package, a container or an API.
+ *    statement that names released code, weights, a package, a container or an API. Code the
+ *    statement names for the evaluation itself ("calibration code at ...") does not count.
  * 3. Not runnable when, without that, an access statement says nothing was released or that it
  *    is a laboratory test or workflow; the baseline type is experimental_reference; or the
  *    description, or the adaptation of an evaluation on the gap's protocols, says people
  *    perform it (expert interpretation, manual review, by clinicians).
- * 4. Otherwise runnable: the data gives no reason to think it is not.
+ * 4. Otherwise not shown to be runnable: nothing in the release records released code,
+ *    weights, a container or a recipe.
  * Returns { runnable, reason, record }.
  */
 export function runnability(ix, systemId, { protocols = [], overrides = RUNNABILITY_OVERRIDES } = {}) {
@@ -798,7 +843,7 @@ export function runnability(ix, systemId, { protocols = [], overrides = RUNNABIL
   for (const r of members) {
     if (r.run_recipes?.length || r.run_guide) return { runnable: true, reason: `run recipe on \`${r.id}\``, record: r.id };
     if (r.artifacts?.length) return { runnable: true, reason: `\`${r.artifacts[0]}\` on \`${r.id}\``, record: r.id };
-    const open = (r.access ?? []).find((t) => RELEASED.test(t) && !NO_RELEASE.test(t));
+    const open = (r.access ?? []).find((t) => RELEASED.test(t.replace(OTHER_CODE, '')) && !NO_RELEASE.test(t));
     if (open) return { runnable: true, reason: `access of \`${r.id}\`: "${clean(open)}"`, record: r.id };
   }
   const ids = new Set(members.map((r) => r.id));
@@ -817,22 +862,126 @@ export function runnability(ix, systemId, { protocols = [], overrides = RUNNABIL
     const people = affirmed(BY_PEOPLE, e.adaptation);
     if (people) return { runnable: false, reason: `evaluation \`${e.id}\` records its adaptation as "${clean(e.adaptation)}"`, record: e.id };
   }
-  return { runnable: true, reason: 'no statement in the release that it cannot be run', record: null };
+  return { runnable: false, reason: `the release records no released code, weights, container or run recipe for \`${systemId}\`${members.length > 1 ? ` or its ${members.length - 1} configuration${members.length === 2 ? '' : 's'}` : ''}`, record: null };
 }
 
 /**
- * Split gaps into those every system of which can be run by software and those that cannot. A
- * benchmark or recipe gap names no system and is always kept; a proposed benchmark's list of
- * proxy systems drops systems that cannot be run.
+ * The datasets a gap's run would use: those its protocols (and the tasks and benchmarks they
+ * are part of) use, those the evaluations of its systems on its protocols were scored on, and
+ * those the recipe owner uses; each with the records it shares data with (same_data_as).
+ */
+export function gapDatasets(ix, gap) {
+  const out = new Set();
+  const systems = new Set(gap.systems ?? []);
+  const anchors = [...new Set([...(gap.protocols ?? []), gap.benchmark, gap.owner].filter(Boolean))];
+  for (const p of anchors) {
+    for (const t of [p, ...ix.ancestors(p)]) ix.linkOf(t, 'uses_data').forEach((d) => out.add(d));
+    for (const e of ix.evalsByAssessment.get(p) ?? []) {
+      const s = systemOfEvaluation(ix, e);
+      if (!systems.size || systems.has(s)) ix.linkOf(e, 'data').forEach((d) => out.add(d));
+    }
+  }
+  for (const d of [...out]) ix.linkOf(d, 'same_data_as').forEach((x) => out.add(x));
+  return [...out].filter((d) => ix.recs.has(d)).sort();
+}
+
+/**
+ * Whether the release shows the gap's benchmark data can be obtained:
+ * 1. Not obtainable when a dataset, protocol or benchmark of the run says its data is not public
+ *    (controlled access, on request, not released) or holds private data. This wins over
+ *    everything else.
+ * 2. Obtainable when the recipe owner has a run recipe or run guide (it fetches the data).
+ * 3. Obtainable when every dataset of the run, or a record it shares data with, records an
+ *    accession, repository, archive DOI, or an access statement that says where to download it.
+ * 4. Otherwise not shown: no dataset, or a dataset with no public source recorded.
+ * Returns { open, reason, record }.
+ */
+export function dataAccess(ix, gap) {
+  const datasets = gapDatasets(ix, gap);
+  const anchors = [...new Set([...(gap.protocols ?? []), gap.benchmark, gap.owner].filter(Boolean))];
+  for (const id of [...datasets, ...anchors]) {
+    const r = ix.recs.get(id);
+    if (!r) continue;
+    if (r.privateData) return { open: false, reason: `\`${id}\` records that private data is not included`, record: id };
+    const isData = r.kind === 'dataset' || r.kind === 'dataset_subset';
+    for (const [texts, needData] of [[r.dataAccessNotes ?? [], !isData], [r.notes ?? [], true], [r.recipeDataNotes ?? [], false]]) {
+      for (const t of texts) {
+        const s = closedSentence(t, needData);
+        if (s) return { open: false, reason: `\`${id}\` says the data is not public: "${s}"`, record: id };
+      }
+    }
+  }
+  const owner = gap.owner ? ix.recs.get(gap.owner) : null;
+  if (owner && (owner.run_recipes?.length || owner.run_guide)) return { open: true, reason: `run ${owner.run_guide ? 'guide' : 'recipe'} on \`${owner.id}\``, record: owner.id };
+  if (!datasets.length) return { open: false, reason: 'no dataset is linked to the run\'s protocols or evaluations, so the release does not show where the data is', record: null };
+  const sourceOf = (id) => {
+    const r = ix.recs.get(id);
+    if (r?.dataRefs?.length) return r.dataRefs[0];
+    const t = (r?.dataAccessNotes ?? []).find((x) => DATA_OPEN.test(x));
+    return t ? clean(t) : null;
+  };
+  const found = [];
+  for (const d of datasets) {
+    const src = sourceOf(d) ?? ix.linkOf(d, 'same_data_as').map(sourceOf).find(Boolean) ?? datasets.filter((x) => ix.linkOf(x, 'same_data_as').includes(d)).map(sourceOf).find(Boolean);
+    if (!src) return { open: false, reason: `no accession, repository or download is recorded for dataset \`${d}\``, record: d };
+    found.push(`\`${d}\`: ${src.length > 160 ? `${src.slice(0, 157)}...` : src}`);
+  }
+  return { open: true, reason: found.slice(0, 3).join('; ') + (found.length > 3 ? `; and ${found.length - 3} more` : ''), record: datasets[0] };
+}
+
+/**
+ * A later system the release records for this one: a system record that `supersedes` it or
+ * describes itself as its successor ("successor to Rhapsody"), or a superseded_by attribute on
+ * it or one of its configurations. Null when the release records none.
+ */
+export function successorOf(ix, systemId) {
+  const members = new Set(ix.membersOf?.(systemId) ?? [systemId]);
+  for (const id of members) {
+    const by = ix.recs.get(id)?.supersededBy;
+    if (by) return { id: by, reason: `\`${id}\` records superseded_by "${clean(by)}"` };
+  }
+  const names = [...new Set([...members].map((id) => ix.recs.get(id)?.name).filter((n) => n && n.length >= 3))];
+  const esc = (n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const named = names.length ? new RegExp(`\\b(?:successor (?:to|of)|supersedes) (?:the )?(?:${names.map(esc).join('|')})(?![\\w-])`, 'i') : null;
+  for (const r of ix.recs.values()) {
+    if (!SYSTEM_KINDS.includes(r.kind) || members.has(r.id)) continue;
+    const linked = (r.links ?? []).some((l) => l.relation === 'supersedes' && members.has(l.target_id));
+    const m = !linked && named ? named.exec(r.description ?? '') : null;
+    if ((!linked && !m) || ix.resolveSystem(r.id) === systemId) continue;
+    return { id: r.id, reason: linked ? `\`${r.id}\` supersedes it` : `\`${r.id}\` (${clean(r.name)}) is described as "${m[0]}"` };
+  }
+  return null;
+}
+
+/**
+ * Split gaps into those that can be filed and those blocked, with every reason:
+ * - a proposed benchmark (no direct evidence) names no system to run and no benchmark data, so
+ *   it is blocked for a person to scope;
+ * - each system must be runnable by software (runnability) and have no recorded successor;
+ * - the run's data must be obtainable (dataAccess).
+ * A proposed benchmark's list of proxy systems drops systems that cannot be run. Kept gaps carry
+ * `checks` (the reasons they passed), which the issue quotes.
  */
 export function excludeNotRunnable(ix, gaps, opts = {}) {
   const kept = [];
   const excluded = [];
   for (const g of gaps) {
     if (g.proxySystems) g.proxySystems = g.proxySystems.filter((p) => runnability(ix, p.id, opts).runnable);
-    const bad = g.systems.map((s) => ({ system: s, ...runnability(ix, s, { ...opts, protocols: g.protocols }) })).find((r) => !r.runnable);
-    if (bad) excluded.push({ gap: g, system: bad.system, reason: bad.reason });
-    else kept.push(g);
+    const reasons = [];
+    if (g.type === 'no-direct-evidence') reasons.push('it proposes a new benchmark, so the release has no system to run and no benchmark data to check');
+    const systems = g.systems.map((s) => ({ system: s, ...runnability(ix, s, { ...opts, protocols: g.protocols }) }));
+    for (const r of systems) if (!r.runnable) reasons.push(`not runnable by software: ${r.reason}`);
+    for (const s of g.systems) {
+      const next = successorOf(ix, s);
+      if (next) reasons.push(`superseded: the release records a successor to ${ix.name(s)}, ${ix.name(next.id)} (${next.reason})`);
+    }
+    const data = g.type === 'no-direct-evidence' ? null : dataAccess(ix, g);
+    if (data && !data.open) reasons.push(`data not shown to be obtainable: ${data.reason}`);
+    if (reasons.length) excluded.push({ gap: g, system: systems.find((r) => !r.runnable)?.system ?? null, reason: reasons.join('; ') });
+    else {
+      g.checks = { systems: systems.map((r) => ({ system: r.system, reason: r.reason })), data: data.reason };
+      kept.push(g);
+    }
   }
   return { kept, excluded };
 }
@@ -856,9 +1005,12 @@ const contains = (hay, needle) => {
 
 // Assay, data type and truth-set words that many unrelated benchmarks share. They never
 // identify a benchmark on their own: "WGS CNV" or "HG002 GIAB" names a family, not a benchmark.
-const COMMON_TOKENS = new Set(['WGS', 'WES', 'WXS', 'CNV', 'CNVS', 'SNV', 'SNVS', 'SNP', 'SNPS', 'INDEL', 'INDELS', 'SV', 'SVS', 'GIAB', 'DNA', 'RNA', 'CDNA', 'CFDNA', 'CTDNA', 'NGS', 'PCR', 'AUC', 'AUROC', 'AUPRC', 'ROC', 'MCC', 'VCF', 'BAM', 'GRCH37', 'GRCH38', 'HG19', 'HG38']);
-// Sizes and coverage ("5kb", "30x") are size bins and depths, which many benchmarks share.
-const isCommon = (t) => COMMON_TOKENS.has(t.toUpperCase()) || /^\d+(?:bp|kb|mb|gb|x)$/i.test(t);
+const COMMON_TOKENS = new Set(['WGS', 'WES', 'WXS', 'CNV', 'CNVS', 'SNV', 'SNVS', 'SNP', 'SNPS', 'INDEL', 'INDELS', 'SV', 'SVS', 'GIAB', 'DNA', 'RNA', 'CDNA', 'CFDNA', 'CTDNA', 'NGS', 'PCR', 'AUC', 'AUROC', 'AUPRC', 'ROC', 'MCC', 'VCF', 'BAM', 'GRCH37', 'GRCH38', 'HG19', 'HG38',
+  // Public resources that many benchmarks draw on: naming one does not name a benchmark.
+  'CLINVAR', 'GNOMAD', 'HGMD', 'DBSNP', 'ENCODE', 'GTEX', 'TCGA', 'COSMIC', 'ONCOKB', 'OMIM', 'HPO']);
+// Sizes and coverage ("5kb", "30x") are size bins and depths, which many benchmarks share; a
+// year names when a paper appeared, not which benchmark it is.
+const isCommon = (t) => COMMON_TOKENS.has(t.toUpperCase()) || /^\d+(?:bp|kb|mb|gb|x)$/i.test(t) || /^(?:19|20)\d\d$/.test(t);
 
 /** Words of a name that identify it on their own: acronyms and words with digits (ClinGen, SVI, PP3, SEQC2). */
 export function distinctiveTokens(name) {
@@ -878,6 +1030,12 @@ function nameScore(hay, name) {
   const hits = specific.filter((t) => contains(hay, t)).length;
   if (!specific.length || hits < Math.min(2, specific.length)) return 0;
   return 10 * hits + tokens.filter((t) => isCommon(t) && contains(hay, t)).length;
+}
+
+/** At least two specific (not common) distinctive words of the name appear: ClinGen, PP3 and BP4. */
+function strictTokens(hay, name) {
+  const specific = distinctiveTokens(name).filter((t) => !isCommon(t));
+  return specific.length >= 2 && specific.filter((t) => contains(hay, t)).length >= 2;
 }
 
 /** Whether `text` holds the record ID as a whole word (not as part of a longer ID). */
@@ -932,6 +1090,17 @@ export function coveringIssue(ix, gap, issues) {
     } else if (gap.type === 'unverified-recipe') score = (citesRecord && recipeWords) ? 500 : contains(hay, ix.name(gap.benchmark)) && /\b(recipe|run guide|smoke)\b/i.test(raw) ? 1 : 0;
     else if (citesRecord && systemsNamed) score = 500;
     else if (gap.systems.every((s) => nameScore(hay, ix.name(s)))) score = benchScore();
+    // The same benchmark or use case, whatever the systems: an open issue or proposal on the
+    // benchmark or use case already holds the work, and a second proposal next to it is noise.
+    // These rank below every match above, so the most specific issue is still credited.
+    if (!score) {
+      if (citesRecord) score = 8;
+      else if (!markers.length) score = Math.max(0, ...benchNames.map((n) => (contains(hay, n) ? 7 : strictTokens(hay, n) ? 6 : 0)));
+    }
+    // The use case: on its own it covers the gap; with a benchmark match it breaks a tie, so an
+    // issue on the same use case is credited over one that shares only benchmark words.
+    const sameUseCase = gap.useCases.some((u) => citesId(raw, u.id) || (!markers.length && (contains(hay, u.title) || contains(hay, u.slug))));
+    if (sameUseCase) score = score ? score + 0.5 : 1;
     if (score > bestScore) {
       best = i;
       bestScore = score;
@@ -1048,7 +1217,17 @@ export function renderProposal(ix, g, { release, why, whyNote, runUrl, rank, dat
     ]
     : g.type === 'unverified-recipe'
       ? [`- Benchmark: ${named(ix, g.benchmark)}.`, `- Model: what the recipe runs. Its weights requirement says: ${g.weights ? `"${esc(g.weights)}"` : 'nothing recorded'}.`]
-      : [`- Model${g.systems.length > 1 ? 's' : ''}: ${g.systems.map((s) => named(ix, s)).join(' and ')}.`, `- Benchmark: ${named(ix, g.benchmark)}.`, `- Protocols: ${listNames(ix, g.protocols)}.`];
+      : [
+        `- Model${g.systems.length > 1 ? 's' : ''}: ${g.systems.map((s) => named(ix, s)).join(' and ')}.`,
+        ix.recs.get(g.benchmark)?.kind === 'benchmark' ? `- Benchmark: ${named(ix, g.benchmark)}.` : '- Benchmark: no benchmark record; the run is on the protocols below.',
+        `- Protocols: ${listNames(ix, g.protocols)}.`,
+      ];
+  const checks = g.checks
+    ? [
+      ...g.checks.systems.map((c) => `- Runnable: ${esc(ix.name(c.system))}, ${esc(c.reason)}.`),
+      `- Data: ${esc(g.checks.data)}.`,
+    ]
+    : [];
   const body = [
     '## Gap',
     '',
@@ -1061,6 +1240,7 @@ export function renderProposal(ix, g, { release, why, whyNote, runUrl, rank, dat
     '## Model and benchmark',
     '',
     ...what,
+    ...checks,
     '',
     '## Estimate',
     '',
@@ -1264,7 +1444,7 @@ export function smokeChecks(dir) {
 export function renderSummary({ mode, release, gaps, plan, filed, notes, usage, excluded = [] }) {
   const byType = Object.keys(TYPES).map((t) => `${TYPES[t]}: ${gaps.filter((g) => g.type === t || g.flags?.includes(t)).length}`).join('; ');
   const fmtEst = (g) => (g.estimate.kind === 'none' ? 'no estimate' : `${g.estimate.lowerBound ? 'at least ' : ''}${g.estimate.gpuHours} GPU-h`);
-  const skip = new Map([...excluded.map((x) => [x.gap.key, `not runnable by software: ${x.reason}`]), ...plan.skipped.map((s) => [s.gap.key, s.reason])]);
+  const skip = new Map([...excluded.map((x) => [x.gap.key, `blocked: ${x.reason}`]), ...plan.skipped.map((s) => [s.gap.key, s.reason])]);
   const chosen = new Set(plan.file.map((g) => g.key));
   return [
     `## Gap scanner, release ${release} (${mode})`,
@@ -1277,9 +1457,9 @@ export function renderSummary({ mode, release, gaps, plan, filed, notes, usage, 
     '',
     filed.length ? filed.map((f) => `- ${f.url ?? '(not filed)'} ${f.issue.title}${f.whyNote ? ` (${f.whyNote})` : ''}`).join('\n') : 'None.',
     '',
-    '### Not runnable by software',
+    '### Blocked: needs a human look',
     '',
-    excluded.length ? `Left out of the proposals because a system in them cannot be run by software (runnability in \`scripts/agents/gaps.mjs\`):\n\n${excluded.map((x) => `- ${esc(x.gap.title)} (\`${x.gap.key}\`): ${esc(x.reason)}.`).join('\n')}` : 'None.',
+    excluded.length ? `Not filed because the release data does not show a runnable system and obtainable data, or records a successor (runnability, dataAccess and successorOf in \`scripts/agents/gaps.mjs\`). Each needs a person to check before it is proposed; most are fixed by recording access in the data store:\n\n${excluded.map((x) => `- ${esc(x.gap.title)} (\`${x.gap.key}\`): blocked: ${esc(x.reason)}.`).join('\n')}` : 'None.',
     '',
     `### Top ${Math.min(LIMITS.listed, gaps.length)} gaps by value per GPU-hour`,
     '',
@@ -1328,7 +1508,7 @@ export async function main(argv = process.argv.slice(2), env = process.env, deps
 
   const gaps = scoreGaps(ix, findGaps(ix, useCasesFile, discrepanciesFile, { smokeChecks: smokeChecks(resolve(ROOT, args.smokeDir || SMOKE_DIR)) }));
   const { kept, excluded } = excludeNotRunnable(ix, gaps);
-  for (const x of excluded) log(`not runnable by software: ${x.gap.key}: ${x.reason}`);
+  for (const x of excluded) log(`blocked: ${x.gap.key}: ${x.reason}`);
   let plan = { file: [], skipped: [] };
   try {
     const issues = args.dryRun || args.issues ? JSON.parse(readFileSync(args.issues ? resolve(args.issues) : join(dir, 'issues.json'), 'utf8')) : await gh.listIssues(repo);
