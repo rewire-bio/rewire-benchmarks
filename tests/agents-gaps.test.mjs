@@ -4,7 +4,11 @@
 // 2026-11-20-727601dd065b, trimmed to six use cases, three findings and three recipe owners
 // (mappings keep at most 40 evaluations each). From release 2026-11-20-72316db0764b they add the
 // Kaschta et al. 2026 manual versus Talos reanalysis (use case, mapping and records) and the
-// ProteinGym v1.3 substitutions protocol with its run recipes. issues.json holds the real issues #40 to #56, #65
+// ProteinGym v1.3 substitutions protocol with its run recipes, and the five proposals of report-only
+// run 44739368955 that an independent check found should not be filed (Lancet on the virtual
+// tumour, EnFusion on Seraseq, the clinical classifier on CCGA validation, FUSILLI on the Lin et al.
+// 2026 cohort; MutPred was already here), with the SEQC2 FD WES indel protocol (open callers on SRA
+// data), the DART-Eval benchmark and Rhapsody and Rhapsody-2. issues.json holds the real issues #40 to #56, #65
 // and #67 to #71 (open) and #25 (closed) of this repository, as the REST API returns them, and one
 // synthetic closed proposal (#9001).
 import { test } from 'node:test';
@@ -13,8 +17,8 @@ import { mkdtempSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  LABELS, LIMITS, MARKER, buildIndex, checkWhy, citesId, coveringIssue, distinctiveTokens, estimate, excludeNotRunnable, findGaps, gpuCount,
-  latestRelease, main, planFiling, readRecords, runnability, scoreGaps, whyFacts, writeWhy, Usage,
+  LABELS, LIMITS, MARKER, buildIndex, checkWhy, citesId, coveringIssue, dataAccess, distinctiveTokens, estimate, excludeNotRunnable, findGaps, gpuCount,
+  latestRelease, main, planFiling, readRecords, runnability, scoreGaps, successorOf, whyFacts, writeWhy, Usage,
 } from '../scripts/agents/gaps.mjs';
 
 const FIX = 'tests/agents-gaps-fixtures';
@@ -299,15 +303,19 @@ test('estimate: runtimes are summed over systems and protocols, a partial sum is
 const MANUAL = 'reanalysis-kaschta-20261010-method-manual-diagnostic-reanalysis';
 const KASCHTA = 'reanalysis-kaschta-20261010-protocol-manual-vs-talos-219-reanalysis';
 
-test('runnability: manual expert reanalysis is not runnable by software, Talos on the same protocol is', () => {
+test('runnability: manual expert reanalysis is not runnable by software; Talos is not shown runnable without a release record', () => {
   const manual = runnability(ix, MANUAL, { protocols: [KASCHTA] });
   assert.equal(manual.runnable, false);
   assert.match(manual.reason, /people perform it/);
-  assert.equal(runnability(ix, 'uc-clinical-20260930-method-talos', { protocols: [KASCHTA] }).runnable, true);
+  // The fixture keeps no Talos record with code or access, so nothing shows it can be run.
+  const talos = runnability(ix, 'uc-clinical-20260930-method-talos', { protocols: [KASCHTA] });
+  assert.equal(talos.runnable, false);
+  assert.match(talos.reason, /records no released code, weights, container or run recipe/);
   const { kept, excluded } = excludeNotRunnable(ix, gaps);
-  assert.deepEqual(excluded.map((x) => x.gap.key), [`verify:${MANUAL}:${KASCHTA}`]);
+  assert.match(excluded.find((x) => x.gap.key === `verify:${MANUAL}:${KASCHTA}`).reason, /people perform it/);
   assert.ok(!kept.some((g) => g.systems.includes(MANUAL)));
-  assert.ok(kept.some((g) => g.key === `verify:uc-clinical-20260930-method-talos:${KASCHTA}`));
+  // Every kept gap carries the reasons it passed, for the issue to quote.
+  for (const g of kept) assert.ok(g.checks && g.checks.data, g.key);
 });
 
 test('runnability: decided from release data, with overrides only as a fallback', () => {
@@ -328,14 +336,16 @@ test('runnability: decided from release data, with overrides only as a fallback'
   const r = (id, opts) => runnability(small, id, opts).runnable;
   assert.equal(r('lab'), false);
   assert.equal(r('closed'), false);
-  assert.equal(r('tool'), true); // "trained models are not released" says nothing about the tool
-  assert.equal(r('curated'), true); // negated
+  // "Trained models are not released" says nothing about the tool, but nothing shows it released either.
+  assert.match(runnability(small, 'tool').reason, /records no released code/);
+  assert.equal(r('tool'), false);
+  assert.match(runnability(small, 'curated').reason, /records no released code/); // negated, so not "people perform it"
   assert.equal(r('reviewed'), false);
   assert.equal(r('coded'), true);
   assert.equal(r('pinned'), true);
-  // An evaluation's adaptation counts only on the gap's protocols.
-  assert.equal(r('blank'), true);
-  assert.equal(r('blank', { protocols: ['p'] }), false);
+  // Silence is not runnable; an evaluation's adaptation gives the reason only on the gap's protocols.
+  assert.match(runnability(small, 'blank').reason, /records no released code/);
+  assert.match(runnability(small, 'blank', { protocols: ['p'] }).reason, /Expert interpretation/);
   // The override list decides when the data cannot.
   const o = runnability(small, 'blank', { overrides: { blank: { runnable: false, reason: 'a person reads the slides' } } });
   assert.equal(o.runnable, false);
@@ -346,10 +356,12 @@ test('a dry run leaves out systems that cannot be run and logs each exclusion in
   const out = mkdtempSync(join(tmpdir(), 'gaps-'));
   const r = await main(['--dry-run', '--out', out], {}, { log: quiet });
   assert.ok(!r.filed.some((f) => f.key.includes(MANUAL)));
-  assert.match(r.summary, /### Not runnable by software\n\nLeft out of the proposals/);
-  assert.ok(r.summary.includes(`\`verify:${MANUAL}:${KASCHTA}\`): the description of`));
+  assert.match(r.summary, /### Blocked: needs a human look\n\nNot filed because/);
+  assert.ok(r.summary.includes(`\`verify:${MANUAL}:${KASCHTA}\`): blocked: not runnable by software: the description of`));
   const plan = JSON.parse(readFileSync(join(out, 'plan.json'), 'utf8'));
-  assert.deepEqual(plan.excluded.map((x) => x.system), [MANUAL]);
+  assert.equal(plan.excluded.find((x) => x.key === `verify:${MANUAL}:${KASCHTA}`).system, MANUAL);
+  // Every filed proposal states why its systems run and where its data is.
+  for (const f of r.filed) assert.match(f.issue.body, /\n- Data: /);
 });
 
 test('dedupe matches the ProteinGym recipe to #67 by the benchmark ID, not by name', () => {
@@ -361,25 +373,29 @@ test('dedupe matches the ProteinGym recipe to #67 by the benchmark ID, not by na
   assert.ok(!normalisedIncludes(i67, ix.name(g.benchmark)));
   assert.equal(coveringIssue(ix, g, issues)?.number, 67);
   assert.match(planFiling(ix, gaps, issues, 100).skipped.find((s) => s.gap.key === key).reason, /#67/);
-  // The protocol ID alone, with "recipe", also covers it; an ID inside a longer ID does not.
-  const hand = (body) => [{ number: 9100, title: 'x', state: 'open', body }];
+  // The protocol ID alone, with "recipe", covers it best; the benchmark ID without recipe words
+  // covers it too (same benchmark), but ranks below, so the recipe issue is credited.
+  const hand = (body, number = 9100) => [{ number, title: 'x', state: 'open', body }];
   assert.equal(coveringIssue(ix, g, hand('Fix the recipe of `rewire-proteingym-v1-3-dms-substitutions`.'))?.number, 9100);
-  assert.equal(coveringIssue(ix, g, hand('Fix the recipe of rewire-proteingym-v1-3-dms-substitutions-indels.')), null);
-  assert.equal(coveringIssue(ix, g, hand('See discovery-benchmark-proteingym.')), null); // no recipe words
+  assert.equal(coveringIssue(ix, g, hand('See discovery-benchmark-proteingym.'))?.number, 9100);
+  assert.equal(coveringIssue(ix, g, [...hand('See discovery-benchmark-proteingym.', 9105), ...hand('Fix the recipe of `rewire-proteingym-v1-3-dms-substitutions`.')])?.number, 9100);
   assert.equal(citesId('a discovery-benchmark-proteingym.', 'discovery-benchmark-proteingym'), true);
   assert.equal(citesId('a discovery-benchmark-proteingym-v2', 'discovery-benchmark-proteingym'), false);
   // A filed recipe proposal for the parent benchmark covers it through its marker.
   assert.equal(coveringIssue(ix, g, hand(`<!-- ${MARKER}: recipe:discovery-benchmark-proteingym -->`))?.number, 9100);
 });
 
-test('dedupe by ID needs the system too, and a filed proposal is matched by its marker, not its text', () => {
+test('dedupe by shared benchmark: an open proposal on the benchmark covers other systems on it, a closed one does not', () => {
   const bench = 'vep-uc-20261014-benchmark-clingen-svi-calibration';
   const polyphen = gaps.find((g) => g.type !== 'discrepancy' && g.benchmark === bench && /PolyPhen/.test(ix.name(g.systems[0])));
   assert.ok(polyphen);
   const mutpred = 'somatic-oncogenicity-20261009-method-mutpred';
-  // A filed MutPred proposal names the benchmark ID in its text and marker; it does not cover PolyPhen-2.
-  const filed = [{ number: 9101, title: 'Proposed verification run: MutPred', state: 'open', body: `Benchmark \`${bench}\`.\n<!-- ${MARKER}: verify:${mutpred}:${bench} -->` }];
-  assert.equal(coveringIssue(ix, polyphen, filed), null);
+  const filed = (state) => [{ number: 9101, title: 'Proposed verification run: MutPred', state, body: `Benchmark \`${bench}\`.\n<!-- ${MARKER}: verify:${mutpred}:${bench} -->` }];
+  assert.equal(coveringIssue(ix, polyphen, filed('open'))?.number, 9101);
+  assert.equal(coveringIssue(ix, polyphen, filed('closed')), null);
+  // A filed proposal's text is not searched for IDs: one on another benchmark that lists this one does not cover it.
+  const other = [{ number: 9103, title: 'Proposed benchmark: x', state: 'open', body: `Proxy benchmarks: \`${bench}\`.\n<!-- ${MARKER}: use-case:use-case-not-this-one -->` }];
+  assert.equal(coveringIssue(ix, polyphen, other), null);
   // A hand-written issue citing the system and benchmark IDs covers it.
   const hand = [{ number: 9102, title: 'x', state: 'open', body: `Rerun ${polyphen.systems[0]} on ${bench}.` }];
   assert.equal(coveringIssue(ix, polyphen, hand)?.number, 9102);
@@ -389,3 +405,101 @@ function normalisedIncludes(issue, name) {
   const n = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, ' ');
   return n(`${issue.title} ${issue.body}`).includes(n(name).trim());
 }
+
+// The five proposals report-only run 44739368955 would have filed, from their real records.
+const FLAGGED = {
+  mutpred: 'verify:somatic-oncogenicity-20261009-method-mutpred:vep-uc-20261014-benchmark-clingen-svi-calibration',
+  lancet: 'verify:amp-oncology-rna-20261007-issue-10-config-lancet:amp-oncology-rna-20261007-protocol-lancet-virtual-tumor',
+  enfusion: 'verify:amp-oncology-rna-20261007-issue-11-config-enfusion-3-callers-filter-known-fusion-list:amp-oncology-rna-20261007-protocol-enfusion-seraseq',
+  ccga: 'verify:ctdnajam-20261010-method-clinical-data:ctdnajam-20261010-protocol-ccga1-validation-sens-98spec',
+  fusilli: 'verify:rna-fusion-20261009-method-fusilli:rna-fusion-20261009-protocol-lin2026-high-depth',
+};
+const FREEBAYES = 'verify:somatic-20261009-method-freebayes:somatic-20261009-protocol-guille2025-seqc2-fd-wes-indel';
+
+test('none of the five proposals the independent check rejected passes the screen, each with its reason', () => {
+  const { kept, excluded } = excludeNotRunnable(ix, gaps);
+  const reason = (k) => excluded.find((x) => x.gap.key === k)?.reason;
+  for (const k of Object.values(FLAGGED)) {
+    assert.ok(byKey(k), k);
+    assert.ok(!kept.some((g) => g.key === k), k);
+  }
+  // CCGA: the dataset record says the sequencing data are not public, and no classifier was released.
+  assert.match(reason(FLAGGED.ccga), /`ctdnajam-20261010-data-ccga1-validation` says the data is not public: "Sequencing data are not public\."/);
+  assert.match(reason(FLAGGED.ccga), /no released code, weights, container or run recipe for `ctdnajam-20261010-method-clinical-data`/);
+  // FUSILLI and EnFusion: no code or access recorded for the authors' tools.
+  assert.match(reason(FLAGGED.fusilli), /no released code.*`rna-fusion-20261009-method-fusilli`/);
+  assert.match(reason(FLAGGED.fusilli), /no accession, repository or download is recorded for dataset `rna-fusion-20261009-data-lin2026-ball-nanopore`/);
+  assert.match(reason(FLAGGED.enfusion), /no released code.*known-fusion-list/);
+  assert.match(reason(FLAGGED.lancet), /no released code.*config-lancet/);
+  // MutPred: the GitHub link in its configurations' access is the calibration code, not MutPred.
+  assert.match(reason(FLAGGED.mutpred), /no released code.*method-mutpred/);
+});
+
+test('a system with released code on data with an accession passes, and quotes both', () => {
+  const g = byKey(FREEBAYES);
+  const run = runnability(ix, g.systems[0], { protocols: g.protocols });
+  assert.equal(run.runnable, true);
+  assert.match(run.reason, /github\.com\/freebayes/);
+  const data = dataAccess(ix, g);
+  assert.equal(data.open, true);
+  assert.match(data.reason, /SRA run SRR7890879/);
+  const { kept } = excludeNotRunnable(ix, gaps);
+  assert.ok(kept.some((x) => x.key === FREEBAYES));
+});
+
+test('data access: closed statements win, recipe data requirements count, and non-data limitations do not', () => {
+  // DART-Eval's recipe says its official inputs need authenticated access.
+  const dart = byKey('recipe:discovery-benchmark-dart-eval');
+  assert.ok(dart);
+  const d = dataAccess(ix, dart);
+  assert.equal(d.open, false);
+  assert.match(d.reason, /authenticated access is required/);
+  // A recipe on the owner is enough when nothing says the data is closed.
+  assert.equal(dataAccess(ix, byKey('recipe:discovery-benchmark-genomic-benchmarks')).open, true);
+  const rec = (id, kind, extra = {}) => ({ id, kind, name: id, description: '', links: [], access: [], artifacts: [], dataAccessNotes: [], notes: [], recipeDataNotes: [], dataRefs: [], ...extra });
+  const small = (p, ds) => buildIndex({ recs: new Map([[p.id, p], ...ds.map((x) => [x.id, x])]) });
+  const prot = (notes) => rec('p', 'protocol', { links: [{ relation: 'uses_data', target_id: 'd' }], notes });
+  const gap = { systems: [], protocols: ['p'], benchmark: 'p', owner: null };
+  const open = rec('d', 'dataset', { dataRefs: ['accession SRP162370'] });
+  assert.equal(dataAccess(small(prot([]), [open]), gap).open, true);
+  // "Confidence intervals are not available" is about the paper, not the data.
+  assert.equal(dataAccess(small(prot(['Confidence intervals are not available.']), [open]), gap).open, true);
+  assert.equal(dataAccess(small(prot(['The patient samples are available on request.']), [open]), gap).open, false);
+  // A dataset with no source recorded blocks; so does one whose own access says controlled.
+  assert.match(dataAccess(small(prot([]), [rec('d', 'dataset')]), gap).reason, /no accession, repository or download/);
+  assert.match(dataAccess(small(prot([]), [rec('d', 'dataset', { dataRefs: ['accession phs1'], dataAccessNotes: ['Controlled access through dbGaP'] })]), gap).reason, /not public/);
+});
+
+test('dedupe by use case and benchmark words: EnFusion and FUSILLI go to #46, CCGA to #50, MutPred to #65', () => {
+  assert.equal(coveringIssue(ix, byKey(FLAGGED.enfusion), issues)?.number, 46);
+  assert.equal(coveringIssue(ix, byKey(FLAGGED.fusilli), issues)?.number, 46);
+  assert.equal(coveringIssue(ix, byKey(FLAGGED.ccga), issues)?.number, 50);
+  assert.equal(coveringIssue(ix, byKey(FLAGGED.mutpred), issues.filter((i) => i.state === 'open'))?.number, 65);
+  // SEQC2 callers: #45 shares the use case and the benchmark words, #51 only the words; #45 is credited.
+  assert.equal(coveringIssue(ix, byKey(FREEBAYES), issues)?.number, 45);
+  // Public resource names and years alone do not make a benchmark match: #65 says ClinVar and
+  // gnomAD, which does not make it the Brandes et al. 2023 discrepancy.
+  assert.equal(coveringIssue(ix, byKey('discrepancy:discrepancy-44e5640b79522964'), issues), null);
+});
+
+test('successors: the release records Rhapsody-2 as the successor to Rhapsody, and none for Lancet', () => {
+  const next = successorOf(ix, 'vep-lit-20261014-method-rhapsody');
+  assert.equal(next?.id, 'vep-uc-20261014-method-rhapsody-2');
+  assert.match(next.reason, /successor to Rhapsody/);
+  assert.equal(successorOf(ix, 'vep-uc-20261014-method-rhapsody-2'), null);
+  // Lancet2 is not in the release, so Lancet is not flagged as superseded; it is blocked for having no code record.
+  assert.equal(successorOf(ix, 'amp-oncology-rna-20261007-issue-10-config-lancet'), null);
+  // A superseded system blocks the gap even when it runs and its data is public.
+  const g = { ...byKey(FREEBAYES), systems: ['vep-lit-20261014-method-rhapsody'] };
+  const { excluded } = excludeNotRunnable(ix, [g]);
+  assert.match(excluded[0].reason, /superseded: the release records a successor to Rhapsody, Rhapsody-2/);
+});
+
+test('the fixture run files only what passes and never pads to the weekly cap', async () => {
+  const r = await main(['--dry-run'], {}, { log: quiet });
+  const { kept } = excludeNotRunnable(ix, gaps);
+  const passing = planFiling(ix, kept, issues).file.map((g) => g.key);
+  assert.deepEqual(r.filed.map((f) => f.key), passing);
+  assert.ok(r.filed.length < LIMITS.maxIssues);
+  for (const k of Object.values(FLAGGED)) assert.ok(!r.filed.some((f) => f.key === k), k);
+});
