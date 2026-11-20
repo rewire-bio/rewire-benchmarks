@@ -1,0 +1,111 @@
+schema_version: "1.0"
+id: mfass-v2-kmer-baseline
+title: MFASS v2 corrected k-mer and position baseline on CPU
+summary: >-
+  Prepares the MFASS v2 protocol from the two published MFASS tables, fits the registered
+  k-mer and position baseline on the training split and scores the 8,324 held-out variants.
+kind: benchmark_run
+purpose: harness_run
+scope: full_protocol
+protocol_id: mfass-v2
+kg_record_id: rewire-mfass-v2
+store_recipe_id: mfass-v2-baseline
+licence:
+  code: MIT
+  weights: No pretrained weights; the baseline is fitted on the training split.
+  data: Reuse terms are unreported upstream (KosuriLab/MFASS). The data is fetched, not redistributed.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No rewirebench image is published. CI builds containers/Containerfile without pushing it.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No linux/arm64 image has been built.
+hardware_floor:
+  accelerator:
+    kind: none
+  host_memory_gb: 0.83
+  wall_clock_seconds: 21.6
+  basis: measured_by_rewire
+  note: >-
+    CPU only. Measured on 2026-11-20 on an Apple M4 (macOS arm64) by this recipe: 21.6 seconds
+    including the input download, peak resident memory 0.83 GB. Disk was not measured; the two
+    inputs total 80 MB.
+missing:
+  weights_pin:
+    reason: inapplicable
+    note: The baseline uses no pretrained weights.
+inputs:
+  - name: snv_data_clean.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
+    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
+    bytes: 41445250
+  - name: snv_func_annot.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
+    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
+    bytes: 38514140
+commands:
+  - name: prepare
+    argv: [rewirebench, prepare, mfass-v2, --source, "{inputs}", --output, "{work}/prepared"]
+  - name: run-baselines
+    argv:
+      - rewirebench
+      - run-baselines
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/baselines"
+      - --baseline
+      - mfass-kmer-position-v2
+outputs:
+  - baselines/baseline-manifest.json
+  - baselines/mfass-kmer-position-v2/report.json
+  - baselines/mfass-kmer-position-v2/predictions.json
+expected_output:
+  description: >-
+    The corrected baseline values published in benchmarks/mfass/README.md, on all 8,324
+    held-out variants with 315 positives.
+  values:
+    - label: Scored variants
+      metric_id: n
+      file: baselines/mfass-kmer-position-v2/report.json
+      key: [metrics, n]
+      value: 8324
+      tolerance: 0
+    - label: Positives
+      metric_id: positives
+      file: baselines/mfass-kmer-position-v2/report.json
+      key: [metrics, positives]
+      value: 315
+      tolerance: 0
+    - label: Precision at 100
+      metric_id: precision_at_capacity
+      file: baselines/mfass-kmer-position-v2/report.json
+      key: [metrics, precision_at_capacity]
+      value: 0.610
+      tolerance: 0.0005
+    - label: Average precision
+      metric_id: average_precision_sklearn
+      file: baselines/mfass-kmer-position-v2/report.json
+      key: [metrics, average_precision_sklearn]
+      value: 0.286
+      tolerance: 0.0005
+    - label: AUROC
+      metric_id: auroc
+      file: baselines/mfass-kmer-position-v2/report.json
+      key: [metrics, auroc]
+      value: 0.778
+      tolerance: 0.0005
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - A rerun with the project's own code and data, not an independent reproduction by another group.
+  - Runs in the host Python environment because no container image is published yet.
