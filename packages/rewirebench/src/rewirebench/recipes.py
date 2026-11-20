@@ -5,9 +5,10 @@ that it worked (expected output). It carries no status. The evidence store holds
 pointer to the file (repository, commit, path, SHA-256) and the verified status, so
 promoting a recipe never changes the bytes a receipt cites.
 
-Schema 1.0 lets a recipe run only four data subcommands of rewirebench itself. A recipe
-cannot name a shell, another program or a Python adapter, so it cannot start a pod or
-submit a result.
+Schema 1.0 lets a recipe run only five subcommands of rewirebench itself: four data
+commands, and ``run`` with a model from the registry in ``rewirebench.models``. A recipe
+cannot name a shell, another program or an arbitrary Python callable, so it cannot start
+a pod or submit a result.
 
 Field names follow ADR 0005 of rewire-benchmark-data where the two overlap; see
 ``docs/adr-c-recipes-and-receipts.md``.
@@ -17,6 +18,7 @@ from __future__ import annotations
 
 import datetime
 import hashlib
+import json
 import os
 import re
 from dataclasses import dataclass
@@ -44,11 +46,13 @@ RECIPES_DIR_VARIABLE = "REWIREBENCH_RECIPES_DIR"
 SCHEMA_FILENAME = "recipe.schema.json"
 # The only program a recipe may name, and the subcommands it may use. These prepare and
 # score data on the machine. Left out on purpose: `submit`, `submit-queue` and `enqueue`
-# (a recipe never sends anything), `recipe` and `receipt` (it never starts another recipe),
-# and `run`, whose --adapter option imports and calls any installed Python callable, for
-# example subprocess.Popen. A model recipe needs `run` back with an adapter allowlist.
+# (a recipe never sends anything), `recipe` and `receipt` (it never starts another recipe).
+# `run` is accepted only with --model and a registered model: its --adapter option imports
+# and calls any installed Python callable, for example subprocess.Popen. See check_run_step.
 RUNNER_PROGRAM = "rewirebench"
-RUNNER_COMMANDS = ("prepare", "evaluate", "run-baselines", "prepare-baseline-artifact")
+DATA_COMMANDS = ("prepare", "evaluate", "run-baselines", "prepare-baseline-artifact")
+MODEL_COMMAND = "run"
+RUNNER_COMMANDS = (*DATA_COMMANDS, MODEL_COMMAND)
 # Names the runner writes into a run folder. A recipe cannot list them as outputs.
 RESERVED_OUTPUTS = ("receipt.json", "SHA256SUMS")
 RESERVED_FOLDER = "logs"
@@ -97,6 +101,33 @@ def python_satisfies(spec: str, version: tuple[int, ...]) -> bool:
     if spec.startswith("=="):
         return tuple(version[: len(wanted)]) == wanted
     return tuple(version[:3]) >= wanted
+
+
+def check_run_step(argv: list[str]) -> None:
+    """Refuse a ``rewirebench run`` step that could call anything but a registered model.
+
+    The step is parsed by the real command-line parser, which accepts no abbreviated
+    option for ``run``, so ``--adapter=x`` and ``--adap x`` are seen for what they are.
+    It must name its model with ``--model``, the model must be one a recipe may use, and
+    the adapter options must be ones the model declares.
+    """
+    from rewirebench import cli, models
+
+    args = cli.parse_strict(argv[1:])
+    if args.command != MODEL_COMMAND:
+        raise ValueError(f"Not a {MODEL_COMMAND} step: {argv[:2]}")
+    if args.adapter is not None or args.model is None:
+        raise ValueError(
+            "A recipe run step names a registered model with --model, never --adapter"
+        )
+    spec = models.get_model(args.model)
+    if not spec.recipe_allowed:
+        raise ValueError(f"Model {spec.id} starts another program, so a recipe cannot use it")
+    try:
+        options = json.loads(args.adapter_options)
+    except json.JSONDecodeError as error:
+        raise ValueError(f"--adapter-options is not JSON: {error}") from error
+    models.check_options(spec, options)
 
 
 class Strict(BaseModel):
@@ -251,7 +282,8 @@ class Command(Strict):
     """One rewirebench step as an argv list. No shell is involved.
 
     The first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A
-    step that runs longer than ``timeout_seconds`` is stopped and the run fails.
+    ``run`` step names a registered model with ``--model``. A step that runs longer than
+    ``timeout_seconds`` is stopped and the run fails.
     """
 
     name: Identifier
@@ -267,6 +299,11 @@ class Command(Strict):
                 f"Command {self.name}: a recipe runs only `{RUNNER_PROGRAM}` followed by one "
                 f"of {', '.join(RUNNER_COMMANDS)}. No shell and no other program."
             )
+        if self.argv[1] == MODEL_COMMAND:
+            try:
+                check_run_step(list(self.argv))
+            except ValueError as error:
+                raise ValueError(f"Command {self.name}: {error}") from error
         for argument in self.argv:
             unknown = sorted(set(_PLACEHOLDER.findall(argument)) - set(PLACEHOLDERS))
             if unknown:

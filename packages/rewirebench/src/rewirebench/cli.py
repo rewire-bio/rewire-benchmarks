@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime
 import importlib
+import io
 import json
 import os
 import sys
@@ -60,9 +62,31 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
     if args.recipe_command == "show":
         return {**recipes.summary(loaded, directory),
                 "recipe": loaded.recipe.model_dump(mode="json", by_alias=True)}, 0
+    from rewirebench import backends
+
+    started_by = args.started_by or receipts.default_started_by()
+    if args.recipe_command == "plan":
+        backend = backends.get_backend(args.backend, spark=_spark_config(args, required=False))
+        plan = backend.plan(
+            loaded, recipes_dir=directory, output=args.output, inputs=args.inputs,
+            started_by=started_by, kg_release_id=args.kg_release_id,
+        )
+        return plan.model_dump(mode="json"), 0
+    if args.backend == "spark" and not args.in_container:
+        # From this machine: SSH to the Spark and run the pinned image there. Without
+        # --execute nothing is contacted and the steps are printed.
+        spark = backends.get_backend("spark", spark=_spark_config(args, required=args.execute))
+        result = spark.run(
+            loaded, recipes_dir=directory, output=args.output, inputs=args.inputs,
+            started_by=started_by, kg_release_id=args.kg_release_id,
+            dry_run=not args.execute,
+        )
+        return result, 0 if result.get("dry_run") or result.get("checks_passed") else 1
+    if args.in_container and args.backend != "spark":
+        raise ValueError("--in-container is set by the spark backend only")
     receipt = receipts.run_recipe(
         loaded, output=args.output, recipes_dir=directory, inputs=args.inputs,
-        started_by=args.started_by, kg_release_id=args.kg_release_id,
+        started_by=args.started_by, kg_release_id=args.kg_release_id, backend=args.backend,
     )
     return {"recipe_id": loaded.recipe.id, "checks_passed": receipt.checks_passed,
             "metrics": receipt.metrics, "wall_seconds": receipt.wall_seconds,
@@ -72,12 +96,27 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
         0 if receipt.checks_passed else 1
 
 
-def main(argv=None):
+def _spark_config(args: argparse.Namespace, *, required: bool) -> Any:
+    """The Spark to use: --spark-host and --spark-workdir, or the environment."""
+    from rewirebench.backends import spark
+
+    return spark.SparkConfig.from_environment(
+        host=args.spark_host, workdir=args.spark_workdir, required=required
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="rewirebench", description="Local biological benchmark evaluation"
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("protocols", help="List implemented protocols")
+    listing = sub.add_parser("models", help="List the registered model adapters")
+    listing.add_argument("--protocol", choices=sdk.PROTOCOLS,
+                         help="Only the models this protocol accepts")
+    server = sub.add_parser(
+        "mcp", help="Serve the benchmarks MCP server on stdio (needs rewirebench[mcp])")
+    server.add_argument("--recipes-dir", help="Default: the recipes/ of this checkout")
     cleanup = sub.add_parser("clean", help="Preview old expanded references with verified gzip copies")
     cleanup.add_argument("--root", required=True, help="Repository containing benchmarks/*/data")
     cleanup.add_argument("--older-than-days", type=float, default=7)
@@ -119,15 +158,22 @@ def main(argv=None):
     prepare.add_argument("--output", required=True)
     prepare.add_argument("--options", default="{}", help="Protocol options as JSON")
     for name in ("run", "evaluate"):
-        cmd = sub.add_parser(name)
+        # No abbreviated options for `run`: a recipe step is checked by parsing it here,
+        # and `--adap` must not be read as `--adapter`.
+        cmd = sub.add_parser(name, allow_abbrev=name != "run")
         cmd.add_argument("--prepared", required=True)
         cmd.add_argument("--output", required=True)
-        cmd.add_argument("--model-name", default="private model")
+        cmd.add_argument("--model-name", help="Default: the registered model's title, "
+                                              "or 'private model' with --adapter")
         cmd.add_argument("--training-overlap", default="unreported")
         cmd.add_argument("--allow-partial", action="store_true")
         if name == "run":
-            cmd.add_argument(
-                "--adapter", required=True, help="Explicit local Python module:class to execute"
+            which = cmd.add_mutually_exclusive_group(required=True)
+            which.add_argument(
+                "--model", help="A registered model; see `rewirebench models`"
+            )
+            which.add_argument(
+                "--adapter", help="Explicit local Python module:class to execute"
             )
             cmd.add_argument("--adapter-options", default="{}")
             cmd.add_argument("--batch-size", type=int, default=32)
@@ -153,24 +199,39 @@ def main(argv=None):
         "show": "Print one recipe as validated JSON",
         "validate": "Validate every recipe, or the named files",
         "schema": "Print the JSON Schema of a recipe",
-        "run": "Run a recipe on this machine and write receipt.json",
+        "plan": "Print what a run would need and cost on a backend. Starts nothing",
+        "run": "Run a recipe and write receipt.json",
     }
     for name, text in recipe_commands.items():
         cmd = recipe_sub.add_parser(name, help=text)
         if name != "schema":
             cmd.add_argument("--recipes-dir", help="Default: the recipes/ of this checkout")
-        if name in {"show", "run"}:
+        if name in {"show", "plan", "run"}:
             cmd.add_argument("recipe", help="Recipe ID")
         if name == "validate":
             cmd.add_argument("paths", nargs="*", help="Recipe files; default is all of recipes/")
-        if name == "run":
-            cmd.add_argument("--output", required=True, help="New folder for outputs and receipt")
+        if name in {"plan", "run"}:
+            cmd.add_argument("--output", required=name == "run",
+                             help="New folder for outputs and receipt")
             cmd.add_argument("--inputs", help="Folder holding the inputs; default is to fetch them")
-            cmd.add_argument("--backend", choices=["local"], default="local")
+            cmd.add_argument("--backend", default="local",
+                             choices=["local", "spark", "runpod"] if name == "plan"
+                             else ["local", "spark"],
+                             help="runpod can be planned and priced, not run")
             cmd.add_argument("--started-by", choices=["human", "agent", "ci"],
                              help="Default: ci in CI, agent under a known agent harness, "
                                   "otherwise human. An agent should pass agent")
             cmd.add_argument("--kg-release-id")
+            cmd.add_argument("--spark-host", help="SSH destination of the Spark; default "
+                                                  "REWIREBENCH_SPARK_HOST")
+            cmd.add_argument("--spark-workdir", help="Absolute folder on the Spark; default "
+                                                     "REWIREBENCH_SPARK_WORKDIR")
+        if name == "run":
+            cmd.add_argument("--execute", action="store_true",
+                             help="With --backend spark: connect and run. Without it the "
+                                  "steps are printed and nothing is contacted")
+            cmd.add_argument("--in-container", action="store_true",
+                             help="Set by the spark backend inside the recipe's image")
     receipt = sub.add_parser("receipt", help="Check a run receipt")
     receipt_sub = receipt.add_subparsers(dest="receipt_command", required=True)
     check = receipt_sub.add_parser("verify", help="Recompute a receipt folder's digests and checks")
@@ -180,7 +241,31 @@ def main(argv=None):
     check.add_argument("--strict", action="store_true",
                        help="Also fail when a check could not be made. Passes only for a "
                             "recipe run from a clean commit")
+    return parser
+
+
+def parse_strict(argv: list[str]) -> argparse.Namespace:
+    """Parse an argv list, raising ValueError where the command line would exit."""
+    with contextlib.redirect_stderr(io.StringIO()) as problem:
+        try:
+            return build_parser().parse_args(argv)
+        except SystemExit:
+            lines = problem.getvalue().strip().splitlines()
+            raise ValueError(lines[-1] if lines else "Not a rewirebench command") from None
+
+
+def main(argv=None):
+    parser = build_parser()
     args = parser.parse_args(argv)
+    if args.command == "mcp":
+        # Stdout belongs to the MCP transport from here on, so nothing below may print.
+        try:
+            from rewirebench import mcp_server
+        except ImportError as error:
+            parser.exit(2, f"The MCP server needs the mcp package ({error}). "
+                           "Install rewirebench[mcp].\n")
+        mcp_server.serve(recipes_dir=args.recipes_dir)
+        return
     arguments = list(sys.argv[1:] if argv is None else argv)
     started_at = datetime.datetime.now(datetime.UTC)
     started = time.perf_counter()
@@ -198,6 +283,9 @@ def main(argv=None):
             result = clean(args.root, older_than_days=args.older_than_days, apply=args.apply)
         elif args.command == "protocols":
             result = list(sdk.PROTOCOLS)
+        elif args.command == "models":
+            from rewirebench import models
+            result = models.list_models(args.protocol)
         elif args.command == "inspect":
             result = sdk.describe(args.protocol)
             from rewirebench.baselines import describe_baselines
@@ -237,17 +325,25 @@ def main(argv=None):
                 "prepared": str(Path(args.output) / "prepared.json"),
             }
         elif args.command in {"run", "evaluate"}:
+            model_name = args.model_name or "private model"
+            if args.command == "run" and args.model:
+                from rewirebench import models
+                spec = models.get_model(args.model)
+                model_name = args.model_name or spec.title
+                adapter = models.load(spec, json.loads(args.adapter_options))
+            elif args.command == "run":
+                module, name = args.adapter.split(":", 1)
+                factory = getattr(importlib.import_module(module), name)
+                adapter = factory(**json.loads(args.adapter_options))
             kwargs = {
                 "output": args.output,
-                "model": {"name": args.model_name, "training_overlap": args.training_overlap},
+                "model": {"name": model_name, "training_overlap": args.training_overlap},
                 "allow_partial": args.allow_partial,
             }
             if args.command == "run":
-                module, name = args.adapter.split(":", 1)
-                factory = getattr(importlib.import_module(module), name)
                 result = sdk.run(
                     args.prepared,
-                    factory(**json.loads(args.adapter_options)),
+                    adapter,
                     batch_size=args.batch_size,
                     prediction_type=args.prediction_type,
                     **kwargs,

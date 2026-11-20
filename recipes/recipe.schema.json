@@ -111,7 +111,7 @@
     },
     "Command": {
       "additionalProperties": false,
-      "description": "One rewirebench step as an argv list. No shell is involved.\n\nThe first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A\nstep that runs longer than ``timeout_seconds`` is stopped and the run fails.",
+      "description": "One rewirebench step as an argv list. No shell is involved.\n\nThe first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A\n``run`` step names a registered model with ``--model``. A step that runs longer than\n``timeout_seconds`` is stopped and the run fails.",
       "properties": {
         "name": {
           "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
