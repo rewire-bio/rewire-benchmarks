@@ -244,7 +244,10 @@ SCRIPTS = {
     "write": WRITE % "2.004",
     "write-nan": WRITE % "float('nan')",
     "fail": "raise SystemExit(3)",
-    "sleep": "import time; time.sleep(60)",
+    # The step starts a child of its own; the timeout must stop that one too.
+    "sleep": ("import subprocess, sys, time; "
+              "subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)']); "
+              "time.sleep(60)"),
     "environment": WRITE % "2.004" + "; import os; print(sorted(os.environ.items()))",
     "write-receipt": WRITE % "2.004" + "; (target.parent / 'receipt.json').write_text('{}')",
 }
@@ -301,6 +304,7 @@ def test_a_step_runs_only_this_installation_of_rewirebench():
     assert receipts._program(["rewirebench", "prepare", "mfass-v2"]) == [
         sys.executable, "-m", "rewirebench.cli", "prepare", "mfass-v2"]
     for argv in (["sh", "-c", "true"], ["runpodctl", "create", "pod"], ["rewirebench"],
+                 ["rewirebench", "run", "--adapter", "subprocess:Popen"],
                  ["rewirebench", "submit"], ["rewirebench", "recipe", "run", "x"]):
         with pytest.raises(ValueError, match="runs only rewirebench data commands"):
             receipts._program(argv)

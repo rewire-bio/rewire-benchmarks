@@ -152,6 +152,9 @@ def test_the_local_backend_is_cpu_only():
     ["python", "-c", "print(1)"],
     ["rewirebench"],
     ["rewirebench", "submit", "--bundle", "x"],
+    # `run --adapter` calls any installed callable, so it would run another program.
+    ["rewirebench", "run", "--prepared", "{work}/prepared", "--output", "{output}/run",
+     "--adapter", "subprocess:Popen", "--adapter-options", '{"args": ["runpodctl"]}'],
     ["rewirebench", "submit-queue", "--send"],
     ["rewirebench", "enqueue"],
     ["rewirebench", "recipe", "run", "other"],

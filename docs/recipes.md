@@ -37,13 +37,15 @@ reports every other file under `invalid`, with exit code 1.
   URL with no user name or password, or from a `repo_path` in this repository. A run stops
   before any command if an input does not match.
 - `commands` are argv lists. The first element is `rewirebench` and the second is one of
-  `prepare`, `run`, `evaluate`, `run-baselines` or `prepare-baseline-artifact`. Nothing else is
+  `prepare`, `evaluate`, `run-baselines` or `prepare-baseline-artifact`. Nothing else is
   accepted: no shell, no other program, and none of the commands that send data (`submit`,
-  `submit-queue`, `enqueue`). The step runs the same installation that is executing the recipe.
+  `submit-queue`, `enqueue`). `run` is not accepted yet either, because its `--adapter` option
+  calls any installed Python callable; a model recipe will need it back with a list of allowed
+  adapters. The step runs the same installation that is executing the recipe.
   `{inputs}` is the folder holding the inputs, `{work}` is a scratch folder that is deleted,
   and `{output}` is the run folder.
 - A command may set `timeout_seconds` (default 3600, at most 86400). A step still running then
-  is stopped and the run fails.
+  is stopped, with any process it started, and the run fails.
 - `outputs` lists the files the run must write, relative to the run folder. `receipt.json`,
   `SHA256SUMS` and `logs/` belong to the runner and cannot be listed.
 - `expected_output` holds values read from JSON outputs with a tolerance, and SHA-256 digests for
@@ -73,8 +75,8 @@ check passed and 1 otherwise. A receipt is written in both cases.
 
 What keeps a recipe run from starting a GPU or paid run:
 
-- A recipe can only name rewirebench's own data commands (see above), so it cannot call a
-  shell, `runpodctl` or any other program.
+- A recipe can only name four of rewirebench's own data commands (see above), so it cannot
+  call a shell, `runpodctl`, any other program or a Python adapter.
 - Each step gets a short list of environment variables (`PATH`, `HOME`, locale, temp folder,
   Python and certificate settings, the container digest variables). API keys and tokens in your
   environment are not passed on, so they cannot reach a step or its logs.
@@ -82,9 +84,8 @@ What keeps a recipe run from starting a GPU or paid run:
   name the `local` backend.
 - `recipe run` accepts `--backend local` only.
 
-This is not a sandbox. `rewirebench run --adapter module:Class` imports Python code that is
-installed in the environment, and that code runs with your user's rights. Read a recipe you
-did not write before you run it.
+This is not a sandbox. A step runs with your user's rights and can read your home folder.
+Read a recipe you did not write before you run it.
 
 The run folder holds the outputs, `logs/` with each command's output, `receipt.json` and
 `SHA256SUMS`. Logs can contain local paths and anything a command printed, so read them before

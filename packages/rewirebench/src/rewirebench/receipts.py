@@ -21,6 +21,7 @@ import math
 import os
 import platform
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -569,8 +570,10 @@ def _execute(
     with (log.with_suffix(".stdout.txt").open("xb") as out,
           log.with_suffix(".stderr.txt").open("xb") as err):
         try:
+            # Its own session, so a timeout stops the step's child processes as well.
             process = subprocess.Popen(
-                executable, cwd=cwd, env=step_environment(), stdout=out, stderr=err
+                executable, cwd=cwd, env=step_environment(), stdout=out, stderr=err,
+                start_new_session=hasattr(os, "killpg"),
             )
         except OSError as error:
             err.write(f"{type(error).__name__}: {error}\n".encode())
@@ -579,7 +582,13 @@ def _execute(
 
         def stop() -> None:
             expired.set()
-            process.kill()
+            try:
+                if hasattr(os, "killpg"):
+                    os.killpg(process.pid, signal.SIGKILL)
+                else:
+                    process.kill()
+            except ProcessLookupError:
+                pass
 
         timer = threading.Timer(timeout, stop)
         timer.start()

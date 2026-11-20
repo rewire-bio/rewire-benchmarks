@@ -5,8 +5,9 @@ that it worked (expected output). It carries no status. The evidence store holds
 pointer to the file (repository, commit, path, SHA-256) and the verified status, so
 promoting a recipe never changes the bytes a receipt cites.
 
-Schema 1.0 lets a recipe run only the data subcommands of rewirebench itself. A recipe
-cannot name a shell or another program, so it cannot start a pod or submit a result.
+Schema 1.0 lets a recipe run only four data subcommands of rewirebench itself. A recipe
+cannot name a shell, another program or a Python adapter, so it cannot start a pod or
+submit a result.
 
 Field names follow ADR 0005 of rewire-benchmark-data where the two overlap; see
 ``docs/adr-c-recipes-and-receipts.md``.
@@ -42,10 +43,12 @@ PLACEHOLDERS = ("inputs", "work", "output")
 RECIPES_DIR_VARIABLE = "REWIREBENCH_RECIPES_DIR"
 SCHEMA_FILENAME = "recipe.schema.json"
 # The only program a recipe may name, and the subcommands it may use. These prepare and
-# score data on the machine. `submit`, `submit-queue`, `enqueue`, `recipe` and `receipt`
-# are left out on purpose: a recipe never sends anything and never starts another recipe.
+# score data on the machine. Left out on purpose: `submit`, `submit-queue` and `enqueue`
+# (a recipe never sends anything), `recipe` and `receipt` (it never starts another recipe),
+# and `run`, whose --adapter option imports and calls any installed Python callable, for
+# example subprocess.Popen. A model recipe needs `run` back with an adapter allowlist.
 RUNNER_PROGRAM = "rewirebench"
-RUNNER_COMMANDS = ("prepare", "run", "evaluate", "run-baselines", "prepare-baseline-artifact")
+RUNNER_COMMANDS = ("prepare", "evaluate", "run-baselines", "prepare-baseline-artifact")
 # Names the runner writes into a run folder. A recipe cannot list them as outputs.
 RESERVED_OUTPUTS = ("receipt.json", "SHA256SUMS")
 RESERVED_FOLDER = "logs"

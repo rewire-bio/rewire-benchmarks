@@ -102,11 +102,13 @@ belongs to the backend that spends money, which is not part of this step.
 - `commands` is a list of named argv lists, not one `command`. The MFASS v2 baseline needs two
   steps. No shell is involved. The placeholders `{inputs}`, `{work}` and `{output}` are the only
   substitution.
-- Schema 1.0 accepts only `rewirebench` followed by `prepare`, `run`, `evaluate`,
-  `run-baselines` or `prepare-baseline-artifact`. A step gets an allowlisted environment with
-  no CUDA device and has a timeout. This is what makes "a local recipe run never starts a GPU
-  or paid run" a property of the code. A backend that needs another program (a container
-  runtime on the Spark, a model's own script) has to widen the schema on purpose.
+- Schema 1.0 accepts only `rewirebench` followed by `prepare`, `evaluate`, `run-baselines` or
+  `prepare-baseline-artifact`. A step gets an allowlisted environment with no CUDA device and
+  has a timeout. This is what makes "a local recipe run never starts a GPU or paid run" a
+  property of the code. `run` is left out because `--adapter` calls any installed Python
+  callable. A model recipe (#58) has to add it back with a list of allowed adapters, and a
+  backend that needs another program (a container runtime on the Spark) has to widen the
+  schema on purpose.
 - A `runpod` backend block requires `estimate.price_basis` and caps `max_hours` at 24, so the
   amount a launch must quote and have confirmed can always be computed from the recipe.
 - `outputs` lists the files a run must write. A missing one is a failed check.
