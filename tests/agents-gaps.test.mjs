@@ -8,7 +8,10 @@
 // run 44739368955 that an independent check found should not be filed (Lancet on the virtual
 // tumour, EnFusion on Seraseq, the clinical classifier on CCGA validation, FUSILLI on the Lin et al.
 // 2026 cohort; MutPred was already here), with the SEQC2 FD WES indel protocol (open callers on SRA
-// data), the DART-Eval benchmark and Rhapsody and Rhapsody-2. issues.json holds the real issues #40 to #56, #65
+// data), the DART-Eval benchmark and Rhapsody and Rhapsody-2. For the three recipe proposals of
+// report-only run 44743133101 they hold the BEACON and NABench benchmark records, the Genomic
+// Benchmarks record as that release has it, and the ProteinGym AMFR protocol (it names the runner
+// protocol of the ProteinGym v1.3 recipes). issues.json holds the real issues #40 to #56, #65
 // and #67 to #71 (open) and #25 (closed) of this repository, as the REST API returns them, and one
 // synthetic closed proposal (#9001).
 import { test } from 'node:test';
@@ -18,7 +21,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   LABELS, LIMITS, MARKER, buildIndex, checkWhy, citesId, coveringIssue, dataAccess, distinctiveTokens, estimate, excludeNotRunnable, findGaps, gpuCount,
-  latestRelease, main, planFiling, readRecords, runnability, scoreGaps, successorOf, whyFacts, writeWhy, Usage,
+  latestRelease, main, planFiling, readRecords, recipeCheck, runnability, scoreGaps, successorOf, whyFacts, writeWhy, Usage,
 } from '../scripts/agents/gaps.mjs';
 
 const FIX = 'tests/agents-gaps-fixtures';
@@ -454,8 +457,10 @@ test('data access: closed statements win, recipe data requirements count, and no
   const d = dataAccess(ix, dart);
   assert.equal(d.open, false);
   assert.match(d.reason, /authenticated access is required/);
-  // A recipe on the owner is enough when nothing says the data is closed.
-  assert.equal(dataAccess(ix, byKey('recipe:discovery-benchmark-genomic-benchmarks')).open, true);
+  // A recipe on the owner is enough when nothing says the data is closed and recipeCheck accepts it.
+  assert.equal(dataAccess(ix, byKey('recipe:discovery-benchmark-beacon')).open, true);
+  // A recipe recipeCheck rejects says nothing about the data.
+  assert.equal(dataAccess(ix, byKey('recipe:discovery-benchmark-genomic-benchmarks')).open, false);
   const rec = (id, kind, extra = {}) => ({ id, kind, name: id, description: '', links: [], access: [], artifacts: [], dataAccessNotes: [], notes: [], recipeDataNotes: [], dataRefs: [], ...extra });
   const small = (p, ds) => buildIndex({ recs: new Map([[p.id, p], ...ds.map((x) => [x.id, x])]) });
   const prot = (notes) => rec('p', 'protocol', { links: [{ relation: 'uses_data', target_id: 'd' }], notes });
@@ -502,4 +507,42 @@ test('the fixture run files only what passes and never pads to the weekly cap', 
   assert.deepEqual(r.filed.map((f) => f.key), passing);
   assert.ok(r.filed.length < LIMITS.maxIssues);
   for (const k of Object.values(FLAGGED)) assert.ok(!r.filed.some((f) => f.key === k), k);
+});
+
+test('recipe gaps: a placeholder evaluation script or a recipe with no score blocks; BEACON passes with its caveats', () => {
+  const { kept, excluded } = excludeNotRunnable(ix, gaps);
+  const reason = (k) => excluded.find((x) => x.gap.key === k)?.reason ?? '';
+  // NABench: the run documentation and the recipe both say the evaluation script is the user's.
+  assert.ok(!kept.some((g) => g.key === 'recipe:discovery-benchmark-nabench'));
+  assert.match(reason('recipe:discovery-benchmark-nabench'), /run documentation of `discovery-benchmark-nabench` says ".*SELEX processed data are still being organized.*script to be supplied by the user\."/);
+  assert.match(reason('recipe:discovery-benchmark-nabench'), /recipe `nabench-official` says "Example command \(specific script to be provided by you\)"/);
+  // Genomic Benchmarks: the official recipe only yields the splits, and the rewirebench scoring
+  // recipe is for genomic-benchmarks-v2, which no record in the release defines or uses.
+  assert.ok(!kept.some((g) => g.key === 'recipe:discovery-benchmark-genomic-benchmarks'));
+  assert.match(reason('recipe:discovery-benchmark-genomic-benchmarks'), /recipe `genomic-benchmarks-official` outputs "Train and test splits as the package ships them\.", not a score/);
+  assert.match(reason('recipe:discovery-benchmark-genomic-benchmarks'), /recipe `genomic-benchmarks-rewirebench` is for protocol `genomic-benchmarks-v2`, which no record in the release defines or uses/);
+  // ProteinGym v1.3: the AMFR protocol record names its recipes' runner protocol, so they count.
+  const pg = recipeCheck(ix, 'rewire-proteingym-v1-3-dms-substitutions');
+  assert.equal(pg.ready, true);
+  assert.equal(pg.entry.item.id, 'proteingym-v1-3-esm2');
+  // "Data and weight paths are placeholders" is a parameter, not missing content.
+  const paths = buildIndex({ recs: new Map([['b', { id: 'b', kind: 'benchmark', links: [], runDoc: 'Data and weight paths are placeholders.', run_recipes: [{ id: 'r', protocol_id: 'b', outputs: ['Per-task scores.'], instructions: [] }] }]]) });
+  assert.equal(recipeCheck(paths, 'b').ready, true);
+  // BEACON: filed, with the release's caveats quoted.
+  const beacon = kept.find((g) => g.key === 'recipe:discovery-benchmark-beacon');
+  assert.ok(beacon);
+  assert.match(beacon.checks.recipe, /recipe `beacon-official` outputs "A fine-tuned model and its score/);
+  assert.ok(beacon.caveats.some((c) => /A minimal independent command sequence has not been validated in this pass/.test(c)));
+  assert.ok(beacon.caveats.some((c) => /conda environment `beacon` but never activates it/.test(c)));
+  assert.ok(beacon.caveats.some((c) => /No tier 1 ranking rests/.test(c)));
+});
+
+test('a recipe proposal with no use case says where tier 1 comes from, not that its systems are tier 1', async () => {
+  const r = await main(['--dry-run'], {}, { log: quiet });
+  const f = r.filed.find((x) => x.key === 'recipe:discovery-benchmark-beacon');
+  assert.ok(f);
+  assert.match(f.issue.body, /- Tier 1 use cases: none maps a protocol under it; BEACON \(`discovery-benchmark-beacon`\) is depth tier 1 \(its `depth_tier`\)\./);
+  for (const x of r.filed) if (x.key.startsWith('recipe:')) assert.ok(!/the systems are tier 1/.test(x.issue.body), x.key);
+  assert.match(f.issue.body, /- Caveat: The release's run documentation for `discovery-benchmark-beacon` says: /);
+  assert.match(f.issue.body, /Verbatim from the recipe `beacon-official`/);
 });

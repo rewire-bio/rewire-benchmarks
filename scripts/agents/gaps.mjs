@@ -8,9 +8,10 @@
 // Each gap gets a value (clinical relevance of its use cases and how many rankings it could
 // change) and, where the data gives a basis, a GPU-hour and dollar estimate. A gap is filed only
 // when the release shows released code, weights, a container or a recipe for every system, shows
-// where the benchmark data can be obtained, and records no successor to its systems; otherwise it
-// is blocked and listed in the summary for a person to look at (runnability, dataAccess and
-// successorOf below). No model call decides what is filed. The best few are filed here as "Proposed verification run" or "Proposed benchmark" issues, labelled proposal
+// where the benchmark data can be obtained, records no successor to its systems, and holds a
+// recipe or run guide that leads to a score with nothing left for the user to supply; otherwise it
+// is blocked and listed in the summary for a person to look at (runnability, dataAccess,
+// successorOf and recipeCheck below). No model call decides what is filed. The best few are filed here as "Proposed verification run" or "Proposed benchmark" issues, labelled proposal
 // and tier-1.
 //
 // Every number, name, command and link in an issue comes from the release data or this
@@ -162,6 +163,11 @@ function slim(r) {
     dataRefs: DATA_REF_KEYS.filter((k) => typeof a[k] === 'string' && a[k].trim() && !/^(?:unreported|not stated|unknown|none)\b/i.test(a[k])).map((k) => `${k} ${a[k]}`),
     privateData: a.private_data_not_included === true,
     supersededBy: typeof a.superseded_by === 'string' ? a.superseded_by : null,
+    // What the store says about running the benchmark from its documentation (recipeCheck below).
+    runDoc: typeof a.run_documentation?.summary === 'string' ? a.run_documentation.summary : null,
+    // The runner protocol a protocol record or an evaluation names: a recipe for that protocol
+    // has a record in the release that defines or used it.
+    runnerProtocol: typeof a.protocol_id === 'string' ? a.protocol_id : typeof a.comparison?.protocol_id === 'string' ? a.comparison.protocol_id : null,
   };
 }
 
@@ -362,7 +368,17 @@ export function buildIndex({ recs, runtimes = [] }) {
     return members.get(systemId) ?? [systemId];
   }
 
-  return { recs, runtimes, linkOf, name, resolveSystem, studyOf, benchmarkOf, ancestors, evalsByAssessment, descendants, recipeOwner, membersOf };
+  // Protocols the release defines or used: record IDs and the runner protocols records name.
+  let known = null;
+  function knowsProtocol(id) {
+    if (!known) {
+      known = new Set();
+      for (const r of recs.values()) if (r.runnerProtocol) known.add(r.runnerProtocol);
+    }
+    return recs.has(id) || known.has(id);
+  }
+
+  return { recs, runtimes, linkOf, name, resolveSystem, studyOf, benchmarkOf, ancestors, evalsByAssessment, descendants, recipeOwner, membersOf, knowsProtocol };
 }
 
 function systemOfEvaluation(ix, evalId) {
@@ -392,19 +408,96 @@ function mainRecipe(rec) {
   return list.find((r) => r.purpose === 'generate_and_evaluate') ?? list[0] ?? null;
 }
 
+// Outputs that are a score: a recipe whose outputs are only data splits or embeddings does not
+// verify anything.
+const SCORE_OUTPUT = /\bscor(?:e|es|ed|ing)\b|\bmetrics?\b|\baccuracy\b|\bau(?:roc|prc|c)\b|\bf1\b|\bcorrelations?\b|\bspearman\b|\bperformance\b|\bresults?\b/i;
+// The store or the project saying part of the run is missing: a script the user must write, data
+// still being prepared, a guide that cannot be inferred. "Paths are placeholders" is not missing
+// content, so the bare word does not count.
+const PLACEHOLDER = /\bto be (?:supplied|provided|written|added|released|implemented)\b|\bstill being (?:organi[sz]ed|prepared|processed|curated|assembled|uploaded)\b|\bcannot be inferred\b|\bnot yet (?:released|available|public|provided)\b|\bcoming soon\b|\bTODO\b/i;
+
+/** The first sentence (or line, or semicolon clause) of `text` matching `re`, or null. */
+function sentenceWith(re, text) {
+  for (const raw of String(text ?? '').split(/(?<=[.;])\s+|\n+/)) {
+    const s = clean(raw.replace(/^#+\s*/, ''));
+    if (re.test(s)) return s.length > 240 ? `${s.slice(0, 237)}...` : s;
+  }
+  return null;
+}
+
+/** Every string in a recipe or run guide: titles, code, steps, inputs, outputs, requirements, limitations. */
+function recipeTexts(entry) {
+  const out = [];
+  const walk = (v) => {
+    if (typeof v === 'string') out.push(v);
+    else if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (!['source_ids', 'source_locator', 'status', 'version', 'id', 'record_id', 'review'].includes(k)) walk(x);
+  };
+  walk(entry);
+  return out;
+}
+
 /**
- * The command a person would run, verbatim from the store: the run guide's steps, else the main
- * recipe's instructions. Null when the store has neither.
+ * Whether the recipe owner holds a run a person can follow to a score, from the release data:
+ * 1. Candidates are the run guide, then the recipes (generate_and_evaluate first).
+ * 2. A candidate counts when its outputs name a score (a metric, accuracy, results), and, for a
+ *    recipe written for another protocol ID, when the release defines or uses that protocol
+ *    (a record ID, or the protocol a protocol record or evaluation names).
+ * 3. Not ready when no candidate counts, or when the owner's run documentation or the chosen
+ *    candidate says part of the run is missing (PLACEHOLDER: a script to be supplied by the user,
+ *    data still being organised, a guide that cannot be inferred).
+ * Returns { ready, reason, entry: { kind: 'guide' | 'recipe', item } | null, owner } or null when
+ * the owner has no recipe or guide.
  */
-export function commandFor(rec) {
+export function recipeCheck(ix, ownerId) {
+  const rec = ownerId ? ix.recs.get(ownerId) : null;
+  if (!rec || !(rec.run_recipes?.length || rec.run_guide)) return null;
+  const recipes = [...(rec.run_recipes ?? [])].sort((a, b) => (b.purpose === 'generate_and_evaluate') - (a.purpose === 'generate_and_evaluate'));
+  const candidates = [...(rec.run_guide ? [{ kind: 'guide', item: rec.run_guide }] : []), ...recipes.map((r) => ({ kind: 'recipe', item: r }))];
+  const label = (c) => (c.kind === 'guide' ? `the run guide of \`${rec.id}\`` : `recipe \`${c.item.id}\``);
+  const rejected = [];
+  let entry = null;
+  for (const c of candidates) {
+    const outputs = (Array.isArray(c.item.outputs) ? c.item.outputs : [c.item.outputs]).filter((x) => typeof x === 'string');
+    if (!outputs.some((o) => SCORE_OUTPUT.test(o))) {
+      rejected.push(`${label(c)} outputs ${outputs.length ? outputs.map((o) => `"${clean(o)}"`).join(' and ') : 'nothing recorded'}, not a score`);
+      continue;
+    }
+    const prot = c.kind === 'recipe' ? c.item.protocol_id : null;
+    if (prot && prot !== rec.id && !ix.knowsProtocol(prot)) {
+      rejected.push(`${label(c)} is for protocol \`${prot}\`, which no record in the release defines or uses`);
+      continue;
+    }
+    entry = c;
+    break;
+  }
+  const reasons = [];
+  const doc = sentenceWith(PLACEHOLDER, rec.runDoc);
+  if (doc) reasons.push(`the run documentation of \`${rec.id}\` says "${doc}"`);
+  if (!entry) reasons.push(...rejected);
+  else {
+    const said = recipeTexts(entry.item).map((t) => sentenceWith(PLACEHOLDER, t)).find(Boolean);
+    if (said) reasons.push(`${label(entry)} says "${said}"`);
+  }
+  if (reasons.length) return { ready: false, reason: reasons.join('; '), entry, owner: rec.id };
+  const outputs = (Array.isArray(entry.item.outputs) ? entry.item.outputs : [entry.item.outputs]).filter((x) => typeof x === 'string');
+  return { ready: true, reason: `${label(entry)} outputs "${clean(outputs.find((o) => SCORE_OUTPUT.test(o)))}"`, entry, owner: rec.id };
+}
+
+/**
+ * The command a person would run, verbatim from the store: the chosen entry (recipeCheck), else
+ * the run guide's steps, else the main recipe's instructions. Null when the store has neither.
+ */
+export function commandFor(rec, entry = null) {
   if (!rec) return null;
-  if (rec.run_guide?.steps?.length) {
+  const guide = entry ? (entry.kind === 'guide' ? entry.item : null) : rec.run_guide;
+  if (guide?.steps?.length) {
     return {
-      from: `run guide of \`${rec.id}\` (status \`${rec.run_guide.status ?? 'unknown'}\`)`,
-      blocks: rec.run_guide.steps.map((s) => ({ title: s.title ?? '', lang: 'sh', code: s.shell ?? '' })).filter((b) => b.code),
+      from: `run guide of \`${rec.id}\` (status \`${guide.status ?? 'unknown'}\`)`,
+      blocks: guide.steps.map((s) => ({ title: s.title ?? '', lang: 'sh', code: s.shell ?? '' })).filter((b) => b.code),
     };
   }
-  const r = mainRecipe(rec);
+  const r = entry?.kind === 'recipe' ? entry.item : mainRecipe(rec);
   if (!r?.instructions?.length) return null;
   const lang = (rt) => (rt === 'python' ? 'python' : 'sh');
   return {
@@ -415,9 +508,9 @@ export function commandFor(rec) {
 
 const CPU_ONLY = /\bno (?:accelerator|gpu)s? (?:is |are )?(?:required|needed)\b|\bcpu[- ]only\b|\bdoes not need a gpu\b/i;
 
-/** The hardware text of a recipe owner's main recipe, if any. */
-function hardwareText(rec) {
-  const r = mainRecipe(rec);
+/** The hardware text of the chosen recipe (recipeCheck), else the owner's main recipe, if any. */
+function hardwareText(rec, entry = null) {
+  const r = entry?.kind === 'recipe' ? entry.item : mainRecipe(rec);
   return r?.requirements?.hardware ? clean(r.requirements.hardware) : null;
 }
 
@@ -449,7 +542,7 @@ export function gpuCount(text) {
  * Dollars come only from GPU_PRICES (dated and sourced), and only when every counted runtime
  * has a price; otherwise no dollar estimate.
  */
-export function estimate(ix, { systems = [], protocols = [], owner = null }) {
+export function estimate(ix, { systems = [], protocols = [], owner = null, entry = null }) {
   const sys = new Set(systems);
   const prot = new Set(protocols);
   const byPair = new Map(); // "system|protocol" -> first usable runtime
@@ -493,9 +586,9 @@ export function estimate(ix, { systems = [], protocols = [], owner = null }) {
     };
   }
   const rec = owner ? ix.recs.get(owner) : null;
-  const hw = hardwareText(rec);
+  const hw = hardwareText(rec, entry);
   if (hw && CPU_ONLY.test(hw)) {
-    return { kind: 'cpu', gpuHours: 0, usd: 0, basis: `the hardware field of the ${commandFor(rec)?.from ?? `recipe of \`${owner}\``} says "${hw}"`, usdBasis: 'no GPU is used, so there is no GPU cost. Runner time is not estimated.' };
+    return { kind: 'cpu', gpuHours: 0, usd: 0, basis: `the hardware field of the ${commandFor(rec, entry)?.from ?? `recipe of \`${owner}\``} says "${hw}"`, usdBasis: 'no GPU is used, so there is no GPU cost. Runner time is not estimated.' };
   }
   return {
     kind: 'none',
@@ -724,7 +817,11 @@ export function findGaps(ix, useCasesFile, discrepanciesFile, { smokeChecks = []
     const rewireRun = [...scope].some((id) => (ix.evalsByAssessment.get(id) ?? []).some((e) => ix.recs.get(e)?.origin === 'rewire_run'));
     if (rewireRun) continue;
     const rk = rankings.filter((x) => scope.has(x.protocol)).length;
-    const recipe = mainRecipe(r);
+    const check = recipeCheck(ix, r.id);
+    const recipe = check?.entry?.kind === 'recipe' ? check.entry.item : mainRecipe(r);
+    // Where tier 1 comes from when no tier 1 use case maps a protocol under the record.
+    const tierRec = r.kind === 'benchmark' ? r.id : b;
+    const tierBasis = tier === 1 ? `${named(ix, tierRec)} is depth tier 1${ix.recs.get(tierRec)?.tier === 1 ? ' (its `depth_tier`)' : ' (from its areas)'}` : null;
     const smoke = smokeChecks.find((s) => r.id.endsWith(`-${s.replace(/_/g, '-')}`)) ?? null;
     gaps.push({
       key: gapKey('recipe', r.id),
@@ -734,6 +831,7 @@ export function findGaps(ix, useCasesFile, discrepanciesFile, { smokeChecks = []
       useCases: [...ucIds].map((id) => tier1.get(id)).filter(Boolean),
       systems: [],
       weights: recipe?.requirements?.weights ? clean(recipe.requirements.weights) : null,
+      tierBasis,
       statuses: [...new Set(statuses)],
       smoke,
       benchmark: r.id,
@@ -743,6 +841,7 @@ export function findGaps(ix, useCasesFile, discrepanciesFile, { smokeChecks = []
       owner: r.id,
     });
   }
+  for (const g of gaps) g.recipe = recipeCheck(ix, g.owner);
   return gaps;
 }
 
@@ -751,7 +850,7 @@ export function scoreGaps(ix, gaps) {
   for (const g of gaps) {
     g.clinicalWeight = clinicalWeight(g.useCases);
     g.value = g.clinicalWeight * (1 + g.rankings);
-    g.estimate = g.kind === 'benchmark' ? { kind: 'none', gpuHours: null, usd: null, basis: 'no direct protocol or recipe exists yet for this use case.', usdBasis: 'there is no GPU-hour estimate to price.' } : estimate(ix, { systems: g.systems, protocols: g.protocols, owner: g.owner });
+    g.estimate = g.kind === 'benchmark' ? { kind: 'none', gpuHours: null, usd: null, basis: 'no direct protocol or recipe exists yet for this use case.', usdBasis: 'there is no GPU-hour estimate to price.' } : estimate(ix, { systems: g.systems, protocols: g.protocols, owner: g.owner, entry: g.recipe?.entry ?? null });
     g.bucket = g.estimate.kind === 'cpu' ? 0 : g.estimate.kind === 'gpu' ? 1 : 2;
     g.perGpuHour = g.estimate.kind === 'gpu' && g.estimate.gpuHours > 0 ? g.value / g.estimate.gpuHours : null;
   }
@@ -890,7 +989,8 @@ export function gapDatasets(ix, gap) {
  * 1. Not obtainable when a dataset, protocol or benchmark of the run says its data is not public
  *    (controlled access, on request, not released) or holds private data. This wins over
  *    everything else.
- * 2. Obtainable when the recipe owner has a run recipe or run guide (it fetches the data).
+ * 2. Obtainable when the recipe owner has a run recipe or run guide that recipeCheck accepts (it
+ *    fetches the data). A recipe that recipeCheck rejects says nothing about the data.
  * 3. Obtainable when every dataset of the run, or a record it shares data with, records an
  *    accession, repository, archive DOI, or an access statement that says where to download it.
  * 4. Otherwise not shown: no dataset, or a dataset with no public source recorded.
@@ -911,8 +1011,8 @@ export function dataAccess(ix, gap) {
       }
     }
   }
-  const owner = gap.owner ? ix.recs.get(gap.owner) : null;
-  if (owner && (owner.run_recipes?.length || owner.run_guide)) return { open: true, reason: `run ${owner.run_guide ? 'guide' : 'recipe'} on \`${owner.id}\``, record: owner.id };
+  const check = gap.recipe !== undefined ? gap.recipe : recipeCheck(ix, gap.owner);
+  if (check?.ready) return { open: true, reason: `${check.entry.kind === 'guide' ? 'run guide' : `run recipe \`${check.entry.item.id}\``} on \`${check.owner}\``, record: check.owner };
   if (!datasets.length) return { open: false, reason: 'no dataset is linked to the run\'s protocols or evaluations, so the release does not show where the data is', record: null };
   const sourceOf = (id) => {
     const r = ix.recs.get(id);
@@ -954,11 +1054,29 @@ export function successorOf(ix, systemId) {
 }
 
 /**
+ * What the release says a person should know before running a gap that passes: the owner's run
+ * documentation verbatim, a conda environment the command creates but never activates, and a
+ * recipe run no tier 1 ranking rests on.
+ */
+export function caveatsOf(ix, g) {
+  const out = [];
+  const owner = g.owner ? ix.recs.get(g.owner) : null;
+  if (owner?.runDoc) out.push(`The release's run documentation for \`${owner.id}\` says: "${clean(owner.runDoc)}"`);
+  const code = (commandFor(owner, g.recipe?.entry ?? null)?.blocks ?? []).map((b) => b.code).join('\n');
+  const env = /\bconda create\b[^\n]*?(?:-n|--name)\s+(\S+)/.exec(code);
+  if (env && !/\b(?:conda|source|mamba) activate\b/.test(code)) out.push(`The command creates the conda environment \`${env[1]}\` but never activates it; activate it before installing.`);
+  if (g.type === 'unverified-recipe' && !g.rankings) out.push('No tier 1 ranking rests on a protocol under this record, so the value is the minimum.');
+  return out;
+}
+
+/**
  * Split gaps into those that can be filed and those blocked, with every reason:
  * - a proposed benchmark (no direct evidence) names no system to run and no benchmark data, so
  *   it is blocked for a person to scope;
  * - each system must be runnable by software (runnability) and have no recorded successor;
- * - the run's data must be obtainable (dataAccess).
+ * - the run's data must be obtainable (dataAccess);
+ * - a recipe or run guide on the gap's recipe owner must lead to a score with nothing missing
+ *   (recipeCheck). For a recipe gap this is the runnability check: it has no system of its own.
  * A proposed benchmark's list of proxy systems drops systems that cannot be run. Kept gaps carry
  * `checks` (the reasons they passed), which the issue quotes.
  */
@@ -975,11 +1093,14 @@ export function excludeNotRunnable(ix, gaps, opts = {}) {
       const next = successorOf(ix, s);
       if (next) reasons.push(`superseded: the release records a successor to ${ix.name(s)}, ${ix.name(next.id)} (${next.reason})`);
     }
+    const recipe = g.recipe !== undefined ? g.recipe : recipeCheck(ix, g.owner);
+    if (recipe && !recipe.ready) reasons.push(`no run a person can follow to a score: ${recipe.reason}`);
     const data = g.type === 'no-direct-evidence' ? null : dataAccess(ix, g);
     if (data && !data.open) reasons.push(`data not shown to be obtainable: ${data.reason}`);
     if (reasons.length) excluded.push({ gap: g, system: systems.find((r) => !r.runnable)?.system ?? null, reason: reasons.join('; ') });
     else {
-      g.checks = { systems: systems.map((r) => ({ system: r.system, reason: r.reason })), data: data.reason };
+      g.checks = { systems: systems.map((r) => ({ system: r.system, reason: r.reason })), recipe: recipe?.reason ?? null, data: data.reason };
+      g.caveats = caveatsOf(ix, g);
       kept.push(g);
     }
   }
@@ -1156,7 +1277,8 @@ function listNames(ix, ids, n = 6) {
 function gapLines(ix, g) {
   const ucs = g.useCases.map((u) => `${esc(u.title)} (\`${u.id}\`, ${u.clinical ? 'clinical context' : 'research context'})`);
   const lines = [`- Type: ${TYPES[g.type]}${g.flags && g.flags.length > 1 ? `; also ${g.flags.slice(1).map((f) => TYPES[f].toLowerCase()).join('; ')}` : ''}.`];
-  lines.push(`- Tier 1 use case${ucs.length === 1 ? '' : 's'}: ${ucs.length ? ucs.join('; ') : 'none maps a protocol involved; the systems are tier 1'}.`);
+  const noUseCase = g.systems.length ? 'none maps a protocol involved; the systems are tier 1' : `none maps a protocol under it; ${g.tierBasis ?? 'the record is tier 1'}`;
+  lines.push(`- Tier 1 use case${ucs.length === 1 ? '' : 's'}: ${ucs.length ? ucs.join('; ') : noUseCase}.`);
   if (g.type === 'no-direct-evidence') {
     lines.push(`- Active direct mappings: 0. Active proxy mappings: ${g.proxyMappings}.`);
     if (g.baseline) lines.push(`- Baseline named by the use case: ${esc(g.baseline.name)}${g.baseline.ids.length ? ` (${g.baseline.ids.map((x) => `\`${x}\``).join(', ')})` : ''}.`);
@@ -1178,7 +1300,7 @@ function commandSection(ix, g) {
     return 'No command: no direct protocol or recipe exists for this use case. The first step is a protocol and a recipe (run-recipe schema in #64).';
   }
   const rec = g.owner ? ix.recs.get(g.owner) : null;
-  const cmd = commandFor(rec);
+  const cmd = commandFor(rec, g.recipe?.entry ?? null);
   if (!cmd || !cmd.blocks.length) return `No command: the store has no run recipe or run guide for ${g.benchmark ? named(ix, g.benchmark) : 'this benchmark'}. The first step is a recipe (run-recipe schema in #64).`;
   const out = [`Verbatim from the ${cmd.from} in release data. It is the documented run of the benchmark${g.systems.length ? `; point it at ${g.systems.map((s) => esc(ix.name(s))).join(' and ')} where the recipe takes a model` : ''}. Read the recipe's limitations before running.`, ''];
   let lines = 0;
@@ -1225,7 +1347,9 @@ export function renderProposal(ix, g, { release, why, whyNote, runUrl, rank, dat
   const checks = g.checks
     ? [
       ...g.checks.systems.map((c) => `- Runnable: ${esc(ix.name(c.system))}, ${esc(c.reason)}.`),
+      ...(g.checks.recipe ? [`- Recipe: ${esc(g.checks.recipe)}.`] : []),
       `- Data: ${esc(g.checks.data)}.`,
+      ...(g.caveats ?? []).map((c) => `- Caveat: ${esc(c)}`),
     ]
     : [];
   const body = [
