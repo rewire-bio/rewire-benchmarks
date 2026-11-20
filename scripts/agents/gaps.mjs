@@ -138,6 +138,7 @@ function slim(r) {
     unit: a.unit ?? null,
     printed: a.printed_value ?? null,
     value: a.numeric_value ?? null,
+    approximate: Boolean(a.approximate ?? r.approximate),
     hardware: a.inference_hardware ?? a.hardware ?? null,
     // An evaluation that records only training hardware measures training, which is never a basis.
     trainingOnly: Boolean(a.training_hardware) && !a.inference_hardware,
@@ -406,15 +407,18 @@ export function gpuCount(text) {
 
 /**
  * GPU-hour and dollar estimate for running `systems` on `protocols`, with its basis.
- * 1. A runtime result recorded for one of the systems on one of the protocols, whose hardware
- *    names a GPU and its count: hours times GPU count.
+ * 1. Runtime results recorded for the systems on the protocols, whose hardware names a GPU and
+ *    its count: hours times GPU count, one result per system and protocol, summed. When results
+ *    cover only some of the system and protocol pairs, the figure is a lower bound and says so.
  * 2. The recipe's hardware field says no GPU is needed: 0 GPU-hours and no GPU cost.
  * 3. Otherwise no estimate, with the hardware text if there is one.
- * Dollars come only from GPU_PRICES (dated and sourced); otherwise no dollar estimate.
+ * Dollars come only from GPU_PRICES (dated and sourced), and only when every counted runtime
+ * has a price; otherwise no dollar estimate.
  */
 export function estimate(ix, { systems = [], protocols = [], owner = null }) {
   const sys = new Set(systems);
   const prot = new Set(protocols);
+  const byPair = new Map(); // "system|protocol" -> first usable runtime
   for (const r of ix.runtimes) {
     // Runtime results are kept apart from the other records, so read the link off the result.
     const ev = (r.links ?? []).find((l) => l.relation === 'evaluation')?.target_id;
@@ -423,18 +427,35 @@ export function estimate(ix, { systems = [], protocols = [], owner = null }) {
     const a = ix.linkOf(ev, 'assessment')[0];
     if (!sys.has(s) || !prot.has(a)) continue;
     if (ix.recs.get(ev)?.trainingOnly) continue;
+    const pair = `${s}|${a}`;
+    if (byPair.has(pair)) continue;
     const hw = r.hardware ?? ix.recs.get(ev)?.hardware;
     const n = gpuCount(hw);
     const h = hoursOf(r.value, r.unit);
     if (!n || h === null) continue;
-    const gpuHours = Number((h * n).toPrecision(3));
-    const price = GPU_PRICES.find((p) => p.match.test(String(hw)));
+    byPair.set(pair, { r, s, a, hw, gpuHours: h * n, price: GPU_PRICES.find((p) => p.match.test(String(hw))) });
+  }
+  if (byPair.size) {
+    const parts = [...byPair.values()];
+    const gpuHours = Number(parts.reduce((t, p) => t + p.gpuHours, 0).toPrecision(3));
+    const pairs = sys.size * prot.size;
+    const partial = byPair.size < pairs;
+    const approx = parts.some((p) => p.r.approximate);
+    const priced = parts.every((p) => p.price);
+    const usd = priced ? Number(parts.reduce((t, p) => t + p.gpuHours * p.price.usdPerGpuHour, 0).toFixed(2)) : null;
+    const each = parts.map((p) => `result \`${p.r.id}\`: runtime ${p.r.printed ?? p.r.value} ${p.r.unit}${p.r.approximate ? ' (approximate)' : ''} on ${clean(p.hw)}, for ${ix.name(p.s)} on ${ix.name(p.a)}`).join('; ');
+    const caveats = [
+      partial ? `a lower bound: runtimes are recorded for ${byPair.size} of the ${pairs} system and protocol pairs this run covers` : null,
+      approx ? 'the paper gives an approximate runtime' : null,
+    ].filter(Boolean);
     return {
       kind: 'gpu',
       gpuHours,
-      usd: price ? Number((gpuHours * price.usdPerGpuHour).toFixed(2)) : null,
-      basis: `result \`${r.id}\`: runtime ${r.printed ?? r.value} ${r.unit} on ${clean(hw)}, for ${ix.name(s)} on ${ix.name(a)}.`,
-      usdBasis: price ? `${price.usdPerGpuHour} USD per GPU-hour (${price.source}, ${price.date})` : 'no dated, sourced hourly price for this GPU is recorded (GPU_PRICES in scripts/agents/gaps.mjs).',
+      lowerBound: partial,
+      approximate: approx,
+      usd,
+      basis: `${each}.${caveats.length ? ` This is ${caveats.join(', and ')}.` : ''}`,
+      usdBasis: priced ? [...new Set(parts.map((p) => `${p.price.usdPerGpuHour} USD per GPU-hour (${p.price.source}, ${p.price.date})`))].join('; ') : 'no dated, sourced hourly price is recorded for every GPU used (GPU_PRICES in scripts/agents/gaps.mjs).',
     };
   }
   const rec = owner ? ix.recs.get(owner) : null;
@@ -631,22 +652,26 @@ export function findGaps(ix, useCasesFile, discrepanciesFile, { smokeChecks = []
       protocols = own.filter((p) => benchKey(p) === bench);
       anchorNote = `the ${f.studies[i].role} study's own protocols, because the studies share no protocol or benchmark record`;
     }
-    const both = (r) => (f.systems ?? []).every((s) => r.systems.has(s));
-    const rk = rankings.filter(both).length;
-    const ucIds = new Set(rankings.filter(both).map((r) => r.useCase));
+    // Only rankings on the protocols the run would use: a rerun elsewhere cannot change them.
+    const onRun = rankings.filter((r) => protocols.includes(r.protocol) && (f.systems ?? []).every((s) => r.systems.has(s)));
+    const rk = onRun.length;
+    const ucIds = new Set(onRun.map((r) => r.useCase));
     for (const m of useCasesFile.mappings ?? []) if (tier1.has(m.use_case_id) && m.lifecycle === 'active' && m.relevance !== 'outside_scope' && protocols.includes(m.protocol_id)) ucIds.add(m.use_case_id);
     gaps.push({
       key: gapKey('discrepancy', f.id),
+      // The store re-keys findings when their studies change and keeps the old IDs, so a
+      // proposal marked with an old ID still counts as filed.
+      aliases: (f.previous_ids ?? []).map((id) => gapKey('discrepancy', id)),
       type: 'discrepancy',
       kind: 'verification',
       title: `Proposed verification run: ${ix.name(f.systems[0])} and ${ix.name(f.systems[1])} on ${ix.name(bench)}`,
       useCases: [...ucIds].map((id) => tier1.get(id)).filter(Boolean),
       systems: [...f.systems],
-      finding: { id: f.id, rule: f.rule, scope: f.scope, severity: f.severity, studies: (f.studies ?? []).length, anchorNote },
+      finding: { id: f.id, previousIds: [...(f.previous_ids ?? [])], rule: f.rule, scope: f.scope, severity: f.severity, studies: (f.studies ?? []).length, anchorNote },
       benchmark: bench,
       protocols,
       rankings: rk,
-      rankingNote: `both systems are ranked together on ${rk} tier 1 ranking${rk === 1 ? '' : 's'}; settling the order also settles the finding's contested page`,
+      rankingNote: `both systems are ranked together on ${rk} tier 1 ranking${rk === 1 ? '' : 's'} on the protocols this run uses; settling the order also settles the finding's contested page`,
       owner: protocols.map((p) => ix.recipeOwner(p)).find(Boolean) ?? ix.recipeOwner(bench),
     });
   }
@@ -720,39 +745,61 @@ const contains = (hay, needle) => {
   return n.length >= 3 && ` ${hay} `.includes(` ${n} `);
 };
 
+// Assay, data type and truth-set words that many unrelated benchmarks share. They never
+// identify a benchmark on their own: "WGS CNV" or "HG002 GIAB" names a family, not a benchmark.
+const COMMON_TOKENS = new Set(['WGS', 'WES', 'WXS', 'CNV', 'CNVS', 'SNV', 'SNVS', 'SNP', 'SNPS', 'INDEL', 'INDELS', 'SV', 'SVS', 'GIAB', 'DNA', 'RNA', 'CDNA', 'CFDNA', 'CTDNA', 'NGS', 'PCR', 'AUC', 'AUROC', 'AUPRC', 'ROC', 'MCC', 'VCF', 'BAM', 'GRCH37', 'GRCH38', 'HG19', 'HG38']);
+// Sizes and coverage ("5kb", "30x") are size bins and depths, which many benchmarks share.
+const isCommon = (t) => COMMON_TOKENS.has(t.toUpperCase()) || /^\d+(?:bp|kb|mb|gb|x)$/i.test(t);
+
 /** Words of a name that identify it on their own: acronyms and words with digits (ClinGen, SVI, PP3, SEQC2). */
 export function distinctiveTokens(name) {
   return [...new Set(String(name ?? '').split(/[^A-Za-z0-9]+/).filter((w) => w.length >= 3 && (/\d/.test(w) || /[A-Z].*[A-Z]/.test(w))))];
 }
 
-/** The text names this record (a system, benchmark or protocol): in full, or by at least two of its distinctive words (one if it has only one). */
-function namesBenchmark(hay, name) {
-  if (contains(hay, name)) return true;
+/**
+ * How strongly the text names this record (a system, benchmark or protocol), 0 for not at all.
+ * In full scores highest. Otherwise at least two of its specific words must appear (one if it has
+ * only one); common words (COMMON_TOKENS) do not count towards that, and only break ties. A name
+ * made only of common words must appear in full.
+ */
+function nameScore(hay, name) {
+  if (contains(hay, name)) return 100;
   const tokens = distinctiveTokens(name);
-  if (!tokens.length) return false;
-  return tokens.filter((t) => contains(hay, t)).length >= Math.min(2, tokens.length);
+  const specific = tokens.filter((t) => !isCommon(t));
+  const hits = specific.filter((t) => contains(hay, t)).length;
+  if (!specific.length || hits < Math.min(2, specific.length)) return 0;
+  return 10 * hits + tokens.filter((t) => isCommon(t) && contains(hay, t)).length;
 }
 
 /**
  * An open issue written by hand that already covers the gap (#40 to #56, #67 to #71 and the
  * like), matched on names: the system and its benchmark or protocol (in full or by its
- * distinctive words); both systems of a discrepancy and its anchor, or its ID; the recipe's benchmark with "recipe", "run guide" or "smoke"; the
- * use case's title or slug.
+ * specific words); both systems of a discrepancy and its anchor, or its ID or a previous ID; the
+ * recipe's benchmark with "recipe", "run guide" or "smoke"; the use case's title or slug. When
+ * several issues match, the one that names the benchmark most specifically is returned.
  */
 export function coveringIssue(ix, gap, issues) {
+  let best = null;
+  let bestScore = 0;
   for (const i of issues) {
     if (isClosed(i)) continue;
     const hay = normalise(`${i.title} ${i.body ?? ''}`);
     const raw = `${i.title} ${i.body ?? ''}`;
     const benchNames = [gap.benchmark, ...gap.protocols].filter(Boolean).map((id) => ix.name(id));
-    let hit = false;
-    if (gap.type === 'no-direct-evidence') hit = gap.useCases.some((u) => contains(hay, u.title) || contains(hay, u.slug));
-    else if (gap.type === 'discrepancy') hit = raw.includes(gap.finding.id) || (gap.systems.every((s) => namesBenchmark(hay, ix.name(s))) && benchNames.some((n) => namesBenchmark(hay, n)));
-    else if (gap.type === 'unverified-recipe') hit = contains(hay, ix.name(gap.benchmark)) && /\b(recipe|run guide|smoke)\b/i.test(raw);
-    else hit = gap.systems.every((s) => namesBenchmark(hay, ix.name(s))) && benchNames.some((n) => namesBenchmark(hay, n));
-    if (hit) return i;
+    const benchScore = () => Math.max(0, ...benchNames.map((n) => nameScore(hay, n)));
+    let score = 0;
+    if (gap.type === 'no-direct-evidence') score = gap.useCases.some((u) => contains(hay, u.title) || contains(hay, u.slug)) ? 1 : 0;
+    else if (gap.type === 'discrepancy') {
+      if ([gap.finding.id, ...(gap.finding.previousIds ?? [])].some((id) => raw.includes(id))) score = 1000;
+      else if (gap.systems.every((s) => nameScore(hay, ix.name(s)))) score = benchScore();
+    } else if (gap.type === 'unverified-recipe') score = contains(hay, ix.name(gap.benchmark)) && /\b(recipe|run guide|smoke)\b/i.test(raw) ? 1 : 0;
+    else if (gap.systems.every((s) => nameScore(hay, ix.name(s)))) score = benchScore();
+    if (score > bestScore) {
+      best = i;
+      bestScore = score;
+    }
   }
-  return null;
+  return best;
 }
 
 /**
@@ -766,7 +813,7 @@ export function planFiling(ix, gaps, issues, max = LIMITS.maxIssues) {
   const skipped = [];
   const benches = new Set();
   for (const g of gaps) {
-    const m = marked.get(g.key);
+    const m = [g.key, ...(g.aliases ?? [])].map((k) => marked.get(k)).find(Boolean);
     if (m) {
       skipped.push({ gap: g, reason: `already proposed in #${m.number} (${isClosed(m) ? 'closed' : 'open'})` });
       continue;
@@ -843,7 +890,7 @@ function commandSection(ix, g) {
 
 function estimateSection(g) {
   const e = g.estimate;
-  const hours = e.kind === 'none' ? `no estimate, because ${e.basis}` : `estimate ${e.gpuHours}. Basis: ${e.basis}`;
+  const hours = e.kind === 'none' ? `no estimate, because ${e.basis}` : `estimate ${e.lowerBound ? 'at least ' : ''}${e.approximate ? 'about ' : ''}${e.gpuHours}. Basis: ${e.basis}`;
   const usd = e.usd === null ? `no estimate, because ${e.usdBasis}` : `estimate ${e.usd} USD. Basis: ${e.usdBasis}`;
   return [
     `- GPU-hours: ${hours}`,
@@ -1078,7 +1125,7 @@ export function smokeChecks(dir) {
 
 export function renderSummary({ mode, release, gaps, plan, filed, notes, usage }) {
   const byType = Object.keys(TYPES).map((t) => `${TYPES[t]}: ${gaps.filter((g) => g.type === t || g.flags?.includes(t)).length}`).join('; ');
-  const fmtEst = (g) => (g.estimate.kind === 'none' ? 'no estimate' : `${g.estimate.gpuHours} GPU-h`);
+  const fmtEst = (g) => (g.estimate.kind === 'none' ? 'no estimate' : `${g.estimate.lowerBound ? 'at least ' : ''}${g.estimate.gpuHours} GPU-h`);
   const skip = new Map(plan.skipped.map((s) => [s.gap.key, s.reason]));
   const chosen = new Set(plan.file.map((g) => g.key));
   return [

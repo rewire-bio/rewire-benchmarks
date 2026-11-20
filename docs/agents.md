@@ -24,8 +24,8 @@ System identity follows the discrepancy rules: a configuration counts as its mod
 
 ### Value, estimate and order
 
-- **Value** is the clinical weight (2 when a use case the gap serves has a clinical context, else 1) times one plus the number of rankings the run could change.
-- **GPU-hours** come from a recorded runtime result for the same system on the same protocol whose hardware names a GPU and its count (hours times GPU count), or are 0 when the recipe's hardware field says no GPU or accelerator is needed. Otherwise the issue says "no estimate" and why. A runtime on an evaluation that records only training hardware is not used.
+- **Value** is the clinical weight (2 when a use case the gap serves has a clinical context, else 1) times one plus the number of rankings the run could change. For a discrepancy that is the rankings holding both systems on the protocols the run uses; rankings on other protocols do not count, and neither do their use cases.
+- **GPU-hours** come from recorded runtime results for the run's systems on its protocols whose hardware names a GPU and its count (hours times GPU count, one result per system and protocol, summed), or are 0 when the recipe's hardware field says no GPU or accelerator is needed. Otherwise the issue says "no estimate" and why. A runtime on an evaluation that records only training hardware is not used. When runtimes cover only some of the run's system and protocol pairs, the figure is labelled a lower bound; an approximate runtime in the paper is labelled approximate.
 - **Dollars** come only from a dated, sourced hourly price in `GPU_PRICES` in the script. It is empty, so every GPU run says "no estimate" for cost until a price is added with its source.
 - **Order:** runs that need no GPU first, by value; then runs with a GPU-hour estimate, by value per GPU-hour; then runs with no estimate, by value. Nothing is divided by an assumed figure. At most one proposal per benchmark a week, and at most five a week.
 
@@ -35,8 +35,8 @@ The gap, "Why it matters", the exact model and benchmark (with record IDs), the 
 
 ### Dedupe
 
-- Each issue carries a hidden `gap-proposal` marker with the gap's key. A key with a marker on any issue, open or closed, is never filed again, so a closed or declined proposal stays closed.
-- Hand-written open issues are matched by name: the system and its benchmark or protocol (in full, or by at least two of the benchmark's acronyms and words with digits, such as ClinGen, PP3 and BP4); both systems of a discrepancy and its anchor, or the finding ID; the recipe's benchmark with "recipe", "run guide" or "smoke"; or the use case's title or slug. Closed hand-written issues do not count. This keeps it off #40 to #56, #65 and #67 to #71. Every skip is listed in the job summary with the issue that covers it.
+- Each issue carries a hidden `gap-proposal` marker with the gap's key. A key with a marker on any issue, open or closed, is never filed again, so a closed or declined proposal stays closed. The store re-keys a discrepancy when its studies change and keeps the old IDs in `previous_ids`; a marker or issue citing any of them also counts.
+- Hand-written open issues are matched by name: the system and its benchmark or protocol (in full, or by at least two of the benchmark's acronyms and words with digits, such as ClinGen, PP3 and BP4, or one if it has only one); both systems of a discrepancy and its anchor, or the finding ID or a previous ID; the recipe's benchmark with "recipe", "run guide" or "smoke"; or the use case's title or slug. Common assay and truth-set words (WGS, CNV, GIAB, SNV and the like) and sizes such as 5kb never count towards the two words, so "WGS CNV" alone does not match. When several issues match, the one naming the benchmark most specifically is credited. Closed hand-written issues do not count. This keeps it off #40 to #56, #65 and #67 to #71. Every skip is listed in the job summary with the issue that covers it.
 
 ### Modes
 

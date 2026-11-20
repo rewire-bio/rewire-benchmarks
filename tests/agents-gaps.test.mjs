@@ -221,3 +221,75 @@ test('latestRelease takes the newest serving release that has a kg bundle', () =
   assert.equal(latestRelease(list), '2026-11-19-aaaaaaaaaaaa');
   assert.equal(latestRelease([...list, { tagName: 'kg/2026-11-20-bbbbbbbbbbbb', createdAt: '2026-11-20T10:01:00Z', isDraft: false }]), '2026-11-20-bbbbbbbbbbbb');
 });
+
+test('a discrepancy counts only rankings on the protocols its run would use', () => {
+  // PROVEAN and SIFT are ranked together only on the Chen 2020 protocols; the run is on the
+  // Brandes 2023 protocols, so it can change no ranking and takes no use case from Chen 2020.
+  const g = byKey('discrepancy:discrepancy-44e5640b79522964');
+  assert.ok(g.protocols.every((p) => p.startsWith('gfm-guides-20261014-esm1b-protocol-')));
+  assert.equal(g.rankings, 0);
+  assert.deepEqual(g.useCases, []);
+  assert.equal(g.value, 1);
+  // The same evaluations mapped onto a run protocol do count.
+  const chen = useCases.mappings.find((m) => m.protocol_id === 'somatic-oncogenicity-20261009-protocol-chen2020-oncokb-default' && m.relevance === 'direct');
+  const moved = { ...useCases, mappings: [...useCases.mappings, { ...chen, protocol_id: g.protocols[0] }] };
+  const g2 = findGaps(ix, moved, discrepancies).find((x) => x.key === g.key);
+  assert.equal(g2.rankings, 1);
+  assert.deepEqual(g2.useCases.map((u) => u.id), [chen.use_case_id]);
+});
+
+test('a discrepancy proposal filed under a previous finding ID is not filed again', () => {
+  const old = 'discrepancy-0123456789abcdef';
+  const rekeyed = { ...discrepancies, discrepancies: discrepancies.discrepancies.map((f) => (f.id === 'discrepancy-44e5640b79522964' ? { ...f, previous_ids: [old] } : f)) };
+  const gs = scoreGaps(ix, findGaps(ix, useCases, rekeyed));
+  const key = 'discrepancy:discrepancy-44e5640b79522964';
+  // Closed (for example declined) under the old ID: skipped, not refiled.
+  const closed = [...issues, { number: 9003, title: 'Proposed verification run: PROVEAN and SIFT', state: 'closed', body: `<!-- ${MARKER}: discrepancy:${old} -->` }];
+  const plan = planFiling(ix, gs, closed, 100);
+  assert.ok(!plan.file.some((g) => g.key === key));
+  assert.match(plan.skipped.find((s) => s.gap.key === key).reason, /#9003 \(closed\)/);
+  // An open hand-written issue that cites the old ID covers it too.
+  const cited = [...issues, { number: 9004, title: 'x', state: 'open', body: `See ${old}.` }];
+  assert.equal(coveringIssue(ix, gs.find((g) => g.key === key), cited)?.number, 9004);
+  // Without the alias it would have been filed.
+  assert.ok(planFiling(ix, scoreGaps(ix, findGaps(ix, useCases, discrepancies)), closed, 100).file.some((g) => g.key === key));
+});
+
+test('common assay words alone do not make an issue cover a gap, and the most specific issue is credited', () => {
+  const names = {
+    freec: 'Control-FREEC',
+    gab: 'NA12878 WGS CNV recall and precision, 1 bp overlap (Gabrielaite et al. Table S2)',
+    dragen: 'DRAGEN 4.2 CNV+SV configuration',
+    hg002: 'HG002 GIAB v0.6 CNV deletion 1-5kb F-score',
+  };
+  const fake = { name: (id) => names[id] ?? id };
+  const gap = (system, bench) => ({ type: 'single-study', systems: [system], benchmark: bench, protocols: [bench], useCases: [] });
+  const byNumber = (n) => issues.filter((i) => i.number === n);
+  // #51 is somatic CNV on SEQC2 HCC1395 and names Control-FREEC, WGS and CNV, but not NA12878.
+  assert.equal(coveringIssue(fake, gap('freec', 'gab'), byNumber(51)), null);
+  assert.equal(coveringIssue(fake, gap('freec', 'gab'), issues), null);
+  // DRAGEN CNV on HG002 is #40's scope; #52 (small variants on HG002) must not take the credit.
+  assert.equal(coveringIssue(fake, gap('dragen', 'hg002'), issues)?.number, 40);
+});
+
+test('estimate: runtimes are summed over systems and protocols, a partial sum is a lower bound', () => {
+  const evs = [...loaded.recs.values()].filter((r) => r.kind === 'evaluation' && r.links.some((l) => l.relation === 'assessment'));
+  const sysOf = (ev) => ix.resolveSystem(ev.links.find((l) => l.relation === 'system').target_id);
+  const protOf = (ev) => ev.links.find((l) => l.relation === 'assessment').target_id;
+  const a = evs[0];
+  const b = evs.find((e) => protOf(e) === protOf(a) && sysOf(e) && sysOf(e) !== sysOf(a));
+  assert.ok(b, 'two systems on one protocol in the fixtures');
+  const rt = (id, ev, minutes, extra = {}) => ({ id, kind: 'result', name: id, links: [{ relation: 'evaluation', target_id: ev.id }], metric: 'runtime', unit: 'minute', value: String(minutes), printed: String(minutes), hardware: '2 × NVIDIA A100 80GB', ...extra });
+  const runtimes = [rt('rt-a', a, 30), rt('rt-b', b, 60, { approximate: true, printed: 'around 60' })];
+  const full = estimate(buildIndex({ recs: loaded.recs, runtimes }), { systems: [sysOf(a), sysOf(b)], protocols: [protOf(a)] });
+  assert.equal(full.gpuHours, 3);
+  assert.equal(full.lowerBound, false);
+  assert.equal(full.approximate, true);
+  assert.match(full.basis, /rt-a/);
+  assert.match(full.basis, /rt-b/);
+  assert.match(full.basis, /approximate/);
+  const part = estimate(buildIndex({ recs: loaded.recs, runtimes: [runtimes[0]] }), { systems: [sysOf(a), sysOf(b)], protocols: [protOf(a)] });
+  assert.equal(part.gpuHours, 1);
+  assert.equal(part.lowerBound, true);
+  assert.match(part.basis, /lower bound: runtimes are recorded for 1 of the 2 system and protocol pairs/);
+});
