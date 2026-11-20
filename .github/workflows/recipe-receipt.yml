@@ -20,8 +20,6 @@ jobs:
   mfass-v2-kmer-baseline:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    env:
-      RUN_DIR: ${{ runner.temp }}/mfass-v2-kmer-baseline
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -31,12 +29,12 @@ jobs:
       - name: Validate every recipe
         run: uv run --no-sync rewirebench recipe validate
       - name: Run the recipe and write its receipt
-        run: uv run --no-sync rewirebench recipe run mfass-v2-kmer-baseline --output "$RUN_DIR"
+        run: uv run --no-sync rewirebench recipe run mfass-v2-kmer-baseline --output "$RUNNER_TEMP/mfass-v2-kmer-baseline"
       - name: Verify the receipt
-        run: uv run --no-sync rewirebench receipt verify "$RUN_DIR"
+        run: uv run --no-sync rewirebench receipt verify "$RUNNER_TEMP/mfass-v2-kmer-baseline"
       - name: Show the receipt
         if: always()
-        run: cat "$RUN_DIR/receipt.json"
+        run: cat "$RUNNER_TEMP/mfass-v2-kmer-baseline/receipt.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
