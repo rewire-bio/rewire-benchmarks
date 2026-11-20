@@ -31,6 +31,10 @@ jobs:
           python -c 'import json, os; r=json.load(open("dist/release-source.json")); open(os.environ["GITHUB_ENV"], "a").write("SOURCE_DATE_EPOCH={}\n".format(r["source_date_epoch"]))'
       - run: uv sync --locked --all-packages --extra sequence
       - run: uv run --no-sync pytest packages/rewirebench/tests tests benchmarks/mfass/tests
+        env:
+          # A release is cut from a reviewed tag. Whether rdf-kg-mcp has published a newer
+          # tag since is checked on pull requests, not here.
+          REWIRE_SKIP_PIN_FRESHNESS: '1'
       - run: uv build --package rewirebench
       - name: Install pinned Apptainer release
         # Official release asset 485098930; digest and package metadata checked 2026-09-21.

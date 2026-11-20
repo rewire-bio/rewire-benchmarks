@@ -5,6 +5,11 @@ Every query here was run against KG release `2026-10-12-cba623554ce3` with
 later release can add records or supersede them, so always read the current values
 rather than copying these.
 
+The plugin pins v0.4.0. The four tools used here (`dataset_info`, `find_entity`,
+`describe_resource`, `sparql_query`) are still in that release, checked against its
+source. The queries have not been run again on it. v0.4.0 also has `search`,
+`describe_schema`, `list_queries` and `run_query`, which this page does not use yet.
+
 The server predeclares the bundle prefixes (`rb:`, `id:`, `mls:`, `skos:`, `dcterms:`,
 `schema:`, `metric:`, `status:` and others), so queries need no `PREFIX` lines. The
 default graph is the union of asserted, inferred and ontology graphs. Pass

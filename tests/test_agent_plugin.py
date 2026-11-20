@@ -1,7 +1,11 @@
 """The Claude Code plugin must ship the same skill that is reviewed in skills/."""
 import json
+import os
+import re
+import subprocess
 from pathlib import Path
 
+import pytest
 from rewirebench import sdk
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,13 +46,95 @@ def test_marketplace_lists_the_plugin():
     assert entry["version"] == plugin["version"]
 
 
-def test_mcp_server_is_pinned():
+GRAPH_SERVER = "https://github.com/rewire-bio/rdf-kg-mcp"
+# v0.1.0 has no search, list_queries or run_query, which the product page describes.
+# v0.4.0 has all eight read tools and was read at its tag when this floor was set.
+MINIMUM_GRAPH_SERVER = (0, 4, 0)
+# The read tools in src/rdf_kg_mcp/server.py at tag v0.4.0, read on 2026-11-20.
+GRAPH_TOOLS = {"dataset_info", "describe_schema", "find_entity", "search", "describe_resource",
+               "sparql_query", "list_queries", "run_query"}
+SKIP_FRESHNESS = "REWIRE_SKIP_PIN_FRESHNESS"
+RELEASE_TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
+
+
+def version_tuple(tag: str) -> tuple[int, int, int]:
+    match = RELEASE_TAG.fullmatch(tag)
+    assert match, f"Not a release tag: {tag}"
+    major, minor, patch = (int(part) for part in match.groups())
+    return major, minor, patch
+
+
+def pinned_tag() -> str:
     servers = json.loads((PLUGIN / ".mcp.json").read_text())["mcpServers"]
     server = servers["rewire-benchmark-graph"]
     assert server["command"] == "uvx"
     source = server["args"][server["args"].index("--from") + 1]
-    assert source.startswith("git+https://github.com/rewire-bio/rdf-kg-mcp@v")
+    prefix = f"git+{GRAPH_SERVER}@"
+    assert source.startswith(prefix)
     assert server["args"][-2:] == ["serve", "https://benchmarks.rewirebio.io/agents/kg.tar.gz"]
+    return source.removeprefix(prefix)
+
+
+def newest_release(ls_remote_output: str) -> str:
+    """Newest vX.Y.Z tag in `git ls-remote --tags --refs` output, compared as integers."""
+    tags = [line.rsplit("refs/tags/", 1)[1] for line in ls_remote_output.splitlines()
+            if "refs/tags/" in line]
+    releases = [tag for tag in tags if RELEASE_TAG.fullmatch(tag)]
+    assert releases, "No release tags found"
+    return max(releases, key=version_tuple)
+
+
+def test_mcp_server_is_pinned():
+    assert version_tuple(pinned_tag()) >= MINIMUM_GRAPH_SERVER
+
+
+def test_newest_release_sorts_numerically_and_ignores_other_tags():
+    listing = "\n".join(f"{'a' * 40}\trefs/tags/{tag}"
+                        for tag in ("v0.9.0", "v0.10.0", "v0.2.1", "nightly", "v1.0.0rc1"))
+    assert newest_release(listing) == "v0.10.0"
+
+
+def test_readme_shows_the_plugin_pin():
+    assert f"git+{GRAPH_SERVER}@{pinned_tag()}" in (ROOT / "README.md").read_text()
+
+
+def test_skill_uses_only_tools_the_pinned_server_has():
+    """The skill's graph steps each start with a tool name. Each must be in the pinned release."""
+    text = (SKILL / "SKILL.md").read_text()
+    steps = re.findall(r"^\d+\. `([a-z_]+)`", text, flags=re.MULTILINE)
+    assert steps[:3] == ["dataset_info", "find_entity", "sparql_query"]
+    assert set(steps) <= GRAPH_TOOLS, sorted(set(steps) - GRAPH_TOOLS)
+    assert "`describe_resource`" in text and "describe_resource" in GRAPH_TOOLS
+
+
+def test_skill_reference_states_which_server_release_its_queries_ran_on():
+    text = (SKILL / "reference/kg-queries.md").read_text()
+    assert f"plugin pins {pinned_tag()}" in " ".join(text.split())
+
+
+def test_mcp_pin_is_the_newest_release():
+    """A stale pin fails here. Offline, the check is skipped locally and fails in CI.
+
+    The release workflow sets REWIRE_SKIP_PIN_FRESHNESS, so a release of this repository
+    does not wait on another repository's tags.
+    """
+    if os.environ.get(SKIP_FRESHNESS):
+        pytest.skip(f"{SKIP_FRESHNESS} is set")
+    try:
+        listing = subprocess.run(
+            ["git", "ls-remote", "--tags", "--refs", GRAPH_SERVER],
+            check=True, capture_output=True, text=True, timeout=60,
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+        ).stdout
+    except (OSError, subprocess.SubprocessError) as error:
+        if os.environ.get("CI"):
+            raise
+        pytest.skip(f"Cannot list rdf-kg-mcp tags: {type(error).__name__}")
+    newest = newest_release(listing)
+    assert pinned_tag() == newest, (
+        f"plugins/bio-model-benchmarks/.mcp.json pins rdf-kg-mcp {pinned_tag()}; "
+        f"the newest release is {newest}. Raise the pin here and in README.md."
+    )
 
 
 def test_protocol_table_matches_the_sdk():

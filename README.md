@@ -218,7 +218,7 @@ For other MCP clients, add the server:
     "rewire-benchmark-graph": {
       "command": "uvx",
       "args": [
-        "--from", "git+https://github.com/rewire-bio/rdf-kg-mcp@v0.1.0",
+        "--from", "git+https://github.com/rewire-bio/rdf-kg-mcp@v0.4.0",
         "rdf-kg-mcp", "serve", "https://benchmarks.rewirebio.io/agents/kg.tar.gz"
       ]
     }
@@ -233,6 +233,21 @@ Then give the agent the skill: copy [`skills/bio-model-benchmarks`](skills/bio-m
 into the client's skills directory, or paste `SKILL.md` into its instructions and keep the
 `reference/` files beside it. The copy under `plugins/` is kept byte-identical by
 `tests/test_agent_plugin.py`; edit `skills/bio-model-benchmarks` and copy it across.
+
+## Recipes and receipts
+
+A recipe under [`recipes/`](recipes) pins the inputs, environment and commands of one run and
+states the values it should produce. Every run writes a `receipt.json` with the recipe digest,
+code commit, input and output digests, hardware, wall time, peak memory, metrics and cost.
+
+```sh
+uv run rewirebench recipe list
+uv run rewirebench recipe run mfass-v2-kmer-baseline --output runs/mfass
+uv run rewirebench receipt verify runs/mfass
+```
+
+See [docs/recipes.md](docs/recipes.md), and
+[docs/adr-c-recipes-and-receipts.md](docs/adr-c-recipes-and-receipts.md) for the decision.
 
 ## Cleaning local reference data
 

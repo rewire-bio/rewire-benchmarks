@@ -12,9 +12,9 @@
       "name": "bio-model-benchmarks",
       "source": "./plugins/bio-model-benchmarks",
       "description": "Find published results for DNA, RNA, protein and cell models in the Rewire benchmark graph, and reproduce or run benchmarks locally with rewirebench.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "license": "MIT",
-      "homepage": "https://benchmarks.rewire.it/",
+      "homepage": "https://benchmarks.rewirebio.io/",
       "repository": "https://github.com/rewire-bio/rewire-benchmarks",
       "keywords": ["benchmarks", "biology", "genomics", "proteins", "reproducibility"],
       "category": "science"

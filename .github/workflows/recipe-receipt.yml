@@ -1,0 +1,65 @@
+name: Recipe receipt check
+# Runs the executed CPU recipe from recipes/ with `rewirebench recipe run`, then re-checks the
+# receipt with `rewirebench receipt verify --strict`. The inputs come from GitHub (80 MB), so
+# this runs only when recipes or the runner package change, on main, and weekly. It never uses
+# a GPU or paid compute.
+on:
+  pull_request:
+    paths:
+      - 'recipes/**'
+      - 'packages/rewirebench/**'
+      - 'uv.lock'
+      - '.github/workflows/recipe-receipt.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'recipes/**'
+      - 'packages/rewirebench/**'
+      - 'uv.lock'
+      - '.github/workflows/recipe-receipt.yml'
+  schedule:
+    - cron: '43 4 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mfass-v2-kmer-baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # On a pull request the default checkout is a temporary merge commit that is on no
+      # branch. The receipt must cite a commit a reader can find, so check out the PR head.
+      RUN_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.8.2'
+      - run: uv sync --locked --package rewirebench --python 3.11
+      - name: Validate every recipe
+        run: uv run --no-sync rewirebench recipe validate
+      - name: Run the recipe and write its receipt
+        run: uv run --no-sync rewirebench recipe run mfass-v2-kmer-baseline --output "$RUNNER_TEMP/mfass-v2-kmer-baseline"
+      - name: Verify the receipt, including a clean code commit and a committed recipe
+        run: uv run --no-sync rewirebench receipt verify "$RUNNER_TEMP/mfass-v2-kmer-baseline" --strict
+      - name: Check the receipt cites the commit under test
+        run: |
+          python3 - <<'PY'
+          import json, os
+          receipt = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "mfass-v2-kmer-baseline", "receipt.json")))
+          wanted = os.environ["RUN_COMMIT"]
+          assert receipt["code"]["commit"] == wanted, receipt["code"]
+          assert receipt["recipe"]["commit"] == wanted, receipt["recipe"]
+          assert receipt["code"]["dirty"] is False, receipt["code"]
+          PY
+      - name: Show the receipt
+        if: always()
+        run: cat "$RUNNER_TEMP/mfass-v2-kmer-baseline/receipt.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recipe-receipt-mfass-v2-kmer-baseline
+          path: ${{ runner.temp }}/mfass-v2-kmer-baseline
+          if-no-files-found: ignore
