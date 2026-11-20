@@ -2,7 +2,9 @@
 //
 // The fixtures are real records, use cases, mappings and findings from data release
 // 2026-11-20-727601dd065b, trimmed to six use cases, three findings and three recipe owners
-// (mappings keep at most 40 evaluations each). issues.json holds the real issues #40 to #56, #65
+// (mappings keep at most 40 evaluations each). From release 2026-11-20-72316db0764b they add the
+// Kaschta et al. 2026 manual versus Talos reanalysis (use case, mapping and records) and the
+// ProteinGym v1.3 substitutions protocol with its run recipes. issues.json holds the real issues #40 to #56, #65
 // and #67 to #71 (open) and #25 (closed) of this repository, as the REST API returns them, and one
 // synthetic closed proposal (#9001).
 import { test } from 'node:test';
@@ -11,8 +13,8 @@ import { mkdtempSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  LABELS, LIMITS, MARKER, buildIndex, checkWhy, coveringIssue, distinctiveTokens, estimate, findGaps, gpuCount, latestRelease, main,
-  planFiling, readRecords, scoreGaps, whyFacts, writeWhy, Usage,
+  LABELS, LIMITS, MARKER, buildIndex, checkWhy, citesId, coveringIssue, distinctiveTokens, estimate, excludeNotRunnable, findGaps, gpuCount,
+  latestRelease, main, planFiling, readRecords, runnability, scoreGaps, whyFacts, writeWhy, Usage,
 } from '../scripts/agents/gaps.mjs';
 
 const FIX = 'tests/agents-gaps-fixtures';
@@ -293,3 +295,97 @@ test('estimate: runtimes are summed over systems and protocols, a partial sum is
   assert.equal(part.lowerBound, true);
   assert.match(part.basis, /lower bound: runtimes are recorded for 1 of the 2 system and protocol pairs/);
 });
+
+const MANUAL = 'reanalysis-kaschta-20261010-method-manual-diagnostic-reanalysis';
+const KASCHTA = 'reanalysis-kaschta-20261010-protocol-manual-vs-talos-219-reanalysis';
+
+test('runnability: manual expert reanalysis is not runnable by software, Talos on the same protocol is', () => {
+  const manual = runnability(ix, MANUAL, { protocols: [KASCHTA] });
+  assert.equal(manual.runnable, false);
+  assert.match(manual.reason, /people perform it/);
+  assert.equal(runnability(ix, 'uc-clinical-20260930-method-talos', { protocols: [KASCHTA] }).runnable, true);
+  const { kept, excluded } = excludeNotRunnable(ix, gaps);
+  assert.deepEqual(excluded.map((x) => x.gap.key), [`verify:${MANUAL}:${KASCHTA}`]);
+  assert.ok(!kept.some((g) => g.systems.includes(MANUAL)));
+  assert.ok(kept.some((g) => g.key === `verify:uc-clinical-20260930-method-talos:${KASCHTA}`));
+});
+
+test('runnability: decided from release data, with overrides only as a fallback', () => {
+  const rec = (id, extra = {}) => ({ id, kind: 'method', name: id, description: '', links: [], access: [], artifacts: [], ...extra });
+  const recs = new Map([
+    ['lab', rec('lab', { access: ['Clinical laboratory test'] })],
+    ['closed', rec('closed', { access: ['Closed system; run by the authors. Not available to reuse.'] })],
+    ['tool', rec('tool', { access: ['Tool run by the authors; trained models are not released'] })],
+    ['curated', rec('curated', { description: 'Annotates variants with no manual curation.' })],
+    ['reviewed', rec('reviewed', { description: 'Variants classified by clinicians.' })],
+    // Released code outweighs a description that mentions expert review.
+    ['coded', rec('coded', { description: 'Replaces expert review of variants.', access: ['Code at https://github.com/example/coded'] })],
+    ['pinned', rec('pinned', { description: 'Manual review aid.', artifacts: ['checkpoint_revision'] })],
+    ['blank', rec('blank')],
+    ['eval', { id: 'eval', kind: 'evaluation', name: 'e', links: [{ relation: 'system', target_id: 'blank' }, { relation: 'assessment', target_id: 'p' }], adaptation: 'Expert interpretation' }],
+  ]);
+  const small = buildIndex({ recs });
+  const r = (id, opts) => runnability(small, id, opts).runnable;
+  assert.equal(r('lab'), false);
+  assert.equal(r('closed'), false);
+  assert.equal(r('tool'), true); // "trained models are not released" says nothing about the tool
+  assert.equal(r('curated'), true); // negated
+  assert.equal(r('reviewed'), false);
+  assert.equal(r('coded'), true);
+  assert.equal(r('pinned'), true);
+  // An evaluation's adaptation counts only on the gap's protocols.
+  assert.equal(r('blank'), true);
+  assert.equal(r('blank', { protocols: ['p'] }), false);
+  // The override list decides when the data cannot.
+  const o = runnability(small, 'blank', { overrides: { blank: { runnable: false, reason: 'a person reads the slides' } } });
+  assert.equal(o.runnable, false);
+  assert.match(o.reason, /RUNNABILITY_OVERRIDES/);
+});
+
+test('a dry run leaves out systems that cannot be run and logs each exclusion in the summary', async () => {
+  const out = mkdtempSync(join(tmpdir(), 'gaps-'));
+  const r = await main(['--dry-run', '--out', out], {}, { log: quiet });
+  assert.ok(!r.filed.some((f) => f.key.includes(MANUAL)));
+  assert.match(r.summary, /### Not runnable by software\n\nLeft out of the proposals/);
+  assert.ok(r.summary.includes(`\`verify:${MANUAL}:${KASCHTA}\`): the description of`));
+  const plan = JSON.parse(readFileSync(join(out, 'plan.json'), 'utf8'));
+  assert.deepEqual(plan.excluded.map((x) => x.system), [MANUAL]);
+});
+
+test('dedupe matches the ProteinGym recipe to #67 by the benchmark ID, not by name', () => {
+  const key = 'recipe:rewire-proteingym-v1-3-dms-substitutions';
+  const g = byKey(key);
+  assert.ok(g);
+  // #67 names the benchmark ID and "run guide", but not the protocol's name.
+  const i67 = issues.find((i) => i.number === 67);
+  assert.ok(!normalisedIncludes(i67, ix.name(g.benchmark)));
+  assert.equal(coveringIssue(ix, g, issues)?.number, 67);
+  assert.match(planFiling(ix, gaps, issues, 100).skipped.find((s) => s.gap.key === key).reason, /#67/);
+  // The protocol ID alone, with "recipe", also covers it; an ID inside a longer ID does not.
+  const hand = (body) => [{ number: 9100, title: 'x', state: 'open', body }];
+  assert.equal(coveringIssue(ix, g, hand('Fix the recipe of `rewire-proteingym-v1-3-dms-substitutions`.'))?.number, 9100);
+  assert.equal(coveringIssue(ix, g, hand('Fix the recipe of rewire-proteingym-v1-3-dms-substitutions-indels.')), null);
+  assert.equal(coveringIssue(ix, g, hand('See discovery-benchmark-proteingym.')), null); // no recipe words
+  assert.equal(citesId('a discovery-benchmark-proteingym.', 'discovery-benchmark-proteingym'), true);
+  assert.equal(citesId('a discovery-benchmark-proteingym-v2', 'discovery-benchmark-proteingym'), false);
+  // A filed recipe proposal for the parent benchmark covers it through its marker.
+  assert.equal(coveringIssue(ix, g, hand(`<!-- ${MARKER}: recipe:discovery-benchmark-proteingym -->`))?.number, 9100);
+});
+
+test('dedupe by ID needs the system too, and a filed proposal is matched by its marker, not its text', () => {
+  const bench = 'vep-uc-20261014-benchmark-clingen-svi-calibration';
+  const polyphen = gaps.find((g) => g.type !== 'discrepancy' && g.benchmark === bench && /PolyPhen/.test(ix.name(g.systems[0])));
+  assert.ok(polyphen);
+  const mutpred = 'somatic-oncogenicity-20261009-method-mutpred';
+  // A filed MutPred proposal names the benchmark ID in its text and marker; it does not cover PolyPhen-2.
+  const filed = [{ number: 9101, title: 'Proposed verification run: MutPred', state: 'open', body: `Benchmark \`${bench}\`.\n<!-- ${MARKER}: verify:${mutpred}:${bench} -->` }];
+  assert.equal(coveringIssue(ix, polyphen, filed), null);
+  // A hand-written issue citing the system and benchmark IDs covers it.
+  const hand = [{ number: 9102, title: 'x', state: 'open', body: `Rerun ${polyphen.systems[0]} on ${bench}.` }];
+  assert.equal(coveringIssue(ix, polyphen, hand)?.number, 9102);
+});
+
+function normalisedIncludes(issue, name) {
+  const n = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+  return n(`${issue.title} ${issue.body}`).includes(n(name).trim());
+}

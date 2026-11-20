@@ -352,6 +352,118 @@
     "text": "Only two sequence-only controls have been measured on the target split, both in Rewire's own runs, so there is no model comparison on it yet. On the 15,003 held-out records of the mRNABench designed-reporter test split, the composition ridge control reached a mean squared error of 1.914 against 2.366 for the training-mean control, and a Pearson correlation of 0.437; the training-mean control has no defined correlation, because its prediction is constant. The published FramePool panels are the only model comparison recorded here: neural models (FramePool and Optimus) reached Pearson 0.743 to 0.966 on the two random-sequence panels and 0.700 to 0.894 on the two human panels, while k-mer random forests, which were evaluated on the random panels only, reached 0.616 to 0.877. Those values are reported in the FramePool study on its own library, one split per panel with no uncertainty interval, and they are not measured on the designed-reporter split, so they are not baselines for it. Both Rewire controls are single runs on one split with no seed variability, and their automated audit checks the run itself, not a published score.",
     "status": "reviewed"
    }
+  },
+  {
+   "id": "use-case-unresolved-rare-disease-reanalysis",
+   "slug": "unresolved-rare-disease-reanalysis",
+   "title": "Reanalyse unresolved rare-disease cases",
+   "question": "Which reanalysis methods find new diagnoses or reduce review effort when given the same updated information?",
+   "area": "dna-genomes",
+   "contexts": [
+    "clinical_research"
+   ],
+   "search_terms": [
+    "rare disease",
+    "reanalysis",
+    "negative exome",
+    "unresolved genome",
+    "variant reevaluation",
+    "Talos",
+    "Exomiser",
+    "ClinVar"
+   ],
+   "intended_users": [
+    "Clinical genomics services responsible for unresolved cases",
+    "Laboratory reanalysis leads"
+   ],
+   "decision": "Choose a workflow that identifies previously unresolved cases worth reopening and explains the evidence changes that warrant review.",
+   "inputs": [
+    "Original ES/GS calls, coverage, report, filters and analysis date",
+    "Updated phenotype, pedigree and gene\u2013disease or variant evidence",
+    "Dated changes to calling and interpretation methods"
+   ],
+   "output": "A prioritised queue of new or changed findings, their evidence history and the review or confirmation needed to resolve each case.",
+   "setting": "A defined cohort remaining unresolved after an earlier ES/GS analysis, followed over a stated interval. Variant reevaluation and whole-case reanalysis are recorded separately.",
+   "exclusions": [
+    "Reranking known solved cases does not establish new diagnostic yield.",
+    "New knowledge, phenotypes or variant calls must not be counted automatically as algorithmic improvement.",
+    "A changed database label or new candidate is not a confirmed diagnosis."
+   ],
+   "clinical_scope": "Clinical research on reanalysis support. Programme-level yield and the added value of a method require different comparisons; diagnoses and diagnosed individuals have separate denominators.",
+   "evidence_gaps": [
+    "Equal updated calls, phenotypes and knowledge with matched review effort are not established in the extracted peer-reviewed programme.",
+    "Kaschta et al. 2026 (medRxiv 10.64898/2026.05.16.26352295, version 1) is the only study found that compares two reanalysis methods by new findings on the same unresolved cases, and it prints its values only in prose. Its Table 1 is an image of individual variants, its supplement is per-patient data and was not read, and its licence reserves all rights, so the source is pinned by hash and not archived.",
+    "In Kaschta et al. 2026 the arms did not receive the same updated information: manual reanalysis re-called the reads with DRAGEN v4.2.4 while Talos used the archived v3.7.5 calls, the arms ran at different times, and Talos was scored against the manual findings. Review effort was measured as analyst minutes per case for the manual arm and candidate variants per case for Talos. Its automated total yield is printed as 41.9% where 161 of 377 is 42.7%; that value is disputed and not shown.",
+    "False alerts, review time, retracted diagnoses and source denominator inconsistencies need adjudication.",
+    "Qualified human scientific review remains outstanding; automated source transcription does not establish experimental replication.",
+    "No printed table compares several reanalysis methods by new confirmed diagnoses on the same unsolved cohort.",
+    "The Solve-RD CNV reanalysis (Demidov et al. 2024) tables count the calls each caller returned for review. Calls found by more than one caller are counted once per caller, and per-caller detection of the confirmed pathogenic CNVs is printed only in the text.",
+    "The Exomiser flagging thresholds (Vestito et al. 2024) and the Talos evaluation cohorts are scored on diagnoses already known, which the first exclusion keeps out of new-yield evidence. The Exomiser thresholds were also chosen on the same 37 cases they are scored on.",
+    "AMELIE 3 (medRxiv 2020.12.29.20248974) reports alerts per patient per year, but its tables are images; not extracted.",
+    "Genet Med 2022 (Moon versus Exomiser on 80 nondiagnostic exomes) and J Mol Diagn 2019 (automated exome reanalysis) were not open access and were not retrieved.",
+    "No machine-learning method has been compared with manual expert reanalysis or Exomiser on the same data in the linked evidence."
+   ],
+   "citations": [
+    {
+     "source_id": "use-case-source-clinical-priorities-2026-09-28",
+     "locator": "C2 \u2014 Unresolved rare-disease reanalysis"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Codex source curation, independent worker cross-review and root integration review",
+    "reviewed_at": "2026-09-30T21:54:30.217Z",
+    "note": "Source-backed literature curation with independent automated transcription and scope checks. No new model execution, independent experimental replication, qualified human scientific review or clinical validation."
+   },
+   "collection_plan": {
+    "status": "collecting",
+    "comparison_question": "Does a proposed reanalysis method improve confirmed diagnoses or reduce review burden relative to refreshed conventional analysis using identical updated knowledge, phenotypes and calls?",
+    "baselines": [
+     "Refreshed conventional analysis with the same updated information",
+     "The original unresolved cohort for programme-level incremental yield, reported separately"
+    ],
+    "outcomes": [
+     "New confirmed diagnoses per eligible case over a stated interval",
+     "Added method benefit under equal updated inputs",
+     "False alerts, review time and the reason for each resolved case"
+    ],
+    "validation_requirements": [
+     "Record original and update dates; exclude future knowledge at each analysis time.",
+     "Separate benefit from new information, calling changes and prioritisation changes.",
+     "Audit family/site overlap and originating-laboratory label circularity.",
+     "Count diagnoses and diagnosed individuals separately; distinguish first and repeated cycles.",
+     "Use independent qualified clinical-genetics review to confirm outcomes."
+    ],
+    "next_step": "Close the remaining endpoint, independence and comparator gaps documented in the 30 September 2026 audit and linked article issue; obtain qualified scientific review."
+   },
+   "evidence_checked": {
+    "date": "2026-10-14",
+    "cutoff_date": "2026-10-14",
+    "next_due": "2026-11-14",
+    "records": [
+     "docs/reviews/use-cases/variant-effect-predictors-2026-10-14.md",
+     "docs/reviews/vep-literature-2026-10-14-review.md",
+     "docs/reviews/use-cases/vep-use-cases-2026-10-14.md",
+     "data/omics/search-ledger.jsonl"
+    ]
+   },
+   "baseline": {
+    "name": "Manual expert reanalysis and Exomiser",
+    "method_ids": [
+     "reanalysis-kaschta-20261010-method-manual-diagnostic-reanalysis",
+     "uc-clinical-20260930-method-exomiser"
+    ],
+    "rationale": "Kaschta et al. 2026 judge automated reanalysis against laboratory experts repeating the diagnostic review, a manual workflow rather than an algorithm. Exomiser rerun with updated annotations is the established automated comparator, used for reanalysis in the 100,000 Genomes Project (Vestito et al. 2024).",
+    "source_ids": [
+     "reanalysis-kaschta-20261010-source-kaschta2026",
+     "rare-reanalysis-20261009-source-vestito2024"
+    ]
+   },
+   "summary": {
+    "text": "No study gives two reanalysis methods the same updated information and compares their new diagnoses, so this evidence cannot show which method finds more. One preprint compares methods on the same unresolved cases: in Kaschta et al. 2026, manual expert reanalysis and the automated tool Talos were applied to 219 genomes without a prior pathogenic or likely pathogenic finding. The arms had unequal inputs: the manual arm re-called the original reads with a newer DRAGEN version while Talos used the archived calls, and Talos was scored against the manual findings, so findings only Talos might have made were not counted. Each arm added the same three pathogenic or likely pathogenic cases, taking the cohort from 158 to 161 of 377 cases (42.7%), and manual reanalysis classified two new VUS cases, one of which Talos returned. Manual review took a mean of 81 minutes per case and Talos returned about three variants per case on average, but no analyst time was printed for reviewing the Talos output, so the two effort figures cannot be compared. The numbers are small, from one centre with a high initial yield, and Illumina, which makes the manual arm's software, supported the study. The other printed comparisons measure review workload, or recovery of diagnoses that were already known. In the Solve-RD CNV reanalysis of unsolved exomes, three callers returned different numbers of calls for expert review: ExomeDepth 4205, ClinCNV 2782 and CoNIFER 862. These counts overlap where callers found the same CNV, thresholds differ by caller, and ClinCNV was developed by the study's first author. In 100,000 Genomes Project cases diagnosed after a new disease-gene association, the Exomiser developers' recommended flagging rule (phenotype score increase 0.2, variant score 0.8) flagged 31 of the 37 diagnostic variants and 23 other variants, while the loosest rule tested flagged all 37 and 182 others; the rules were chosen on these same cases. In the Talos developers' ACG trio cohort, strict phenotype filtering returned 403 candidate variants instead of 487 and recovered 164 known diagnoses instead of 177. The known diagnoses come from each cohort's earlier analysis, and Talos recovery counts only diagnoses its own calling pipeline could detect. Recall on known diagnoses is not new diagnostic yield, each comparison was reported by the developers of at least one method compared, and none is clinical validation.",
+    "status": "reviewed"
+   },
+   "planned_work": []
   }
  ],
  "mappings": [
@@ -2183,6 +2295,59 @@
    ],
    "relevance": "proxy",
    "evidence_sha256": "834580cb17a4aa417d188aeca8532392c08cf6e7626866e3a38c8a0907b69288"
+  },
+  {
+   "id": "use-case-mapping-reanalysis-kaschta-20261010-manual-vs-talos",
+   "use_case_id": "use-case-unresolved-rare-disease-reanalysis",
+   "lifecycle": "active",
+   "revision": 1,
+   "reason": "Recorded from the Kaschta et al. follow-up pass 2026-10-10 (data/omics/use-case-coverage-reanalysis-kaschta-20261010/). Independently reviewed 2026-10-10 (docs/reviews/use-cases/unresolved-rare-disease-reanalysis-kaschta-2026-10-10.md).",
+   "protocol_id": "reanalysis-kaschta-20261010-protocol-manual-vs-talos-219-reanalysis",
+   "evaluation_ids": [
+    "reanalysis-kaschta-20261010-eval-manual-219-reanalysis",
+    "reanalysis-kaschta-20261010-eval-talos-219-reanalysis"
+   ],
+   "endpoint": "New P/LP and VUS case findings, case-category counts, manual review time and Talos candidates per case for manual and Talos reanalysis of the same 219 unresolved genomes",
+   "relevance": "direct",
+   "rationale": "Manual and automated reanalysis of the same unresolved cohort after the same interval, with new-finding counts and review effort for both arms, directly answers which method finds new diagnoses or reduces review effort. The arms did not receive the same variant calls (the manual arm re-called with a newer DRAGEN), which favours the manual arm; any difference, and the matching three P/LP gains, must be read with that in mind.",
+   "constraints": [
+    "Inspect every linked evaluation's source locator and preserved conflicts before citing a result.",
+    "Do not combine this mapping's evaluations with any other protocol's results, including the Talos 2026 study mappings."
+   ],
+   "limitations": [
+    "Unequal inputs: the manual arm re-aligned and re-called the raw reads with DRAGEN v4.2.4 and used Emedgene; Talos used the archived DRAGEN v3.7.5 VCFs. Differences cannot be attributed to the method alone.",
+    "This does not meet the question's condition of the same updated information: the arms had different variant calls and partly different knowledge dates, so a difference between them cannot be attributed to the method.",
+    "The reference is the manual arm's own result: Talos is scored on whether it returned what manual reanalysis found, so findings that only Talos might have made are not counted. Talos can only match or miss what manual reanalysis found; candidates only Talos returned were not adjudicated. Talos found all three new P/LP cases from the archived v3.7.5 calls, so none of the P/LP gains depended on the manual arm's re-calling.",
+    "Very small numbers: three new P/LP cases in each arm.",
+    "The Talos total diagnostic yield is printed as 41.9% in a sentence that also gives 158 to 161 cases and calls it identical to the manual result; 161 of 377 is 42.7%, and 41.9% is the initial yield. That one result is disputed and not shown; the Talos count of 161 is stored.",
+    "Talos output per case is printed as an average of three variants (Results; Discussion P3) and as a median of approximately three (Discussion P1); the stored value is the average. It is a rounded word, and the cases it averages over (219 or the whole cohort) are not stated.",
+    "Manual time excludes report writing and preparation of evidence for secondary review; no hands-on time is printed for Talos.",
+    "Single centre, high initial yield (41.9%), one reanalysis round after a mean of 660 days.",
+    "A new candidate or classification is not a confirmed diagnosis; per-case confirmation details are in the supplement, which was not read.",
+    "Review effort is measured in different units: mean analyst minutes per case for the manual arm, candidate variants per case for Talos. No analyst time is printed for reviewing the Talos output, so the two cannot be compared as effort.",
+    "Manual reanalysis ran from October 2024 to December 2025 and Talos once in October 2025, so the knowledge available to each arm differed by case.",
+    "Illumina, which makes DRAGEN and Emedgene, provided sequencing reagents, software licences and technical support and supported the study (Competing interests; Funding statement)."
+   ],
+   "citations": [
+    {
+     "source_id": "reanalysis-kaschta-20261010-source-kaschta2026",
+     "locator": "Results 'Reanalysis Diagnostic Yield: Manual Reanalysis' P1-P3 and 'Automated Reanalysis' P1; Abstract P3; Methods"
+    }
+   ],
+   "review": {
+    "method": "automated_source_review",
+    "actor": "Separate Claude review agent, independent of the extractor; no human review claimed",
+    "reviewed_at": "2026-10-10T00:00:00Z",
+    "note": "Direct relevance confirmed, with the unequal inputs stated as the second limitation. The protocol measures the use case's endpoint, new findings and review effort in a previously unresolved cohort, for two methods on the same cases, as the existing direct programme judgement does without an equal-input control. The Talos total-yield result is disputed in this review. Not human scientific review and not clinical validation."
+   },
+   "evidence_sha256": "8f1d38b3be05a9669cb20e4925ef42d16aa5aadccf5208ccafb5ce97eddda8b0",
+   "presentation": {
+    "group": "kaschta2026-reanalysis",
+    "title": "Manual versus Talos reanalysis on one cohort (Kaschta et al. 2026)",
+    "stratum_label": "Reanalysis of 219 unresolved cases",
+    "stratum_order": 1,
+    "headline_metric": "count"
+   }
   }
  ]
 }
