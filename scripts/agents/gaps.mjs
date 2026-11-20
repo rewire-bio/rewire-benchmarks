@@ -6,7 +6,9 @@
 //   - open discrepancies between studies that a rerun on a shared protocol would settle;
 //   - run recipes nobody has executed (no receipt).
 // Each gap gets a value (clinical relevance of its use cases and how many rankings it could
-// change) and, where the data gives a basis, a GPU-hour and dollar estimate. The best few are
+// change) and, where the data gives a basis, a GPU-hour and dollar estimate. A gap whose system
+// cannot be run by software (people perform it, a laboratory test, nothing released) is left out
+// and listed in the summary (runnability below). The best few are
 // filed here as "Proposed verification run" or "Proposed benchmark" issues, labelled proposal
 // and tier-1.
 //
@@ -123,6 +125,7 @@ function slim(r) {
     id: r.id,
     kind: r.kind,
     name: r.name ?? r.id,
+    description: r.description ?? '',
     links: r.links ?? [],
     source_ids: r.source_ids ?? [],
     areas: r.facets?.areas ?? [],
@@ -142,6 +145,11 @@ function slim(r) {
     hardware: a.inference_hardware ?? a.hardware ?? null,
     // An evaluation that records only training hardware measures training, which is never a basis.
     trainingOnly: Boolean(a.training_hardware) && !a.inference_hardware,
+    // What says whether a system can be run by software (runnability below).
+    access: [a.access, a.access_reuse].filter((x) => typeof x === 'string'),
+    baselineType: a.baseline_type ?? null,
+    artifacts: ARTIFACT_KEYS.filter((k) => a[k] !== undefined && a[k] !== null && !/^(?:unreported|not stated|unknown|none)\b/i.test(String(a[k]))),
+    adaptation: typeof (a.comparison?.adaptation ?? a.adaptation) === 'string' ? (a.comparison?.adaptation ?? a.adaptation) : null,
   };
 }
 
@@ -328,7 +336,21 @@ export function buildIndex({ recs, runtimes = [] }) {
     return br && (br.run_recipes?.length || br.run_guide) ? b : null;
   }
 
-  return { recs, runtimes, linkOf, name, resolveSystem, studyOf, benchmarkOf, ancestors, evalsByAssessment, descendants, recipeOwner };
+  /** The system record and every configuration that resolves to it. */
+  let members = null;
+  function membersOf(systemId) {
+    if (!members) {
+      members = new Map();
+      for (const r of recs.values()) {
+        if (!['model', 'method', 'configuration', 'pipeline', 'baseline', 'service'].includes(r.kind)) continue;
+        const s = resolveSystem(r.id);
+        members.set(s, [...(members.get(s) ?? []), r.id]);
+      }
+    }
+    return members.get(systemId) ?? [systemId];
+  }
+
+  return { recs, runtimes, linkOf, name, resolveSystem, studyOf, benchmarkOf, ancestors, evalsByAssessment, descendants, recipeOwner, membersOf };
 }
 
 function systemOfEvaluation(ix, evalId) {
@@ -728,6 +750,93 @@ export function scoreGaps(ix, gaps) {
     || a.key.localeCompare(b.key));
 }
 
+// ---------- Runnability ----------
+
+// Attributes that pin something a machine runs: a checkpoint, weights, code, packages or an
+// environment. Any of them on a system or its configurations means it can be run by software.
+const ARTIFACT_KEYS = ['checkpoint', 'checkpoint_revision', 'checkpoint_sha256', 'weights_sha256', 'code', 'code_commit', 'software_commit', 'packages', 'environment', 'container'];
+// An access statement that names released code, weights, a package, a container or an API.
+const RELEASED = /github\.com|gitlab|huggingface\.co|hugging face|bioconda|bioconductor|pypi|docker|zenodo|\bapi\b|\b(?:public|open|released|downloadable|open-source)\b[^.;]*\b(?:code|weights|checkpoints?|software|package|source|models?)\b|\b(?:code|source code|software) at\b/i;
+// An access statement that says nothing runnable was released.
+// "Trained models are not released" alone does not count: the tool itself may be public.
+const NO_RELEASE = /\bno (?:public )?(?:code|model weights|weights)\b[^.;]*\b(?:code|weights)\b|\bnot (?:openly |publicly )?available\b|\bnot released as software\b|\bclosed system\b/i;
+// An access statement that says the system is a laboratory test or workflow, not software.
+const LABORATORY = /\blaboratory (?:tests?|workflow)\b|\b(?:commercial|clinical) assay\b/i;
+// A description or evaluation adaptation that says people perform the method.
+const BY_PEOPLE = /\b(?:expert|manual|human)[- ](?:re-?)?(?:interpretation|analysis|reanalysis|review|curation|classification|annotation|reading)\b|\bby (?:laboratory |clinical |trained |human )?(?:experts?|clinicians?|curators?|pathologists?|geneticists?|annotators?)\b/i;
+const NEGATED = /\b(?:no|not|without)\s+$/i;
+
+/** The first match of `re` in `text` that is not negated ("no manual curation" is not manual). */
+function affirmed(re, text) {
+  const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
+  for (const m of String(text ?? '').matchAll(g)) if (!NEGATED.test(String(text).slice(Math.max(0, m.index - 12), m.index))) return m[0];
+  return null;
+}
+
+/**
+ * Systems the release data cannot settle, by record ID: { id: { runnable, reason } }. A
+ * fallback only; fix the record in the data store first, and remove the entry once it is fixed.
+ */
+export const RUNNABILITY_OVERRIDES = {};
+
+/**
+ * Whether a system can be run by software, from the release data:
+ * 1. An entry in RUNNABILITY_OVERRIDES decides.
+ * 2. Runnable when the system or one of its configurations has a run recipe or run guide, an
+ *    attribute that pins a checkpoint, weights, code, packages or an environment, or an access
+ *    statement that names released code, weights, a package, a container or an API.
+ * 3. Not runnable when, without that, an access statement says nothing was released or that it
+ *    is a laboratory test or workflow; the baseline type is experimental_reference; or the
+ *    description, or the adaptation of an evaluation on the gap's protocols, says people
+ *    perform it (expert interpretation, manual review, by clinicians).
+ * 4. Otherwise runnable: the data gives no reason to think it is not.
+ * Returns { runnable, reason, record }.
+ */
+export function runnability(ix, systemId, { protocols = [], overrides = RUNNABILITY_OVERRIDES } = {}) {
+  if (overrides[systemId]) return { ...overrides[systemId], record: systemId, reason: `${overrides[systemId].reason} (RUNNABILITY_OVERRIDES)` };
+  const members = (ix.membersOf?.(systemId) ?? [systemId]).map((id) => ix.recs.get(id)).filter(Boolean);
+  for (const r of members) {
+    if (r.run_recipes?.length || r.run_guide) return { runnable: true, reason: `run recipe on \`${r.id}\``, record: r.id };
+    if (r.artifacts?.length) return { runnable: true, reason: `\`${r.artifacts[0]}\` on \`${r.id}\``, record: r.id };
+    const open = (r.access ?? []).find((t) => RELEASED.test(t) && !NO_RELEASE.test(t));
+    if (open) return { runnable: true, reason: `access of \`${r.id}\`: "${clean(open)}"`, record: r.id };
+  }
+  const ids = new Set(members.map((r) => r.id));
+  const evals = protocols.flatMap((p) => ix.evalsByAssessment?.get(p) ?? []).map((e) => ix.recs.get(e))
+    .filter((e) => e && (e.links ?? []).some((l) => l.relation === 'system' && ids.has(l.target_id)));
+  for (const r of members) {
+    const closed = (r.access ?? []).find((t) => NO_RELEASE.test(t));
+    if (closed) return { runnable: false, reason: `the access of \`${r.id}\` says nothing runnable was released: "${clean(closed)}"`, record: r.id };
+    const lab = (r.access ?? []).map((t) => affirmed(LABORATORY, t) && t).find(Boolean);
+    if (lab) return { runnable: false, reason: `the access of \`${r.id}\` says it is a laboratory test or workflow: "${clean(lab)}"`, record: r.id };
+    if (r.baselineType === 'experimental_reference') return { runnable: false, reason: `\`${r.id}\` is an experimental reference baseline`, record: r.id };
+    const people = affirmed(BY_PEOPLE, r.description);
+    if (people) return { runnable: false, reason: `the description of \`${r.id}\` says people perform it ("${people}")`, record: r.id };
+  }
+  for (const e of evals) {
+    const people = affirmed(BY_PEOPLE, e.adaptation);
+    if (people) return { runnable: false, reason: `evaluation \`${e.id}\` records its adaptation as "${clean(e.adaptation)}"`, record: e.id };
+  }
+  return { runnable: true, reason: 'no statement in the release that it cannot be run', record: null };
+}
+
+/**
+ * Split gaps into those every system of which can be run by software and those that cannot. A
+ * benchmark or recipe gap names no system and is always kept; a proposed benchmark's list of
+ * proxy systems drops systems that cannot be run.
+ */
+export function excludeNotRunnable(ix, gaps, opts = {}) {
+  const kept = [];
+  const excluded = [];
+  for (const g of gaps) {
+    if (g.proxySystems) g.proxySystems = g.proxySystems.filter((p) => runnability(ix, p.id, opts).runnable);
+    const bad = g.systems.map((s) => ({ system: s, ...runnability(ix, s, { ...opts, protocols: g.protocols }) })).find((r) => !r.runnable);
+    if (bad) excluded.push({ gap: g, system: bad.system, reason: bad.reason });
+    else kept.push(g);
+  }
+  return { kept, excluded };
+}
+
 // ---------- Dedupe ----------
 
 /** Gap keys already filed, from the hidden marker, on open and closed issues. */
@@ -771,28 +880,57 @@ function nameScore(hay, name) {
   return 10 * hits + tokens.filter((t) => isCommon(t) && contains(hay, t)).length;
 }
 
+/** Whether `text` holds the record ID as a whole word (not as part of a longer ID). */
+export function citesId(text, id) {
+  if (!id) return false;
+  const re = new RegExp(`(?<![A-Za-z0-9_.-])${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![A-Za-z0-9_-])`);
+  return re.test(String(text ?? ''));
+}
+
+/**
+ * The protocol and benchmark IDs a gap is about: its benchmark, its protocols, the record that
+ * holds its recipe, and the benchmark each of those is part of.
+ */
+export function gapRecordIds(ix, gap) {
+  const ids = [gap.benchmark, ...(gap.protocols ?? []), gap.owner].filter(Boolean);
+  return [...new Set([...ids, ...ids.map((id) => ix.benchmarkOf?.(id)).filter(Boolean)])];
+}
+
 /**
  * An open issue written by hand that already covers the gap (#40 to #56, #67 to #71 and the
- * like), matched on names: the system and its benchmark or protocol (in full or by its
+ * like). It matches on names: the system and its benchmark or protocol (in full or by its
  * specific words); both systems of a discrepancy and its anchor, or its ID or a previous ID; the
- * recipe's benchmark with "recipe", "run guide" or "smoke"; the use case's title or slug. When
- * several issues match, the one that names the benchmark most specifically is returned.
+ * recipe's benchmark with "recipe", "run guide" or "smoke"; the use case's title or slug. It also
+ * matches on record IDs, in the text of a hand-written issue or in the gap-proposal marker of a
+ * filed one: a protocol or benchmark ID of the gap (gapRecordIds) together with the system IDs or
+ * names, or for a recipe with "recipe", "run guide" or "smoke" (or a recipe marker). A filed
+ * proposal's text is not searched for IDs, because it lists records of other gaps. When several
+ * issues match, the one that names the benchmark most specifically is returned.
  */
 export function coveringIssue(ix, gap, issues) {
   let best = null;
   let bestScore = 0;
+  const recordIds = gapRecordIds(ix, gap);
   for (const i of issues) {
     if (isClosed(i)) continue;
     const hay = normalise(`${i.title} ${i.body ?? ''}`);
     const raw = `${i.title} ${i.body ?? ''}`;
     const benchNames = [gap.benchmark, ...gap.protocols].filter(Boolean).map((id) => ix.name(id));
     const benchScore = () => Math.max(0, ...benchNames.map((n) => nameScore(hay, n)));
+    const markers = [...markedKeys([i]).keys()].map((k) => k.split(':'));
+    // IDs: from the marker of a filed proposal, else from the hand-written text.
+    const cites = (id) => (markers.length ? markers.some((parts) => parts.includes(id)) : citesId(raw, id));
+    const citesRecord = recordIds.some(cites);
+    const recipeWords = markers.length ? markers.some((parts) => parts[0] === 'recipe') : /\b(recipe|run guide|smoke)\b/i.test(raw);
+    const systemsNamed = gap.systems.every((s) => cites(s) || (!markers.length && nameScore(hay, ix.name(s))));
     let score = 0;
-    if (gap.type === 'no-direct-evidence') score = gap.useCases.some((u) => contains(hay, u.title) || contains(hay, u.slug)) ? 1 : 0;
+    if (gap.type === 'no-direct-evidence') score = gap.useCases.some((u) => contains(hay, u.title) || contains(hay, u.slug) || cites(u.id)) ? 1 : 0;
     else if (gap.type === 'discrepancy') {
       if ([gap.finding.id, ...(gap.finding.previousIds ?? [])].some((id) => raw.includes(id))) score = 1000;
+      else if (citesRecord && systemsNamed) score = 500;
       else if (gap.systems.every((s) => nameScore(hay, ix.name(s)))) score = benchScore();
-    } else if (gap.type === 'unverified-recipe') score = contains(hay, ix.name(gap.benchmark)) && /\b(recipe|run guide|smoke)\b/i.test(raw) ? 1 : 0;
+    } else if (gap.type === 'unverified-recipe') score = (citesRecord && recipeWords) ? 500 : contains(hay, ix.name(gap.benchmark)) && /\b(recipe|run guide|smoke)\b/i.test(raw) ? 1 : 0;
+    else if (citesRecord && systemsNamed) score = 500;
     else if (gap.systems.every((s) => nameScore(hay, ix.name(s)))) score = benchScore();
     if (score > bestScore) {
       best = i;
@@ -1123,10 +1261,10 @@ export function smokeChecks(dir) {
   return readdirSync(dir).filter((f) => f.endsWith('.sh')).map((f) => f.slice(0, -3)).sort();
 }
 
-export function renderSummary({ mode, release, gaps, plan, filed, notes, usage }) {
+export function renderSummary({ mode, release, gaps, plan, filed, notes, usage, excluded = [] }) {
   const byType = Object.keys(TYPES).map((t) => `${TYPES[t]}: ${gaps.filter((g) => g.type === t || g.flags?.includes(t)).length}`).join('; ');
   const fmtEst = (g) => (g.estimate.kind === 'none' ? 'no estimate' : `${g.estimate.lowerBound ? 'at least ' : ''}${g.estimate.gpuHours} GPU-h`);
-  const skip = new Map(plan.skipped.map((s) => [s.gap.key, s.reason]));
+  const skip = new Map([...excluded.map((x) => [x.gap.key, `not runnable by software: ${x.reason}`]), ...plan.skipped.map((s) => [s.gap.key, s.reason])]);
   const chosen = new Set(plan.file.map((g) => g.key));
   return [
     `## Gap scanner, release ${release} (${mode})`,
@@ -1138,6 +1276,10 @@ export function renderSummary({ mode, release, gaps, plan, filed, notes, usage }
     '### Proposals',
     '',
     filed.length ? filed.map((f) => `- ${f.url ?? '(not filed)'} ${f.issue.title}${f.whyNote ? ` (${f.whyNote})` : ''}`).join('\n') : 'None.',
+    '',
+    '### Not runnable by software',
+    '',
+    excluded.length ? `Left out of the proposals because a system in them cannot be run by software (runnability in \`scripts/agents/gaps.mjs\`):\n\n${excluded.map((x) => `- ${esc(x.gap.title)} (\`${x.gap.key}\`): ${esc(x.reason)}.`).join('\n')}` : 'None.',
     '',
     `### Top ${Math.min(LIMITS.listed, gaps.length)} gaps by value per GPU-hour`,
     '',
@@ -1185,10 +1327,12 @@ export async function main(argv = process.argv.slice(2), env = process.env, deps
   const emit = (s) => (env.GITHUB_STEP_SUMMARY ? appendFileSync(env.GITHUB_STEP_SUMMARY, `${s}\n`) : log(s));
 
   const gaps = scoreGaps(ix, findGaps(ix, useCasesFile, discrepanciesFile, { smokeChecks: smokeChecks(resolve(ROOT, args.smokeDir || SMOKE_DIR)) }));
+  const { kept, excluded } = excludeNotRunnable(ix, gaps);
+  for (const x of excluded) log(`not runnable by software: ${x.gap.key}: ${x.reason}`);
   let plan = { file: [], skipped: [] };
   try {
     const issues = args.dryRun || args.issues ? JSON.parse(readFileSync(args.issues ? resolve(args.issues) : join(dir, 'issues.json'), 'utf8')) : await gh.listIssues(repo);
-    plan = planFiling(ix, gaps, issues, args.maxIssues);
+    plan = planFiling(ix, kept, issues, args.maxIssues);
 
     let client = deps.anthropic ?? null;
     if (!args.dryRun && !client && env.ANTHROPIC_API_KEY && plan.file.length) {
@@ -1209,18 +1353,18 @@ export async function main(argv = process.argv.slice(2), env = process.env, deps
       filed.push(entry);
     }
   } finally {
-    const summary = renderSummary({ mode, release, gaps, plan, filed, notes, usage });
+    const summary = renderSummary({ mode, release, gaps, plan, filed, notes, usage, excluded });
     emit(summary);
     if (args.out) {
       mkdirSync(args.out, { recursive: true });
       writeFileSync(join(args.out, 'summary.md'), summary);
-      writeFileSync(join(args.out, 'plan.json'), `${JSON.stringify({ mode, release, dataRepo, filed: filed.map(({ facts, issue, ...f }) => ({ ...f, title: issue.title })), skipped: plan.skipped.map((s) => ({ key: s.gap.key, reason: s.reason })), gaps: gaps.map((g) => ({ key: g.key, type: g.type, flags: g.flags ?? [], value: g.value, estimate: g.estimate, title: g.title })) }, null, 2)}\n`);
+      writeFileSync(join(args.out, 'plan.json'), `${JSON.stringify({ mode, release, dataRepo, filed: filed.map(({ facts, issue, ...f }) => ({ ...f, title: issue.title })), skipped: plan.skipped.map((s) => ({ key: s.gap.key, reason: s.reason })), excluded: excluded.map((x) => ({ key: x.gap.key, system: x.system, reason: x.reason })), gaps: gaps.map((g) => ({ key: g.key, type: g.type, flags: g.flags ?? [], value: g.value, estimate: g.estimate, title: g.title })) }, null, 2)}\n`);
       for (const [i, f] of filed.entries()) writeFileSync(join(args.out, `${i + 1}-${createHash('sha1').update(f.key).digest('hex').slice(0, 8)}.md`), `# ${f.issue.title}\n\nLabels: ${f.issue.labels.join(', ')}\n\n${f.issue.body}\n`);
       writeFileSync(join(args.out, 'usage.json'), `${JSON.stringify({ byModel: usage.byModel, estimatedUsd: usage.total() }, null, 2)}\n`);
     }
     log(`Estimated cost of this run: $${usage.total().toFixed(4)}`);
   }
-  return { summary: renderSummary({ mode, release, gaps, plan, filed, notes, usage }), gaps, plan, filed, usage, ix };
+  return { summary: renderSummary({ mode, release, gaps, plan, filed, notes, usage, excluded }), gaps, plan, filed, usage, ix, excluded };
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {

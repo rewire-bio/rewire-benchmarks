@@ -22,6 +22,16 @@ Only tier 1 use cases (DNA and RNA genomics, `depth_tier` 1). A **ranking** is o
 
 System identity follows the discrepancy rules: a configuration counts as its model through `configuration_of`, then `family`, then `alias_of`.
 
+### Only systems software can run
+
+A gap is proposed only when every system in it can be run by software. This is decided from the release data, over the system record and every configuration that counts as it:
+
+- **Runnable** when one of them has a run recipe or run guide; an attribute that pins a checkpoint, weights, code, packages or an environment (`checkpoint`, `checkpoint_revision`, `code_commit`, `packages`, `environment` and the like); or an `access` or `access_reuse` statement naming released code, weights, a package, a container or an API (a GitHub or Hugging Face link, "public code", "open weights").
+- **Not runnable** when, without any of that, an access statement says nothing runnable was released ("no public code or weights", "not publicly available", "closed system") or that it is a laboratory test or workflow; the baseline type is `experimental_reference`; or a description, or the adaptation of an evaluation on the gap's protocols, says people perform it ("expert interpretation", "manual reanalysis", "by clinicians"). A negated phrase ("no manual curation") does not count.
+- **Otherwise runnable:** the data gives no reason to think it is not.
+
+`RUNNABILITY_OVERRIDES` in the script decides a system the data cannot settle. It is a fallback: correct the record in the data store first, and remove the entry once the record says it. Every exclusion is listed in the job summary under "Not runnable by software", with the record and the text that decided it, and in `plan.json` in the artifact. A proposed benchmark's list of proxy systems leaves those systems out too.
+
 ### Value, estimate and order
 
 - **Value** is the clinical weight (2 when a use case the gap serves has a clinical context, else 1) times one plus the number of rankings the run could change. For a discrepancy that is the rankings holding both systems on the protocols the run uses; rankings on other protocols do not count, and neither do their use cases.
@@ -36,7 +46,8 @@ The gap, "Why it matters", the exact model and benchmark (with record IDs), the 
 ### Dedupe
 
 - Each issue carries a hidden `gap-proposal` marker with the gap's key. A key with a marker on any issue, open or closed, is never filed again, so a closed or declined proposal stays closed. The store re-keys a discrepancy when its studies change and keeps the old IDs in `previous_ids`; a marker or issue citing any of them also counts.
-- Hand-written open issues are matched by name: the system and its benchmark or protocol (in full, or by at least two of the benchmark's acronyms and words with digits, such as ClinGen, PP3 and BP4, or one if it has only one); both systems of a discrepancy and its anchor, or the finding ID or a previous ID; the recipe's benchmark with "recipe", "run guide" or "smoke"; or the use case's title or slug. Common assay and truth-set words (WGS, CNV, GIAB, SNV and the like) and sizes such as 5kb never count towards the two words, so "WGS CNV" alone does not match. When several issues match, the one naming the benchmark most specifically is credited. Closed hand-written issues do not count. This keeps it off #40 to #56, #65 and #67 to #71. Every skip is listed in the job summary with the issue that covers it.
+- Hand-written open issues are matched by name: the system and its benchmark or protocol (in full, or by at least two of the benchmark's acronyms and words with digits, such as ClinGen, PP3 and BP4, or one if it has only one); both systems of a discrepancy and its anchor, or the finding ID or a previous ID; the recipe's benchmark with "recipe", "run guide" or "smoke"; or the use case's title or slug. Common assay and truth-set words (WGS, CNV, GIAB, SNV and the like) and sizes such as 5kb never count towards the two words, so "WGS CNV" alone does not match. When several issues match, the one naming the benchmark most specifically is credited. Closed hand-written issues do not count. This keeps it off #40 to #56, #65 and #67 to #71.
+- Open issues are also matched by record ID. The gap's IDs are its benchmark, its protocols, the record holding its recipe, and the benchmark each is part of. A hand-written issue that cites one of them as a whole ID covers the gap when it also cites or names the gap's systems, or, for a recipe, says "recipe", "run guide" or "smoke". So #67, which cites `discovery-benchmark-proteingym` and names the run guide, covers the recipe of its protocol `rewire-proteingym-v1-3-dms-substitutions`. For an issue the scanner filed, only the IDs in its marker count, since its text lists records of other gaps: a `recipe:` marker for a benchmark covers its protocols' recipes. Every skip is listed in the job summary with the issue that covers it.
 
 ### Modes
 
