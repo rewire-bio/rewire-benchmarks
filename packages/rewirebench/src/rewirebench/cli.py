@@ -255,15 +255,16 @@ def main(argv=None):
             used = [_prepared_file(args.prepared)]
             if args.command == "evaluate":
                 used.append(Path(args.predictions or args.embeddings))
-            receipts.write_adhoc_receipt(
+            written = receipts.write_adhoc_receipt(
                 args.output, argv=arguments, input_files=used, metrics=result["metrics"],
                 started_at=started_at, wall_seconds=time.perf_counter() - started)
             result = {
                 "coverage": result["coverage"],
                 "metrics": result["metrics"],
                 "report": str(Path(args.output) / "report.json"),
-                "receipt": str(Path(args.output) / "receipt.json"),
             }
+            if written is not None:
+                result["receipt"] = str(Path(args.output) / receipts.RECEIPT_FILENAME)
         elif args.command == "export":
             sdk.export(args.report, output=args.output)
             result = {"bundle": args.output, "uploaded": False}

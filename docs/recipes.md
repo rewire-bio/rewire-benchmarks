@@ -57,8 +57,8 @@ The run folder holds the outputs, `logs/` with each command's output, `receipt.j
 
 | Field | Content |
 | --- | --- |
-| `recipe` | ID, path, commit and SHA-256 of the recipe file |
-| `code` | Repository, commit, whether the tree had uncommitted changes, rewirebench version, `sdk_code_sha256` |
+| `recipe` | ID, path and SHA-256 of the recipe file. The commit is given only when the file at that commit has the same bytes |
+| `code` | Repository and commit of the checkout rewirebench ran from (null for an installed wheel), whether it had uncommitted changes, rewirebench version, `sdk_code_sha256` |
 | `environment` | Image digest per platform from the recipe, the image used if any, Python and OS |
 | `inputs` | Source, size and SHA-256 of each input |
 | `hardware` | Architecture, CPU model and cores, memory, GPUs |

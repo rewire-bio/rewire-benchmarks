@@ -8,7 +8,7 @@ summary: >-
 kind: benchmark_run
 purpose: harness_run
 scope: synthetic_smoke
-protocol_id: flip2-fitness-v1
+rewirebench_protocol: flip2-fitness-v1
 licence:
   code: MIT
   weights: No pretrained weights.

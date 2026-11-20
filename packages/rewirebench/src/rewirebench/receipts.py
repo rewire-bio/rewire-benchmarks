@@ -310,6 +310,27 @@ def code_state(root: Path | None) -> Code:
     )
 
 
+def recipe_origin(path: Path) -> tuple[str | None, str | None]:
+    """Repository and commit of a recipe file, when HEAD holds exactly these bytes.
+
+    A recipe that is untracked or edited since the last commit gets no commit: the
+    pointer must never name a commit whose file differs from the one that ran.
+    """
+    folder = path.resolve().parent
+    top = _run_text(["git", "rev-parse", "--show-toplevel"], cwd=folder)
+    if top is None:
+        return None, None
+    origin = _run_text(["git", "remote", "get-url", "origin"], cwd=folder)
+    repository = _without_credentials(origin) if origin else None
+    relative = path.resolve().relative_to(Path(top).resolve()).as_posix()
+    committed = _run_text(["git", "rev-parse", f"HEAD:{relative}"], cwd=folder)
+    current = _run_text(["git", "hash-object", "--no-filters", path.name], cwd=folder)
+    commit = _run_text(["git", "rev-parse", "HEAD"], cwd=folder)
+    if committed is None or committed != current or not commit or len(commit) != 40:
+        return repository, None
+    return repository, commit
+
+
 def _source_root() -> Path | None:
     """The checkout this module runs from, or ``None`` for an installed wheel."""
     parents = Path(__file__).resolve().parents
@@ -513,7 +534,10 @@ def run_recipe(
     if folder.exists():
         raise FileExistsError(f"Output folder already exists: {folder}")
     repo_root = recipes_dir.parent
-    code = code_state(repo_root)
+    # The code commit comes from where rewirebench is installed, the recipe commit from
+    # where the recipe file is. With a wheel and --recipes-dir these are different places.
+    code = code_state(_source_root())
+    recipe_repository, recipe_commit = recipe_origin(loaded.path)
     started_at = datetime.datetime.now(datetime.UTC)
     started = time.perf_counter()
     commands: list[CommandRecord] = []
@@ -556,7 +580,7 @@ def run_recipe(
         verified_on=started_at.date(),
         started_by=started_by or default_started_by(),
         backend="local",
-        recipe=RecipePointer(id=recipe.id, repository=code.repository, commit=code.commit,
+        recipe=RecipePointer(id=recipe.id, repository=recipe_repository, commit=recipe_commit,
                              path=f"recipes/{relative}", sha256=loaded.sha256),
         kg_release_id=kg_release_id,
         code=code,

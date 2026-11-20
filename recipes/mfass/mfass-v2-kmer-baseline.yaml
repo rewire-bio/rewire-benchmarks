@@ -7,7 +7,7 @@ summary: >-
 kind: benchmark_run
 purpose: harness_run
 scope: full_protocol
-protocol_id: mfass-v2
+rewirebench_protocol: mfass-v2
 kg_record_id: rewire-mfass-v2
 store_recipe_id: mfass-v2-baseline
 licence:

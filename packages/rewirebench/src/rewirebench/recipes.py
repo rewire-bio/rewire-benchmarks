@@ -317,7 +317,7 @@ class Recipe(Strict):
         "rescore_predictions", "generate_and_evaluate", "obtain_and_run", "harness_run"
     ]
     scope: Scope
-    protocol_id: Text | None = None
+    rewirebench_protocol: Text | None = None
     kg_record_id: Text | None = None
     store_recipe_id: Text | None = None
     licence: Licence
@@ -344,8 +344,8 @@ class Recipe(Strict):
                 raise ValueError(
                     f"{block} must be either present or named once in missing with a reason"
                 )
-        if self.purpose == "harness_run" and not self.protocol_id:
-            raise ValueError("A harness_run recipe names its rewirebench protocol_id")
+        if self.purpose == "harness_run" and not self.rewirebench_protocol:
+            raise ValueError("A harness_run recipe names its rewirebench_protocol")
         for label, names in (
             ("input", [item.name for item in self.inputs]),
             ("command", [command.name for command in self.commands]),
@@ -408,11 +408,11 @@ def parse_recipe(text: str | bytes) -> Recipe:
     if not isinstance(data, dict):
         raise ValueError("A recipe is a YAML mapping")  # noqa: TRY004 - CLI reports ValueError
     recipe = Recipe.model_validate(data)
-    if recipe.protocol_id is not None and recipe.purpose == "harness_run":
+    if recipe.rewirebench_protocol is not None:
         from rewirebench import sdk
 
-        if recipe.protocol_id not in sdk.PROTOCOLS:
-            raise ValueError(f"Unknown rewirebench protocol: {recipe.protocol_id}")
+        if recipe.rewirebench_protocol not in sdk.PROTOCOLS:
+            raise ValueError(f"Unknown rewirebench protocol: {recipe.rewirebench_protocol}")
     return recipe
 
 
@@ -493,7 +493,7 @@ def summary(loaded: LoadedRecipe, directory: Path) -> dict[str, Any]:
         "title": recipe.title,
         "kind": recipe.kind,
         "scope": recipe.scope,
-        "protocol_id": recipe.protocol_id,
+        "rewirebench_protocol": recipe.rewirebench_protocol,
         "backends": recipe.backends.names(),
         "path": str(PurePosixPath("recipes", *loaded.path.relative_to(directory).parts)),
         "sha256": loaded.sha256,

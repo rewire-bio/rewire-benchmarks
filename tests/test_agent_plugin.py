@@ -47,7 +47,8 @@ def test_marketplace_lists_the_plugin():
 
 
 GRAPH_SERVER = "https://github.com/rewire-bio/rdf-kg-mcp"
-# The skill uses search, list_queries and run_query, which first shipped in v0.4.0.
+# v0.1.0 has no search, list_queries or run_query, which the product page describes.
+# v0.4.0 has all eight read tools and was read at its tag when this floor was set.
 MINIMUM_GRAPH_SERVER = (0, 4, 0)
 RELEASE_TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
 

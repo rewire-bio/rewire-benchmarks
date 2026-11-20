@@ -59,7 +59,7 @@ def test_committed_schema_matches_the_models():
 
 def test_mfass_recipe_pins_the_published_inputs_and_values():
     recipe = recipes.load_recipe(RECIPES / "mfass/mfass-v2-kmer-baseline.yaml").recipe
-    assert recipe.protocol_id == "mfass-v2" and recipe.scope == "full_protocol"
+    assert recipe.rewirebench_protocol == "mfass-v2" and recipe.scope == "full_protocol"
     assert {item.name: item.sha256 for item in recipe.inputs} == {
         "snv_data_clean.txt": "a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8",
         "snv_func_annot.txt": "71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1",
@@ -181,9 +181,11 @@ def test_a_price_needs_a_dated_source():
 
 def test_harness_recipes_name_a_real_protocol():
     with pytest.raises(ValueError, match="Unknown rewirebench protocol"):
-        parse(changed(protocol_id="no-such-protocol"))
-    with pytest.raises(ValidationError, match="protocol_id"):
-        parse(changed(protocol_id=None))
+        parse(changed(rewirebench_protocol="no-such-protocol"))
+    with pytest.raises(ValidationError, match="rewirebench_protocol"):
+        parse(changed(rewirebench_protocol=None))
+    with pytest.raises(ValidationError, match="Extra inputs"):
+        parse(changed(protocol_id="rewire-mfass-v2"))
 
 
 def test_duplicate_yaml_keys_are_rejected():

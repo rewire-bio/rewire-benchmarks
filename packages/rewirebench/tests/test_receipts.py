@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime
 import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -55,7 +56,8 @@ def test_receipt_records_everything_the_run_depends_on(smoke_run: Path):
     assert data["recipe"]["id"] == SMOKE
     assert data["recipe"]["sha256"] == loaded.sha256
     assert data["recipe"]["path"] == "recipes/flip2/flip2-synthetic-smoke.yaml"
-    assert data["recipe"]["commit"] == data["code"]["commit"]
+    # The pointer has a commit only when the file at HEAD has the bytes that ran.
+    assert data["recipe"]["commit"] in (None, data["code"]["commit"])
     assert data["code"]["commit"] is None or len(data["code"]["commit"]) == 40
     assert len(data["code"]["sdk_code_sha256"]) == 64
     assert data["environment"]["images"] == {"linux/amd64": None, "linux/arm64": None}
@@ -176,7 +178,7 @@ def custom_recipes(tmp_path: Path, argv: list[str], **fields: Any) -> Path:
     (root / "data/input.txt").write_text("pinned input\n")
     data = yaml.safe_load((RECIPES / "flip2/flip2-synthetic-smoke.yaml").read_text())
     data.update(
-        id="custom", purpose="generate_and_evaluate", protocol_id=None,
+        id="custom", purpose="generate_and_evaluate", rewirebench_protocol=None,
         inputs=[{"name": "input.txt", "repo_path": "data/input.txt",
                  "sha256": recipes.sha256_file(root / "data/input.txt")}],
         commands=[{"name": "step", "argv": argv}, {"name": "after", "argv": argv}],
@@ -199,11 +201,49 @@ def test_a_recipe_can_run_any_argv_and_read_nested_values(tmp_path: Path):
     loaded = recipes.get_recipe("custom", directory)
     receipt = receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
     assert receipt.checks_passed and receipt.metrics == {"value": 2.004}
-    assert receipt.code.commit is None and receipt.recipe.commit is None
+    assert receipt.recipe.commit is None and receipt.recipe.repository is None
+    assert receipt.code == receipts.code_state(receipts._source_root())
     assert receipts.verify(tmp_path / "out", recipes_dir=directory,
                            inputs=directory.parent / "data")["complete"]
     with pytest.raises(FileExistsError):
         receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
+
+
+def git(folder: Path, *arguments: str) -> str:
+    return subprocess.run(
+        ["git", "-c", "user.name=Test", "-c", "user.email=test@example.org", *arguments],
+        cwd=folder, check=True, capture_output=True, text=True,
+    ).stdout.strip()
+
+
+def test_recipe_commit_is_recorded_only_for_the_committed_bytes(tmp_path: Path):
+    """The recipes folder and the code can be different checkouts, and a recipe can be edited."""
+    directory = custom_recipes(tmp_path, [sys.executable, "-c", WRITE_RESULT, "{output}"])
+    root = directory.parent
+    git(root, "init", "--quiet")
+    git(root, "remote", "add", "origin", "git@github.com:example/recipes.git")
+    git(root, "add", "data")
+    git(root, "commit", "--quiet", "-m", "data only")
+
+    def run(name: str) -> receipts.Receipt:
+        loaded = recipes.get_recipe("custom", directory)
+        return receipts.run_recipe(loaded, output=tmp_path / name, recipes_dir=directory)
+
+    untracked = run("untracked")
+    assert untracked.recipe.commit is None
+    assert untracked.recipe.repository == "https://github.com/example/recipes"
+    git(root, "add", "recipes")
+    git(root, "commit", "--quiet", "-m", "recipe")
+    head = git(root, "rev-parse", "HEAD")
+    committed = run("committed")
+    assert committed.recipe.commit == head
+    # The code commit describes where rewirebench runs from, not the recipes checkout.
+    assert committed.code == receipts.code_state(receipts._source_root())
+    assert committed.code.commit != head
+    recipe = directory / "test/custom.yaml"
+    recipe.write_text(recipe.read_text() + "# Edited after the commit.\n")
+    edited = run("edited")
+    assert edited.recipe.commit is None and edited.recipe.sha256 != committed.recipe.sha256
 
 
 def test_a_failed_command_still_leaves_a_receipt_that_cannot_pass(
@@ -342,6 +382,10 @@ def test_plain_cli_runs_also_write_a_receipt(
     _, code = run_cli(capsys, "run-baselines", "--prepared", str(tmp_path / "prepared"),
                       "--output", str(tmp_path / "nested"), "--baseline", "training-mean-v1")
     assert code == 0 and not (tmp_path / "nested/receipt.json").exists()
+    result, code = run_cli(capsys, "evaluate", "--prepared", str(tmp_path / "prepared"),
+                           "--predictions", str(predictions), "--allow-partial",
+                           "--output", str(tmp_path / "nested-evaluated"))
+    assert code == 0 and "receipt" not in result
 
 
 def test_receipt_dates_are_utc(smoke_run: Path):

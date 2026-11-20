@@ -45,6 +45,7 @@ Where the two documents name the same thing, the recipe and the receipt use the 
 
 | Subject | ADR-C draft | ADR 0005 | Used here |
 | --- | --- | --- | --- |
+| Protocol | none | `protocol_id`, a store record ID | `rewirebench_protocol` for the runner's protocol name (`mfass-v2`) and `kg_record_id` for the store record (`rewire-mfass-v2`). `protocol_id` is not used, because the store already gives it another meaning. |
 | What the recipe is for | `kind` | `purpose` | Both. `kind` is `model_run`, `benchmark_run` or `data_prep`. `purpose` uses the ADR 0005 values, including `harness_run` and `obtain_and_run`. |
 | Container and runtime | `container.image` | `environment` | `environment`, with `images` keyed by `linux/amd64` and `linux/arm64`. Each is a reference by digest or a stated reason for its absence. |
 | Model weights | `weights` | `weights_pin` | `weights_pin`: host, repository, 40-hex revision, per-file SHA-256, licence, gated flag, `resolved_on`. |
@@ -63,13 +64,16 @@ Fields ADR-C has and ADR 0005 does not keep their ADR-C names: `inputs`, `estima
 
 **`receipt_kind` and measured values.** ADR 0005 says a `local_execution` receipt may not carry
 measured time or peak memory, because nothing instrumented those runs. The runner does measure
-both, and the lead requires both on every receipt. So rewirebench never writes
+both, and every receipt must carry both. So rewirebench never writes
 `local_execution`. It writes `runner_ci_smoke` for a `synthetic_smoke` run in CI and
-`runner_reproduction` otherwise. `local_execution` stays for runs made outside the runner. A
-receipt whose `code.commit` is null or whose `code.dirty` is true did not come from a clean
-commit of this repository, and a reviewer should not promote a recipe on it.
+`runner_reproduction` otherwise. `local_execution` stays for runs made outside the runner.
 
-**Cost.** The lead's shape is used: `amount` and `currency` for paid backends, and null with a
+`code.commit` is the commit of the checkout rewirebench runs from, and is null for an installed
+wheel. `recipe.commit` is set only when the recipe file at that commit has the bytes that ran.
+A reviewer should not promote a recipe on a receipt where `recipe.commit` is null, or where
+`code.commit` is null or `code.dirty` is true.
+
+**Cost.** The receipt records `amount` and `currency` for paid backends, and null with a
 `reason` otherwise (`"owned hardware"` for `local` and `spark`). ADR 0005's rule is kept around
 it: `paid_compute: true` requires `hourly_rate`, `rate_source` and `rate_date` as well, and
 `paid_compute: false` forbids every money field. The models reject a `local` or `spark` receipt
