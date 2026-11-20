@@ -521,6 +521,10 @@ test('recipe gaps: a placeholder evaluation script or a recipe with no score blo
   assert.ok(!kept.some((g) => g.key === 'recipe:discovery-benchmark-genomic-benchmarks'));
   assert.match(reason('recipe:discovery-benchmark-genomic-benchmarks'), /recipe `genomic-benchmarks-official` outputs "Train and test splits as the package ships them\.", not a score/);
   assert.match(reason('recipe:discovery-benchmark-genomic-benchmarks'), /recipe `genomic-benchmarks-rewirebench` is for protocol `genomic-benchmarks-v2`, which no record in the release defines or uses/);
+  // The package downloads the data, so the reason does not also claim the data cannot be found.
+  assert.ok(!/data not shown to be obtainable/.test(reason('recipe:discovery-benchmark-genomic-benchmarks')));
+  // DART-Eval's closed data is still reported.
+  assert.match(reason('recipe:discovery-benchmark-dart-eval'), /data not shown to be obtainable: .*authenticated access is required/);
   // ProteinGym v1.3: the AMFR protocol record names its recipes' runner protocol, so they count.
   const pg = recipeCheck(ix, 'rewire-proteingym-v1-3-dms-substitutions');
   assert.equal(pg.ready, true);
@@ -532,6 +536,7 @@ test('recipe gaps: a placeholder evaluation script or a recipe with no score blo
   const beacon = kept.find((g) => g.key === 'recipe:discovery-benchmark-beacon');
   assert.ok(beacon);
   assert.match(beacon.checks.recipe, /recipe `beacon-official` outputs "A fine-tuned model and its score/);
+  assert.match(beacon.checks.data, /run recipe `beacon-official` on `discovery-benchmark-beacon`, whose data requirement says "Laid out under the repository's data directory as the README describes\."/);
   assert.ok(beacon.caveats.some((c) => /A minimal independent command sequence has not been validated in this pass/.test(c)));
   assert.ok(beacon.caveats.some((c) => /conda environment `beacon` but never activates it/.test(c)));
   assert.ok(beacon.caveats.some((c) => /No tier 1 ranking rests/.test(c)));

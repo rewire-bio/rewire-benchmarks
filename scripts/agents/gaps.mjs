@@ -994,7 +994,7 @@ export function gapDatasets(ix, gap) {
  * 3. Obtainable when every dataset of the run, or a record it shares data with, records an
  *    accession, repository, archive DOI, or an access statement that says where to download it.
  * 4. Otherwise not shown: no dataset, or a dataset with no public source recorded.
- * Returns { open, reason, record }.
+ * Returns { open, reason, record }, with closed: true when a record says the data is not public.
  */
 export function dataAccess(ix, gap) {
   const datasets = gapDatasets(ix, gap);
@@ -1002,17 +1002,20 @@ export function dataAccess(ix, gap) {
   for (const id of [...datasets, ...anchors]) {
     const r = ix.recs.get(id);
     if (!r) continue;
-    if (r.privateData) return { open: false, reason: `\`${id}\` records that private data is not included`, record: id };
+    if (r.privateData) return { open: false, closed: true, reason: `\`${id}\` records that private data is not included`, record: id };
     const isData = r.kind === 'dataset' || r.kind === 'dataset_subset';
     for (const [texts, needData] of [[r.dataAccessNotes ?? [], !isData], [r.notes ?? [], true], [r.recipeDataNotes ?? [], false]]) {
       for (const t of texts) {
         const s = closedSentence(t, needData);
-        if (s) return { open: false, reason: `\`${id}\` says the data is not public: "${s}"`, record: id };
+        if (s) return { open: false, closed: true, reason: `\`${id}\` says the data is not public: "${s}"`, record: id };
       }
     }
   }
   const check = gap.recipe !== undefined ? gap.recipe : recipeCheck(ix, gap.owner);
-  if (check?.ready) return { open: true, reason: `${check.entry.kind === 'guide' ? 'run guide' : `run recipe \`${check.entry.item.id}\``} on \`${check.owner}\``, record: check.owner };
+  if (check?.ready) {
+    const need = check.entry.item.requirements?.data ?? check.entry.item.prerequisites?.data;
+    return { open: true, reason: `${check.entry.kind === 'guide' ? 'run guide' : `run recipe \`${check.entry.item.id}\``} on \`${check.owner}\`${typeof need === 'string' ? `, whose data requirement says "${clean(need)}"` : ''}`, record: check.owner };
+  }
   if (!datasets.length) return { open: false, reason: 'no dataset is linked to the run\'s protocols or evaluations, so the release does not show where the data is', record: null };
   const sourceOf = (id) => {
     const r = ix.recs.get(id);
@@ -1096,7 +1099,9 @@ export function excludeNotRunnable(ix, gaps, opts = {}) {
     const recipe = g.recipe !== undefined ? g.recipe : recipeCheck(ix, g.owner);
     if (recipe && !recipe.ready) reasons.push(`no run a person can follow to a score: ${recipe.reason}`);
     const data = g.type === 'no-direct-evidence' ? null : dataAccess(ix, g);
-    if (data && !data.open) reasons.push(`data not shown to be obtainable: ${data.reason}`);
+    // A rejected recipe already blocks; then only a statement that the data is closed is worth
+    // adding, not that the release does not show where the recipe would fetch it from.
+    if (data && !data.open && (data.closed || !recipe || recipe.ready)) reasons.push(`data not shown to be obtainable: ${data.reason}`);
     if (reasons.length) excluded.push({ gap: g, system: systems.find((r) => !r.runnable)?.system ?? null, reason: reasons.join('; ') });
     else {
       g.checks = { systems: systems.map((r) => ({ system: r.system, reason: r.reason })), recipe: recipe?.reason ?? null, data: data.reason };
@@ -1583,7 +1588,7 @@ export function renderSummary({ mode, release, gaps, plan, filed, notes, usage, 
     '',
     '### Blocked: needs a human look',
     '',
-    excluded.length ? `Not filed because the release data does not show a runnable system and obtainable data, or records a successor (runnability, dataAccess and successorOf in \`scripts/agents/gaps.mjs\`). Each needs a person to check before it is proposed; most are fixed by recording access in the data store:\n\n${excluded.map((x) => `- ${esc(x.gap.title)} (\`${x.gap.key}\`): blocked: ${esc(x.reason)}.`).join('\n')}` : 'None.',
+    excluded.length ? `Not filed because the release data does not show a runnable system, obtainable data and a run that leads to a score, or records a successor (runnability, dataAccess, recipeCheck and successorOf in \`scripts/agents/gaps.mjs\`). Each needs a person to check before it is proposed; most are fixed by recording access in the data store:\n\n${excluded.map((x) => `- ${esc(x.gap.title)} (\`${x.gap.key}\`): blocked: ${esc(x.reason)}.`).join('\n')}` : 'None.',
     '',
     `### Top ${Math.min(LIMITS.listed, gaps.length)} gaps by value per GPU-hour`,
     '',
