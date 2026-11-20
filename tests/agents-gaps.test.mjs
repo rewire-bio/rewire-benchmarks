@@ -2,8 +2,9 @@
 //
 // The fixtures are real records, use cases, mappings and findings from data release
 // 2026-11-20-727601dd065b, trimmed to six use cases, three findings and three recipe owners
-// (mappings keep at most 40 evaluations each). issues.json holds the real open issues #25, #40
-// to #56, #65 and #67 to #71 of this repository, and one synthetic closed proposal (#9001).
+// (mappings keep at most 40 evaluations each). issues.json holds the real issues #40 to #56, #65
+// and #67 to #71 (open) and #25 (closed) of this repository, as the REST API returns them, and one
+// synthetic closed proposal (#9001).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, existsSync } from 'node:fs';
@@ -74,6 +75,11 @@ test('dedupe: never re-proposes #40 to #56, #65 or #67 to #71, and honours a clo
   // At most one proposal per benchmark in a run.
   const benches = plan.file.map((g) => g.benchmark).filter(Boolean);
   assert.equal(new Set(benches).size, benches.length);
+  // A closed hand-written issue covers nothing: #25 is closed, so the splicing use case is not skipped for it.
+  assert.ok(![...reasons.values()].some((r) => /#25\b/.test(r)));
+  // gh issue list spells the state in capitals; it must read the same.
+  const upper = issues.map((i) => ({ ...i, state: i.state.toUpperCase() }));
+  assert.deepEqual(planFiling(ix, gaps, upper).file.map((g) => g.key), plan.file.map((g) => g.key));
   // A marker on an open issue also counts.
   const marked = [...issues, { number: 9002, title: 'x', state: 'open', body: `<!-- ${MARKER}: ${plan.file[0].key} -->` }];
   assert.ok(!planFiling(ix, gaps, marked).file.some((g) => g.key === plan.file[0].key));
@@ -107,6 +113,11 @@ test('estimate: no estimate without a basis, 0 GPU-hours when the recipe says no
   assert.equal(gpu.gpuHours, 1);
   assert.equal(gpu.usd, null); // no sourced price
   assert.match(gpu.basis, /fixture-runtime/);
+
+  // The same runtime on an evaluation that records only training hardware is not a basis.
+  const trained = new Map(loaded.recs);
+  trained.set(ev.id, { ...ev, trainingOnly: true });
+  assert.equal(estimate(buildIndex({ recs: trained, runtimes: [runtime] }), { systems: [sys], protocols: [prot] }).kind, 'none');
 });
 
 test('gpuCount needs both a GPU and its count', () => {

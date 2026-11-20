@@ -139,6 +139,8 @@ function slim(r) {
     printed: a.printed_value ?? null,
     value: a.numeric_value ?? null,
     hardware: a.inference_hardware ?? a.hardware ?? null,
+    // An evaluation that records only training hardware measures training, which is never a basis.
+    trainingOnly: Boolean(a.training_hardware) && !a.inference_hardware,
   };
 }
 
@@ -420,6 +422,7 @@ export function estimate(ix, { systems = [], protocols = [], owner = null }) {
     const s = systemOfEvaluation(ix, ev);
     const a = ix.linkOf(ev, 'assessment')[0];
     if (!sys.has(s) || !prot.has(a)) continue;
+    if (ix.recs.get(ev)?.trainingOnly) continue;
     const hw = r.hardware ?? ix.recs.get(ev)?.hardware;
     const n = gpuCount(hw);
     const h = hoursOf(r.value, r.unit);
@@ -709,6 +712,9 @@ export function markedKeys(issues) {
   return out;
 }
 
+// The REST API gives "open" and "closed"; gh issue list gives "OPEN" and "CLOSED".
+const isClosed = (issue) => String(issue.state ?? '').toLowerCase() === 'closed';
+
 const contains = (hay, needle) => {
   const n = normalise(needle);
   return n.length >= 3 && ` ${hay} `.includes(` ${n} `);
@@ -735,7 +741,7 @@ function namesBenchmark(hay, name) {
  */
 export function coveringIssue(ix, gap, issues) {
   for (const i of issues) {
-    if (i.state === 'closed') continue;
+    if (isClosed(i)) continue;
     const hay = normalise(`${i.title} ${i.body ?? ''}`);
     const raw = `${i.title} ${i.body ?? ''}`;
     const benchNames = [gap.benchmark, ...gap.protocols].filter(Boolean).map((id) => ix.name(id));
@@ -762,7 +768,7 @@ export function planFiling(ix, gaps, issues, max = LIMITS.maxIssues) {
   for (const g of gaps) {
     const m = marked.get(g.key);
     if (m) {
-      skipped.push({ gap: g, reason: `already proposed in #${m.number} (${m.state})` });
+      skipped.push({ gap: g, reason: `already proposed in #${m.number} (${isClosed(m) ? 'closed' : 'open'})` });
       continue;
     }
     const c = coveringIssue(ix, g, issues);
@@ -849,7 +855,7 @@ function estimateSection(g) {
 }
 
 /** One proposal issue. `why` is the model's paragraph, or null with `whyNote` saying why not. */
-export function renderProposal(ix, g, { release, why, whyNote, runUrl, rank }) {
+export function renderProposal(ix, g, { release, why, whyNote, runUrl, rank, dataRepo = DATA_REPO }) {
   const what = g.type === 'no-direct-evidence'
     ? [
       `- Benchmark: none exists; this is the gap. Proxy benchmarks or protocols used now: ${listNames(ix, g.proxyBenchmarks)}.`,
@@ -879,7 +885,7 @@ export function renderProposal(ix, g, { release, why, whyNote, runUrl, rank }) {
     '',
     commandSection(ix, g),
     '',
-    `<sub>Filed by the gap scanner (\`scripts/agents/gaps.mjs\`, #60) from release \`${release}\` of ${DATA_REPO}${runUrl ? ` in [this run](${runUrl})` : ''}, rank ${rank} this week. ${NOT_RUN}</sub>`,
+    `<sub>Filed by the gap scanner (\`scripts/agents/gaps.mjs\`, #60) from release \`${release}\` of ${dataRepo}${runUrl ? ` in [this run](${runUrl})` : ''}, rank ${rank} this week. ${NOT_RUN}</sub>`,
     '',
     `<!-- ${MARKER}: ${g.key} -->`,
   ].join('\n');
@@ -1150,7 +1156,7 @@ export async function main(argv = process.argv.slice(2), env = process.env, deps
       const w = args.dryRun
         ? { text: null, note: 'Dry run: no model call, so no paragraph.' }
         : client ? await writeWhy(client, usage, { system, facts, log }) : { text: null, note: 'No paragraph: ANTHROPIC_API_KEY is not set for this workflow.' };
-      const issue = renderProposal(ix, g, { release, why: w.text, whyNote: w.note, runUrl: args.runUrl, rank: i + 1 });
+      const issue = renderProposal(ix, g, { release, why: w.text, whyNote: w.note, runUrl: args.runUrl, rank: i + 1, dataRepo });
       const entry = { key: g.key, issue, whyNote: w.note, facts };
       if (write) entry.url = (await gh.createIssue(repo, issue)).html_url;
       filed.push(entry);

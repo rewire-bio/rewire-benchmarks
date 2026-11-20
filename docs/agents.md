@@ -25,7 +25,7 @@ System identity follows the discrepancy rules: a configuration counts as its mod
 ### Value, estimate and order
 
 - **Value** is the clinical weight (2 when a use case the gap serves has a clinical context, else 1) times one plus the number of rankings the run could change.
-- **GPU-hours** come from a recorded runtime result for the same system on the same protocol whose hardware names a GPU and its count (hours times GPU count), or are 0 when the recipe's hardware field says no GPU or accelerator is needed. Otherwise the issue says "no estimate" and why. Training time is never used.
+- **GPU-hours** come from a recorded runtime result for the same system on the same protocol whose hardware names a GPU and its count (hours times GPU count), or are 0 when the recipe's hardware field says no GPU or accelerator is needed. Otherwise the issue says "no estimate" and why. A runtime on an evaluation that records only training hardware is not used.
 - **Dollars** come only from a dated, sourced hourly price in `GPU_PRICES` in the script. It is empty, so every GPU run says "no estimate" for cost until a price is added with its source.
 - **Order:** runs that need no GPU first, by value; then runs with a GPU-hour estimate, by value per GPU-hour; then runs with no estimate, by value. Nothing is divided by an assumed figure. At most one proposal per benchmark a week, and at most five a week.
 
@@ -36,7 +36,7 @@ The gap, "Why it matters", the exact model and benchmark (with record IDs), the 
 ### Dedupe
 
 - Each issue carries a hidden `gap-proposal` marker with the gap's key. A key with a marker on any issue, open or closed, is never filed again, so a closed or declined proposal stays closed.
-- Hand-written open issues are matched by name: the system and its benchmark or protocol (in full, or by at least two of the benchmark's acronyms and words with digits, such as ClinGen, PP3 and BP4); both systems of a discrepancy and its anchor, or the finding ID; the recipe's benchmark with "recipe", "run guide" or "smoke"; or the use case's title or slug. This keeps it off #25, #40 to #56, #65 and #67 to #71. Every skip is listed in the job summary with the issue that covers it.
+- Hand-written open issues are matched by name: the system and its benchmark or protocol (in full, or by at least two of the benchmark's acronyms and words with digits, such as ClinGen, PP3 and BP4); both systems of a discrepancy and its anchor, or the finding ID; the recipe's benchmark with "recipe", "run guide" or "smoke"; or the use case's title or slug. Closed hand-written issues do not count. This keeps it off #40 to #56, #65 and #67 to #71. Every skip is listed in the job summary with the issue that covers it.
 
 ### Modes
 
