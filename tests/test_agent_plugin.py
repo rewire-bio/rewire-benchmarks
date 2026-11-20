@@ -50,6 +50,10 @@ GRAPH_SERVER = "https://github.com/rewire-bio/rdf-kg-mcp"
 # v0.1.0 has no search, list_queries or run_query, which the product page describes.
 # v0.4.0 has all eight read tools and was read at its tag when this floor was set.
 MINIMUM_GRAPH_SERVER = (0, 4, 0)
+# The read tools in src/rdf_kg_mcp/server.py at tag v0.4.0, read on 2026-11-20.
+GRAPH_TOOLS = {"dataset_info", "describe_schema", "find_entity", "search", "describe_resource",
+               "sparql_query", "list_queries", "run_query"}
+SKIP_FRESHNESS = "REWIRE_SKIP_PIN_FRESHNESS"
 RELEASE_TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
 
 
@@ -94,8 +98,28 @@ def test_readme_shows_the_plugin_pin():
     assert f"git+{GRAPH_SERVER}@{pinned_tag()}" in (ROOT / "README.md").read_text()
 
 
+def test_skill_uses_only_tools_the_pinned_server_has():
+    """The skill's graph steps each start with a tool name. Each must be in the pinned release."""
+    text = (SKILL / "SKILL.md").read_text()
+    steps = re.findall(r"^\d+\. `([a-z_]+)`", text, flags=re.MULTILINE)
+    assert steps[:3] == ["dataset_info", "find_entity", "sparql_query"]
+    assert set(steps) <= GRAPH_TOOLS, sorted(set(steps) - GRAPH_TOOLS)
+    assert "`describe_resource`" in text and "describe_resource" in GRAPH_TOOLS
+
+
+def test_skill_reference_states_which_server_release_its_queries_ran_on():
+    text = (SKILL / "reference/kg-queries.md").read_text()
+    assert f"plugin pins {pinned_tag()}" in " ".join(text.split())
+
+
 def test_mcp_pin_is_the_newest_release():
-    """A stale pin fails here. Offline, the check is skipped locally and fails in CI."""
+    """A stale pin fails here. Offline, the check is skipped locally and fails in CI.
+
+    The release workflow sets REWIRE_SKIP_PIN_FRESHNESS, so a release of this repository
+    does not wait on another repository's tags.
+    """
+    if os.environ.get(SKIP_FRESHNESS):
+        pytest.skip(f"{SKIP_FRESHNESS} is set")
     try:
         listing = subprocess.run(
             ["git", "ls-remote", "--tags", "--refs", GRAPH_SERVER],

@@ -68,10 +68,21 @@ both, and every receipt must carry both. So rewirebench never writes
 `local_execution`. It writes `runner_ci_smoke` for a `synthetic_smoke` run in CI and
 `runner_reproduction` otherwise. `local_execution` stays for runs made outside the runner.
 
+ADR 0005 says `runner_ci_smoke` and `runner_reproduction` "come from rewire-benchmarks at a
+commit". The runner does not enforce that when it writes a receipt: a run from an installed
+wheel, a dirty tree or an agent's laptop is also written as `runner_reproduction`, and a run
+without a recipe has `scope: null`. The commit condition is checked when the receipt is read.
+
 `code.commit` is the commit of the checkout rewirebench runs from, and is null for an installed
 wheel. `recipe.commit` is set only when the recipe file at that commit has the bytes that ran.
 A reviewer should not promote a recipe on a receipt where `recipe.commit` is null, or where
-`code.commit` is null or `code.dirty` is true.
+`code.commit` is null or `code.dirty` is true. `rewirebench receipt verify --strict` fails on
+such a receipt (its `commits` check), and on a receipt whose run failed.
+
+The `Recipe receipt check` workflow checks out the pull request head, not the temporary merge
+commit GitHub builds for a pull request, and fails unless both commits in the receipt equal
+the commit under test. It also runs on every push to main that touches the runner or a recipe,
+so there is a receipt at a commit on main.
 
 **Cost.** The receipt records `amount` and `currency` for paid backends, and null with a
 `reason` otherwise (`"owned hardware"` for `local` and `spark`). ADR 0005's rule is kept around
@@ -91,6 +102,13 @@ belongs to the backend that spends money, which is not part of this step.
 - `commands` is a list of named argv lists, not one `command`. The MFASS v2 baseline needs two
   steps. No shell is involved. The placeholders `{inputs}`, `{work}` and `{output}` are the only
   substitution.
+- Schema 1.0 accepts only `rewirebench` followed by `prepare`, `run`, `evaluate`,
+  `run-baselines` or `prepare-baseline-artifact`. A step gets an allowlisted environment with
+  no CUDA device and has a timeout. This is what makes "a local recipe run never starts a GPU
+  or paid run" a property of the code. A backend that needs another program (a container
+  runtime on the Spark, a model's own script) has to widen the schema on purpose.
+- A `runpod` backend block requires `estimate.price_basis` and caps `max_hours` at 24, so the
+  amount a launch must quote and have confirmed can always be computed from the recipe.
 - `outputs` lists the files a run must write. A missing one is a failed check.
 - The receipt records `hardware` (CPU, GPU, memory, architecture) for every backend instead of
   the RunPod-only `instance` block. Inputs and outputs are lists with size and SHA-256.
@@ -132,5 +150,8 @@ directly and still writes its own `workflow-receipt.json`; it does not write `re
 - Whether ADR 0005 adopts the `receipt_kind` narrowing and the `amount` and `currency` cost
   shape above. ADR 0005 is still proposed.
 - Signing receipts and exporting them as a Process Run Crate.
-- Recipes for the other six CPU protocols. Each needs pinned inputs and an expected value that
-  was measured, not assumed.
+- Full-protocol recipes for the other seven of the eight protocols. Each needs pinned inputs
+  and an expected value that was measured, not assumed.
+- A byte-level check on the MFASS predictions. `predictions.json` from the same commit has
+  SHA-256 `2683ef05...` on macOS arm64 and `563ae79d...` on Linux x86_64 (2026-11-20), with
+  the five checked metrics equal, so the recipe pins no artifact digest.

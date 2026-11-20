@@ -40,7 +40,7 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
     directory = recipes.find_recipes_dir(args.recipes_dir)
     if directory is None:
         if args.recipe_command == "list":
-            return {"recipes_dir": None, "recipes": [],
+            return {"recipes_dir": None, "recipes": [], "invalid": [],
                     "note": "No recipes directory found. Run from a rewire-benchmarks checkout, "
                             f"or set --recipes-dir or {recipes.RECIPES_DIR_VARIABLE}."}, 0
         raise ValueError(
@@ -51,9 +51,11 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
         results = recipes.validate_files(recipes.recipe_files(directory))
         return results, 0 if results and all(entry["valid"] for entry in results) else 1
     if args.recipe_command == "list":
+        # A file that is not a valid recipe is reported and does not hide the others.
+        valid, invalid = recipes.list_recipes(directory)
         return {"recipes_dir": str(directory),
-                "recipes": [recipes.summary(item, directory)
-                            for item in recipes.list_recipes(directory)]}, 0
+                "recipes": [recipes.summary(item, directory) for item in valid],
+                "invalid": invalid}, 1 if invalid else 0
     loaded = recipes.get_recipe(args.recipe, directory)
     if args.recipe_command == "show":
         return {**recipes.summary(loaded, directory),
@@ -165,16 +167,19 @@ def main(argv=None):
             cmd.add_argument("--output", required=True, help="New folder for outputs and receipt")
             cmd.add_argument("--inputs", help="Folder holding the inputs; default is to fetch them")
             cmd.add_argument("--backend", choices=["local"], default="local")
-            cmd.add_argument("--started-by", choices=["human", "agent", "ci"])
+            cmd.add_argument("--started-by", choices=["human", "agent", "ci"],
+                             help="Default: ci in CI, agent under a known agent harness, "
+                                  "otherwise human. An agent should pass agent")
             cmd.add_argument("--kg-release-id")
     receipt = sub.add_parser("receipt", help="Check a run receipt")
     receipt_sub = receipt.add_subparsers(dest="receipt_command", required=True)
     check = receipt_sub.add_parser("verify", help="Recompute a receipt folder's digests and checks")
-    check.add_argument("folder", help="Run folder holding receipt.json")
+    check.add_argument("folder", help="Run folder holding receipt.json, or that file")
     check.add_argument("--recipes-dir", help="Default: the recipes/ of this checkout")
     check.add_argument("--inputs", help="Folder holding the inputs, to re-hash them")
     check.add_argument("--strict", action="store_true",
-                       help="Also fail when a check could not be made")
+                       help="Also fail when a check could not be made. Passes only for a "
+                            "recipe run from a clean commit")
     args = parser.parse_args(argv)
     arguments = list(sys.argv[1:] if argv is None else argv)
     started_at = datetime.datetime.now(datetime.UTC)

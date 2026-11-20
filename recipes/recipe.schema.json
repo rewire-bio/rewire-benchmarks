@@ -111,7 +111,7 @@
     },
     "Command": {
       "additionalProperties": false,
-      "description": "One step as an argv list. No shell is involved, so no quoting rules apply.",
+      "description": "One rewirebench step as an argv list. No shell is involved.\n\nThe first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A\nstep that runs longer than ``timeout_seconds`` is stopped and the run fails.",
       "properties": {
         "name": {
           "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
@@ -123,9 +123,16 @@
             "minLength": 1,
             "type": "string"
           },
-          "minItems": 1,
+          "minItems": 2,
           "title": "Argv",
           "type": "array"
+        },
+        "timeout_seconds": {
+          "default": 3600,
+          "exclusiveMinimum": 0,
+          "maximum": 86400,
+          "title": "Timeout Seconds",
+          "type": "integer"
         }
       },
       "required": [
@@ -152,7 +159,7 @@
         "python": {
           "anyOf": [
             {
-              "minLength": 1,
+              "pattern": "^(>=|==)3\\.\\d+(\\.\\d+)?$",
               "type": "string"
             },
             {
@@ -485,6 +492,7 @@
     },
     "Lockfile": {
       "additionalProperties": false,
+      "description": "A lock file in the recipe's repository. A run refuses a file with other bytes.",
       "properties": {
         "path": {
           "minLength": 1,
@@ -694,6 +702,7 @@
     },
     "RunpodBackend": {
       "additionalProperties": false,
+      "description": "Pod shape and the longest the pod may live. The quote is built from these.",
       "properties": {
         "gpu_types": {
           "items": {
@@ -720,6 +729,7 @@
         },
         "max_hours": {
           "exclusiveMinimum": 0,
+          "maximum": 24,
           "title": "Max Hours",
           "type": "number"
         }
@@ -770,7 +780,12 @@
       "description": "ADR 0005 ``weights_pin``: where the weights are and which bytes they are.",
       "properties": {
         "host": {
-          "minLength": 1,
+          "enum": [
+            "huggingface",
+            "github",
+            "zenodo",
+            "other"
+          ],
           "title": "Host",
           "type": "string"
         },

@@ -5,6 +5,9 @@ that it worked (expected output). It carries no status. The evidence store holds
 pointer to the file (repository, commit, path, SHA-256) and the verified status, so
 promoting a recipe never changes the bytes a receipt cites.
 
+Schema 1.0 lets a recipe run only the data subcommands of rewirebench itself. A recipe
+cannot name a shell or another program, so it cannot start a pod or submit a result.
+
 Field names follow ADR 0005 of rewire-benchmark-data where the two overlap; see
 ``docs/adr-c-recipes-and-receipts.md``.
 """
@@ -18,9 +21,19 @@ import re
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Annotated, Any, Literal
+from urllib.parse import urlsplit
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictInt,
+    StringConstraints,
+    ValidationError,
+    model_validator,
+)
 
 SCHEMA_VERSION = "1.0"
 PLATFORMS = ("linux/amd64", "linux/arm64")
@@ -28,12 +41,26 @@ REQUIREMENT_BLOCKS = ("weights_pin", "environment", "hardware_floor", "expected_
 PLACEHOLDERS = ("inputs", "work", "output")
 RECIPES_DIR_VARIABLE = "REWIREBENCH_RECIPES_DIR"
 SCHEMA_FILENAME = "recipe.schema.json"
+# The only program a recipe may name, and the subcommands it may use. These prepare and
+# score data on the machine. `submit`, `submit-queue`, `enqueue`, `recipe` and `receipt`
+# are left out on purpose: a recipe never sends anything and never starts another recipe.
+RUNNER_PROGRAM = "rewirebench"
+RUNNER_COMMANDS = ("prepare", "run", "evaluate", "run-baselines", "prepare-baseline-artifact")
+# Names the runner writes into a run folder. A recipe cannot list them as outputs.
+RESERVED_OUTPUTS = ("receipt.json", "SHA256SUMS")
+RESERVED_FOLDER = "logs"
+DEFAULT_TIMEOUT_SECONDS = 3600
+MAX_TIMEOUT_SECONDS = 24 * 3600
+MAX_RUNPOD_HOURS = 24
 
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[a-f0-9]{64}$")]
 Revision = Annotated[str, StringConstraints(pattern=r"^[a-f0-9]{40}$")]
 ImageDigest = Annotated[str, StringConstraints(pattern=r"^sha256:[a-f0-9]{64}$")]
 Identifier = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9.-]*[a-z0-9]$")]
 Text = Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
+# Strict numbers: YAML `"3"` or `true` is an error, not 3 or 1, and inf and nan are refused.
+Number = Annotated[float, Field(strict=True, allow_inf_nan=False)]
+PythonSpec = Annotated[str, StringConstraints(pattern=r"^(>=|==)3\.\d+(\.\d+)?$")]
 Scope = Literal["synthetic_smoke", "selected_assay", "full_protocol"]
 BackendName = Literal["local", "spark", "runpod", "nextflow"]
 MissingReason = Literal["inapplicable", "unavailable", "unextracted", "unreported"]
@@ -49,12 +76,24 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def relative_path(value: str) -> str:
+class RecipeError(ValueError):
+    """A recipe file that cannot be used, with a message that names the field."""
+
+
+def relative_path(value: str, inside: str = "the run folder") -> str:
     """Reject absolute paths and parent traversal in a path written in a recipe."""
     path = PurePosixPath(value)
     if not value or path.is_absolute() or ".." in path.parts or "\\" in value:
-        raise ValueError(f"Not a relative path inside the run folder: {value!r}")
+        raise ValueError(f"Not a relative path inside {inside}: {value!r}")
     return str(path)
+
+
+def python_satisfies(spec: str, version: tuple[int, ...]) -> bool:
+    """Whether a Python version meets a recipe's ``>=3.11`` or ``==3.11`` style bound."""
+    wanted = tuple(int(part) for part in spec[2:].split("."))
+    if spec.startswith("=="):
+        return tuple(version[: len(wanted)]) == wanted
+    return tuple(version[:3]) >= wanted
 
 
 class Strict(BaseModel):
@@ -100,15 +139,22 @@ class PlatformImage(Strict):
 
 
 class Lockfile(Strict):
+    """A lock file in the recipe's repository. A run refuses a file with other bytes."""
+
     path: Text
     sha256: Sha256
+
+    @model_validator(mode="after")
+    def _relative(self) -> Lockfile:
+        relative_path(self.path, "the repository")
+        return self
 
 
 class Environment(Strict):
     """ADR 0005 ``environment``: runtime, Python and one image digest per platform."""
 
     runtime: Literal["python", "docker", "podman", "apptainer"]
-    python: Text | None = None
+    python: PythonSpec | None = None
     images: dict[Literal["linux/amd64", "linux/arm64"], PlatformImage]
     lockfile: Lockfile | None = None
 
@@ -123,21 +169,26 @@ class WeightsFile(Strict):
     path: Text
     sha256: Sha256
 
+    @model_validator(mode="after")
+    def _relative(self) -> WeightsFile:
+        relative_path(self.path, "the weights repository")
+        return self
+
 
 class WeightsPin(Strict):
     """ADR 0005 ``weights_pin``: where the weights are and which bytes they are."""
 
-    host: Text
+    host: Literal["huggingface", "github", "zenodo", "other"]
     repository: Text
     revision: Revision | None = None
     files: list[WeightsFile] = Field(min_length=1)
     licence: Text
-    gated: bool
+    gated: StrictBool
     resolved_on: datetime.date
 
     @model_validator(mode="after")
     def _revision_on_git_hosts(self) -> WeightsPin:
-        if self.host.lower() in {"huggingface", "hugging face", "github"} and not self.revision:
+        if self.host in {"huggingface", "github"} and not self.revision:
             raise ValueError("A Hugging Face or GitHub weights pin needs a 40-hex revision")
         return self
 
@@ -149,16 +200,21 @@ class RecipeInput(Strict):
     sha256: Sha256
     url: Text | None = None
     repo_path: Text | None = None
-    bytes: int | None = Field(default=None, ge=0)
+    bytes: StrictInt | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def _one_source(self) -> RecipeInput:
         if (self.url is None) == (self.repo_path is None):
             raise ValueError("An input has exactly one of url or repo_path")
-        if self.url is not None and not self.url.startswith("https://"):
-            raise ValueError("Input URLs must use https")
+        if self.url is not None:
+            parts = urlsplit(self.url)
+            if parts.scheme != "https" or not parts.hostname:
+                raise ValueError("Input URLs must use https")
+            if parts.username is not None or parts.password is not None:
+                # The URL is copied into the receipt, so it must not carry a credential.
+                raise ValueError("Input URLs must not contain a user name or password")
         if self.repo_path is not None:
-            relative_path(self.repo_path)
+            relative_path(self.repo_path, "the repository")
         if relative_path(self.name) != self.name or "/" in self.name:
             raise ValueError("An input name is a plain file name")
         return self
@@ -167,8 +223,8 @@ class RecipeInput(Strict):
 class Accelerator(Strict):
     kind: Literal["none", "gpu"]
     model: Text | None = None
-    count: int | None = Field(default=None, ge=1)
-    memory_gb: float | None = Field(default=None, gt=0)
+    count: StrictInt | None = Field(default=None, ge=1)
+    memory_gb: Number | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
     def _cpu_has_no_gpu_fields(self) -> Accelerator:
@@ -181,21 +237,33 @@ class HardwareFloor(Strict):
     """ADR 0005 ``hardware_floor``. Every figure shares the stated basis."""
 
     accelerator: Accelerator
-    host_memory_gb: float | None = Field(default=None, gt=0)
-    disk_gb: float | None = Field(default=None, gt=0)
-    wall_clock_seconds: float | None = Field(default=None, gt=0)
+    host_memory_gb: Number | None = Field(default=None, gt=0)
+    disk_gb: Number | None = Field(default=None, gt=0)
+    wall_clock_seconds: Number | None = Field(default=None, gt=0)
     basis: Literal["source_stated", "measured_by_rewire"]
     note: Text | None = None
 
 
 class Command(Strict):
-    """One step as an argv list. No shell is involved, so no quoting rules apply."""
+    """One rewirebench step as an argv list. No shell is involved.
+
+    The first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A
+    step that runs longer than ``timeout_seconds`` is stopped and the run fails.
+    """
 
     name: Identifier
-    argv: list[Text] = Field(min_length=1)
+    argv: list[Text] = Field(min_length=2)
+    timeout_seconds: StrictInt = Field(
+        default=DEFAULT_TIMEOUT_SECONDS, gt=0, le=MAX_TIMEOUT_SECONDS
+    )
 
     @model_validator(mode="after")
     def _known_placeholders(self) -> Command:
+        if self.argv[0] != RUNNER_PROGRAM or self.argv[1] not in RUNNER_COMMANDS:
+            raise ValueError(
+                f"Command {self.name}: a recipe runs only `{RUNNER_PROGRAM}` followed by one "
+                f"of {', '.join(RUNNER_COMMANDS)}. No shell and no other program."
+            )
         for argument in self.argv:
             unknown = sorted(set(_PLACEHOLDER.findall(argument)) - set(PLACEHOLDERS))
             if unknown:
@@ -213,13 +281,21 @@ class ExpectedValue(Strict):
     metric_id: Text
     file: Text
     key: list[Text | int] = Field(min_length=1)
-    value: float
-    tolerance: float = Field(ge=0)
+    value: Number
+    tolerance: Number = Field(ge=0)
     unit: Text | None = None
 
     @model_validator(mode="after")
     def _relative_file(self) -> ExpectedValue:
         relative_path(self.file)
+        # A tolerance wider than the value accepts zero and a sign change, so it checks
+        # nothing. For an expected value of zero the limit is 1.
+        limit = abs(self.value) if self.value else 1.0
+        if self.tolerance > limit:
+            raise ValueError(
+                f"{self.metric_id}: tolerance {self.tolerance} is wider than the check allows "
+                f"(at most {limit} for an expected value of {self.value})"
+            )
         return self
 
 
@@ -257,15 +333,15 @@ class PriceBasis(Strict):
 
     provider: Text
     accelerator: Text
-    amount_per_hour: float = Field(gt=0)
+    amount_per_hour: Number = Field(gt=0)
     currency: Annotated[str, StringConstraints(pattern=r"^[A-Z]{3}$")]
     rate_source: Text
     rate_date: datetime.date
 
 
 class Estimate(Strict):
-    gpu_hours: float | None = Field(default=None, ge=0)
-    wall_clock_seconds: float | None = Field(default=None, gt=0)
+    gpu_hours: Number | None = Field(default=None, ge=0)
+    wall_clock_seconds: Number | None = Field(default=None, gt=0)
     price_basis: PriceBasis | None = None
     note: Text | None = None
 
@@ -275,14 +351,16 @@ class LocalBackend(Strict):
 
 
 class SparkBackend(Strict):
-    gpus: bool = True
+    gpus: StrictBool = True
 
 
 class RunpodBackend(Strict):
+    """Pod shape and the longest the pod may live. The quote is built from these."""
+
     gpu_types: list[Text] = Field(min_length=1)
     cloud: Literal["SECURE", "COMMUNITY"] = "SECURE"
-    disk_gb: int = Field(gt=0)
-    max_hours: float = Field(gt=0)
+    disk_gb: StrictInt = Field(gt=0)
+    max_hours: Number = Field(gt=0, le=MAX_RUNPOD_HOURS)
 
 
 class NextflowBackend(Strict):
@@ -354,11 +432,24 @@ class Recipe(Strict):
             if len(set(names)) != len(names):
                 raise ValueError(f"Duplicate {label} names")
         for path in self.outputs:
-            relative_path(path)
+            parts = PurePosixPath(relative_path(path)).parts
+            if path in RESERVED_OUTPUTS or parts[0] == RESERVED_FOLDER:
+                raise ValueError(
+                    f"Output {path!r} uses a name the runner writes itself "
+                    f"({', '.join(RESERVED_OUTPUTS)} and {RESERVED_FOLDER}/)"
+                )
+        floor = self.hardware_floor
+        if self.backends.local is not None and floor and floor.accelerator.kind == "gpu":
+            raise ValueError(
+                "The local backend is CPU only. A recipe that needs a GPU names spark or runpod"
+            )
         if self.backends.runpod is not None:
             image = self.environment.images["linux/amd64"] if self.environment else None
             if image is None or image.digest is None:
                 raise ValueError("The runpod backend needs a linux/amd64 image digest")
+            if self.estimate is None or self.estimate.price_basis is None:
+                # Without a dated hourly rate there is no amount to quote and confirm.
+                raise ValueError("The runpod backend needs estimate.price_basis")
         if self.backends.spark is not None:
             image = self.environment.images["linux/arm64"] if self.environment else None
             if image is None or image.digest is None:
@@ -389,8 +480,13 @@ def _unique_mapping(loader: _UniqueKeyLoader, node: yaml.MappingNode) -> dict[An
     seen: set[Any] = set()
     for key_node, _ in node.value:
         key = loader.construct_object(key_node, deep=True)
+        line = key_node.start_mark.line + 1
+        try:
+            hash(key)
+        except TypeError:
+            raise ValueError(f"A key at line {line} is a list or mapping, not text") from None
         if key in seen:
-            raise ValueError(f"Duplicate key {key!r} at line {key_node.start_mark.line + 1}")
+            raise ValueError(f"Duplicate key {key!r} at line {line}")
         seen.add(key)
     return loader.construct_mapping(node, deep=True)
 
@@ -400,36 +496,56 @@ _UniqueKeyLoader.add_constructor(
 )
 
 
+def _problems(error: ValidationError) -> str:
+    """One line per problem: the field, then the message. No dump of the recipe, no URL."""
+    lines: list[str] = []
+    for problem in error.errors(include_url=False, include_input=False):
+        where = ".".join(str(part) for part in problem["loc"]) or "recipe"
+        lines.append(f"{where}: {problem['msg'].removeprefix('Value error, ')}")
+    return "\n".join(lines)
+
+
 def parse_recipe(text: str | bytes) -> Recipe:
     try:
         data = yaml.load(text, Loader=_UniqueKeyLoader)
     except yaml.YAMLError as error:
-        raise ValueError(f"Not valid YAML: {error}") from error
+        raise RecipeError(f"Not valid YAML: {error}") from error
+    except ValueError as error:
+        raise RecipeError(str(error)) from error
     if not isinstance(data, dict):
-        raise ValueError("A recipe is a YAML mapping")  # noqa: TRY004 - CLI reports ValueError
-    recipe = Recipe.model_validate(data)
+        raise RecipeError("A recipe is a YAML mapping")
+    try:
+        recipe = Recipe.model_validate(data)
+    except ValidationError as error:
+        raise RecipeError(_problems(error)) from error
     if recipe.rewirebench_protocol is not None:
         from rewirebench import sdk
 
         if recipe.rewirebench_protocol not in sdk.PROTOCOLS:
-            raise ValueError(f"Unknown rewirebench protocol: {recipe.rewirebench_protocol}")
+            raise RecipeError(
+                f"rewirebench_protocol: Unknown rewirebench protocol: {recipe.rewirebench_protocol}"
+            )
     return recipe
 
 
 def load_recipe(path: str | Path) -> LoadedRecipe:
     path = Path(path)
     content = path.read_bytes()
+    if path.suffix != ".yaml":
+        raise RecipeError(f"Recipe files end in .yaml, not {path.suffix or 'nothing'}")
     recipe = parse_recipe(content)
-    if path.stem != recipe.id or path.suffix != ".yaml":
-        raise ValueError(f"Recipe {recipe.id} must be in a file named {recipe.id}.yaml")
+    if path.stem != recipe.id:
+        raise RecipeError(f"Recipe {recipe.id} must be in a file named {recipe.id}.yaml")
     return LoadedRecipe(recipe=recipe, path=path, sha256=hashlib.sha256(content).hexdigest())
 
 
 def find_recipes_dir(explicit: str | Path | None = None) -> Path | None:
-    """Locate ``recipes/``: the argument, the environment, the working tree, the checkout.
+    """Locate ``recipes/``: the argument, the environment, the checkout, the working tree.
 
-    The wheel does not ship recipes, so this returns ``None`` outside a checkout
-    unless the caller or ``REWIREBENCH_RECIPES_DIR`` names a directory.
+    The checkout rewirebench runs from comes before the working directory, so running
+    from inside another folder that has its own ``recipes/`` does not swap the recipes.
+    The wheel does not ship recipes; an installed wheel looks at the working directory
+    and its parents, and returns ``None`` when none has a ``recipes/``.
     """
     named = explicit or os.environ.get(RECIPES_DIR_VARIABLE)
     if named:
@@ -437,18 +553,19 @@ def find_recipes_dir(explicit: str | Path | None = None) -> Path | None:
         if not path.is_dir():
             raise ValueError(f"Recipes directory not found: {path}")
         return path.resolve()
+    parents = Path(__file__).resolve().parents
+    if len(parents) > 4 and (parents[4] / "recipes" / SCHEMA_FILENAME).is_file():
+        return parents[4] / "recipes"
     here = Path.cwd().resolve()
     for folder in (here, *here.parents):
         if (folder / "recipes" / SCHEMA_FILENAME).is_file():
             return folder / "recipes"
-    parents = Path(__file__).resolve().parents
-    if len(parents) > 4 and (parents[4] / "recipes" / SCHEMA_FILENAME).is_file():
-        return parents[4] / "recipes"
     return None
 
 
 def recipe_files(directory: Path) -> list[Path]:
-    return sorted(directory.rglob("*.yaml"))
+    """Every YAML file under the directory. A ``.yml`` file is listed so it is reported."""
+    return sorted([*directory.rglob("*.yaml"), *directory.rglob("*.yml")])
 
 
 def validate_files(paths: list[Path]) -> list[dict[str, Any]]:
@@ -469,12 +586,22 @@ def validate_files(paths: list[Path]) -> list[dict[str, Any]]:
     return results
 
 
-def list_recipes(directory: Path) -> list[LoadedRecipe]:
-    loaded = [load_recipe(path) for path in recipe_files(directory)]
-    identifiers = [item.recipe.id for item in loaded]
-    if len(set(identifiers)) != len(identifiers):
-        raise ValueError("Duplicate recipe IDs")
-    return loaded
+def list_recipes(directory: Path) -> tuple[list[LoadedRecipe], list[dict[str, Any]]]:
+    """The valid recipes, and a report for each file that is not one."""
+    loaded: list[LoadedRecipe] = []
+    invalid: list[dict[str, Any]] = []
+    seen: dict[str, Path] = {}
+    for path in recipe_files(directory):
+        try:
+            item = load_recipe(path)
+            if item.recipe.id in seen:
+                raise RecipeError(f"Recipe ID already used by {seen[item.recipe.id]}")
+        except (ValueError, OSError) as error:
+            invalid.append({"path": str(path), "error": str(error)})
+            continue
+        seen[item.recipe.id] = path
+        loaded.append(item)
+    return loaded, invalid
 
 
 def get_recipe(identifier: str, directory: Path) -> LoadedRecipe:
@@ -483,6 +610,8 @@ def get_recipe(identifier: str, directory: Path) -> LoadedRecipe:
         raise ValueError(
             f"Unknown recipe: {identifier}" if not matches else f"Duplicate recipe: {identifier}"
         )
+    if matches[0].suffix != ".yaml":
+        raise RecipeError(f"Recipe files end in .yaml: rename {matches[0].name}")
     return load_recipe(matches[0])
 
 

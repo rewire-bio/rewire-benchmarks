@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime
+import io
 import json
 import shutil
 import subprocess
@@ -63,6 +64,7 @@ def test_receipt_records_everything_the_run_depends_on(smoke_run: Path):
     assert data["environment"]["images"] == {"linux/amd64": None, "linux/arm64": None}
     assert data["inputs"] == [{
         "name": "smoke.csv", "source": "repository:workflows/benchmark/examples/smoke.csv",
+        "obtained": "repository",
         "sha256": recipes.sha256_file(FIXTURE / "smoke.csv"),
         "bytes": (FIXTURE / "smoke.csv").stat().st_size,
     }]
@@ -91,19 +93,51 @@ def test_receipt_records_everything_the_run_depends_on(smoke_run: Path):
     assert data["verified_on"] == data["started_at"][:10]
     sums = (smoke_run / "SHA256SUMS").read_text().splitlines()
     assert f"{recipes.sha256_file(smoke_run / 'receipt.json')}  ./receipt.json" in sums
+    # The steps ran as nested runs: the recipe's receipt is the only one in the folder.
+    assert [path.name for path in smoke_run.rglob("receipt.json")] == ["receipt.json"]
 
 
 def test_verify_passes_on_an_untouched_run(smoke_run: Path, capsys: pytest.CaptureFixture[str]):
     result, code = run_cli(capsys, "receipt", "verify", str(smoke_run), "--strict",
                            "--recipes-dir", str(RECIPES), "--inputs", str(FIXTURE))
-    assert code == 0 and result["ok"] and result["complete"]
-    assert set(statuses(result).values()) == {"match"}
+    found = statuses(result)
+    assert list(found) == ["sha256sums", "outputs", "run", "recipe", "inputs", "checks",
+                           "metrics", "commits"]
+    # `commits` depends on whether this checkout is clean, so it decides --strict here.
+    commits = found.pop("commits")
+    assert set(found.values()) == {"match"} and result["ok"]
+    assert result["complete"] == (commits == "match") and code == (0 if result["complete"] else 1)
+    # Without --inputs the receipt's inputs are still compared with the recipe's pins.
     result, code = run_cli(capsys, "receipt", "verify", str(smoke_run),
                            "--recipes-dir", str(RECIPES))
-    assert code == 0 and statuses(result)["inputs"] == "not_available"
-    _, code = run_cli(capsys, "receipt", "verify", str(smoke_run), "--strict",
-                      "--recipes-dir", str(RECIPES))
-    assert code == 1
+    assert code == 0 and statuses(result)["inputs"] == "match"
+    # The path of receipt.json works as well as its folder.
+    by_file, code = run_cli(capsys, "receipt", "verify", str(smoke_run / "receipt.json"),
+                            "--recipes-dir", str(RECIPES))
+    assert code == 0 and by_file == result
+
+
+def test_verify_without_the_recipe_cannot_be_complete(smoke_run: Path):
+    result = receipts.verify(smoke_run, recipes_dir=None)
+    found = statuses(result)
+    assert found["recipe"] == found["inputs"] == found["checks"] == "not_available"
+    assert found["metrics"] == "not_available" and found["run"] == "match"
+    assert result["ok"] and not result["complete"]
+
+
+def test_strict_needs_a_clean_code_commit_and_a_committed_recipe(smoke_run: Path):
+    receipt = receipts.load_receipt(smoke_run)
+    clean = receipt.model_copy(update={
+        "code": receipt.code.model_copy(update={"commit": "a" * 40, "dirty": False}),
+        "recipe": receipt.recipe.model_copy(update={"commit": "a" * 40}),
+    })
+    assert receipts._verify_commits(clean)["status"] == "match"
+    for update in ({"code": clean.code.model_copy(update={"commit": None})},
+                   {"code": clean.code.model_copy(update={"dirty": True})},
+                   {"code": clean.code.model_copy(update={"dirty": None})},
+                   {"recipe": clean.recipe.model_copy(update={"commit": None})}):
+        assert receipts._verify_commits(clean.model_copy(update=update))["status"] \
+            == "not_available"
 
 
 def test_verify_catches_a_changed_output(run_copy: Path, capsys: pytest.CaptureFixture[str]):
@@ -142,9 +176,43 @@ def test_verify_catches_edited_sums_and_unlisted_files(run_copy: Path):
     result = receipts.verify(run_copy, recipes_dir=RECIPES)
     assert statuses(result)["sha256sums"] == statuses(result)["outputs"] == "mismatch"
     (run_copy / "extra.txt").unlink()
+    intact = sums.read_text()
+    # A second line for the same file must not win over the first.
+    sums.write_text(f"{'0' * 64}  ./receipt.json\n" + intact)
+    result = receipts.verify(run_copy, recipes_dir=RECIPES)
+    assert statuses(result)["sha256sums"] == "mismatch" and "twice" in result["results"][0]["detail"]
+    sums.write_text(intact + "not a digest line\n")
+    assert statuses(receipts.verify(run_copy, recipes_dir=RECIPES))["sha256sums"] == "mismatch"
+    # Every run writes SHA256SUMS, so a folder without one has been changed.
     sums.unlink()
     result = receipts.verify(run_copy, recipes_dir=RECIPES)
-    assert statuses(result)["sha256sums"] == "not_available" and result["ok"]
+    assert statuses(result)["sha256sums"] == "mismatch" and not result["ok"]
+
+
+def rewrite_receipt(folder: Path, change: Any) -> None:
+    """Edit receipt.json and bring SHA256SUMS in line, as someone hiding an edit would."""
+    data = json.loads((folder / "receipt.json").read_text())
+    change(data)
+    (folder / "receipt.json").write_text(json.dumps(data))
+    receipts.write_sums(folder)
+
+
+def test_verify_catches_edited_metrics_and_inputs(run_copy: Path, tmp_path: Path):
+    other = Path(shutil.copytree(run_copy, tmp_path / "other"))
+    rewrite_receipt(run_copy, lambda data: data["metrics"].update(n=99.0))
+    result = receipts.verify(run_copy, recipes_dir=RECIPES)
+    found = statuses(result)
+    assert found["sha256sums"] == found["outputs"] == found["checks"] == "match"
+    assert found["metrics"] == "mismatch" and not result["ok"]
+    # Without the recipe the metrics are still compared with the receipt's own checks.
+    result = receipts.verify(run_copy, recipes_dir=None)
+    assert statuses(result)["metrics"] == "mismatch" and not result["ok"]
+
+    rewrite_receipt(other, lambda data: data["inputs"][0].update(sha256="b" * 64))
+    result = receipts.verify(other, recipes_dir=RECIPES)
+    assert statuses(result)["inputs"] == "mismatch" and not result["ok"]
+    rewrite_receipt(other, lambda data: data["inputs"].clear())
+    assert statuses(receipts.verify(other, recipes_dir=RECIPES))["inputs"] == "mismatch"
 
 
 def test_verify_catches_a_changed_recipe_and_changed_inputs(run_copy: Path, tmp_path: Path):
@@ -170,8 +238,33 @@ def test_verify_rejects_a_receipt_that_breaks_the_schema(run_copy: Path):
         receipts.verify(run_copy, recipes_dir=RECIPES)
 
 
-def custom_recipes(tmp_path: Path, argv: list[str], **fields: Any) -> Path:
-    """A recipes directory with one recipe that runs ``argv`` on a small input."""
+WRITE = ("import json, pathlib, sys; target = pathlib.Path(sys.argv[1]) / 'result.json'; "
+         "target.write_text(json.dumps({'nested': [%s]}))")
+SCRIPTS = {
+    "write": WRITE % "2.004",
+    "write-nan": WRITE % "float('nan')",
+    "fail": "raise SystemExit(3)",
+    "sleep": "import time; time.sleep(60)",
+    "environment": WRITE % "2.004" + "; import os; print(sorted(os.environ.items()))",
+    "write-receipt": WRITE % "2.004" + "; (target.parent / 'receipt.json').write_text('{}')",
+}
+
+
+@pytest.fixture
+def scripted(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A recipe step can only be a rewirebench command, so the tests swap the process
+    behind `rewirebench evaluate <script>` for a short script."""
+
+    def program(argv: list[str]) -> list[str]:
+        assert argv[:2] == ["rewirebench", "evaluate"]
+        return [sys.executable, "-c", SCRIPTS[argv[2]], *argv[3:]]
+
+    monkeypatch.setattr(receipts, "_program", program)
+
+
+def custom_recipes(tmp_path: Path, script: str = "write", **fields: Any) -> Path:
+    """A recipes directory with one recipe that runs a test script on a small input."""
+    argv = ["rewirebench", "evaluate", script, "{output}"]
     root = tmp_path / "checkout"
     (root / "recipes/test").mkdir(parents=True)
     (root / "data").mkdir()
@@ -192,21 +285,130 @@ def custom_recipes(tmp_path: Path, argv: list[str], **fields: Any) -> Path:
     return root / "recipes"
 
 
-WRITE_RESULT = ("import json, pathlib, sys; target = pathlib.Path(sys.argv[1]) / 'result.json'; "
-                "target.write_text(json.dumps({'nested': [2.004]}))")
+def run_custom(tmp_path: Path, script: str = "write", **fields: Any) -> receipts.Receipt:
+    directory = custom_recipes(tmp_path, script, **fields)
+    loaded = recipes.get_recipe("custom", directory)
+    return receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
 
 
-def test_a_recipe_can_run_any_argv_and_read_nested_values(tmp_path: Path):
-    directory = custom_recipes(tmp_path, [sys.executable, "-c", WRITE_RESULT, "{output}"])
+def expected(**fields: Any) -> dict[str, Any]:
+    value = {"label": "Value", "metric_id": "value", "file": "result.json",
+             "key": ["nested", 0], "value": 2.0, "tolerance": 0.01}
+    return {"description": "one value", "values": [{**value, **fields}]}
+
+
+def test_a_step_runs_only_this_installation_of_rewirebench():
+    assert receipts._program(["rewirebench", "prepare", "mfass-v2"]) == [
+        sys.executable, "-m", "rewirebench.cli", "prepare", "mfass-v2"]
+    for argv in (["sh", "-c", "true"], ["runpodctl", "create", "pod"], ["rewirebench"],
+                 ["rewirebench", "submit"], ["rewirebench", "recipe", "run", "x"]):
+        with pytest.raises(ValueError, match="runs only rewirebench data commands"):
+            receipts._program(argv)
+
+
+def test_a_step_gets_a_reduced_environment_with_no_cuda_device(
+    tmp_path: Path, scripted: None, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setenv("RUNPOD_API_KEY", "rpa_SECRET123")
+    monkeypatch.setenv("REWIRE_SUBMISSION_TOKEN", "token-SECRET456")
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    environment = receipts.step_environment()
+    assert environment[receipts.NESTED_VARIABLE] == "1"
+    assert environment["CUDA_VISIBLE_DEVICES"] == "" and "PATH" in environment
+    assert not {"RUNPOD_API_KEY", "REWIRE_SUBMISSION_TOKEN"} & set(environment)
+    assert run_custom(tmp_path, "environment").checks_passed
+    log = (tmp_path / "out/logs/01-step.stdout.txt").read_text()
+    assert "SECRET" not in log and "('CUDA_VISIBLE_DEVICES', '')" in log
+    assert f"('{receipts.NESTED_VARIABLE}', '1')" in log
+
+
+def test_a_step_that_outlives_its_timeout_is_stopped(tmp_path: Path, scripted: None):
+    directory = custom_recipes(tmp_path, "sleep")
+    recipe = directory / "test/custom.yaml"
+    data = yaml.safe_load(recipe.read_text())
+    data["commands"][0]["timeout_seconds"] = 1
+    recipe.write_text(yaml.safe_dump(data))
+    loaded = recipes.get_recipe("custom", directory)
+    receipt = receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
+    assert receipt.wall_seconds < 30 and not receipt.checks_passed
+    assert receipt.commands[0].exit_code not in (0, None) and receipt.commands[1].exit_code is None
+    assert "timeout" in (tmp_path / "out/logs/01-step.stderr.txt").read_text()
+
+
+def test_a_value_outside_the_tolerance_fails(tmp_path: Path, scripted: None):
+    receipt = run_custom(tmp_path, expected_output=expected(tolerance=0.001))
+    assert not receipt.checks_passed and receipt.metrics == {"value": 2.004}
+    assert [check.passed for check in receipt.checks] == [True, False]
+
+
+def test_a_nan_in_an_output_fails_the_check_and_the_receipt_is_still_written(
+    tmp_path: Path, scripted: None
+):
+    receipt = run_custom(tmp_path, "write-nan")
+    assert not receipt.checks_passed and receipt.metrics == {"value": None}
+    assert receipts.load_receipt(tmp_path / "out") == receipt
+    assert (tmp_path / "out/SHA256SUMS").is_file()
+
+
+def test_a_receipt_that_cannot_be_serialised_leaves_no_empty_file(smoke_run: Path, tmp_path: Path):
+    receipt = receipts.load_receipt(smoke_run)
+    broken = receipt.model_copy(update={"wall_seconds": float("inf")})
+    with pytest.raises(ValueError, match="JSON compliant"):
+        receipts.save(broken, tmp_path)
+    assert list(tmp_path.iterdir()) == []
+    (tmp_path / "receipt.json").write_text("")
+    with pytest.raises(ValueError, match="is not a receipt"):
+        receipts.verify(tmp_path)
+
+
+def test_an_artifact_is_checked_by_its_sha256(tmp_path: Path, scripted: None):
+    digest = recipes.hashlib.sha256(json.dumps({"nested": [2.004]}).encode()).hexdigest()
+    artifact = {"description": "exact bytes",
+                "artifacts": [{"path": "result.json", "sha256": digest}]}
+    (tmp_path / "right").mkdir()
+    receipt = run_custom(tmp_path / "right", expected_output=artifact)
+    assert receipt.checks_passed and receipt.checks[-1].kind == "artifact"
+    assert receipt.checks[-1].observed == digest
+    result = receipts.verify(tmp_path / "right/out",
+                             recipes_dir=tmp_path / "right/checkout/recipes")
+    assert statuses(result)["checks"] == "match"
+    artifact["artifacts"][0]["sha256"] = "c" * 64
+    (tmp_path / "wrong").mkdir()
+    receipt = run_custom(tmp_path / "wrong", expected_output=artifact)
+    assert not receipt.checks_passed and not receipt.checks[-1].passed
+    assert receipt.checks[-1].expected == "c" * 64 and receipt.checks[-1].observed == digest
+
+
+def test_a_step_that_writes_the_receipt_itself_fails_the_run(tmp_path: Path, scripted: None):
+    receipt = run_custom(tmp_path, "write-receipt")
+    assert not receipt.checks_passed
+    moved = "logs/written-by-a-command-receipt.json"
+    assert (tmp_path / "out" / moved).read_text() == "{}"
+    assert [check.file for check in receipt.checks if not check.passed] == [moved]
+    assert receipts.load_receipt(tmp_path / "out") == receipt
+    result = receipts.verify(tmp_path / "out", recipes_dir=tmp_path / "checkout/recipes")
+    assert statuses(result)["checks"] == "mismatch" and statuses(result)["run"] == "mismatch"
+
+
+def test_a_recipe_reads_nested_values_and_never_overwrites_a_run(tmp_path: Path, scripted: None):
+    directory = custom_recipes(tmp_path)
     loaded = recipes.get_recipe("custom", directory)
     receipt = receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
     assert receipt.checks_passed and receipt.metrics == {"value": 2.004}
+    assert [item.obtained for item in receipt.inputs] == ["repository"]
     assert receipt.recipe.commit is None and receipt.recipe.repository is None
     assert receipt.code == receipts.code_state(receipts._source_root())
-    assert receipts.verify(tmp_path / "out", recipes_dir=directory,
-                           inputs=directory.parent / "data")["complete"]
+    found = statuses(receipts.verify(tmp_path / "out", recipes_dir=directory,
+                                     inputs=directory.parent / "data"))
+    # The recipe is in no commit, so the receipt is intact but cannot support a promotion.
+    assert found.pop("commits") == "not_available" and set(found.values()) == {"match"}
     with pytest.raises(FileExistsError):
         receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
+    # Files passed with --inputs are recorded as supplied: nothing was fetched.
+    supplied = receipts.run_recipe(loaded, output=tmp_path / "supplied", recipes_dir=directory,
+                                   inputs=directory.parent / "data")
+    assert [item.obtained for item in supplied.inputs] == ["supplied"]
+    assert supplied.inputs[0].source == "repository:data/input.txt"
 
 
 def git(folder: Path, *arguments: str) -> str:
@@ -216,9 +418,21 @@ def git(folder: Path, *arguments: str) -> str:
     ).stdout.strip()
 
 
-def test_recipe_commit_is_recorded_only_for_the_committed_bytes(tmp_path: Path):
+def test_code_state_reports_a_dirty_tree(tmp_path: Path):
+    git(tmp_path, "init", "--quiet")
+    (tmp_path / "tracked.txt").write_text("one\n")
+    git(tmp_path, "add", "tracked.txt")
+    git(tmp_path, "commit", "--quiet", "-m", "first")
+    state = receipts.code_state(tmp_path)
+    assert state.commit == git(tmp_path, "rev-parse", "HEAD") and state.dirty is False
+    (tmp_path / "tracked.txt").write_text("two\n")
+    assert receipts.code_state(tmp_path).dirty is True
+    assert receipts.code_state(None).commit is None and receipts.code_state(None).dirty is None
+
+
+def test_recipe_commit_is_recorded_only_for_the_committed_bytes(tmp_path: Path, scripted: None):
     """The recipes folder and the code can be different checkouts, and a recipe can be edited."""
-    directory = custom_recipes(tmp_path, [sys.executable, "-c", WRITE_RESULT, "{output}"])
+    directory = custom_recipes(tmp_path)
     root = directory.parent
     git(root, "init", "--quiet")
     git(root, "remote", "add", "origin", "git@github.com:example/recipes.git")
@@ -244,12 +458,22 @@ def test_recipe_commit_is_recorded_only_for_the_committed_bytes(tmp_path: Path):
     recipe.write_text(recipe.read_text() + "# Edited after the commit.\n")
     edited = run("edited")
     assert edited.recipe.commit is None and edited.recipe.sha256 != committed.recipe.sha256
+    # The older receipt still verifies: its recipe is read from the commit it cites.
+    result = receipts.verify(tmp_path / "committed", recipes_dir=directory)
+    found = statuses(result)
+    assert found["recipe"] == found["checks"] == found["inputs"] == "match" and result["ok"]
+    assert head in result["results"][3]["detail"]
+    # A receipt that cites bytes no commit holds does not.
+    rewrite_receipt(tmp_path / "committed",
+                    lambda data: data["recipe"].update(sha256="d" * 64))
+    result = receipts.verify(tmp_path / "committed", recipes_dir=directory)
+    assert statuses(result)["recipe"] == "mismatch" and not result["ok"]
 
 
 def test_a_failed_command_still_leaves_a_receipt_that_cannot_pass(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], scripted: None
 ):
-    directory = custom_recipes(tmp_path, [sys.executable, "-c", "raise SystemExit(3)"])
+    directory = custom_recipes(tmp_path, "fail")
     result, code = run_cli(capsys, "recipe", "run", "custom", "--output", str(tmp_path / "out"),
                            "--recipes-dir", str(directory))
     assert code == 1 and result["checks_passed"] is False
@@ -259,13 +483,30 @@ def test_a_failed_command_still_leaves_a_receipt_that_cannot_pass(
     assert [check.passed for check in receipt.checks] == [False, False]
     result = receipts.verify(tmp_path / "out", recipes_dir=directory)
     assert statuses(result)["checks"] == "mismatch" and not result["ok"]
+    # A failed run does not verify when the recipe cannot be found either.
+    (tmp_path / "empty").mkdir()
+    for missing in (tmp_path / "empty", None):
+        result = receipts.verify(tmp_path / "out", recipes_dir=missing)
+        found = statuses(result)
+        assert found["recipe"] == found["checks"] == "not_available"
+        assert found["run"] == "mismatch" and not result["ok"]
+    result, code = run_cli(capsys, "receipt", "verify", str(tmp_path / "out"),
+                           "--recipes-dir", str(tmp_path / "empty"))
+    assert code == 1 and not result["ok"]
 
 
-def test_a_changed_input_stops_the_run_before_anything_executes(tmp_path: Path):
-    directory = custom_recipes(tmp_path, [sys.executable, "-c", WRITE_RESULT, "{output}"])
-    (directory.parent / "data/input.txt").write_text("different bytes\n")
+def test_a_changed_input_stops_the_run_before_anything_executes(tmp_path: Path, scripted: None):
+    directory = custom_recipes(tmp_path)
     loaded = recipes.get_recipe("custom", directory)
-    with pytest.raises(ValueError, match="the recipe pins"):
+    data = yaml.safe_load(loaded.path.read_text())
+    data["inputs"][0]["bytes"] = 5
+    loaded.path.write_text(yaml.safe_dump(data))
+    with pytest.raises(ValueError, match="is 13 bytes; the recipe pins 5"):
+        receipts.run_recipe(recipes.get_recipe("custom", directory), output=tmp_path / "out",
+                            recipes_dir=directory)
+    assert not (tmp_path / "out").exists()
+    (directory.parent / "data/input.txt").write_text("different bytes\n")
+    with pytest.raises(ValueError, match="has SHA-256 .* the recipe pins"):
         receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
     assert not (tmp_path / "out").exists()
     supplied = tmp_path / "supplied"
@@ -275,13 +516,66 @@ def test_a_changed_input_stops_the_run_before_anything_executes(tmp_path: Path):
                             inputs=supplied)
 
 
+def test_a_fetched_input_has_a_size_limit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(receipts, "MAX_INPUT_BYTES", 10)
+    monkeypatch.setattr(receipts.urllib.request, "urlopen",
+                        lambda request, timeout: io.BytesIO(b"x" * 11))
+    with pytest.raises(ValueError, match="Input larger than 10 bytes"):
+        receipts._fetch("https://example.org/big", tmp_path / "big")
+    monkeypatch.setattr(receipts.urllib.request, "urlopen",
+                        lambda request, timeout: io.BytesIO(b"x" * 10))
+    receipts._fetch("https://example.org/small", tmp_path / "small")
+    assert (tmp_path / "small").read_bytes() == b"x" * 10
+
+
+def test_a_run_is_refused_when_the_machine_or_checkout_does_not_meet_the_recipe(
+    tmp_path: Path, scripted: None
+):
+    directory = custom_recipes(tmp_path)
+    recipe = directory / "test/custom.yaml"
+    original = yaml.safe_load(recipe.read_text())
+    (directory.parent / "requirements.lock").write_text("pydantic==2\n")
+    locked = recipes.sha256_file(directory.parent / "requirements.lock")
+
+    def run(environment: dict[str, Any] | None = None, **floor: Any) -> receipts.Receipt:
+        data = json.loads(json.dumps(original))
+        data["environment"].update(environment or {})
+        data["hardware_floor"].update(floor)
+        recipe.write_text(yaml.safe_dump(data))
+        return receipts.run_recipe(recipes.get_recipe("custom", directory),
+                                   output=tmp_path / "out", recipes_dir=directory)
+
+    with pytest.raises(ValueError, match="needs Python >=3.99"):
+        run({"python": ">=3.99"})
+    with pytest.raises(ValueError, match="needs Python ==3.9"):
+        run({"python": "==3.9"})
+    with pytest.raises(ValueError, match="requirements.lock has SHA-256"):
+        run({"lockfile": {"path": "requirements.lock", "sha256": "0" * 64}})
+    with pytest.raises(ValueError, match="missing.lock not found"):
+        run({"lockfile": {"path": "missing.lock", "sha256": locked}})
+    with pytest.raises(ValueError, match="needs 1000000.0 GB of memory"):
+        run(host_memory_gb=1e6)
+    assert not (tmp_path / "out").exists()
+    minor = ".".join(str(part) for part in sys.version_info[:2])
+    assert run({"python": f"=={minor}",
+                "lockfile": {"path": "requirements.lock", "sha256": locked}},
+               host_memory_gb=0.001).checks_passed
+    assert recipes.python_satisfies(">=3.11", (3, 11, 0))
+    assert recipes.python_satisfies(">=3.11.4", (3, 12, 0))
+    assert not recipes.python_satisfies(">=3.11.4", (3, 11, 3))
+    assert not recipes.python_satisfies("==3.11", (3, 12, 1))
+
+
 def test_only_the_local_backend_runs_here(tmp_path: Path):
     digest = "sha256:" + "a" * 64
     environment = yaml.safe_load(
         (RECIPES / "flip2/flip2-synthetic-smoke.yaml").read_text())["environment"]
     environment["images"]["linux/amd64"] = {"reference": f"ghcr.io/rewire-bio/x@{digest}"}
+    basis = {"provider": "runpod", "accelerator": "NVIDIA H100 80GB HBM3",
+             "amount_per_hour": 3.99, "currency": "USD", "rate_source": "instance.json",
+             "rate_date": "2026-10-09"}
     directory = custom_recipes(
-        tmp_path, [sys.executable, "-c", WRITE_RESULT, "{output}"], environment=environment,
+        tmp_path, environment=environment, estimate={"gpu_hours": 1, "price_basis": basis},
         backends={"runpod": {"gpu_types": ["NVIDIA H100 80GB HBM3"], "disk_gb": 50,
                              "max_hours": 1}})
     loaded = recipes.get_recipe("custom", directory)
@@ -336,6 +630,8 @@ def test_peak_memory_units_and_remote_urls(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_receipt_kind_follows_scope_and_ci(monkeypatch: pytest.MonkeyPatch):
+    for name in receipts.AGENT_VARIABLES:
+        monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("CI", "true")
     assert receipts._receipt_kind("synthetic_smoke") == "runner_ci_smoke"
     assert receipts._receipt_kind("full_protocol") == "runner_reproduction"
@@ -343,6 +639,8 @@ def test_receipt_kind_follows_scope_and_ci(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("CI")
     assert receipts._receipt_kind("synthetic_smoke") == "runner_reproduction"
     assert receipts.default_started_by() == "human"
+    monkeypatch.setenv("CLAUDECODE", "1")
+    assert receipts.default_started_by() == "agent"
 
 
 def test_plain_cli_runs_also_write_a_receipt(
@@ -363,11 +661,13 @@ def test_plain_cli_runs_also_write_a_receipt(
                                         "<local value>", "--output", "<local value>",
                                         "--baseline", "<local value>"]
     assert str(tmp_path) not in (tmp_path / "baselines/receipt.json").read_text()
-    assert receipt.inputs[0].name == "prepared.json"
+    assert receipt.inputs[0].name == "prepared.json" and receipt.inputs[0].obtained == "local"
     assert receipt.metrics["training-mean-v1"]["n"] == 3
     assert receipt.cost.reason == "owned hardware" and receipt.peak_memory_bytes > 0
     result = receipts.verify(tmp_path / "baselines")
-    assert result["ok"] and statuses(result)["outputs"] == "match"
+    assert result["ok"] and statuses(result)["outputs"] == statuses(result)["run"] == "match"
+    # A run without a recipe has nothing to re-check its values against, so --strict fails.
+    assert statuses(result)["metrics"] == "not_available" and not result["complete"]
 
     predictions = tmp_path / "baselines/training-mean-v1/predictions.json"
     result, code = run_cli(capsys, "evaluate", "--prepared", str(tmp_path / "prepared"),

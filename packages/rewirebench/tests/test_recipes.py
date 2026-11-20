@@ -8,12 +8,13 @@ from typing import Any
 
 import pytest
 import yaml
-from pydantic import ValidationError
 from rewirebench import cli, recipes
 
 ROOT = Path(__file__).resolve().parents[3]
 RECIPES = ROOT / "recipes"
 DIGEST = "sha256:" + "a" * 64
+BASIS = {"provider": "runpod", "accelerator": "NVIDIA H100 80GB HBM3", "amount_per_hour": 3.99,
+         "currency": "USD", "rate_source": "instance.json", "rate_date": "2026-10-09"}
 
 
 def document(name: str = "flip2/flip2-synthetic-smoke.yaml") -> dict[str, Any]:
@@ -74,87 +75,203 @@ def test_mfass_recipe_pins_the_published_inputs_and_values():
 
 @pytest.mark.parametrize("key", ["status", "verified", "unknown_field"])
 def test_status_and_unknown_keys_are_rejected(key: str):
-    with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+    with pytest.raises(recipes.RecipeError, match="Extra inputs are not permitted"):
         parse(changed(**{key: "executed"}))
 
 
 def test_a_block_is_present_or_named_missing_never_both_or_neither():
     data = changed()
     del data["missing"]["weights_pin"]
-    with pytest.raises(ValidationError, match="weights_pin must be either present"):
+    with pytest.raises(recipes.RecipeError, match="weights_pin must be either present"):
         parse(data)
     data = changed()
     data["missing"]["hardware_floor"] = {"reason": "unreported"}
-    with pytest.raises(ValidationError, match="hardware_floor must be either present"):
+    with pytest.raises(recipes.RecipeError, match="hardware_floor must be either present"):
         parse(data)
     data = changed()
     del data["expected_output"]
     data["missing"]["expected_output"] = {"reason": "unreported"}
     assert parse(data).expected_output is None
-    with pytest.raises(ValidationError):
+    with pytest.raises(recipes.RecipeError):
         parse(changed(missing={"weights_pin": {"reason": "not measured yet"}}))
 
 
 def test_images_are_by_digest_for_both_platforms():
     data = changed()
     data["environment"]["images"]["linux/amd64"] = {"reference": "ghcr.io/rewire-bio/x:latest"}
-    with pytest.raises(ValidationError, match="by digest"):
+    with pytest.raises(recipes.RecipeError, match="by digest"):
         parse(data)
     data["environment"]["images"]["linux/amd64"] = {"reference": f"ghcr.io/rewire-bio/x@{DIGEST}"}
     assert parse(data).image_digests() == {"linux/amd64": DIGEST, "linux/arm64": None}
     del data["environment"]["images"]["linux/arm64"]
-    with pytest.raises(ValidationError, match="exactly these platforms"):
+    with pytest.raises(recipes.RecipeError, match="exactly these platforms"):
         parse(data)
     data = changed()
     data["environment"]["images"]["linux/arm64"] = {}
-    with pytest.raises(ValidationError, match="exactly one of reference or missing"):
+    with pytest.raises(recipes.RecipeError, match="exactly one of reference or missing"):
         parse(data)
 
 
 def test_gpu_backends_need_the_image_for_their_platform():
     runpod = {"gpu_types": ["NVIDIA H100 80GB HBM3"], "disk_gb": 200, "max_hours": 3}
     data = changed(backends={"runpod": runpod})
-    with pytest.raises(ValidationError, match="linux/amd64 image digest"):
+    with pytest.raises(recipes.RecipeError, match="linux/amd64 image digest"):
         parse(data)
     data["environment"]["images"]["linux/amd64"] = {"reference": f"ghcr.io/rewire-bio/x@{DIGEST}"}
-    assert parse(data).backends.names() == ["runpod"]
-    data["backends"] = {"spark": {}}
-    with pytest.raises(ValidationError, match="linux/arm64 image digest"):
+    # A paid backend also needs a dated hourly rate, or there is no amount to quote.
+    with pytest.raises(recipes.RecipeError, match="runpod backend needs estimate.price_basis"):
         parse(data)
-    with pytest.raises(ValidationError, match="at least one backend"):
+    data["estimate"] = {"gpu_hours": 1}
+    with pytest.raises(recipes.RecipeError, match="runpod backend needs estimate.price_basis"):
+        parse(data)
+    data["estimate"] = {"gpu_hours": 1, "price_basis": BASIS}
+    assert parse(data).backends.names() == ["runpod"]
+    data["backends"]["runpod"]["max_hours"] = 1e6
+    with pytest.raises(recipes.RecipeError, match="backends.runpod.max_hours"):
+        parse(data)
+    data["backends"] = {"spark": {}}
+    with pytest.raises(recipes.RecipeError, match="linux/arm64 image digest"):
+        parse(data)
+    with pytest.raises(recipes.RecipeError, match="at least one backend"):
         parse(changed(backends={}))
+
+
+def test_the_local_backend_is_cpu_only():
+    data = changed()
+    data["hardware_floor"]["accelerator"] = {"kind": "gpu", "model": "NVIDIA GB10", "count": 1}
+    with pytest.raises(recipes.RecipeError, match="local backend is CPU only"):
+        parse(data)
+    data["environment"]["images"]["linux/arm64"] = {"reference": f"ghcr.io/rewire-bio/x@{DIGEST}"}
+    data["backends"] = {"spark": {}}
+    assert parse(data).hardware_floor.accelerator.kind == "gpu"
+
+
+@pytest.mark.parametrize("argv", [
+    ["sh", "-c", "runpodctl create pod"],
+    ["runpodctl", "create", "pod"],
+    ["python", "-c", "print(1)"],
+    ["rewirebench"],
+    ["rewirebench", "submit", "--bundle", "x"],
+    ["rewirebench", "submit-queue", "--send"],
+    ["rewirebench", "enqueue"],
+    ["rewirebench", "recipe", "run", "other"],
+    ["rewirebench", "receipt", "verify", "x"],
+    ["/usr/bin/env", "rewirebench", "prepare"],
+])
+def test_a_recipe_runs_only_rewirebench_data_commands(argv: list[str]):
+    data = changed()
+    data["commands"][0]["argv"] = argv
+    with pytest.raises(recipes.RecipeError):
+        parse(data)
+    for path in recipes.recipe_files(RECIPES):
+        for command in recipes.load_recipe(path).recipe.commands:
+            assert command.argv[0] == "rewirebench"
+            assert command.argv[1] in recipes.RUNNER_COMMANDS
+
+
+def test_a_command_has_a_bounded_timeout():
+    data = changed()
+    assert parse(data).commands[0].timeout_seconds == 3600
+    for seconds in (0, 86401, "60", 1.5):
+        data["commands"][0]["timeout_seconds"] = seconds
+        with pytest.raises(recipes.RecipeError, match="timeout_seconds"):
+            parse(data)
+    data["commands"][0]["timeout_seconds"] = 86400
+    assert parse(data).commands[0].timeout_seconds == 86400
+
+
+@pytest.mark.parametrize(("field", "value", "message"), [
+    ("tolerance", float("inf"), "finite number"),
+    ("tolerance", float("nan"), "finite number"),
+    ("value", float("nan"), "finite number"),
+    ("value", float("inf"), "finite number"),
+    ("tolerance", 1e9, "wider than the check allows"),
+    ("tolerance", 3.5, "wider than the check allows"),
+    ("tolerance", -0.1, "greater than or equal to 0"),
+    ("value", "3", "valid number"),
+    ("value", True, "valid number"),
+])
+def test_expected_values_are_finite_numbers_with_a_tolerance_that_checks_something(
+    field: str, value: Any, message: str
+):
+    data = changed()
+    data["expected_output"]["values"][0][field] = value
+    with pytest.raises(recipes.RecipeError, match=message):
+        parse(data)
+
+
+def test_a_zero_expected_value_allows_a_tolerance_up_to_one():
+    data = changed()
+    data["expected_output"]["values"][0].update(value=0, tolerance=1)
+    assert parse(data).expected_output.values[0].tolerance == 1
+    data["expected_output"]["values"][0]["tolerance"] = 1.01
+    with pytest.raises(recipes.RecipeError, match="wider than the check allows"):
+        parse(data)
+
+
+def test_fields_do_not_coerce_and_stated_requirements_have_a_checkable_form():
+    data = changed()
+    data["inputs"][0]["bytes"] = True
+    with pytest.raises(recipes.RecipeError, match="inputs.0.bytes"):
+        parse(data)
+    data = changed()
+    data["environment"]["python"] = "banana"
+    with pytest.raises(recipes.RecipeError, match="environment.python"):
+        parse(data)
+    data["environment"]["python"] = "==3.12.1"
+    assert parse(data).environment.python == "==3.12.1"
+    data["environment"]["lockfile"] = {"path": "../uv.lock", "sha256": "0" * 64}
+    with pytest.raises(recipes.RecipeError, match="relative path inside the repository"):
+        parse(data)
+    for output in ("receipt.json", "SHA256SUMS", "logs/01-prepare.stdout.txt"):
+        with pytest.raises(recipes.RecipeError, match="the runner writes itself"):
+            parse(changed(outputs=[output]))
 
 
 def test_inputs_are_pinned_and_come_from_one_place():
     data = changed()
     data["inputs"][0]["sha256"] = "not-a-digest"
-    with pytest.raises(ValidationError):
+    with pytest.raises(recipes.RecipeError):
         parse(data)
     data = changed()
     data["inputs"][0]["url"] = "https://example.org/smoke.csv"
-    with pytest.raises(ValidationError, match="exactly one of url or repo_path"):
+    with pytest.raises(recipes.RecipeError, match="exactly one of url or repo_path"):
         parse(data)
     del data["inputs"][0]["repo_path"]
     data["inputs"][0]["url"] = "http://example.org/smoke.csv"
-    with pytest.raises(ValidationError, match="https"):
+    with pytest.raises(recipes.RecipeError, match="https"):
+        parse(data)
+    # The URL is copied into the receipt, so it carries no credential.
+    for url in ("https://user:token@example.org/smoke.csv", "https://token@example.org/x"):
+        data["inputs"][0]["url"] = url
+        with pytest.raises(recipes.RecipeError, match="user name or password"):
+            parse(data)
+    data["inputs"][0]["url"] = "https://"
+    with pytest.raises(recipes.RecipeError, match="https"):
         parse(data)
     data = changed()
     data["inputs"][0]["repo_path"] = "../outside.csv"
-    with pytest.raises(ValidationError, match="relative path"):
+    with pytest.raises(recipes.RecipeError, match="relative path inside the repository"):
         parse(data)
 
 
 def test_commands_are_argv_lists_with_known_placeholders():
     data = changed()
     data["commands"][0]["argv"] = "rewirebench prepare"
-    with pytest.raises(ValidationError):
+    with pytest.raises(recipes.RecipeError):
         parse(data)
     data = changed()
     data["commands"][0]["argv"][-3] = "{outputs}/prepared"
-    with pytest.raises(ValidationError, match="unknown placeholder"):
+    with pytest.raises(recipes.RecipeError, match="unknown placeholder"):
         parse(data)
     data = changed(outputs=["/etc/passwd"])
-    with pytest.raises(ValidationError, match="relative path"):
+    with pytest.raises(recipes.RecipeError, match="relative path inside the run folder") as error:
+        parse(data)
+    # The message names the problem without a dump of the recipe or a documentation link.
+    assert "input_value" not in str(error.value) and "pydantic" not in str(error.value)
+    data = changed()
+    data["commands"][0]["argv"] = "rewirebench prepare"
+    with pytest.raises(recipes.RecipeError, match=r"^commands\.0\.argv: "):
         parse(data)
 
 
@@ -164,16 +281,23 @@ def test_weights_pin_needs_a_revision_and_file_digests():
            "files": [{"path": "evo2_7b.pt", "sha256": "c" * 64}]}
     data = changed(weights_pin=[pin])
     del data["missing"]["weights_pin"]
-    with pytest.raises(ValidationError, match="40-hex revision"):
+    with pytest.raises(recipes.RecipeError, match="40-hex revision"):
         parse(data)
     pin["revision"] = "b" * 40
     assert parse(data).weights_pin[0].revision == "b" * 40
+    for field, value in (("host", "HuggingFace Hub"), ("gated", "yes"),
+                         ("files", [{"path": "../../m.bin", "sha256": "c" * 64}])):
+        with pytest.raises(recipes.RecipeError):
+            parse(changed(weights_pin=[{**pin, field: value}],
+                          missing={key: value for key, value in data["missing"].items()}))
+    del pin["revision"]
+    pin["host"] = "zenodo"
+    assert parse(data).weights_pin[0].revision is None
 
 
 def test_a_price_needs_a_dated_source():
-    basis = {"provider": "runpod", "accelerator": "NVIDIA H100 80GB HBM3",
-             "amount_per_hour": 3.99, "currency": "USD", "rate_source": "instance.json"}
-    with pytest.raises(ValidationError, match="rate_date"):
+    basis = {key: value for key, value in BASIS.items() if key != "rate_date"}
+    with pytest.raises(recipes.RecipeError, match="estimate.price_basis.rate_date"):
         parse(changed(estimate={"gpu_hours": 1, "price_basis": basis}))
     basis["rate_date"] = "2026-10-09"
     assert parse(changed(estimate={"gpu_hours": 1, "price_basis": basis})).estimate.gpu_hours == 1
@@ -182,9 +306,9 @@ def test_a_price_needs_a_dated_source():
 def test_harness_recipes_name_a_real_protocol():
     with pytest.raises(ValueError, match="Unknown rewirebench protocol"):
         parse(changed(rewirebench_protocol="no-such-protocol"))
-    with pytest.raises(ValidationError, match="rewirebench_protocol"):
+    with pytest.raises(recipes.RecipeError, match="rewirebench_protocol"):
         parse(changed(rewirebench_protocol=None))
-    with pytest.raises(ValidationError, match="Extra inputs"):
+    with pytest.raises(recipes.RecipeError, match="Extra inputs"):
         parse(changed(protocol_id="rewire-mfass-v2"))
 
 
@@ -194,6 +318,8 @@ def test_duplicate_yaml_keys_are_rejected():
         recipes.parse_recipe(text + "scope: full_protocol\n")
     with pytest.raises(ValueError, match="YAML mapping"):
         recipes.parse_recipe("- a list\n")
+    with pytest.raises(recipes.RecipeError, match="line 1 is a list or mapping"):
+        recipes.parse_recipe("? [a, b]\n: 1\n")
 
 
 def test_file_name_must_equal_the_recipe_id(tmp_path: Path):
@@ -226,6 +352,45 @@ def test_cli_lists_shows_and_validates(capsys: pytest.CaptureFixture[str], tmp_p
     with pytest.raises(SystemExit) as stop:
         cli.main(["recipe", "show", "no-such-recipe", "--recipes-dir", str(RECIPES)])
     assert stop.value.code == 2
+
+
+def test_a_bad_file_is_reported_and_does_not_hide_the_others(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    directory = tmp_path / "recipes"
+    (directory / "flip2").mkdir(parents=True)
+    good = (RECIPES / "flip2/flip2-synthetic-smoke.yaml").read_text()
+    (directory / "flip2/flip2-synthetic-smoke.yaml").write_text(good)
+    (directory / "flip2/unhashable.yaml").write_text("? [a, b]\n: 1\n")
+    (directory / "flip2/other.yml").write_text(good.replace("flip2-synthetic-smoke", "other"))
+    (directory / "flip2/copy.yaml").write_text(good)
+    listing, code = run_cli(capsys, "recipe", "list", "--recipes-dir", str(directory))
+    assert code == 1
+    assert [entry["id"] for entry in listing["recipes"]] == ["flip2-synthetic-smoke"]
+    problems = {Path(entry["path"]).name: entry["error"] for entry in listing["invalid"]}
+    assert set(problems) == {"unhashable.yaml", "other.yml", "copy.yaml"}
+    assert "end in .yaml" in problems["other.yml"]
+    assert "list or mapping" in problems["unhashable.yaml"]
+    results, code = run_cli(capsys, "recipe", "validate", "--recipes-dir", str(directory))
+    assert code == 1
+    assert {Path(entry["path"]).name for entry in results if not entry["valid"]} == set(problems)
+    with pytest.raises(SystemExit) as stop:
+        cli.main(["recipe", "show", "other", "--recipes-dir", str(directory)])
+    assert stop.value.code == 2 and "end in .yaml" in capsys.readouterr().err
+
+
+def test_the_checkout_the_code_runs_from_comes_before_the_working_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Running from a folder that has its own recipes/ must not swap the recipes."""
+    (tmp_path / "recipes").mkdir()
+    (tmp_path / "recipes" / recipes.SCHEMA_FILENAME).write_text("{}")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv(recipes.RECIPES_DIR_VARIABLE, raising=False)
+    assert recipes.find_recipes_dir() == RECIPES
+    # An installed wheel has no checkout, so it falls back to the working directory.
+    monkeypatch.setattr(recipes, "__file__", str(tmp_path / "site-packages/rewirebench/recipes.py"))
+    assert recipes.find_recipes_dir() == (tmp_path / "recipes").resolve()
 
 
 def test_cli_works_where_no_recipes_directory_exists(
