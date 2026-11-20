@@ -1,0 +1,12 @@
+{
+  "name": "@rewire-bio/benchmarks-agents",
+  "private": true,
+  "description": "Dependencies for the scheduled agents in scripts/agents (docs/agents.md). Only the gap scanner's live and report-only runs install them.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.9.0"
+  }
+}

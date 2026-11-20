@@ -1,0 +1,1430 @@
+{
+ "schema_version": 5,
+ "release_id": "2026-11-20-727601dd065b",
+ "rules": {
+  "note": "Thresholds for scripts/kg/contradictions.py. Changing a value changes the derived graph and the bundle; record why in docs/reviews/.",
+  "version": "5",
+  "notes": {
+   "5": "Only a study that takes a side counts toward an ordering finding. A split study (enough untied comparisons, but under the 75% consistency share) has no verdict to be an outlier from and none to add to a consensus, so it no longer forms a party or sits in the consensus denominator. Counting it there read \"no opinion\" as \"disagrees\": one split study arriving could end a two-study conflict and leave every reversal candidate under the 80% consensus share, silencing a disagreement between two studies whose results had not changed. Verdicts themselves are unchanged, so each study still publishes split as its verdict. See docs/reviews/2026-11-10-discrepancy-split-studies.md.",
+   "4": "Evidence is counted in studies: each study gives one verdict per pair (at least 2 untied comparisons, 75% one way). An ordering reversal needs at least 2 other studies agreeing at 80%; two studies that disagree make one two-study conflict. Each study uses one configuration per model; combined configurations are their own systems and are not compared with their members; companion_of joins sources into one study. Scope is same-protocol, same-task, different-task or unknown. Severity is capped by scope, limited to medium below 3 consensus studies, and steps down for unreviewed identity and a variant mismatch; nothing steps it up. See docs/design/discrepancy-rules-v4.html and docs/reviews/2026-10-24-discrepancy-rules-v4.md.",
+   "3": "Gap outliers are measured against a reference system every study in the group measured, preferring a named baseline, per protocol or task and metric; groups without one are skipped. Disputed results and results under an evidence concern are left out. IDs hash rule, systems, anchor, metric and a stable outlier study key. See docs/reviews/2026-10-23-discrepancy-identity.md.",
+   "2": "Sources with one DOI, and files from one GitHub repository, are one study; a reversal of a strong consensus goes up a severity step. See docs/reviews/2026-10-22-discrepancy-severity.md."
+  },
+  "tie_tolerance": 0.01,
+  "verdict": {
+   "min_comparisons": 2,
+   "consistency": 0.75
+  },
+  "ordering_reversal": {
+   "min_consensus_studies": 2,
+   "consensus_consistency": 0.8
+  },
+  "gap_outlier": {
+   "min_studies": 3,
+   "margin": 0.1
+  },
+  "severity": {
+   "cap_by_scope": {
+    "same-protocol": "high",
+    "same-task": "high",
+    "unknown": "medium",
+    "different-task": "low"
+   },
+   "high_min_consensus_studies": 3
+  }
+ },
+ "discrepancies": [
+  {
+   "id": "discrepancy-0311356983b743d6",
+   "resolved": false,
+   "rule": "ordering-reversal",
+   "label": "GRNBoost2 and PPCOR (partial Pearson correlation): BEELINE: 10.1038/s41592-019-0690-6 source data published 2020 reverses the order",
+   "summary": "BEELINE: 10.1038/s41592-019-0690-6 source data published 2020 ranks PPCOR (partial Pearson correlation) above GRNBoost2 in 9 of 12 comparisons; 2 of 2 other studies rank GRNBoost2 above PPCOR (partial Pearson correlation).",
+   "severity": "medium",
+   "scope": "same-task",
+   "identity_basis": "reviewed",
+   "review_state": "open",
+   "listing": "public",
+   "variant_mismatch": false,
+   "unlinked_protocols": [],
+   "review_claim": null,
+   "settled": false,
+   "resolution": {},
+   "systems": [
+    "perturbpfn-20261115-method-grnboost2",
+    "perturbpfn-20261115-method-ppcor"
+   ],
+   "consensus_higher": "perturbpfn-20261115-method-grnboost2",
+   "reference_system": null,
+   "outlier_sources": [
+    "acquired-source-0f6c059ffdc338b70a5c"
+   ],
+   "consensus_sources": [
+    "acquired-source-31344fb7e5e8ae6b9666",
+    "acquired-source-3156602fda847ae943b4"
+   ],
+   "party_sources": [],
+   "party_results": [],
+   "numbers": {
+    "outlier_comparisons": 12,
+    "outlier_reversals": 9,
+    "consensus_comparisons": 55,
+    "consensus_agreements": 47,
+    "consensus_studies": 2,
+    "consensus_study_agreements": 2
+   },
+   "previous_ids": [],
+   "key": {
+    "rule": "ordering-reversal",
+    "systems": [
+     "perturbpfn-20261115-method-grnboost2",
+     "perturbpfn-20261115-method-ppcor"
+    ],
+    "anchor": null,
+    "metric": null,
+    "outlier_study": "source:acquired-source-0f6c059ffdc338b70a5c"
+   },
+   "studies": [
+    {
+     "key": "source:acquired-source-0f6c059ffdc338b70a5c",
+     "role": "outlier",
+     "verdict": "perturbpfn-20261115-method-ppcor",
+     "configurations": {
+      "perturbpfn-20261115-method-grnboost2": "acquired-configuration-20bd9426a3b1748c4ac0",
+      "perturbpfn-20261115-method-ppcor": "acquired-configuration-89290921419c9429cb59"
+     },
+     "source_ids": [
+      "acquired-source-0f6c059ffdc338b70a5c"
+     ],
+     "higher": {
+      "perturbpfn-20261115-method-grnboost2": 3,
+      "perturbpfn-20261115-method-ppcor": 9
+     },
+     "ties": 0,
+     "gap": null,
+     "comparisons_total": 12,
+     "comparisons": [
+      {
+       "protocol": "acquired-protocol-18da78ff7de51ffb5605",
+       "dataset": "acquired-dataset-e5fc907663fc0b2c1cd9",
+       "metric": "auprc-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 2.087467301,
+        "perturbpfn-20261115-method-ppcor": 2.795732839
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-a5909f0a15a35f39b4f5",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-ae57d5aeb2bd8c61bb70"
+       },
+       "higher": "perturbpfn-20261115-method-ppcor"
+      },
+      {
+       "protocol": "acquired-protocol-18da78ff7de51ffb5605",
+       "dataset": "acquired-dataset-e5fc907663fc0b2c1cd9",
+       "metric": "beeline-stability",
+       "unit": "fraction",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 0.555555556,
+        "perturbpfn-20261115-method-ppcor": 0.6
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-869d5d33f887e8fa07d8",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-75a2cd0114fad6dcb6ee"
+       },
+       "higher": "perturbpfn-20261115-method-ppcor"
+      },
+      {
+       "protocol": "acquired-protocol-19f8c76e99a986094a6f",
+       "dataset": "acquired-dataset-52841d9a4fb051470230",
+       "metric": "auprc-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.617434265,
+        "perturbpfn-20261115-method-ppcor": 1.750816384
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-3e9424399e8f5214f11a",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-f7913e727614878aceee"
+       },
+       "higher": "perturbpfn-20261115-method-ppcor"
+      },
+      {
+       "protocol": "acquired-protocol-19f8c76e99a986094a6f",
+       "dataset": "acquired-dataset-52841d9a4fb051470230",
+       "metric": "beeline-stability",
+       "unit": "fraction",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 0.7,
+        "perturbpfn-20261115-method-ppcor": 0.718181818
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-7f5d8fee44669d26a406",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-202d9ad07d7a6cdff2b7"
+       },
+       "higher": "perturbpfn-20261115-method-ppcor"
+      },
+      {
+       "protocol": "acquired-protocol-1b09d04bdd84c0554bd1",
+       "dataset": "acquired-dataset-b08e0891e8da19eed07a",
+       "metric": "auprc-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.684396044,
+        "perturbpfn-20261115-method-ppcor": 1.558035714
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-4efbbb195c58ec961a99",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-cdcba73cd6d347153fb5"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-1b09d04bdd84c0554bd1",
+       "dataset": "acquired-dataset-b08e0891e8da19eed07a",
+       "metric": "beeline-stability",
+       "unit": "fraction",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 0.714285714,
+        "perturbpfn-20261115-method-ppcor": 0.5
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-70bdc946e8cb953e6771",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-0a1a1db90e2be86c65dd"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      }
+     ]
+    },
+    {
+     "key": "source:acquired-source-31344fb7e5e8ae6b9666",
+     "role": "consensus",
+     "verdict": "perturbpfn-20261115-method-grnboost2",
+     "configurations": {
+      "perturbpfn-20261115-method-grnboost2": "acquired-configuration-9ef0d0bed99b8227586a",
+      "perturbpfn-20261115-method-ppcor": "acquired-configuration-7b1b949b9fc16f608074"
+     },
+     "source_ids": [
+      "acquired-source-31344fb7e5e8ae6b9666"
+     ],
+     "higher": {
+      "perturbpfn-20261115-method-grnboost2": 37,
+      "perturbpfn-20261115-method-ppcor": 6
+     },
+     "ties": 1,
+     "gap": null,
+     "comparisons_total": 44,
+     "comparisons": [
+      {
+       "protocol": "acquired-protocol-024f47659eb7e75f56dc",
+       "dataset": "acquired-dataset-5da9375e8c9626efb795",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.05,
+        "perturbpfn-20261115-method-ppcor": 1.02
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-bd9b0e09b9ab71e773ed",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-4c5bf4bd4db845f3977b"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-1227fd691dca8a3aa41d",
+       "dataset": "acquired-dataset-f123a29ec27fb4121b9b",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 2.72,
+        "perturbpfn-20261115-method-ppcor": 1.17
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-61fee9399eff42544a03",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-70e8e9fbac4d8c932600"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-174f1a5acdc3c13db7b2",
+       "dataset": "acquired-dataset-5da9375e8c9626efb795",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.26,
+        "perturbpfn-20261115-method-ppcor": 1.04
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-18ed1534b735201ba1ae",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-d093239204d33de5edf0"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-2a8b0faaeabb2b42f8fb",
+       "dataset": "acquired-dataset-505358fce8593f7e41e4",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 2.82,
+        "perturbpfn-20261115-method-ppcor": 0.98
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-9918261007ff14fd060b",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-f193bee8f014def29657"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-30ca92be5250d3347718",
+       "dataset": "acquired-dataset-65ec1a2e5ff66c7e38c6",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 0.93,
+        "perturbpfn-20261115-method-ppcor": 1.14
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-2a5a8a112ba117c8a750",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-a5d349c05ee73d9e6019"
+       },
+       "higher": "perturbpfn-20261115-method-ppcor"
+      },
+      {
+       "protocol": "acquired-protocol-34109c3e92506dce8489",
+       "dataset": "acquired-dataset-505358fce8593f7e41e4",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.05,
+        "perturbpfn-20261115-method-ppcor": 0.98
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-c98914fa32988dbc9799",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-98bb559c0e4135ba8fab"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      }
+     ]
+    },
+    {
+     "key": "source:acquired-source-3156602fda847ae943b4",
+     "role": "consensus",
+     "verdict": "perturbpfn-20261115-method-grnboost2",
+     "configurations": {
+      "perturbpfn-20261115-method-grnboost2": "acquired-configuration-0c21015ca18f77aa85cf",
+      "perturbpfn-20261115-method-ppcor": "acquired-configuration-4bcb697cf9c276193491"
+     },
+     "source_ids": [
+      "acquired-source-3156602fda847ae943b4"
+     ],
+     "higher": {
+      "perturbpfn-20261115-method-grnboost2": 10,
+      "perturbpfn-20261115-method-ppcor": 2
+     },
+     "ties": 3,
+     "gap": null,
+     "comparisons_total": 15,
+     "comparisons": [
+      {
+       "protocol": "acquired-protocol-25210daa0dccd840d2fb",
+       "dataset": "acquired-dataset-8f5136850c1e5540ec38",
+       "metric": "auprc-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.258403675,
+        "perturbpfn-20261115-method-ppcor": 1.374030802
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-5eb2a91c76e29cbbe8b2",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-6edf31ec515f1175c77b"
+       },
+       "higher": "perturbpfn-20261115-method-ppcor"
+      },
+      {
+       "protocol": "acquired-protocol-25210daa0dccd840d2fb",
+       "dataset": "acquired-dataset-8f5136850c1e5540ec38",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.450657895,
+        "perturbpfn-20261115-method-ppcor": 1.421052632
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-80782252e5e6977f3440",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-75abc530c0fca6119850"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-25210daa0dccd840d2fb",
+       "dataset": "acquired-dataset-8f5136850c1e5540ec38",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": "activating edges only",
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 1.967930029,
+        "perturbpfn-20261115-method-ppcor": 2.099125364
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-7b3fdb1ef5e92ac633d5",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-e18aab95c6fa84e63e07"
+       },
+       "higher": "perturbpfn-20261115-method-ppcor"
+      },
+      {
+       "protocol": "acquired-protocol-25210daa0dccd840d2fb",
+       "dataset": "acquired-dataset-8f5136850c1e5540ec38",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": "inhibitory edges only",
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 0.401920439,
+        "perturbpfn-20261115-method-ppcor": 0.200960219
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-e3d6fc5c828a895c4c17",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-026f1fa2f8de0e037e77"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-37b5599b7d976211e8c1",
+       "dataset": "acquired-dataset-caf90389169ff966e573",
+       "metric": "auprc-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 2.681333463,
+        "perturbpfn-20261115-method-ppcor": 2.142671976
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-a0cdbbe216e099f97e41",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-003e3111e0ee184b0278"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      },
+      {
+       "protocol": "acquired-protocol-37b5599b7d976211e8c1",
+       "dataset": "acquired-dataset-caf90389169ff966e573",
+       "metric": "early-precision-ratio",
+       "unit": "unitless",
+       "qualifier": null,
+       "split": null,
+       "values": {
+        "perturbpfn-20261115-method-grnboost2": 2.737777778,
+        "perturbpfn-20261115-method-ppcor": 1.75
+       },
+       "results": {
+        "perturbpfn-20261115-method-grnboost2": "acquired-result-4d0caa4e6c6070389642",
+        "perturbpfn-20261115-method-ppcor": "acquired-result-4267fe4e96025c2a3d49"
+       },
+       "higher": "perturbpfn-20261115-method-grnboost2"
+      }
+     ]
+    }
+   ],
+   "actions": []
+  },
+  {
+   "id": "discrepancy-44e5640b79522964",
+   "resolved": false,
+   "rule": "ordering-reversal",
+   "label": "PROVEAN and SIFT: Brandes et al. 2023 Supplementary Table 2: full benchmark evaluations of ESM1b and all other methods reverses the order",
+   "summary": "Brandes et al. 2023 Supplementary Table 2: full benchmark evaluations of ESM1b and all other methods ranks SIFT above PROVEAN in 3 of 3 comparisons; 3 of 3 other studies rank PROVEAN above SIFT.",
+   "severity": "medium",
+   "scope": "same-task",
+   "identity_basis": "unreviewed",
+   "review_state": "open",
+   "listing": "public",
+   "variant_mismatch": false,
+   "unlinked_protocols": [
+    "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-default",
+    "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-median",
+    "somatic-oncogenicity-20261009-protocol-chen2020-viability-default",
+    "somatic-oncogenicity-20261009-protocol-chen2020-viability-median",
+    "somatic-oncogenicity-20261009-protocol-lee2026-all",
+    "somatic-oncogenicity-20261009-protocol-lee2026-oncogene",
+    "somatic-oncogenicity-20261009-protocol-lee2026-tsg"
+   ],
+   "review_claim": null,
+   "settled": false,
+   "resolution": {},
+   "systems": [
+    "somatic-oncogenicity-20261009-method-provean",
+    "somatic-oncogenicity-20261009-method-sift"
+   ],
+   "consensus_higher": "somatic-oncogenicity-20261009-method-provean",
+   "reference_system": null,
+   "outlier_sources": [
+    "gfm-guides-20261014-esm1b-source-brandes2023-supplementary-table-2"
+   ],
+   "consensus_sources": [
+    "somatic-oncogenicity-20261009-source-chen2020",
+    "somatic-oncogenicity-20261009-source-chen2020-additional-file-10",
+    "somatic-oncogenicity-20261009-source-chen2020-additional-file-21",
+    "somatic-oncogenicity-20261009-source-chen2020-additional-file-22",
+    "somatic-oncogenicity-20261009-source-chen2020-additional-file-9",
+    "somatic-oncogenicity-20261009-source-lee2026",
+    "somatic-oncogenicity-20261009-source-lee2026-oncocal-tool-performance",
+    "vep-lit-20261014-source-livesey2025-article",
+    "vep-lit-20261014-source-livesey2025-supplementary-2"
+   ],
+   "party_sources": [],
+   "party_results": [],
+   "numbers": {
+    "outlier_comparisons": 3,
+    "outlier_reversals": 3,
+    "consensus_comparisons": 31,
+    "consensus_agreements": 30,
+    "consensus_studies": 3,
+    "consensus_study_agreements": 3
+   },
+   "previous_ids": [],
+   "key": {
+    "rule": "ordering-reversal",
+    "systems": [
+     "somatic-oncogenicity-20261009-method-provean",
+     "somatic-oncogenicity-20261009-method-sift"
+    ],
+    "anchor": null,
+    "metric": null,
+    "outlier_study": "doi:10.1038/s41588-023-01465-0"
+   },
+   "studies": [
+    {
+     "key": "doi:10.1038/s41588-023-01465-0",
+     "role": "outlier",
+     "verdict": "somatic-oncogenicity-20261009-method-sift",
+     "configurations": {
+      "somatic-oncogenicity-20261009-method-provean": "gfm-guides-20261014-esm1b-config-provean",
+      "somatic-oncogenicity-20261009-method-sift": "gfm-guides-20261014-esm1b-config-sift"
+     },
+     "source_ids": [
+      "gfm-guides-20261014-esm1b-source-brandes2023-supplementary-table-2"
+     ],
+     "higher": {
+      "somatic-oncogenicity-20261009-method-provean": 0,
+      "somatic-oncogenicity-20261009-method-sift": 3
+     },
+     "ties": 1,
+     "gap": null,
+     "comparisons_total": 4,
+     "comparisons": [
+      {
+       "protocol": "gfm-guides-20261014-esm1b-protocol-clinvar-all-19-methods",
+       "dataset": "gfm-guides-20261014-esm1b-data-clinvar-missense-eve-portal",
+       "metric": "auprc",
+       "unit": "unitless",
+       "qualifier": "balanced PRC-AUC: mean over 100 random downsamples to equal pathogenic and benign counts (80% of the minority class); zero-shot",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.844189980297173,
+        "somatic-oncogenicity-20261009-method-sift": 0.872494936963507
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "gfm-guides-20261014-esm1b-result-clinvar-all-19-provean-auprc",
+        "somatic-oncogenicity-20261009-method-sift": "gfm-guides-20261014-esm1b-result-clinvar-all-19-sift-auprc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-sift"
+      },
+      {
+       "protocol": "gfm-guides-20261014-esm1b-protocol-clinvar-all-19-methods",
+       "dataset": "gfm-guides-20261014-esm1b-data-clinvar-missense-eve-portal",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "global ROC-AUC over all variants; zero-shot",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.864230578647904,
+        "somatic-oncogenicity-20261009-method-sift": 0.874278041098027
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "gfm-guides-20261014-esm1b-result-clinvar-all-19-provean-auroc",
+        "somatic-oncogenicity-20261009-method-sift": "gfm-guides-20261014-esm1b-result-clinvar-all-19-sift-auroc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-sift"
+      },
+      {
+       "protocol": "gfm-guides-20261014-esm1b-protocol-hgmd-all-19-methods",
+       "dataset": "gfm-guides-20261014-esm1b-data-hgmd-dm-vs-gnomad-common-missense",
+       "metric": "auprc",
+       "unit": "unitless",
+       "qualifier": "balanced PRC-AUC: mean over 100 random downsamples to equal pathogenic and benign counts (80% of the minority class); zero-shot",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.864413026195758,
+        "somatic-oncogenicity-20261009-method-sift": 0.882277350241844
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "gfm-guides-20261014-esm1b-result-hgmd-all-19-provean-auprc",
+        "somatic-oncogenicity-20261009-method-sift": "gfm-guides-20261014-esm1b-result-hgmd-all-19-sift-auprc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-sift"
+      },
+      {
+       "protocol": "gfm-guides-20261014-esm1b-protocol-hgmd-all-19-methods",
+       "dataset": "gfm-guides-20261014-esm1b-data-hgmd-dm-vs-gnomad-common-missense",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "global ROC-AUC over all variants; zero-shot",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.879141743938642,
+        "somatic-oncogenicity-20261009-method-sift": 0.883297007138655
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "gfm-guides-20261014-esm1b-result-hgmd-all-19-provean-auroc",
+        "somatic-oncogenicity-20261009-method-sift": "gfm-guides-20261014-esm1b-result-hgmd-all-19-sift-auroc"
+       },
+       "higher": null
+      }
+     ]
+    },
+    {
+     "key": "doi:10.1186/s13059-020-01954-z",
+     "role": "consensus",
+     "verdict": "somatic-oncogenicity-20261009-method-provean",
+     "configurations": {
+      "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-config-chen2020-provean",
+      "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-config-chen2020-sift"
+     },
+     "source_ids": [
+      "somatic-oncogenicity-20261009-source-chen2020",
+      "somatic-oncogenicity-20261009-source-chen2020-additional-file-10",
+      "somatic-oncogenicity-20261009-source-chen2020-additional-file-21",
+      "somatic-oncogenicity-20261009-source-chen2020-additional-file-22",
+      "somatic-oncogenicity-20261009-source-chen2020-additional-file-9"
+     ],
+     "higher": {
+      "somatic-oncogenicity-20261009-method-provean": 17,
+      "somatic-oncogenicity-20261009-method-sift": 1
+     },
+     "ties": 2,
+     "gap": null,
+     "comparisons_total": 20,
+     "comparisons": [
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-default",
+       "dataset": "somatic-oncogenicity-20261009-data-chen2020-oncokb",
+       "metric": "accuracy",
+       "unit": "fraction",
+       "qualifier": "OncoKB benchmark (positive set not stated), default categorical calls",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.67,
+        "somatic-oncogenicity-20261009-method-sift": 0.61
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-chen2020-provean-oncokb-default-accuracy",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-chen2020-sift-oncokb-default-accuracy"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-default",
+       "dataset": "somatic-oncogenicity-20261009-data-chen2020-oncokb",
+       "metric": "negative-predictive-value",
+       "unit": "fraction",
+       "qualifier": "OncoKB benchmark (positive set not stated), default categorical calls",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.8,
+        "somatic-oncogenicity-20261009-method-sift": 0.75
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-chen2020-provean-oncokb-default-negative-predictive-value",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-chen2020-sift-oncokb-default-negative-predictive-value"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-default",
+       "dataset": "somatic-oncogenicity-20261009-data-chen2020-oncokb",
+       "metric": "precision",
+       "unit": "fraction",
+       "qualifier": "OncoKB benchmark (positive set not stated), default categorical calls",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.61,
+        "somatic-oncogenicity-20261009-method-sift": 0.57
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-chen2020-provean-oncokb-default-precision",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-chen2020-sift-oncokb-default-precision"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-default",
+       "dataset": "somatic-oncogenicity-20261009-data-chen2020-oncokb",
+       "metric": "recall",
+       "unit": "fraction",
+       "qualifier": "OncoKB benchmark (positive set not stated), default categorical calls",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.89,
+        "somatic-oncogenicity-20261009-method-sift": 0.89
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-chen2020-provean-oncokb-default-recall",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-chen2020-sift-oncokb-default-recall"
+       },
+       "higher": null
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-default",
+       "dataset": "somatic-oncogenicity-20261009-data-chen2020-oncokb",
+       "metric": "specificity",
+       "unit": "fraction",
+       "qualifier": "OncoKB benchmark (positive set not stated), default categorical calls",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.45,
+        "somatic-oncogenicity-20261009-method-sift": 0.33
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-chen2020-provean-oncokb-default-specificity",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-chen2020-sift-oncokb-default-specificity"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-chen2020-oncokb-median",
+       "dataset": "somatic-oncogenicity-20261009-data-chen2020-oncokb",
+       "metric": "accuracy",
+       "unit": "fraction",
+       "qualifier": "OncoKB benchmark (positive set not stated), median-score threshold",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.69,
+        "somatic-oncogenicity-20261009-method-sift": 0.61
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-chen2020-provean-oncokb-median-accuracy",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-chen2020-sift-oncokb-median-accuracy"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      }
+     ]
+    },
+    {
+     "key": "doi:10.1186/s13059-025-03575-w",
+     "role": "consensus",
+     "verdict": "somatic-oncogenicity-20261009-method-provean",
+     "configurations": {
+      "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-config-livesey2025-provean",
+      "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-config-livesey2025-sift"
+     },
+     "source_ids": [
+      "vep-lit-20261014-source-livesey2025-article",
+      "vep-lit-20261014-source-livesey2025-supplementary-2"
+     ],
+     "higher": {
+      "somatic-oncogenicity-20261009-method-provean": 7,
+      "somatic-oncogenicity-20261009-method-sift": 0
+     },
+     "ties": 0,
+     "gap": null,
+     "comparisons_total": 7,
+     "comparisons": [
+      {
+       "protocol": "vep-lit-20261014-protocol-livesey2025-clinical-auroc",
+       "dataset": "vep-lit-20261014-dataset-livesey2025-clinvar-gnomad-819",
+       "metric": "pairwise-win-rate",
+       "unit": "percent",
+       "qualifier": "average pairwise win rate against all other VEPs, per-protein AUROC on shared variants, ClinVar P/LP versus gnomAD v4.1 missense, proteins with at least 10 of each",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 48.6188302944947,
+        "somatic-oncogenicity-20261009-method-sift": 34.7606747697789
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-result-livesey2025-clinical-auroc-provean-rank-score",
+        "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-result-livesey2025-clinical-auroc-sift-rank-score"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "vep-lit-20261014-protocol-livesey2025-dms-all",
+       "dataset": "vep-lit-20261014-dataset-livesey2025-dms-36",
+       "metric": "pairwise-win-rate",
+       "unit": "percent",
+       "qualifier": "average pairwise win rate against all other VEPs, |Spearman| with DMS on shared variants, 36 human DMS sets",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 48.0733841,
+        "somatic-oncogenicity-20261009-method-sift": 39.26605554
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-result-livesey2025-dms-all-provean-rank-score",
+        "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-result-livesey2025-dms-all-sift-rank-score"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "vep-lit-20261014-protocol-livesey2025-dms-all",
+       "dataset": "vep-lit-20261014-dataset-livesey2025-dms-36",
+       "metric": "pairwise-win-rate",
+       "unit": "percent",
+       "qualifier": "average pairwise win rate against the five top-ranked VEPs (column top_5_winrate; the five are not listed in the table), |Spearman| with DMS on shared variants, 36 human DMS sets",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 5.46743295,
+        "somatic-oncogenicity-20261009-method-sift": 1.222222222
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-result-livesey2025-dms-all-provean-top-5-winrate",
+        "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-result-livesey2025-dms-all-sift-top-5-winrate"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "vep-lit-20261014-protocol-livesey2025-dms-direct",
+       "dataset": "vep-lit-20261014-dataset-livesey2025-dms-36",
+       "metric": "pairwise-win-rate",
+       "unit": "percent",
+       "qualifier": "average pairwise win rate against all other VEPs, |Spearman| with DMS on shared variants, direct DMS assays only",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 50.961232054982,
+        "somatic-oncogenicity-20261009-method-sift": 39.9383255633255
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-result-livesey2025-dms-direct-provean-rank-score-direct",
+        "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-result-livesey2025-dms-direct-sift-rank-score-direct"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "vep-lit-20261014-protocol-livesey2025-dms-indirect",
+       "dataset": "vep-lit-20261014-dataset-livesey2025-dms-36",
+       "metric": "pairwise-win-rate",
+       "unit": "percent",
+       "qualifier": "average pairwise win rate against all other VEPs, |Spearman| with DMS on shared variants, indirect DMS assays only",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 45.9729454295775,
+        "somatic-oncogenicity-20261009-method-sift": 38.7592306026661
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-result-livesey2025-dms-indirect-provean-rank-score-indirect",
+        "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-result-livesey2025-dms-indirect-sift-rank-score-indirect"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "vep-lit-20261014-protocol-livesey2025-dms-snv",
+       "dataset": "vep-lit-20261014-dataset-livesey2025-dms-36",
+       "metric": "pairwise-win-rate",
+       "unit": "percent",
+       "qualifier": "average pairwise win rate against all other VEPs, |Spearman| with DMS on shared variants, SNV-accessible substitutions only",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 48.2823238349979,
+        "somatic-oncogenicity-20261009-method-sift": 40.3410159132434
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-result-livesey2025-dms-snv-provean-rank-score",
+        "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-result-livesey2025-dms-snv-sift-rank-score"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      }
+     ]
+    },
+    {
+     "key": "doi:10.64898/2026.07.16.739080",
+     "role": "consensus",
+     "verdict": "somatic-oncogenicity-20261009-method-provean",
+     "configurations": {
+      "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-config-lee2026-provean",
+      "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-config-lee2026-sift"
+     },
+     "source_ids": [
+      "somatic-oncogenicity-20261009-source-lee2026",
+      "somatic-oncogenicity-20261009-source-lee2026-oncocal-tool-performance"
+     ],
+     "higher": {
+      "somatic-oncogenicity-20261009-method-provean": 6,
+      "somatic-oncogenicity-20261009-method-sift": 0
+     },
+     "ties": 0,
+     "gap": null,
+     "comparisons_total": 6,
+     "comparisons": [
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-lee2026-all",
+       "dataset": "somatic-oncogenicity-20261009-data-lee2026-cgc-missense",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "CGC missense, all genes",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.8185524745702887,
+        "somatic-oncogenicity-20261009-method-sift": 0.7783889349471413
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-lee2026-provean-all-auroc",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-lee2026-sift-all-auroc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-lee2026-all",
+       "dataset": "somatic-oncogenicity-20261009-data-lee2026-cgc-missense",
+       "metric": "average-precision",
+       "unit": "unitless",
+       "qualifier": "CGC missense, all genes",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.5876658555631475,
+        "somatic-oncogenicity-20261009-method-sift": 0.4421438544842223
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-lee2026-provean-all-auprc",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-lee2026-sift-all-auprc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-lee2026-oncogene",
+       "dataset": "somatic-oncogenicity-20261009-data-lee2026-cgc-missense",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "CGC missense, oncogenes (gain of function)",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.8128212819407211,
+        "somatic-oncogenicity-20261009-method-sift": 0.7640829694713254
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-lee2026-provean-oncogene-auroc",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-lee2026-sift-oncogene-auroc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-lee2026-oncogene",
+       "dataset": "somatic-oncogenicity-20261009-data-lee2026-cgc-missense",
+       "metric": "average-precision",
+       "unit": "unitless",
+       "qualifier": "CGC missense, oncogenes (gain of function)",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.6457049369408885,
+        "somatic-oncogenicity-20261009-method-sift": 0.5199893513025153
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-lee2026-provean-oncogene-auprc",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-lee2026-sift-oncogene-auprc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-lee2026-tsg",
+       "dataset": "somatic-oncogenicity-20261009-data-lee2026-cgc-missense",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "CGC missense, tumour suppressors (loss of function)",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.8589171100036134,
+        "somatic-oncogenicity-20261009-method-sift": 0.8166938439507011
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-lee2026-provean-tsg-auroc",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-lee2026-sift-tsg-auroc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "somatic-oncogenicity-20261009-protocol-lee2026-tsg",
+       "dataset": "somatic-oncogenicity-20261009-data-lee2026-cgc-missense",
+       "metric": "average-precision",
+       "unit": "unitless",
+       "qualifier": "CGC missense, tumour suppressors (loss of function)",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.5478132768916758,
+        "somatic-oncogenicity-20261009-method-sift": 0.38339650145213555
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "somatic-oncogenicity-20261009-result-lee2026-provean-tsg-auprc",
+        "somatic-oncogenicity-20261009-method-sift": "somatic-oncogenicity-20261009-result-lee2026-sift-tsg-auprc"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      }
+     ]
+    },
+    {
+     "key": "doi:10.1038/s41436-021-01265-z",
+     "role": "consensus",
+     "verdict": "split",
+     "configurations": {
+      "somatic-oncogenicity-20261009-method-provean": "brca-20261009-config-cubuk2021-provean",
+      "somatic-oncogenicity-20261009-method-sift": "brca-20261009-config-cubuk2021-sift"
+     },
+     "source_ids": [
+      "brca-20261009-source-cubuk2021",
+      "brca-20261009-source-cubuk2021-supplementary-tables"
+     ],
+     "higher": {
+      "somatic-oncogenicity-20261009-method-provean": 2,
+      "somatic-oncogenicity-20261009-method-sift": 3
+     },
+     "ties": 0,
+     "gap": null,
+     "comparisons_total": 5,
+     "comparisons": [
+      {
+       "protocol": "brca-20261009-protocol-cubuk2021-brca1",
+       "dataset": "brca-20261009-data-cubuk2021-brca1-functional",
+       "metric": "benignity-likelihood-ratio",
+       "unit": "unitless",
+       "qualifier": "Source 'negative likelihood ratio' (TNR/FNR): likelihood ratio for benignity of a tolerated call, BRCA1 functional truth set",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 1.0,
+        "somatic-oncogenicity-20261009-method-sift": 23.9
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "brca-20261009-result-cubuk2021-provean-brca1-blr",
+        "somatic-oncogenicity-20261009-method-sift": "brca-20261009-result-cubuk2021-sift-brca1-blr"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-sift"
+      },
+      {
+       "protocol": "brca-20261009-protocol-cubuk2021-brca1",
+       "dataset": "brca-20261009-data-cubuk2021-brca1-functional",
+       "metric": "false-negative-count",
+       "unit": "count",
+       "qualifier": "Functionally deleterious BRCA1 variants called tolerated",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 366.0,
+        "somatic-oncogenicity-20261009-method-sift": 3.0
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "brca-20261009-result-cubuk2021-provean-brca1-false-negatives",
+        "somatic-oncogenicity-20261009-method-sift": "brca-20261009-result-cubuk2021-sift-brca1-false-negatives"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-sift"
+      },
+      {
+       "protocol": "brca-20261009-protocol-cubuk2021-brca1",
+       "dataset": "brca-20261009-data-cubuk2021-brca1-functional",
+       "metric": "likelihood-ratio",
+       "unit": "unitless",
+       "qualifier": "Positive likelihood ratio of a deleterious call (TPR/FPR), BRCA1 functional truth set",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 6.8,
+        "somatic-oncogenicity-20261009-method-sift": 1.23
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "brca-20261009-result-cubuk2021-provean-brca1-plr",
+        "somatic-oncogenicity-20261009-method-sift": "brca-20261009-result-cubuk2021-sift-brca1-plr"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      },
+      {
+       "protocol": "brca-20261009-protocol-cubuk2021-brca2",
+       "dataset": "brca-20261009-data-cubuk2021-brca2-functional",
+       "metric": "false-negative-count",
+       "unit": "count",
+       "qualifier": "Functionally deleterious BRCA2 variants called tolerated",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 52.0,
+        "somatic-oncogenicity-20261009-method-sift": 0.0
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "brca-20261009-result-cubuk2021-provean-brca2-false-negatives",
+        "somatic-oncogenicity-20261009-method-sift": "brca-20261009-result-cubuk2021-sift-brca2-false-negatives"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-sift"
+      },
+      {
+       "protocol": "brca-20261009-protocol-cubuk2021-brca2",
+       "dataset": "brca-20261009-data-cubuk2021-brca2-functional",
+       "metric": "likelihood-ratio",
+       "unit": "unitless",
+       "qualifier": "Positive likelihood ratio of a deleterious call (TPR/FPR), BRCA2 functional truth set",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 3.84,
+        "somatic-oncogenicity-20261009-method-sift": 1.24
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "brca-20261009-result-cubuk2021-provean-brca2-plr",
+        "somatic-oncogenicity-20261009-method-sift": "brca-20261009-result-cubuk2021-sift-brca2-plr"
+       },
+       "higher": "somatic-oncogenicity-20261009-method-provean"
+      }
+     ]
+    },
+    {
+     "key": "doi:10.1101/2023.12.07.570727",
+     "role": "consensus",
+     "verdict": null,
+     "configurations": {
+      "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-config-proteingym-clinical-provean",
+      "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-config-proteingym-clinical-sift"
+     },
+     "source_ids": [
+      "evidence-expansion-proteingym-a3b08cc4",
+      "proteingym-2023",
+      "uc20260930-source-proteingym-amfr-spearman",
+      "vep-lit-20261014-source-proteingym-clinical-supervised-substitutions-auc-summary-144fe22",
+      "vep-lit-20261014-source-proteingym-clinical-zero-shot-indels-auc-summary-144fe22",
+      "vep-lit-20261014-source-proteingym-clinical-zero-shot-substitutions-auc-summary-144fe22",
+      "vep-lit-20261014-source-proteingym-dms-substitutions-spearman-summary-144fe22"
+     ],
+     "higher": {
+      "somatic-oncogenicity-20261009-method-provean": 0,
+      "somatic-oncogenicity-20261009-method-sift": 0
+     },
+     "ties": 1,
+     "gap": null,
+     "comparisons_total": 1,
+     "comparisons": [
+      {
+       "protocol": "vep-lit-20261014-protocol-proteingym-clinical-zero-shot-substitutions-auc-144fe22",
+       "dataset": "vep-lit-20261014-data-proteingym-clinical-substitutions-144fe22",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "ProteinGym clinical substitutions, zero-shot, Average_AUC over proteins",
+       "split": null,
+       "values": {
+        "somatic-oncogenicity-20261009-method-provean": 0.886,
+        "somatic-oncogenicity-20261009-method-sift": 0.878
+       },
+       "results": {
+        "somatic-oncogenicity-20261009-method-provean": "vep-lit-20261014-result-pg-czs-proteingym-clinical-provean-average-auc",
+        "somatic-oncogenicity-20261009-method-sift": "vep-lit-20261014-result-pg-czs-proteingym-clinical-sift-average-auc"
+       },
+       "higher": null
+      }
+     ]
+    }
+   ],
+   "actions": []
+  },
+  {
+   "id": "discrepancy-befd4edf81887f7d",
+   "resolved": false,
+   "rule": "two-study-conflict",
+   "label": "RNAErnie and Evo: Zero-shot benchmarking of RNA language models in structural, functional, and evolutionary learning and RNAGym fitness leaderboard (v0.1.1), leaderboard/fitness/README.md disagree",
+   "summary": "Zero-shot benchmarking of RNA language models in structural, functional, and evolutionary learning ranks Evo above RNAErnie in 6 of 6 comparisons; RNAGym fitness leaderboard (v0.1.1), leaderboard/fitness/README.md ranks RNAErnie above Evo in 4 of 4 comparisons. No other study gives a verdict, so neither is the outlier.",
+   "severity": "low",
+   "scope": "same-task",
+   "identity_basis": "unreviewed",
+   "review_state": "open",
+   "listing": "public",
+   "variant_mismatch": false,
+   "unlinked_protocols": [],
+   "review_claim": null,
+   "settled": false,
+   "resolution": {},
+   "systems": [
+    "gfm2-20261011-you2026-model-rnaernie",
+    "lit-genomics-20261011-geneb-model-evo"
+   ],
+   "consensus_higher": null,
+   "reference_system": null,
+   "outlier_sources": [],
+   "consensus_sources": [],
+   "party_sources": [
+    "lit-rna-20261011-rnagym-source-leaderboard-v0-1-1",
+    "lit-rna-20261011-rnalm-zeroshot-source-wang2026",
+    "lit-rna-20261011-rnalm-zeroshot-source-wang2026-supplement"
+   ],
+   "party_results": [
+    "lit-rna-20261011-rnagym-result-evo-1-5-aptamer",
+    "lit-rna-20261011-rnagym-result-evo-1-5-macro",
+    "lit-rna-20261011-rnagym-result-evo-1-5-ribozyme",
+    "lit-rna-20261011-rnagym-result-evo-1-5-trna",
+    "lit-rna-20261011-rnagym-result-rna-ernie-aptamer",
+    "lit-rna-20261011-rnagym-result-rna-ernie-macro",
+    "lit-rna-20261011-rnagym-result-rna-ernie-ribozyme",
+    "lit-rna-20261011-rnagym-result-rna-ernie-trna",
+    "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-auc-mean",
+    "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-auc-median",
+    "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-mcc-mean",
+    "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-mcc-median",
+    "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-sr-mean",
+    "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-sr-median",
+    "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-auc-mean",
+    "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-auc-median",
+    "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-mcc-mean",
+    "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-mcc-median",
+    "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-sr-mean",
+    "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-sr-median"
+   ],
+   "numbers": {
+    "studies": 2
+   },
+   "previous_ids": [],
+   "key": {
+    "rule": "two-study-conflict",
+    "systems": [
+     "gfm2-20261011-you2026-model-rnaernie",
+     "lit-genomics-20261011-geneb-model-evo"
+    ],
+    "anchor": null,
+    "metric": null,
+    "studies": [
+     "doi:10.1093/bib/bbag098",
+     "repository:https://github.com/markslab-daslab/rnagym"
+    ]
+   },
+   "studies": [
+    {
+     "key": "doi:10.1093/bib/bbag098",
+     "role": "party",
+     "verdict": "lit-genomics-20261011-geneb-model-evo",
+     "configurations": {
+      "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnalm-zeroshot-config-rnaernie-wang2026",
+      "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnalm-zeroshot-config-evo1-5-8k-base-wang2026"
+     },
+     "source_ids": [
+      "lit-rna-20261011-rnalm-zeroshot-source-wang2026",
+      "lit-rna-20261011-rnalm-zeroshot-source-wang2026-supplement"
+     ],
+     "higher": {
+      "gfm2-20261011-you2026-model-rnaernie": 0,
+      "lit-genomics-20261011-geneb-model-evo": 6
+     },
+     "ties": 0,
+     "gap": null,
+     "comparisons_total": 6,
+     "comparisons": [
+      {
+       "protocol": "lit-rna-20261011-rnalm-zeroshot-protocol-t11-auc-mean",
+       "dataset": "lit-rna-20261011-rnalm-zeroshot-data-rnagym-ncrna31",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "PLL-D; mean over assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.551,
+        "lit-genomics-20261011-geneb-model-evo": 0.588
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-auc-mean",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-auc-mean"
+       },
+       "higher": "lit-genomics-20261011-geneb-model-evo"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnalm-zeroshot-protocol-t11-auc-median",
+       "dataset": "lit-rna-20261011-rnalm-zeroshot-data-rnagym-ncrna31",
+       "metric": "auroc",
+       "unit": "unitless",
+       "qualifier": "PLL-D; median over assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.541,
+        "lit-genomics-20261011-geneb-model-evo": 0.586
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-auc-median",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-auc-median"
+       },
+       "higher": "lit-genomics-20261011-geneb-model-evo"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnalm-zeroshot-protocol-t11-mcc-mean",
+       "dataset": "lit-rna-20261011-rnalm-zeroshot-data-rnagym-ncrna31",
+       "metric": "matthews-correlation-coefficient",
+       "unit": "unitless",
+       "qualifier": "PLL-D; mean over assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.076,
+        "lit-genomics-20261011-geneb-model-evo": 0.132
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-mcc-mean",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-mcc-mean"
+       },
+       "higher": "lit-genomics-20261011-geneb-model-evo"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnalm-zeroshot-protocol-t11-mcc-median",
+       "dataset": "lit-rna-20261011-rnalm-zeroshot-data-rnagym-ncrna31",
+       "metric": "matthews-correlation-coefficient",
+       "unit": "unitless",
+       "qualifier": "PLL-D; median over assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.051,
+        "lit-genomics-20261011-geneb-model-evo": 0.13
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-mcc-median",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-mcc-median"
+       },
+       "higher": "lit-genomics-20261011-geneb-model-evo"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnalm-zeroshot-protocol-t11-sr-mean",
+       "dataset": "lit-rna-20261011-rnalm-zeroshot-data-rnagym-ncrna31",
+       "metric": "absolute-spearman-correlation",
+       "unit": "unitless",
+       "qualifier": "PLL-D; mean over assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.1,
+        "lit-genomics-20261011-geneb-model-evo": 0.179
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-sr-mean",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-sr-mean"
+       },
+       "higher": "lit-genomics-20261011-geneb-model-evo"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnalm-zeroshot-protocol-t11-sr-median",
+       "dataset": "lit-rna-20261011-rnalm-zeroshot-data-rnagym-ncrna31",
+       "metric": "absolute-spearman-correlation",
+       "unit": "unitless",
+       "qualifier": "PLL-D; median over assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.081,
+        "lit-genomics-20261011-geneb-model-evo": 0.178
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnalm-zeroshot-result-rnaernie-default-t11-sr-median",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnalm-zeroshot-result-evo1-5-8k-base-t11-sr-median"
+       },
+       "higher": "lit-genomics-20261011-geneb-model-evo"
+      }
+     ]
+    },
+    {
+     "key": "repository:https://github.com/markslab-daslab/rnagym",
+     "role": "party",
+     "verdict": "gfm2-20261011-you2026-model-rnaernie",
+     "configurations": {
+      "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnagym-config-rna-ernie-rnagym-v0-1-1",
+      "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnagym-config-evo-1-5-rnagym-v0-1-1"
+     },
+     "source_ids": [
+      "lit-rna-20261011-rnagym-source-leaderboard-v0-1-1"
+     ],
+     "higher": {
+      "gfm2-20261011-you2026-model-rnaernie": 4,
+      "lit-genomics-20261011-geneb-model-evo": 0
+     },
+     "ties": 0,
+     "gap": null,
+     "comparisons_total": 4,
+     "comparisons": [
+      {
+       "protocol": "lit-rna-20261011-rnagym-protocol-signed-spearman-aptamer",
+       "dataset": "lit-rna-20261011-rnagym-data-aptamer",
+       "metric": "spearman-correlation",
+       "unit": "unitless",
+       "qualifier": "mean signed Spearman over the 2 Aptamer assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.0306,
+        "lit-genomics-20261011-geneb-model-evo": 0.0007
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnagym-result-rna-ernie-aptamer",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnagym-result-evo-1-5-aptamer"
+       },
+       "higher": "gfm2-20261011-you2026-model-rnaernie"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnagym-protocol-signed-spearman-macro",
+       "dataset": "lit-rna-20261011-rnagym-data-ncrna-31",
+       "metric": "spearman-correlation",
+       "unit": "unitless",
+       "qualifier": "macro-mean over 3 ncRNA categories (equal category weights)",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.1937,
+        "lit-genomics-20261011-geneb-model-evo": 0.1378
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnagym-result-rna-ernie-macro",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnagym-result-evo-1-5-macro"
+       },
+       "higher": "gfm2-20261011-you2026-model-rnaernie"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnagym-protocol-signed-spearman-ribozyme",
+       "dataset": "lit-rna-20261011-rnagym-data-ribozyme",
+       "metric": "spearman-correlation",
+       "unit": "unitless",
+       "qualifier": "mean signed Spearman over the 26 Ribozyme assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.1343,
+        "lit-genomics-20261011-geneb-model-evo": 0.0278
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnagym-result-rna-ernie-ribozyme",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnagym-result-evo-1-5-ribozyme"
+       },
+       "higher": "gfm2-20261011-you2026-model-rnaernie"
+      },
+      {
+       "protocol": "lit-rna-20261011-rnagym-protocol-signed-spearman-trna",
+       "dataset": "lit-rna-20261011-rnagym-data-trna",
+       "metric": "spearman-correlation",
+       "unit": "unitless",
+       "qualifier": "mean signed Spearman over the 3 tRNA assays",
+       "split": null,
+       "values": {
+        "gfm2-20261011-you2026-model-rnaernie": 0.4161,
+        "lit-genomics-20261011-geneb-model-evo": 0.385
+       },
+       "results": {
+        "gfm2-20261011-you2026-model-rnaernie": "lit-rna-20261011-rnagym-result-rna-ernie-trna",
+        "lit-genomics-20261011-geneb-model-evo": "lit-rna-20261011-rnagym-result-evo-1-5-trna"
+       },
+       "higher": "gfm2-20261011-you2026-model-rnaernie"
+      }
+     ]
+    }
+   ],
+   "actions": []
+  }
+ ]
+}

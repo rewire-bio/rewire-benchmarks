@@ -14,3 +14,6 @@ dist/
 .nextflow/
 .nextflow.log*
 work/
+
+# Dependencies of the scheduled agents (scripts/agents).
+node_modules/

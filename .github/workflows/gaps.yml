@@ -1,0 +1,111 @@
+name: Gap scanner
+# Weekly, reads the newest release of the benchmark data store and proposes verification runs and
+# benchmarks for tier 1 use cases, ranked by value per GPU-hour (#60). Proposals are issues here
+# labelled proposal and tier-1, at most five a week, filed as the rewire-bot app. It never starts a
+# run (rewire-bio/rdf-kg-mcp#6). Code: scripts/agents/gaps.mjs; prompt: agents/gaps.md;
+# docs/agents.md.
+#
+# The schedule reports only (job summary and artifact) until the repository variable GAPS_MODE is
+# live. Without the ANTHROPIC_API_KEY secret the run makes no model call and files proposals
+# without the "Why it matters" paragraph. The data store is GAPS_DATA_REPO when set, else the
+# DATA_REPO constant in the script; proposals go to this repository (github.repository).
+on:
+  schedule:
+    # Wednesdays 06:00 UTC. Clear of the data store's pipeline alert (07:17 daily), discovery
+    # (08:00 daily) and digest (Monday 06:30), and of this repository's recipe smoke checks (Monday 04:17).
+    - cron: "0 6 * * 3"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run: fixtures, no model or GitHub calls. report-only: real release, prints the proposals. live: files them."
+        type: choice
+        options: [dry-run, report-only, live]
+        default: report-only
+  pull_request:
+    paths:
+      - agents/gaps.md
+      - scripts/agents/**
+      - tests/agents-gaps*
+      - tests/agents-gaps-fixtures/**
+      - .github/workflows/gaps.yml
+permissions:
+  contents: read
+  issues: read
+concurrency:
+  group: gaps-${{ github.event_name == 'pull_request' && github.ref || 'weekly' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MODE: ${{ github.event_name == 'schedule' && (vars.GAPS_MODE || 'report-only') || github.event_name == 'pull_request' && 'dry-run' || inputs.mode }}
+      HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+      GAPS_DATA_REPO: ${{ vars.GAPS_DATA_REPO }}
+    steps:
+      - name: Refuse to run outside rewire-bio
+        run: |
+          if [ "${GITHUB_REPOSITORY%%/*}" != "rewire-bio" ]; then echo "::error::The gap scanner only runs in rewire-bio repositories."; exit 1; fi
+      # Proposals are filed as the rewire-bot app, on this repository only, with issues write and
+      # nothing else: the scanner never pushes, comments elsewhere or touches the data store.
+      - name: Token for this repository
+        id: app
+        if: env.MODE == 'live' && vars.REWIRE_BOT_APP_ID != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.REWIRE_BOT_APP_ID }}
+          private-key: ${{ secrets.REWIRE_BOT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-issues: write
+      - name: Stop when live has no bot token
+        if: env.MODE == 'live' && steps.app.outputs.token == ''
+        run: |
+          echo "::error::Live mode files issues as rewire-bot, but no app token could be made (REWIRE_BOT_APP_ID and REWIRE_BOT_PRIVATE_KEY). Nothing was filed."
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            agents
+            scripts/agents
+            scripts/recipe_smoke
+            tests
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Tests
+        if: env.MODE == 'dry-run'
+        run: node --test tests/agents-gaps.test.mjs
+      - name: Install the Anthropic SDK
+        if: env.MODE != 'dry-run' && env.HAS_KEY == 'true'
+        run: npm ci --prefix scripts/agents --no-audit --no-fund
+      - name: No API key
+        if: env.MODE != 'dry-run' && env.HAS_KEY != 'true'
+        run: echo "::notice::ANTHROPIC_API_KEY is not set in this repository. The scan runs and proposals are filed without the model's paragraph; no model call is made."
+      - name: Download the newest release
+        if: env.MODE != 'dry-run'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/agents/gaps.mjs --download "$RUNNER_TEMP/release"
+      - name: Scan
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          case "$MODE" in
+            dry-run) args="--dry-run" ;;
+            report-only) args="--report-only --release-dir $RUNNER_TEMP/release" ;;
+            live) args="--release-dir $RUNNER_TEMP/release --run-url $RUN_URL" ;;
+            *) echo "::error::Unknown mode $MODE"; exit 1 ;;
+          esac
+          node scripts/agents/gaps.mjs $args --out gaps-out
+      - name: Keep the proposals and token usage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gaps-${{ github.run_id }}
+          path: gaps-out
+          if-no-files-found: ignore
+          retention-days: 30
