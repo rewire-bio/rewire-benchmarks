@@ -218,7 +218,7 @@ For other MCP clients, add the server:
     "rewire-benchmark-graph": {
       "command": "uvx",
       "args": [
-        "--from", "git+https://github.com/rewire-bio/rdf-kg-mcp@v0.1.0",
+        "--from", "git+https://github.com/rewire-bio/rdf-kg-mcp@v0.4.0",
         "rdf-kg-mcp", "serve", "https://benchmarks.rewirebio.io/agents/kg.tar.gz"
       ]
     }
