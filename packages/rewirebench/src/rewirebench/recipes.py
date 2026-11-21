@@ -442,7 +442,9 @@ class PriceBasis(Strict):
 
 
 class Estimate(Strict):
-    gpu_hours: Number | None = Field(default=None, ge=0)
+    gpu_hours: Number | None = Field(
+        default=None, ge=0,
+        description="GPU-hours summed over every GPU: two GPUs for one hour is 2.")
     wall_clock_seconds: Number | None = Field(default=None, gt=0)
     price_basis: PriceBasis | None = None
     note: Text | None = None

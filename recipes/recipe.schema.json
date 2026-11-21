@@ -255,6 +255,7 @@
             }
           ],
           "default": null,
+          "description": "GPU-hours summed over every GPU: two GPUs for one hour is 2.",
           "title": "Gpu Hours"
         },
         "wall_clock_seconds": {

@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import signal
 import socket
 import subprocess
 import sys
@@ -150,14 +151,9 @@ def test_a_recipe_runs_from_plan_to_verified_receipt_through_mcp_only(
     assert started["kind"] == "recipe_run" and started["plan_sha256"] == plan["plan_sha256"]
     # What ran is the plan's command, with this installation's Python in front.
     assert started["command"] == [sys.executable, "-m", "rewirebench.cli", *plan["command"][1:]]
-    # The first run is still going or has made its folder; a second folder shows which.
-    if started["state"] == "running":
-        try:
-            call(server, "run", recipe=SMOKE, output=str(tmp_path / "runs/other"))
-        except RuntimeError as refused:
-            assert "is still going" in str(refused)
-        else:
-            call(server, "cancel_run", run_id=next(reversed(server.state.runs)))
+    with pytest.raises(RuntimeError, match="Output folder already exists"):
+        wait(server, started["run_id"])
+        call(server, "run", recipe=SMOKE, output=str(output))
 
     status = wait(server, started["run_id"])
     assert status["exit_code"] == 0 and status["checks_passed"] is True, status
@@ -373,11 +369,11 @@ def test_cancel_run_stops_the_run_and_what_it_started_and_frees_the_server(
 
 @pytest.mark.skipif(not hasattr(os, "killpg"), reason="needs process groups")
 def test_a_run_is_stopped_at_its_time_limit(server: FastMCP, tmp_path: Path, slow: Path):
-    started = call(server, "run", prepared="p", model="train-mean", timeout_seconds=1.5,
+    started = call(server, "run", prepared="p", model="train-mean", timeout_seconds=4,
                    output=str(tmp_path / "one"))
     grandchild = started_child(slow)
     status = wait(server, started["run_id"], seconds=30)
-    assert status["exit_code"] != 0 and "time limit of 1.5 seconds" in status["stopped"]
+    assert status["exit_code"] != 0 and "time limit of 4 seconds" in status["stopped"]
     assert gone(grandchild)
 
 
@@ -593,6 +589,56 @@ def test_rewirebench_mcp_speaks_mcp_over_real_stdio(tmp_path: Path):
     listed = json.loads(protocols.content[0].text)["protocols"]
     assert [entry["id"] for entry in listed] == list(sdk.PROTOCOLS)
     assert json.loads(plan.content[0].text)["quote"]["reason"] == "owned hardware"
+
+
+@pytest.mark.skipif(not hasattr(os, "killpg"), reason="needs process groups")
+def test_a_terminated_server_stops_its_run_and_removes_its_logs(tmp_path: Path):
+    """SIGTERM to a real `rewirebench mcp` process while a run is going."""
+    hook = tmp_path / "hook"
+    hook.mkdir()
+    (hook / "sitecustomize.py").write_text(HANG)
+    record = tmp_path / "run.pid"
+    path = os.pathsep.join(filter(None, [str(hook), os.environ.get("PYTHONPATH")]))
+    environment = {**os.environ, "PYTHONUNBUFFERED": "1", "PYTHONPATH": path,
+                   "HANG_RECORD": str(record)}
+    environment.pop(receipts.STARTED_BY_VARIABLE, None)
+    served = subprocess.Popen(
+        [sys.executable, "-m", "rewirebench.cli", "mcp", "--recipes-dir", str(RECIPES)],
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        env=environment, cwd=tmp_path, text=True, bufsize=1,
+    )
+    assert served.stdin is not None and served.stdout is not None
+
+    def send(message: dict[str, Any]) -> None:
+        served.stdin.write(json.dumps({"jsonrpc": "2.0", **message}) + "\n")
+        served.stdin.flush()
+
+    def reply(identifier: int) -> dict[str, Any]:
+        while True:
+            message = json.loads(served.stdout.readline())
+            if message.get("id") == identifier:
+                return message
+
+    try:
+        send({"id": 1, "method": "initialize", "params": {
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "test", "version": "0"}}})
+        assert reply(1)["result"]["serverInfo"]["name"] == "rewirebench"
+        send({"method": "notifications/initialized"})
+        send({"id": 2, "method": "tools/call", "params": {
+            "name": "run", "arguments": {"recipe": SMOKE, "output": str(tmp_path / "out")}}})
+        status = json.loads(reply(2)["result"]["content"][0]["text"])
+        assert status["state"] == "running"
+        run = started_child(record)
+        served.send_signal(signal.SIGTERM)
+        # Sent again at once, as a client that is in a hurry would. It changes nothing.
+        served.send_signal(signal.SIGTERM)
+        assert served.wait(timeout=20) == 128 + signal.SIGTERM
+        assert gone(run), "The run outlived the server"
+        assert not Path(status["logs"]["stdout"]).parent.exists()
+    finally:
+        served.kill()
+        served.wait()
 
 
 def test_the_command_line_says_how_to_install_the_server_when_mcp_is_missing(

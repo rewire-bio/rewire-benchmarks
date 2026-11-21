@@ -74,6 +74,8 @@ MAX_RUN_SECONDS = 24 * 3600.0
 # On top of a recipe's own step timeouts: time to fetch its inputs.
 RECIPE_MARGIN_SECONDS = 3600.0
 STOP_GRACE_SECONDS = 5.0
+# When the server itself is closing, its client may kill it within a couple of seconds.
+CLOSE_GRACE_SECONDS = 1.0
 VERIFY_NOTE = (
     "Verification shows the folder is consistent with its receipt and, for a recipe run, "
     "with the recipe. Nothing is signed: hardware, times and who started the run are as "
@@ -118,8 +120,8 @@ class State:
 
     def close(self) -> None:
         """Stop every run still going and remove the log folder the server made."""
-        for run in self.runs.values():
-            stop_run(run, "the server closed")
+        for run in list(self.runs.values()):
+            stop_run(run, "the server closed", grace=CLOSE_GRACE_SECONDS)
         if self.owns_folder:
             shutil.rmtree(self.folder, ignore_errors=True)
 
@@ -135,7 +137,7 @@ def _signal(run: Run, signum: int) -> None:
             run.process.kill()
 
 
-def stop_run(run: Run, reason: str) -> bool:
+def stop_run(run: Run, reason: str, *, grace: float = STOP_GRACE_SECONDS) -> bool:
     """Stop a run that is still going. Returns whether it was.
 
     SIGTERM first: a recipe run then stops its current step, which has its own session,
@@ -147,13 +149,11 @@ def stop_run(run: Run, reason: str) -> bool:
         return False
     run.stopped = run.stopped or reason
     _signal(run, signal.SIGTERM)
-    try:
-        run.process.wait(timeout=STOP_GRACE_SECONDS)
-    except subprocess.TimeoutExpired:
-        pass
+    with contextlib.suppress(subprocess.TimeoutExpired):
+        run.process.wait(timeout=grace)
     _signal(run, getattr(signal, "SIGKILL", signal.SIGTERM))
     with contextlib.suppress(subprocess.TimeoutExpired):
-        run.process.wait(timeout=STOP_GRACE_SECONDS)
+        run.process.wait(timeout=grace)
     return True
 
 
@@ -675,13 +675,17 @@ def build_server(recipes_dir: str | Path | None = None,
 def serve(recipes_dir: str | Path | None = None) -> None:
     """Serve on stdio until the client closes the stream, then stop any run still going.
 
-    SIGTERM and SIGINT end the server the same way. A server that is killed outright
-    cannot stop its run.
+    SIGTERM ends the server the same way. A server that is killed outright cannot stop
+    its run.
     """
     server = build_server(recipes_dir)
 
     def terminate(signum: int, frame: Any) -> None:
-        raise SystemExit(128 + signum)
+        # A second signal must not cut the cleanup short. The process then leaves at
+        # once: unwinding would wait for the thread that is reading standard input.
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        server.close()
+        os._exit(128 + signum)
 
     signal.signal(signal.SIGTERM, terminate)
     try:

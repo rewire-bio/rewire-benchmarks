@@ -875,8 +875,9 @@ def write_adhoc_receipt(
     """Receipt for a CLI run that did not go through a recipe.
 
     Skipped inside a recipe run, where the recipe's own receipt covers the folder.
-    Option values are local paths and private model names, so only the subcommand
-    and the option names are recorded, as the baseline manifest already does.
+    Option values are local paths and private model names, so the recorded command is
+    ``recorded_argv``: the subcommand, the option names, and the values of the model ID
+    and the batch size.
     """
     if os.environ.get(NESTED_VARIABLE):
         return None
