@@ -180,7 +180,6 @@ def test_the_server_check_was_recorded_with_the_launch_lines_the_plugin_ships():
     assert sorted(check["servers"]) == sorted(declared)
     for name, server in declared.items():
         assert check["servers"][name]["command"] == [server["command"], *server["args"]]
-    assert sorted(check["servers"]["rewirebench"]["tools"]) == sorted(mcp_server.TOOLS)
     assert [(call["server"], call["is_error"]) for call in check["calls"]] == [
         (name, False) for name in declared]
 

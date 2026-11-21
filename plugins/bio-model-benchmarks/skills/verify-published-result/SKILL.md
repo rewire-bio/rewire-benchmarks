@@ -30,9 +30,10 @@ rerun). The `find-model-for-use-case` and `run-benchmark` skills cover each half
 
 Before running anything, check each of these and tell the user the outcome:
 
-- A recipe exists. Call `list_recipes` on `rewirebench` and match `kg_record_id` to the protocol
-  record. Today one full-protocol recipe exists, `mfass-v2-kmer-baseline`. If there is none, say
-  that this result cannot be rerun here yet and stop. Do not improvise a protocol.
+- A recipe exists. Call `list_recipes` on `rewirebench`, then `describe_recipe`, and match the
+  recipe's `kg_record_id` to the protocol record. Today one full-protocol recipe exists,
+  `mfass-v2-kmer-baseline`. If there is none, say that this result cannot be rerun here yet
+  and stop. Do not improvise a protocol.
 - Same protocol, split and denominator as the published result.
 - Same system and configuration: checkpoint revision, options and inputs.
 - The recipe's `scope` is `full_protocol`. A `synthetic_smoke` run verifies nothing.

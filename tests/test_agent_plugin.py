@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from rewirebench import mcp_server, sdk
+from rewirebench import sdk
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
@@ -211,10 +211,13 @@ def recorded_tools() -> dict[str, set[str]]:
     return {name: set(server["tools"]) for name, server in check["servers"].items()}
 
 
-def test_recorded_tool_lists_match_the_sources_of_truth():
+def test_recorded_tool_lists_hold_the_tools_the_plugin_relies_on():
+    """The recording is what the pinned servers offer. It is not compared with the server
+    code in this checkout, which may gain a tool before the plugin's pin is raised."""
     tools = recorded_tools()
     assert tools["rewire-benchmark-graph"] == GRAPH_TOOLS
-    assert tools["rewirebench"] == set(mcp_server.TOOLS)
+    assert {"list_recipes", "describe_recipe", "plan_run", "run", "run_status", "cancel_run",
+            "get_receipt", "verify_receipt", "prepare", "evaluate"} <= tools["rewirebench"]
     assert {"get_truth_set", "list_synthetic_protocols", "fetch_file"} <= tools["genomics-mcp"]
 
 

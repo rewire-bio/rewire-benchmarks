@@ -114,3 +114,9 @@ uv run python scripts/demo/mcp_demo.py --servers plugins/bio-model-benchmarks/.m
 
 The same client code runs the three-row fixture offline on every pull request, in
 `tests/test_plugin_demo.py`.
+
+## When a pin is raised
+
+Tests tie this folder to the plugin's `.mcp.json`. After raising the rewirebench pin, record
+the run again from a clean checkout of the new commit and replace `transcript.json` and the
+run folder. After raising any of the three pins, record `plugin-servers.json` again.
