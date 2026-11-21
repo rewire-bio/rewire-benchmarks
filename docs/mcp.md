@@ -47,7 +47,7 @@ tools is in [demo/](demo/README.md).
 | --- | --- |
 | `list_protocols` | The protocols, with the recipes and registered models for each |
 | `describe_protocol` | Capabilities, baselines, registered models and recipes of one protocol. Three protocols also give datasets, metrics and data access; the other five give capabilities only, and the reply says so in `note`. Inputs with sizes and licence are in `describe_recipe` |
-| `list_recipes` | The recipes under `recipes/` with SHA-256, scope and backends |
+| `list_recipes` | The recipes under `recipes/` with SHA-256, scope, backends and `kg_record_id`, the graph record of the protocol (null when the recipe names none) |
 | `describe_recipe` | One recipe in full |
 | `list_models` | The registered model adapters, or those registered for one protocol, with each option's type |
 | `prepare` | Prepare a protocol's data from files already on the machine |
