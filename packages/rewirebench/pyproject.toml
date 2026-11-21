@@ -19,3 +19,4 @@ rewirebench = "rewirebench.cli:main"
 sequence = ["pandas>=2,<3", "pyarrow>=17,<24", "h5py>=3.10,<4"]
 dnabert2 = ["torch==2.2.2", "transformers==4.29.2", "einops==0.6.1", "safetensors==0.7.0", "numpy==1.26.4"]
 esm = ["fair-esm==2.0.0", "torch==2.2.2", "numpy==1.26.4"]
+mcp = ["mcp>=1.12,<2"]

@@ -5,9 +5,11 @@ that it worked (expected output). It carries no status. The evidence store holds
 pointer to the file (repository, commit, path, SHA-256) and the verified status, so
 promoting a recipe never changes the bytes a receipt cites.
 
-Schema 1.0 lets a recipe run only four data subcommands of rewirebench itself. A recipe
-cannot name a shell, another program or a Python adapter, so it cannot start a pod or
-submit a result.
+Schema 1.0 lets a recipe run only five subcommands of rewirebench itself: four data
+commands, and ``run`` with a model from the registry in ``rewirebench.models``. A recipe
+cannot name a shell, another program or an arbitrary Python callable, so it cannot start
+a pod or submit a result. The one model and the one baseline that start an executable
+named in their options (FIMO) are refused in a recipe for that reason.
 
 Field names follow ADR 0005 of rewire-benchmark-data where the two overlap; see
 ``docs/adr-c-recipes-and-receipts.md``.
@@ -17,6 +19,7 @@ from __future__ import annotations
 
 import datetime
 import hashlib
+import json
 import os
 import re
 from dataclasses import dataclass
@@ -44,17 +47,21 @@ RECIPES_DIR_VARIABLE = "REWIREBENCH_RECIPES_DIR"
 SCHEMA_FILENAME = "recipe.schema.json"
 # The only program a recipe may name, and the subcommands it may use. These prepare and
 # score data on the machine. Left out on purpose: `submit`, `submit-queue` and `enqueue`
-# (a recipe never sends anything), `recipe` and `receipt` (it never starts another recipe),
-# and `run`, whose --adapter option imports and calls any installed Python callable, for
-# example subprocess.Popen. A model recipe needs `run` back with an adapter allowlist.
+# (a recipe never sends anything), `recipe` and `receipt` (it never starts another recipe).
+# `run` is accepted only with --model and a registered model: its --adapter option imports
+# and calls any installed Python callable, for example subprocess.Popen. See check_run_step.
 RUNNER_PROGRAM = "rewirebench"
-RUNNER_COMMANDS = ("prepare", "evaluate", "run-baselines", "prepare-baseline-artifact")
+DATA_COMMANDS = ("prepare", "evaluate", "run-baselines", "prepare-baseline-artifact")
+MODEL_COMMAND = "run"
+BASELINES_COMMAND = "run-baselines"
+RUNNER_COMMANDS = (*DATA_COMMANDS, MODEL_COMMAND)
 # Names the runner writes into a run folder. A recipe cannot list them as outputs.
 RESERVED_OUTPUTS = ("receipt.json", "SHA256SUMS")
 RESERVED_FOLDER = "logs"
 DEFAULT_TIMEOUT_SECONDS = 3600
 MAX_TIMEOUT_SECONDS = 24 * 3600
 MAX_RUNPOD_HOURS = 24
+RUNPOD_PROVIDER = "runpod"
 
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[a-f0-9]{64}$")]
 Revision = Annotated[str, StringConstraints(pattern=r"^[a-f0-9]{40}$")]
@@ -97,6 +104,74 @@ def python_satisfies(spec: str, version: tuple[int, ...]) -> bool:
     if spec.startswith("=="):
         return tuple(version[: len(wanted)]) == wanted
     return tuple(version[:3]) >= wanted
+
+
+def check_run_step(argv: list[str], *, cpu_only: bool = False) -> None:
+    """Refuse a ``rewirebench run`` step that could call anything but a registered model.
+
+    The step is parsed by the real command-line parser, which accepts no abbreviated
+    option for ``run``, so ``--adapter=x`` and ``--adap x`` are seen for what they are.
+    It must name its model with ``--model``, the model must be one a recipe may use, and
+    the adapter options must be ones the model declares, of the declared type. With
+    ``cpu_only`` (the local backend) a ``device`` other than ``cpu`` is refused too:
+    hiding CUDA devices does not hide Apple MPS.
+    """
+    from rewirebench import cli, models
+
+    args = cli.parse_strict(argv[1:])
+    if args.command != MODEL_COMMAND:
+        raise ValueError(f"Not a {MODEL_COMMAND} step: {argv[:2]}")
+    if args.adapter is not None or args.model is None:
+        raise ValueError(
+            "A recipe run step names a registered model with --model, never --adapter"
+        )
+    spec = models.get_model(args.model)
+    if not spec.recipe_allowed:
+        raise ValueError(f"Model {spec.id} starts another program, so a recipe cannot use it")
+    try:
+        options = json.loads(args.adapter_options)
+    except json.JSONDecodeError as error:
+        raise ValueError(f"--adapter-options is not JSON: {error}") from error
+    models.check_options(spec, options)
+    if cpu_only:
+        models.check_cpu(spec, options)
+
+
+def check_baselines_step(argv: list[str]) -> None:
+    """Refuse a ``run-baselines`` step that would start an executable it names.
+
+    The FIMO baseline takes the path of an executable in its options and starts it. It
+    is refused whether it is selected with ``--baseline`` or named in
+    ``--baseline-options``, and so is any ``fimo`` option under another name.
+    """
+    from rewirebench import baselines, cli
+
+    args = cli.parse_strict(argv[1:])
+    if args.command != BASELINES_COMMAND:
+        raise ValueError(f"Not a {BASELINES_COMMAND} step: {argv[:2]}")
+    try:
+        options = json.loads(args.baseline_options)
+    except json.JSONDecodeError as error:
+        raise ValueError(f"--baseline-options is not JSON: {error}") from error
+    if not isinstance(options, dict):
+        raise ValueError("--baseline-options is a JSON object")  # noqa: TRY004
+    named = [*(args.baseline or []), *options]
+    takes_program = any(isinstance(value, dict) and baselines.PROGRAM_OPTION in value
+                        for value in options.values())
+    barred = sorted(set(named) & set(baselines.PROGRAM_BASELINES))
+    if barred or takes_program:
+        raise ValueError(
+            f"Baseline {barred[0] if barred else baselines.PROGRAM_BASELINES[0]} starts "
+            "another program, so a recipe cannot use it"
+        )
+
+
+def check_step(argv: list[str], *, cpu_only: bool = False) -> None:
+    """The content rules of one step, by subcommand. Used at validation and at run time."""
+    if len(argv) > 1 and argv[1] == MODEL_COMMAND:
+        check_run_step(argv, cpu_only=cpu_only)
+    elif len(argv) > 1 and argv[1] == BASELINES_COMMAND:
+        check_baselines_step(argv)
 
 
 class Strict(BaseModel):
@@ -247,12 +322,32 @@ class HardwareFloor(Strict):
     note: Text | None = None
 
 
+def _step_schema(schema: dict[str, Any]) -> None:
+    """Add the shape of the step rules to the JSON Schema of a command."""
+    schema["properties"]["argv"]["prefixItems"] = [
+        {"const": RUNNER_PROGRAM}, {"enum": list(RUNNER_COMMANDS)}]
+    schema["if"] = {"properties": {"argv": {"prefixItems": [{}, {"const": MODEL_COMMAND}]}}}
+    schema["then"] = {"properties": {"argv": {
+        "contains": {"pattern": "^--model(=.+)?$"},
+        "not": {"contains": {"pattern": "^--adapter(=.*)?$"}},
+    }}}
+
+
 class Command(Strict):
     """One rewirebench step as an argv list. No shell is involved.
 
     The first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A
-    step that runs longer than ``timeout_seconds`` is stopped and the run fails.
+    ``run`` step names a registered model with ``--model``. A step that runs longer than
+    ``timeout_seconds`` is stopped and the run fails.
+
+    The JSON Schema states the shape of these rules: the program, the subcommand, and
+    for ``run`` a ``--model`` option and no ``--adapter``. Whether the model is
+    registered, may be used in a recipe and is given options it declares is checked by
+    ``rewirebench recipe validate`` only.
     """
+
+    model_config = ConfigDict(extra="forbid", frozen=True,
+                              json_schema_extra=lambda schema: _step_schema(schema))
 
     name: Identifier
     argv: list[Text] = Field(min_length=2)
@@ -267,6 +362,10 @@ class Command(Strict):
                 f"Command {self.name}: a recipe runs only `{RUNNER_PROGRAM}` followed by one "
                 f"of {', '.join(RUNNER_COMMANDS)}. No shell and no other program."
             )
+        try:
+            check_step(list(self.argv))
+        except ValueError as error:
+            raise ValueError(f"Command {self.name}: {error}") from error
         for argument in self.argv:
             unknown = sorted(set(_PLACEHOLDER.findall(argument)) - set(PLACEHOLDERS))
             if unknown:
@@ -343,7 +442,9 @@ class PriceBasis(Strict):
 
 
 class Estimate(Strict):
-    gpu_hours: Number | None = Field(default=None, ge=0)
+    gpu_hours: Number | None = Field(
+        default=None, ge=0,
+        description="GPU-hours summed over every GPU: two GPUs for one hour is 2.")
     wall_clock_seconds: Number | None = Field(default=None, gt=0)
     price_basis: PriceBasis | None = None
     note: Text | None = None
@@ -446,6 +547,15 @@ class Recipe(Strict):
             raise ValueError(
                 "The local backend is CPU only. A recipe that needs a GPU names spark or runpod"
             )
+        if self.backends.local is not None:
+            for command in self.commands:
+                try:
+                    check_step(list(command.argv), cpu_only=True)
+                except ValueError as error:
+                    raise ValueError(
+                        f"Command {command.name}: {error}. A recipe that names the local "
+                        "backend runs on CPU"
+                    ) from error
         if self.backends.runpod is not None:
             image = self.environment.images["linux/amd64"] if self.environment else None
             if image is None or image.digest is None:
@@ -453,6 +563,15 @@ class Recipe(Strict):
             if self.estimate is None or self.estimate.price_basis is None:
                 # Without a dated hourly rate there is no amount to quote and confirm.
                 raise ValueError("The runpod backend needs estimate.price_basis")
+            basis = self.estimate.price_basis
+            priced = self.backends.runpod.gpu_types[0]
+            if basis.provider != RUNPOD_PROVIDER or basis.accelerator != priced:
+                # The quote multiplies this rate, so it must be the rate of the pod asked for.
+                raise ValueError(
+                    f"estimate.price_basis must price the first runpod GPU type: provider "
+                    f"{RUNPOD_PROVIDER!r} and accelerator {priced!r}, not "
+                    f"{basis.provider!r} and {basis.accelerator!r}"
+                )
         if self.backends.spark is not None:
             image = self.environment.images["linux/arm64"] if self.environment else None
             if image is None or image.digest is None:

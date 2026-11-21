@@ -111,7 +111,19 @@
     },
     "Command": {
       "additionalProperties": false,
-      "description": "One rewirebench step as an argv list. No shell is involved.\n\nThe first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A\nstep that runs longer than ``timeout_seconds`` is stopped and the run fails.",
+      "description": "One rewirebench step as an argv list. No shell is involved.\n\nThe first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A\n``run`` step names a registered model with ``--model``. A step that runs longer than\n``timeout_seconds`` is stopped and the run fails.\n\nThe JSON Schema states the shape of these rules: the program, the subcommand, and\nfor ``run`` a ``--model`` option and no ``--adapter``. Whether the model is\nregistered, may be used in a recipe and is given options it declares is checked by\n``rewirebench recipe validate`` only.",
+      "if": {
+        "properties": {
+          "argv": {
+            "prefixItems": [
+              {},
+              {
+                "const": "run"
+              }
+            ]
+          }
+        }
+      },
       "properties": {
         "name": {
           "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
@@ -124,6 +136,20 @@
             "type": "string"
           },
           "minItems": 2,
+          "prefixItems": [
+            {
+              "const": "rewirebench"
+            },
+            {
+              "enum": [
+                "prepare",
+                "evaluate",
+                "run-baselines",
+                "prepare-baseline-artifact",
+                "run"
+              ]
+            }
+          ],
           "title": "Argv",
           "type": "array"
         },
@@ -139,6 +165,20 @@
         "name",
         "argv"
       ],
+      "then": {
+        "properties": {
+          "argv": {
+            "contains": {
+              "pattern": "^--model(=.+)?$"
+            },
+            "not": {
+              "contains": {
+                "pattern": "^--adapter(=.*)?$"
+              }
+            }
+          }
+        }
+      },
       "title": "Command",
       "type": "object"
     },
@@ -215,6 +255,7 @@
             }
           ],
           "default": null,
+          "description": "GPU-hours summed over every GPU: two GPUs for one hour is 2.",
           "title": "Gpu Hours"
         },
         "wall_clock_seconds": {

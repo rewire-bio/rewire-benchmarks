@@ -15,6 +15,7 @@ rewirebench recipe show mfass-v2-kmer-baseline
 rewirebench recipe validate                 # every file under recipes/
 rewirebench recipe validate path/to/new.yaml
 rewirebench recipe schema > recipes/recipe.schema.json
+rewirebench recipe plan mfass-v2-kmer-baseline       # what it needs and costs; starts nothing
 rewirebench recipe run mfass-v2-kmer-baseline --output runs/mfass
 rewirebench receipt verify runs/mfass
 ```
@@ -37,11 +38,26 @@ reports every other file under `invalid`, with exit code 1.
   URL with no user name or password, or from a `repo_path` in this repository. A run stops
   before any command if an input does not match.
 - `commands` are argv lists. The first element is `rewirebench` and the second is one of
-  `prepare`, `evaluate`, `run-baselines` or `prepare-baseline-artifact`. Nothing else is
+  `prepare`, `evaluate`, `run-baselines`, `prepare-baseline-artifact` or `run`. Nothing else is
   accepted: no shell, no other program, and none of the commands that send data (`submit`,
-  `submit-queue`, `enqueue`). `run` is not accepted yet either, because its `--adapter` option
-  calls any installed Python callable; a model recipe will need it back with a list of allowed
-  adapters. The step runs the same installation that is executing the recipe.
+  `submit-queue`, `enqueue`). The step runs the same installation that is executing the recipe.
+- A `run` step names a registered model with `--model <id>` (see `rewirebench models`). It
+  cannot use `--adapter`, which calls any installed Python callable, in any spelling:
+  `--adapter=x` is refused and abbreviated options are not accepted. `--adapter-options` may
+  set only the options the model declares, each of its declared type, and `--batch-size` is
+  1 or more. A model that starts an executable named in its options (FIMO) cannot be used in
+  a recipe. Neither can the FIMO baseline: a `run-baselines` step that selects
+  `dart-h12core-fimo-hit-count-v1`, or passes a `fimo` option in `--baseline-options`, is
+  refused.
+- A recipe that names the `local` backend runs on CPU: a `run` step whose options set
+  `device` to anything but `cpu` is refused at validation and again before the step starts.
+  Hiding CUDA devices would not hide Apple MPS.
+- `recipes/recipe.schema.json` carries the shape of these rules (the program, the
+  subcommand, and for `run` a `--model` option and no `--adapter`). The checks against the
+  model registry need `rewirebench recipe validate`; a JSON Schema validator alone does not
+  make them.
+- With a `runpod` backend, `estimate.price_basis` must be for provider `runpod` and for the
+  first entry of `gpu_types`, because the quote multiplies that rate.
   `{inputs}` is the folder holding the inputs, `{work}` is a scratch folder that is deleted,
   and `{output}` is the run folder.
 - A command may set `timeout_seconds` (default 3600, at most 86400). A step still running then
@@ -75,14 +91,18 @@ check passed and 1 otherwise. A receipt is written in both cases.
 
 What keeps a recipe run from starting a GPU or paid run:
 
-- A recipe can only name four of rewirebench's own data commands (see above), so it cannot
-  call a shell, `runpodctl`, any other program or a Python adapter.
+- A recipe can only name five of rewirebench's own commands (see above), `run` only with
+  a registered model, and neither the model nor the baseline that starts an executable named
+  in its options, so it cannot call a shell, `runpodctl`, any other program or an arbitrary
+  Python callable.
 - Each step gets a short list of environment variables (`PATH`, `HOME`, locale, temp folder,
   Python and certificate settings, the container digest variables). API keys and tokens in your
   environment are not passed on, so they cannot reach a step or its logs.
 - `CUDA_VISIBLE_DEVICES` is set to empty for every step, and a recipe that asks for a GPU cannot
   name the `local` backend.
-- `recipe run` accepts `--backend local` only.
+- `recipe run` accepts `--backend local` and `--backend spark`. Spark prints its steps and
+  contacts nothing unless `--execute` is given; see [mcp.md](mcp.md#spark). There is no
+  `--backend runpod`: a paid run can be planned and priced with `recipe plan`, not started.
 
 This is not a sandbox. A step runs with your user's rights and can read your home folder.
 Read a recipe you did not write before you run it.
@@ -92,7 +112,9 @@ The run folder holds the outputs, `logs/` with each command's output, `receipt.j
 sharing the folder.
 
 `started_by` is `ci` in CI and `agent` when Claude Code runs the command. Otherwise it is
-`human`. An agent on another harness must pass `--started-by agent`.
+`human`. An agent on another harness must pass `--started-by agent` or set
+`REWIREBENCH_STARTED_BY=agent`, which also applies to `run` and `evaluate` outside a recipe.
+The [MCP server](mcp.md) sets it for every command it starts.
 
 ## What a receipt holds
 

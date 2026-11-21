@@ -95,20 +95,27 @@ ADR 0005's `computed_usd`.
 2026-11-17 on rdf-kg-mcp#6 changed that rule: nothing scheduled starts a GPU run, and an agent
 working with a person may start a paid run once that person has confirmed the quoted amount.
 The receipt keeps `started_by` (`human`, `agent` or `ci`) as a record. The confirmation rule
-belongs to the backend that spends money, which is not part of this step.
+belongs to the backend that spends money: `rewirebench.backends.runpod` refuses a launch
+without a confirmed amount and currency equal to the plan's quote, and launches nothing yet
+(see [mcp.md](mcp.md)). An argument cannot show that a person supplied it, so the launch
+step has to take the confirmation from a terminal prompt or MCP elicitation.
 
 ## Changes from the ADR-C draft
 
 - `commands` is a list of named argv lists, not one `command`. The MFASS v2 baseline needs two
   steps. No shell is involved. The placeholders `{inputs}`, `{work}` and `{output}` are the only
   substitution.
-- Schema 1.0 accepts only `rewirebench` followed by `prepare`, `evaluate`, `run-baselines` or
-  `prepare-baseline-artifact`. A step gets an allowlisted environment with no CUDA device and
-  has a timeout. This is what makes "a local recipe run never starts a GPU or paid run" a
-  property of the code. `run` is left out because `--adapter` calls any installed Python
-  callable. A model recipe (#58) has to add it back with a list of allowed adapters, and a
-  backend that needs another program (a container runtime on the Spark) has to widen the
-  schema on purpose.
+- Schema 1.0 accepts only `rewirebench` followed by `prepare`, `evaluate`, `run-baselines`,
+  `prepare-baseline-artifact` or `run`. A step gets an allowlisted environment with no CUDA
+  device and has a timeout. This is what makes "a local recipe run never starts a GPU or paid
+  run" a property of the code. `run` is accepted only with `--model` and a model from the
+  registry in `rewirebench.models`, because `--adapter` calls any installed Python callable.
+  On the local backend a `run` step's `device` must be `cpu`, checked at validation and
+  before the step starts, since an empty `CUDA_VISIBLE_DEVICES` does not hide Apple MPS. The
+  FIMO model and the FIMO baseline start an executable named in their options and are
+  refused in a recipe.
+  The spark backend did not widen the schema: the container runtime is started by the backend
+  on the host, and the steps inside the image are the same rewirebench commands.
 - A `runpod` backend block requires `estimate.price_basis` and caps `max_hours` at 24, so the
   amount a launch must quote and have confirmed can always be computed from the recipe.
 - `outputs` lists the files a run must write. A missing one is a failed check.
@@ -138,8 +145,9 @@ directly and still writes its own `workflow-receipt.json`; it does not write `re
 - `rewirebench` depends on pydantic and PyYAML. `uv.lock` and the four container locks include
   them.
 - The wheel does not ship `recipes/`. The recipe commands find the directory in a checkout, or
-  through `--recipes-dir` or `REWIREBENCH_RECIPES_DIR`. Shipping recipes with the package is a
-  decision for the MCP server work (#57).
+  through `--recipes-dir` or `REWIREBENCH_RECIPES_DIR`. The MCP server (#57) kept it that way:
+  a recipe that pins a `repo_path` input needs the checkout anyway, and a receipt names a
+  recipe commit only when the file sits in a git checkout.
 - No rewirebench image is published, so both recipes record both image digests as missing with
   a reason and run in the host Python environment. The `spark` and `runpod` backends refuse a
   recipe without the image for their platform.

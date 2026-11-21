@@ -242,12 +242,18 @@ code commit, input and output digests, hardware, wall time, peak memory, metrics
 
 ```sh
 uv run rewirebench recipe list
+uv run rewirebench recipe plan mfass-v2-kmer-baseline
 uv run rewirebench recipe run mfass-v2-kmer-baseline --output runs/mfass
 uv run rewirebench receipt verify runs/mfass
 ```
 
 See [docs/recipes.md](docs/recipes.md), and
 [docs/adr-c-recipes-and-receipts.md](docs/adr-c-recipes-and-receipts.md) for the decision.
+
+`uv run rewirebench mcp` serves the same commands to a coding agent as an MCP server on stdio:
+list protocols, recipes and models, prepare, plan, run on this machine, stop a run, and read
+and verify the receipt. It plans and prices the `spark` and `runpod` backends and starts neither. See
+[docs/mcp.md](docs/mcp.md).
 
 ## Cleaning local reference data
 

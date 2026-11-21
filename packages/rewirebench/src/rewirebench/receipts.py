@@ -8,12 +8,13 @@ receipt's inputs and metrics with the recipe. A failed run never verifies.
 Nothing is signed. Fields that cannot be recomputed (hardware, times, who started the
 run) are as trustworthy as the place the folder came from.
 
-The local backend runs only rewirebench's own data subcommands, with a reduced
-environment and with CUDA devices hidden. It is not a sandbox.
+The local backend runs only rewirebench's own subcommands, with a reduced environment
+and with CUDA devices hidden. It is not a sandbox.
 """
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import hashlib
 import json
@@ -28,6 +29,7 @@ import tempfile
 import threading
 import time
 import urllib.request
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Annotated, Any, Literal
 from urllib.parse import urlsplit, urlunsplit
@@ -49,6 +51,7 @@ from rewirebench.recipes import (
     Sha256,
     Strict,
     Text,
+    check_step,
     get_recipe,
     parse_recipe,
     python_satisfies,
@@ -60,6 +63,8 @@ SCHEMA_VERSION = "1.0"
 RECEIPT_FILENAME = "receipt.json"
 SUMS_FILENAME = "SHA256SUMS"
 NESTED_VARIABLE = "REWIREBENCH_RECIPE_RUN"
+STARTED_BY_VARIABLE = "REWIREBENCH_STARTED_BY"
+ARM64_MACHINES = ("aarch64", "arm64")
 OWNED_HARDWARE = "owned hardware"
 CODE_REPOSITORY = "https://github.com/rewire-bio/rewire-benchmarks"
 MAX_INPUT_BYTES = 8 * 2**30
@@ -377,7 +382,14 @@ def _image_used() -> tuple[str | None, str | None]:
 
 
 def default_started_by() -> StartedBy:
-    """``ci`` in CI, ``agent`` under a known agent harness, otherwise ``human``."""
+    """``ci`` in CI, ``agent`` under a known agent harness, otherwise ``human``.
+
+    A caller that knows better sets ``REWIREBENCH_STARTED_BY``; the MCP server sets it to
+    ``agent`` for every command it starts.
+    """
+    stated = os.environ.get(STARTED_BY_VARIABLE)
+    if stated in ("human", "agent", "ci"):
+        return stated  # type: ignore[return-value]
     if os.environ.get("CI"):
         return "ci"
     if any(os.environ.get(name) for name in AGENT_VARIABLES):
@@ -548,17 +560,71 @@ def _program(argv: list[str]) -> list[str]:
     """The process for one recipe step: this installation's rewirebench, nothing else."""
     if len(argv) < 2 or argv[0] != RUNNER_PROGRAM or argv[1] not in RUNNER_COMMANDS:
         raise ValueError(f"A recipe step runs only {RUNNER_PROGRAM} data commands: {argv[:2]}")
+    # Checked again on the rendered argv, which is what the process receives.
+    try:
+        check_step(argv)
+    except ValueError as error:
+        raise ValueError(
+            f"A recipe step runs only {RUNNER_PROGRAM} data commands: {error}"
+        ) from error
     return [sys.executable, "-m", "rewirebench.cli", *argv[1:]]
 
 
-def step_environment() -> dict[str, str]:
-    """Environment of a recipe step: an allowlist, the nested-run marker, no CUDA device."""
+def step_environment(*, hide_cuda: bool = True) -> dict[str, str]:
+    """Environment of a recipe step: an allowlist, the nested-run marker, no CUDA device.
+
+    Only the spark backend, inside its pinned image, passes ``hide_cuda=False``; it then
+    forwards the caller's ``CUDA_VISIBLE_DEVICES`` if one is set.
+    """
     environment = {name: os.environ[name] for name in PASSED_ENVIRONMENT if name in os.environ}
-    return {**environment, NESTED_VARIABLE: "1", "CUDA_VISIBLE_DEVICES": ""}
+    environment[NESTED_VARIABLE] = "1"
+    if hide_cuda:
+        environment["CUDA_VISIBLE_DEVICES"] = ""
+    elif "CUDA_VISIBLE_DEVICES" in os.environ:
+        environment["CUDA_VISIBLE_DEVICES"] = os.environ["CUDA_VISIBLE_DEVICES"]
+    return environment
+
+
+# Steps now running. A step has its own session, so stopping this process would leave it
+# behind; stop_on_terminate ends the steps first.
+_ACTIVE_STEPS: set[subprocess.Popen[bytes]] = set()
+
+
+def stop_active_steps() -> None:
+    for process in list(_ACTIVE_STEPS):
+        try:
+            if hasattr(os, "killpg"):
+                os.killpg(process.pid, signal.SIGKILL)
+            else:
+                process.kill()
+        except (ProcessLookupError, PermissionError):
+            pass
+
+
+@contextlib.contextmanager
+def stop_on_terminate() -> Iterator[None]:
+    """While a recipe runs, SIGTERM stops the running step and then this process.
+
+    The MCP server and a person's ``kill`` both end a run this way. Outside the main
+    thread no handler can be set, and the run goes on as before.
+    """
+    if threading.current_thread() is not threading.main_thread():
+        yield
+        return
+
+    def stop(signum: int, frame: Any) -> None:
+        stop_active_steps()
+        raise SystemExit(128 + signum)
+
+    previous = signal.signal(signal.SIGTERM, stop)
+    try:
+        yield
+    finally:
+        signal.signal(signal.SIGTERM, previous)
 
 
 def _execute(
-    argv: list[str], *, cwd: Path, log: Path, timeout: float
+    argv: list[str], *, cwd: Path, log: Path, timeout: float, hide_cuda: bool = True
 ) -> tuple[int | None, float, int | None]:
     """Run one step without a shell. Returns exit code, wall seconds, peak memory.
 
@@ -566,13 +632,17 @@ def _execute(
     negative and the standard error log says why.
     """
     executable = _program(argv)
+    if hide_cuda:
+        # Hiding CUDA does not hide Apple MPS, so the step is held to the cpu device too.
+        check_step(argv, cpu_only=True)
     started = time.perf_counter()
     with (log.with_suffix(".stdout.txt").open("xb") as out,
           log.with_suffix(".stderr.txt").open("xb") as err):
         try:
             # Its own session, so a timeout stops the step's child processes as well.
             process = subprocess.Popen(
-                executable, cwd=cwd, env=step_environment(), stdout=out, stderr=err,
+                executable, cwd=cwd, env=step_environment(hide_cuda=hide_cuda),
+                stdout=out, stderr=err, stdin=subprocess.DEVNULL,
                 start_new_session=hasattr(os, "killpg"),
             )
         except OSError as error:
@@ -593,6 +663,7 @@ def _execute(
         timer = threading.Timer(timeout, stop)
         timer.start()
         peak: int | None = None
+        _ACTIVE_STEPS.add(process)
         try:
             if hasattr(os, "wait4"):
                 _, status, usage = os.wait4(process.pid, 0)
@@ -602,6 +673,7 @@ def _execute(
                 process.wait()
         finally:
             timer.cancel()
+            _ACTIVE_STEPS.discard(process)
         if expired.is_set():
             err.write(f"Stopped by rewirebench after {timeout:g} seconds (timeout).\n".encode())
     return process.returncode, time.perf_counter() - started, peak
@@ -636,6 +708,26 @@ def check_requirements(recipe: Recipe, repo_root: Path, hardware: Hardware) -> N
         )
 
 
+def inside_spark_image(recipe: Recipe) -> str:
+    """The image digest, if this process is in the recipe's linux/arm64 image on arm64.
+
+    The spark backend starts the image with ``REWIRE_CONTAINER_DIGEST`` set to the digest
+    it pulled. Anywhere else the spark path is refused, so it cannot be used to run a GPU
+    recipe on a machine that merely has a GPU.
+    """
+    if recipe.backends.spark is None:
+        raise ValueError(f"Recipe {recipe.id} does not name the spark backend")
+    wanted = recipe.image_digests()["linux/arm64"]
+    used, _ = _image_used()
+    if wanted is None or used != wanted or platform.machine() not in ARM64_MACHINES:
+        raise ValueError(
+            f"Recipe {recipe.id} runs on spark only inside its linux/arm64 image ({wanted}) "
+            "on an arm64 host. Start it with `rewirebench recipe run --backend spark`, "
+            "which uses SSH and Docker."
+        )
+    return wanted
+
+
 def run_recipe(
     loaded: LoadedRecipe,
     *,
@@ -644,11 +736,25 @@ def run_recipe(
     inputs: str | Path | None = None,
     started_by: StartedBy | None = None,
     kg_release_id: str | None = None,
+    backend: Literal["local", "spark"] = "local",
 ) -> Receipt:
-    """Run a recipe on this machine and write its receipt. No other backend runs here."""
+    """Run a recipe on this machine and write its receipt.
+
+    ``backend="spark"`` is the same run from inside the recipe's pinned image on the
+    Spark, where the spark backend starts it. CUDA devices stay visible there if the
+    recipe's spark block asks for GPUs. No paid backend runs here.
+    """
     recipe = loaded.recipe
-    if recipe.backends.local is None:
-        raise ValueError(f"Recipe {recipe.id} does not name the local backend")
+    hide_cuda = True
+    if backend == "local":
+        if recipe.backends.local is None:
+            raise ValueError(f"Recipe {recipe.id} does not name the local backend")
+    elif backend == "spark":
+        inside_spark_image(recipe)
+        assert recipe.backends.spark is not None
+        hide_cuda = not recipe.backends.spark.gpus
+    else:
+        raise ValueError(f"The {backend} backend does not run on this machine")
     folder = Path(output)
     if folder.exists():
         raise FileExistsError(f"Output folder already exists: {folder}")
@@ -683,7 +789,7 @@ def run_recipe(
                 continue
             exit_code, seconds, peak = _execute(
                 argv, cwd=work, log=folder / "logs" / f"{index:02d}-{command.name}",
-                timeout=command.timeout_seconds,
+                timeout=command.timeout_seconds, hide_cuda=hide_cuda,
             )
             failed = exit_code != 0
             # The recipe's own argv is recorded, so a receipt holds no local paths.
@@ -705,7 +811,7 @@ def run_recipe(
         scope=recipe.scope,
         verified_on=started_at.date(),
         started_by=started_by or default_started_by(),
-        backend="local",
+        backend=backend,
         recipe=RecipePointer(id=recipe.id, repository=recipe_repository, commit=recipe_commit,
                              path=f"recipes/{relative}", sha256=loaded.sha256),
         kg_release_id=kg_release_id,
@@ -731,6 +837,32 @@ def run_recipe(
     return receipt
 
 
+# Options of a CLI run whose values are neither a path nor a private name: the registry ID
+# of the model and the batch size.
+PUBLIC_OPTIONS = ("--model", "--batch-size")
+LOCAL_VALUE = "<local value>"
+
+
+def recorded_argv(argv: list[str]) -> list[str]:
+    """The argv a receipt records for a CLI run without a recipe.
+
+    Option values are local paths and private model names, so only the subcommand, the
+    option names and the values of ``PUBLIC_OPTIONS`` are kept. Without the model's
+    registry ID a receipt would not say which model ran.
+    """
+    recorded = [argv[0] if argv else "run"]
+    keep = False
+    for token in argv[1:]:
+        if token.startswith("--"):
+            name, separator, _ = token.partition("=")
+            recorded.append(token if separator and name in PUBLIC_OPTIONS else name)
+            keep = not separator and name in PUBLIC_OPTIONS
+        else:
+            recorded.append(token if keep else LOCAL_VALUE)
+            keep = False
+    return recorded
+
+
 def write_adhoc_receipt(
     folder: str | Path,
     *,
@@ -743,16 +875,15 @@ def write_adhoc_receipt(
     """Receipt for a CLI run that did not go through a recipe.
 
     Skipped inside a recipe run, where the recipe's own receipt covers the folder.
-    Option values are local paths and private model names, so only the subcommand
-    and the option names are recorded, as the baseline manifest already does.
+    Option values are local paths and private model names, so the recorded command is
+    ``recorded_argv``: the subcommand, the option names, and the values of the model ID
+    and the batch size.
     """
     if os.environ.get(NESTED_VARIABLE):
         return None
     folder = Path(folder)
     image_used, runtime = _image_used()
-    name = argv[0] if argv else "run"
-    argv = [name, *(token.split("=", 1)[0] if token.startswith("--") else "<local value>"
-                    for token in argv[1:])]
+    argv = recorded_argv(argv)
     receipt = Receipt(
         schema_version=SCHEMA_VERSION,
         kind="rewire_run_receipt",
@@ -774,7 +905,7 @@ def write_adhoc_receipt(
             for path in input_files if path.is_file()
         ],
         hardware=detect_hardware(),
-        commands=[CommandRecord(name=name, argv=["rewirebench", *argv], exit_code=0,
+        commands=[CommandRecord(name=argv[0], argv=["rewirebench", *argv], exit_code=0,
                                 wall_seconds=round(wall_seconds, 3),
                                 peak_memory_bytes=own_peak_memory_bytes())],
         started_at=started_at,

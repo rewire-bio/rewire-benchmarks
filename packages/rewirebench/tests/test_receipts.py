@@ -4,9 +4,12 @@ from __future__ import annotations
 import datetime
 import io
 import json
+import os
 import shutil
+import signal
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -697,3 +700,83 @@ def test_receipt_dates_are_utc(smoke_run: Path):
     assert receipt.started_at.tzinfo is not None
     assert receipt.finished_at >= receipt.started_at
     assert receipt.verified_on == receipt.started_at.astimezone(datetime.UTC).date()
+
+
+TERMINATED = """
+import sys, time
+from pathlib import Path
+from rewirebench import receipts
+
+receipts._program = lambda argv: [sys.executable, "-c", "import time; time.sleep(300)"]
+folder = Path(sys.argv[1])
+with receipts.stop_on_terminate():
+    (folder / "ready").write_text("ready")
+    receipts._execute(["rewirebench", "evaluate"], cwd=folder, log=folder / "step", timeout=300)
+"""
+
+
+@pytest.mark.skipif(not hasattr(os, "killpg"), reason="needs process groups")
+def test_a_terminated_recipe_run_stops_its_step_first(tmp_path: Path):
+    """A step has its own session, so ending the run must end the step explicitly.
+    This is how the MCP server's cancel_run and a person's kill stop a recipe run."""
+    runner = subprocess.Popen([sys.executable, "-c", TERMINATED, str(tmp_path)])
+    try:
+        deadline = time.monotonic() + 30
+        step: int | None = None
+        while step is None and time.monotonic() < deadline:
+            listed = subprocess.run(["pgrep", "-P", str(runner.pid)], capture_output=True,
+                                    text=True, check=False).stdout.split()
+            step = int(listed[0]) if listed and (tmp_path / "ready").is_file() else None
+            time.sleep(0.05)
+        assert step is not None, "The step did not start"
+        runner.send_signal(signal.SIGTERM)
+        assert runner.wait(timeout=15) == 128 + signal.SIGTERM
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline:
+            try:
+                os.kill(step, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(0.05)
+        else:
+            raise AssertionError("The step outlived the run that started it")
+    finally:
+        runner.kill()
+        receipts.stop_active_steps()
+
+
+def test_stop_on_terminate_restores_the_handler_and_is_a_no_op_off_the_main_thread():
+    import threading
+
+    before = signal.getsignal(signal.SIGTERM)
+    with receipts.stop_on_terminate():
+        assert signal.getsignal(signal.SIGTERM) is not before
+    assert signal.getsignal(signal.SIGTERM) is before
+    seen: list[Any] = []
+
+    def elsewhere() -> None:
+        with receipts.stop_on_terminate():
+            seen.append(signal.getsignal(signal.SIGTERM))
+
+    worker = threading.Thread(target=elsewhere)
+    worker.start()
+    worker.join()
+    assert seen == [before]
+
+
+def test_the_recipe_run_command_stops_its_step_when_terminated(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    before = signal.getsignal(signal.SIGTERM)
+    during: list[Any] = []
+    real = receipts.run_recipe
+
+    def run(*args: Any, **kwargs: Any) -> receipts.Receipt:
+        during.append(signal.getsignal(signal.SIGTERM))
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(receipts, "run_recipe", run)
+    _, code = run_cli(capsys, "recipe", "run", SMOKE, "--recipes-dir", str(RECIPES),
+                      "--output", str(tmp_path / "out"))
+    assert code == 0 and len(during) == 1 and during[0] is not before
+    assert signal.getsignal(signal.SIGTERM) is before

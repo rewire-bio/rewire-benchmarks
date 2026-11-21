@@ -1,0 +1,294 @@
+"""The model adapter interface and the registry of adapters that ship with rewirebench.
+
+An adapter is a Python object the SDK calls with protocol-approved inputs. The existing
+protocols need three methods and no more: ``predict`` (one score per input), ``embed``
+(one vector per input, for a protocol-owned probe) and an optional ``fit`` on the
+training split. ``score_variants`` and a free ``predict(inputs)`` outside a protocol
+(issue #58) are not defined here because no protocol calls them yet.
+
+The registry is also an allowlist. ``rewirebench run --model ID`` and a recipe ``run``
+step can only name a registered model, so neither can import an arbitrary callable the
+way ``--adapter module:Class`` does.
+"""
+
+from __future__ import annotations
+
+import importlib
+import math
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from typing import Any, Literal, Protocol, runtime_checkable
+
+Interface = Literal["predict", "embed", "fit"]
+OptionType = Literal["text", "integer", "number", "boolean"]
+ModelInput = dict[str, Any]
+
+
+@runtime_checkable
+class ScoreModel(Protocol):
+    """Returns one finite score per input ID."""
+
+    def predict(self, inputs: list[ModelInput]) -> Mapping[str, Any]: ...
+
+
+@runtime_checkable
+class EmbeddingModel(Protocol):
+    """Returns one vector per input ID. The protocol owns the head fitted on top."""
+
+    def embed(self, inputs: list[ModelInput]) -> Mapping[str, Any]: ...
+
+
+@runtime_checkable
+class FittedModel(Protocol):
+    """A score model the SDK fits on the training split before it predicts."""
+
+    def fit(self, inputs: list[ModelInput], targets: Sequence[Any]) -> Any: ...
+
+    def predict(self, inputs: list[ModelInput]) -> Mapping[str, Any]: ...
+
+
+@dataclass(frozen=True)
+class ModelSpec:
+    """One registered adapter.
+
+    ``options`` names every constructor option a caller may set, and ``option_types``
+    the JSON type of each one that is not text. ``runs_program`` marks an adapter that
+    starts an executable named by an option; such a model cannot be used from a recipe
+    or through the MCP server, neither of which may start another program.
+    """
+
+    id: str
+    title: str
+    adapter: str
+    interfaces: tuple[Interface, ...]
+    protocols: tuple[str, ...]
+    pretrained: bool
+    extra: str | None = None
+    options: Mapping[str, str] | None = None
+    required_options: tuple[str, ...] = ()
+    option_types: Mapping[str, OptionType] | None = None
+    runs_program: bool = False
+    note: str | None = None
+
+    @property
+    def prediction_type(self) -> Literal["scalar", "embedding"]:
+        return "scalar" if "predict" in self.interfaces else "embedding"
+
+    @property
+    def recipe_allowed(self) -> bool:
+        return not self.runs_program
+
+    def option_type(self, name: str) -> OptionType:
+        return (self.option_types or {}).get(name, "text")
+
+    def describe(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "adapter": self.adapter,
+            "interfaces": list(self.interfaces),
+            "prediction_type": self.prediction_type,
+            "protocols": list(self.protocols),
+            "pretrained": self.pretrained,
+            "install_extra": self.extra,
+            "options": dict(self.options or {}),
+            "option_types": {name: self.option_type(name) for name in self.options or {}},
+            "required_options": list(self.required_options),
+            "runs_program": self.runs_program,
+            "recipe_allowed": self.recipe_allowed,
+            "note": self.note,
+        }
+
+
+_CHECKPOINT = "Path of the pinned checkpoint file. Its SHA-256 is checked before loading."
+_DEVICE = "Torch device. The local backend hides CUDA devices, so use cpu there."
+
+_MODELS: tuple[ModelSpec, ...] = (
+    ModelSpec(
+        id="train-mean", title="Training target mean",
+        adapter="rewirebench.adapters.sequence:TrainMean",
+        interfaces=("fit", "predict"), pretrained=False,
+        protocols=("flip2-fitness-v1", "mrnabench-sample-mrl-v1", "tdc-admet-group-v1"),
+        note="Constant regression control.",
+    ),
+    ModelSpec(
+        id="seeded-random", title="Seeded random ranking control",
+        adapter="rewirebench.adapters.sequence:SeededRandomScore",
+        interfaces=("predict",), pretrained=False,
+        protocols=("proteingym-v1.3-dms-substitutions", "dart-eval-task1-zero-shot-v1"),
+        options={"seed": "Integer seed, default 0."}, option_types={"seed": "integer"},
+    ),
+    ModelSpec(
+        id="sequence-composition", title="Sequence length and composition features",
+        adapter="rewirebench.adapters.sequence:SequenceComposition",
+        interfaces=("embed",), pretrained=False,
+        protocols=("flip2-fitness-v1", "mrnabench-sample-mrl-v1"),
+        options={"alphabet": "Unique symbols to count, default ACGT."},
+    ),
+    ModelSpec(
+        id="training-prior", title="Training class prior or majority",
+        adapter="rewirebench.adapters.baselines:TrainingPrior",
+        interfaces=("fit", "predict"), pretrained=False,
+        protocols=("mfass-v2", "genomic-benchmarks-v2", "tdc-admet-group-v1"),
+        options={"multiclass": "true for more than two classes."},
+        option_types={"multiclass": "boolean"},
+    ),
+    ModelSpec(
+        id="string-ngram-linear", title="Character 1 to 3-gram counts with a linear head",
+        adapter="rewirebench.adapters.baselines:StringNgramReference",
+        interfaces=("fit", "predict"), pretrained=False,
+        protocols=("genomic-benchmarks-v2", "tdc-admet-group-v1"),
+        options={"field": "sequence or smiles.",
+                 "classification": "false for a regression task.",
+                 "multiclass": "true for more than two classes."},
+        option_types={"classification": "boolean", "multiclass": "boolean"},
+    ),
+    ModelSpec(
+        id="paired-composition", title="Paired sequence composition features",
+        adapter="rewirebench.adapters.baselines:PairedComposition",
+        interfaces=("embed",), pretrained=False,
+        protocols=("mfass-v2-frozen-encoder",),
+        options={"constant": "true for the constant-feature control."},
+        option_types={"constant": "boolean"},
+    ),
+    ModelSpec(
+        id="mfass-kmer-position", title="MFASS corrected k-mer and position baseline",
+        adapter="rewirebench.adapters.mfass:KmerBaseline",
+        interfaces=("fit", "predict"), pretrained=False, protocols=("mfass-v2",),
+    ),
+    ModelSpec(
+        id="dnabert2-frozen", title="DNABERT-2 frozen encoder",
+        adapter="rewirebench.adapters.mfass:DNABERT2",
+        interfaces=("embed",), pretrained=True, extra="dnabert2",
+        protocols=("mfass-v2-frozen-encoder",),
+        options={"checkpoint": "Folder holding the pinned DNABERT-2 files. Each is "
+                               "checked by SHA-256 before loading.",
+                 "batch_size": "Encoder batch size, default 2."},
+        option_types={"batch_size": "integer"},
+        required_options=("checkpoint",),
+    ),
+    ModelSpec(
+        id="esm2-t6-8m-masked-marginal", title="ESM-2 8M masked-marginal substitution score",
+        adapter="rewirebench.adapters.esm:ESM2Adapter",
+        interfaces=("predict",), pretrained=True, extra="esm",
+        protocols=("proteingym-v1.3-dms-substitutions",),
+        options={"checkpoint": _CHECKPOINT, "device": _DEVICE},
+        required_options=("checkpoint",),
+    ),
+    ModelSpec(
+        id="esm2-embeddings", title="ESM-2 mean-pooled embeddings (8M or 35M)",
+        adapter="rewirebench.adapters.esm_embeddings:ESM2Embeddings",
+        interfaces=("embed",), pretrained=True, extra="esm",
+        protocols=("flip2-fitness-v1",),
+        options={"checkpoint": _CHECKPOINT, "device": _DEVICE,
+                 "model_name": "esm2_t6_8M_UR50D (default) or esm2_t12_35M_UR50D."},
+        required_options=("checkpoint",),
+    ),
+    ModelSpec(
+        id="evcouplings-independent", title="EVcouplings independent (site) model",
+        adapter="rewirebench.adapters.evcouplings_independent:EVCouplingsIndependent",
+        interfaces=("predict",), pretrained=True,
+        protocols=("proteingym-v1.3-dms-substitutions",),
+        options={"artifact": "Artifact JSON from prepare-baseline-artifact.",
+                 "artifact_sha256": "SHA-256 of that artifact."},
+        required_options=("artifact", "artifact_sha256"),
+        note="Fitted on alignments, not on assay labels.",
+    ),
+    ModelSpec(
+        id="fimo-h12core-hit-count", title="FIMO hit count over HOCOMOCO v12 H12CORE motifs",
+        adapter="rewirebench.adapters.fimo_motifs:H12CoreFimoHitCount",
+        interfaces=("predict",), pretrained=False,
+        protocols=("dart-eval-task1-zero-shot-v1",),
+        options={"fimo": "Path of a FIMO 5.5.9 executable.",
+                 "motifs": "Path of the H12CORE MEME file.",
+                 "fimo_sha256": "SHA-256 of that executable.",
+                 "timeout": "Seconds allowed per FIMO call."},
+        required_options=("fimo", "motifs", "fimo_sha256"), option_types={"timeout": "number"},
+        runs_program=True,
+        note="Starts the FIMO executable named in the options, so it runs from the command "
+             "line only: a recipe and the MCP server both refuse it.",
+    ),
+)
+
+REGISTRY: dict[str, ModelSpec] = {spec.id: spec for spec in _MODELS}
+
+
+def get_model(identifier: str) -> ModelSpec:
+    if identifier not in REGISTRY:
+        raise ValueError(f"Unknown model: {identifier}. Choose one of {', '.join(REGISTRY)}")
+    return REGISTRY[identifier]
+
+
+def list_models(protocol: str | None = None) -> list[dict[str, Any]]:
+    """Describe the registered models, or those a protocol accepts. Nothing is imported."""
+    if protocol is not None:
+        from rewirebench import sdk
+
+        if protocol not in sdk.PROTOCOLS:
+            raise ValueError(f"Unknown protocol: {protocol}")
+    return [spec.describe() for spec in _MODELS if protocol is None or protocol in spec.protocols]
+
+
+def _has_type(value: Any, wanted: OptionType) -> bool:
+    """JSON types, strictly: true is not an integer and "3" is not a number."""
+    if wanted == "boolean":
+        return isinstance(value, bool)
+    if isinstance(value, bool):
+        return False
+    if wanted == "integer":
+        return isinstance(value, int)
+    if wanted == "number":
+        return isinstance(value, (int, float)) and math.isfinite(value)
+    return isinstance(value, str) and bool(value)
+
+
+def check_protocol(spec: ModelSpec, protocol: Any) -> None:
+    """Refuse prepared data of a protocol the model is not registered for."""
+    if protocol not in spec.protocols:
+        raise ValueError(
+            f"Model {spec.id} is not registered for protocol {protocol}. "
+            f"Its protocols are: {', '.join(spec.protocols)}"
+        )
+
+
+def check_cpu(spec: ModelSpec, options: Mapping[str, Any]) -> None:
+    """Refuse a device other than cpu, where the caller may not use an accelerator."""
+    if options.get("device", "cpu") != "cpu":
+        raise ValueError(f"Model {spec.id}: the local backend is CPU only, so device must be cpu")
+
+
+def check_options(spec: ModelSpec, options: Any) -> dict[str, Any]:
+    """Refuse an option the model does not declare, one of the wrong JSON type, and a
+    missing required one."""
+    if not isinstance(options, dict):
+        raise ValueError("Adapter options are a JSON object")  # noqa: TRY004
+    allowed = set(spec.options or {})
+    unknown = sorted(set(options) - allowed)
+    if unknown:
+        raise ValueError(
+            f"Model {spec.id} has no option {unknown[0]!r}. "
+            f"Its options are: {', '.join(sorted(allowed)) or 'none'}"
+        )
+    for name, value in options.items():
+        wanted = spec.option_type(name)
+        if not _has_type(value, wanted):
+            raise ValueError(f"Model {spec.id}: option {name!r} must be {wanted}, "
+                             f"not {value!r}")
+    absent = [name for name in spec.required_options if name not in options]
+    if absent:
+        raise ValueError(f"Model {spec.id} needs the option {absent[0]!r}")
+    return options
+
+
+def load(spec: ModelSpec, options: dict[str, Any] | None = None) -> Any:
+    """Import and construct a registered adapter. This is where model code first runs."""
+    checked = check_options(spec, options or {})
+    module_name, _, class_name = spec.adapter.partition(":")
+    if not module_name.startswith("rewirebench.adapters."):
+        raise ValueError(f"Model {spec.id} is not a rewirebench adapter")
+    try:
+        factory = getattr(importlib.import_module(module_name), class_name)
+    except ImportError as error:
+        hint = f" Install rewirebench[{spec.extra}]." if spec.extra else ""
+        raise ValueError(f"Model {spec.id} cannot be imported: {error}.{hint}") from error
+    return factory(**checked)
