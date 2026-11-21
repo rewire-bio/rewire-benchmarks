@@ -87,6 +87,7 @@ Backend = Literal["local", "spark", "runpod", "nextflow"]
 StartedBy = Literal["human", "agent", "ci"]
 ReceiptKind = Literal["runner_ci_smoke", "runner_reproduction"]
 CheckStatus = Literal["match", "mismatch", "not_available"]
+CommitSource = Literal["checkout", "install_metadata"]
 Currency = Annotated[str, StringConstraints(pattern=r"^[A-Z]{3}$")]
 
 
@@ -101,11 +102,20 @@ class RecipePointer(Strict):
 
 
 class Code(Strict):
+    """``commit_source`` says where ``commit`` was read. ``checkout``: the HEAD of the git
+    checkout rewirebench ran from, which is also where ``dirty`` comes from.
+    ``install_metadata``: the commit the installer wrote into the package's
+    ``direct_url.json`` when it installed rewirebench from a git URL. No checkout
+    existed, so ``dirty`` is null. It is ``None`` when there is no commit, and in a
+    receipt written before the field existed.
+    """
+
     repository: Text | None
     commit: Revision | None
     dirty: bool | None
     rewirebench_version: Text
     sdk_code_sha256: Sha256
+    commit_source: CommitSource | None = None
 
 
 class ReceiptEnvironment(Strict):
@@ -331,11 +341,46 @@ def _without_credentials(url: str) -> str:
     return url.removesuffix(".git")
 
 
+def _direct_url() -> str | None:
+    """Text of the ``direct_url.json`` of the installed rewirebench, if it has one."""
+    try:
+        return importlib.metadata.distribution("rewirebench").read_text("direct_url.json")
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def installed_from() -> tuple[str | None, str | None]:
+    """Repository and commit an installer recorded for a rewirebench installed from git.
+
+    pip and uv write ``direct_url.json`` beside the package metadata (PEP 610). For an
+    install from a git URL it holds the commit that was built, under ``vcs_info``. An
+    install from a folder, an index or a wheel file has no such commit, and gives
+    ``(None, None)``.
+    """
+    try:
+        record = json.loads(_direct_url() or "null")
+    except ValueError:
+        return None, None
+    info = record.get("vcs_info") if isinstance(record, dict) else None
+    if not isinstance(info, dict) or info.get("vcs") != "git":
+        return None, None
+    commit, url = info.get("commit_id"), record.get("url")
+    if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{40}", commit):
+        return None, None
+    return (_without_credentials(url) if isinstance(url, str) and url else None), commit
+
+
 def code_state(root: Path | None) -> Code:
-    """Commit and cleanliness of the checkout, when the code runs from one."""
+    """Commit and cleanliness of the checkout, when the code runs from one.
+
+    Without a checkout (``root`` is ``None``: an installed wheel) the commit is the one
+    the installer recorded, if rewirebench was installed from git. ``commit_source`` says
+    which of the two it is. ``dirty`` is only known for a checkout.
+    """
     repository: str | None = None
     commit: str | None = None
     dirty: bool | None = None
+    source: CommitSource = "checkout"
     top = _run_text(["git", "rev-parse", "--show-toplevel"], cwd=root) if root else None
     if top is not None:
         commit = _run_text(["git", "rev-parse", "HEAD"], cwd=root)
@@ -346,12 +391,17 @@ def code_state(root: Path | None) -> Code:
         dirty = bool(status.stdout.strip()) if status.returncode == 0 else None
         origin = _run_text(["git", "remote", "get-url", "origin"], cwd=root)
         repository = _without_credentials(origin) if origin else None
+    elif root is None:
+        repository, commit = installed_from()
+        source = "install_metadata"
+    commit = commit if commit and len(commit) == 40 else None
     return Code(
         repository=repository,
-        commit=commit if commit and len(commit) == 40 else None,
+        commit=commit,
         dirty=dirty,
         rewirebench_version=sdk._version(),
         sdk_code_sha256=sdk._code_digest(),
+        commit_source=source if commit else None,
     )
 
 
@@ -1148,7 +1198,10 @@ def _verify_commits(receipt: Receipt) -> dict[str, str]:
     gaps: list[str] = []
     if receipt.code.commit is None:
         gaps.append("code.commit is null")
-    if receipt.code.dirty is not False:
+    if receipt.code.commit_source == "install_metadata":
+        gaps.append("code.commit comes from install metadata, not a checkout, so no "
+                    "tree was checked for changes")
+    elif receipt.code.dirty is not False:
         gaps.append("the code tree was not clean")
     if receipt.recipe is None or receipt.recipe.commit is None:
         gaps.append("recipe.commit is null")
