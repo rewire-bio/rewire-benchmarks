@@ -14,6 +14,7 @@ and with CUDA devices hidden. It is not a sandbox.
 
 from __future__ import annotations
 
+import base64
 import contextlib
 import datetime
 import hashlib
@@ -116,6 +117,15 @@ class Code(Strict):
     rewirebench_version: Text
     sdk_code_sha256: Sha256
     commit_source: CommitSource | None = None
+
+    @model_validator(mode="after")
+    def _source_agrees_with_the_rest(self) -> Code:
+        if self.commit_source is not None and self.commit is None:
+            raise ValueError("code.commit_source is set but code.commit is null")
+        if self.commit_source == "install_metadata" and self.dirty is not None:
+            raise ValueError("code.dirty must be null when code.commit_source is "
+                             "install_metadata: no tree was checked")
+        return self
 
 
 class ReceiptEnvironment(Strict):
@@ -328,25 +338,77 @@ def detect_hardware() -> Hardware:
     )
 
 
-def _without_credentials(url: str) -> str:
-    """Normalise a git remote to an https URL with no user, password or token."""
+REMOTE_SCHEMES = {"https": "https", "http": "http", "ssh": "https", "git": "https"}
+
+
+def _without_credentials(url: str) -> str | None:
+    """Normalise a git remote to an https URL with no user, password or token.
+
+    A remote that names no host (a ``file://`` URL or a folder) gives ``None``: it is a
+    path on the machine that ran, which a receipt must not carry.
+    """
     if "://" not in url and "@" in url and ":" in url:
         host, _, path = url.split("@", 1)[1].partition(":")
         url = f"https://{host}/{path}"
-    parts = urlsplit(url)
-    if parts.scheme and parts.hostname:
-        host = parts.hostname + (f":{parts.port}" if parts.port else "")
-        scheme = "https" if parts.scheme in {"ssh", "git"} else parts.scheme
-        url = urlunsplit((scheme, host, parts.path, "", ""))
+    try:
+        parts = urlsplit(url)
+        port = parts.port
+    except ValueError:
+        return None
+    if parts.scheme not in REMOTE_SCHEMES or not parts.hostname:
+        return None
+    host = parts.hostname + (f":{port}" if port else "")
+    url = urlunsplit((REMOTE_SCHEMES[parts.scheme], host, parts.path, "", ""))
     return url.removesuffix(".git")
+
+
+def _distribution() -> importlib.metadata.Distribution | None:
+    try:
+        return importlib.metadata.distribution("rewirebench")
+    except importlib.metadata.PackageNotFoundError:
+        return None
 
 
 def _direct_url() -> str | None:
     """Text of the ``direct_url.json`` of the installed rewirebench, if it has one."""
-    try:
-        return importlib.metadata.distribution("rewirebench").read_text("direct_url.json")
-    except importlib.metadata.PackageNotFoundError:
-        return None
+    distribution = _distribution()
+    return distribution.read_text("direct_url.json") if distribution else None
+
+
+def files_as_installed(
+    distribution: importlib.metadata.Distribution | None, package: Path
+) -> bool:
+    """Whether the installed files are the ones the installer wrote.
+
+    The installer lists every file of the wheel in ``RECORD`` with its SHA-256. This is
+    true when each listed file still has that digest and no ``.py`` file in the package
+    folder is missing from the list. It compares the install with its own ``RECORD``, so
+    it finds an edit made after the install, not a ``RECORD`` rewritten to match.
+    """
+    files = distribution.files if distribution is not None else None
+    if not files:
+        return False
+    listed: set[Path] = set()
+    for item in files:
+        path = Path(str(distribution.locate_file(item))).resolve()
+        listed.add(path)
+        if item.hash is None:
+            if path.suffix == ".py":
+                return False
+            continue
+        if item.hash.mode != "sha256":
+            return False
+        try:
+            digest = hashlib.sha256(path.read_bytes()).digest()
+        except OSError:
+            return False
+        if base64.urlsafe_b64encode(digest).rstrip(b"=").decode() != item.hash.value:
+            return False
+    return all(path.resolve() in listed for path in package.rglob("*.py"))
+
+
+def _install_unchanged() -> bool:
+    return files_as_installed(_distribution(), Path(__file__).resolve().parent)
 
 
 def installed_from() -> tuple[str | None, str | None]:
@@ -356,6 +418,10 @@ def installed_from() -> tuple[str | None, str | None]:
     install from a git URL it holds the commit that was built, under ``vcs_info``. An
     install from a folder, an index or a wheel file has no such commit, and gives
     ``(None, None)``.
+
+    The commit is given only while the installed files are the ones the installer wrote
+    (``files_as_installed``). After an edit the commit no longer describes the code that
+    runs, so only the repository is returned.
     """
     try:
         record = json.loads(_direct_url() or "null")
@@ -367,7 +433,8 @@ def installed_from() -> tuple[str | None, str | None]:
     commit, url = info.get("commit_id"), record.get("url")
     if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{40}", commit):
         return None, None
-    return (_without_credentials(url) if isinstance(url, str) and url else None), commit
+    repository = _without_credentials(url) if isinstance(url, str) and url else None
+    return repository, (commit if _install_unchanged() else None)
 
 
 def code_state(root: Path | None) -> Code:
@@ -376,12 +443,18 @@ def code_state(root: Path | None) -> Code:
     Without a checkout (``root`` is ``None``: an installed wheel) the commit is the one
     the installer recorded, if rewirebench was installed from git. ``commit_source`` says
     which of the two it is. ``dirty`` is only known for a checkout.
+
+    ``root`` must be the top of its own git work tree. A source tree that only sits inside
+    another repository gets no commit: that HEAD belongs to the outer repository. Install
+    metadata is read only when there is no source tree at all.
     """
     repository: str | None = None
     commit: str | None = None
     dirty: bool | None = None
     source: CommitSource = "checkout"
     top = _run_text(["git", "rev-parse", "--show-toplevel"], cwd=root) if root else None
+    if top is not None and root is not None and Path(top).resolve() != root.resolve():
+        top = None
     if top is not None:
         commit = _run_text(["git", "rev-parse", "HEAD"], cwd=root)
         status = subprocess.run(
@@ -426,10 +499,18 @@ def recipe_origin(path: Path) -> tuple[str | None, str | None]:
     return repository, commit
 
 
-def _source_root() -> Path | None:
-    """The checkout this module runs from, or ``None`` for an installed wheel."""
-    parents = Path(__file__).resolve().parents
-    if len(parents) > 4 and (parents[4] / "packages" / "rewirebench").is_dir():
+SOURCE_LAYOUT = ("packages", "rewirebench", "src", "rewirebench")
+
+
+def _source_root(module: Path | None = None) -> Path | None:
+    """The checkout this module runs from, or ``None`` for an installed wheel.
+
+    The module file itself must sit at ``packages/rewirebench/src/rewirebench`` under the
+    root. A folder of that name beside an installed copy does not make it a checkout.
+    """
+    module = Path(module or __file__).resolve()
+    parents = module.parents
+    if len(parents) > 4 and module.parent == parents[4].joinpath(*SOURCE_LAYOUT):
         return parents[4]
     return None
 
