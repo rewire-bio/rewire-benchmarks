@@ -1,7 +1,10 @@
 """Every run writes a receipt, and verify recomputes it instead of trusting it."""
 from __future__ import annotations
 
+import base64
 import datetime
+import hashlib
+import importlib.metadata
 import io
 import json
 import os
@@ -529,10 +532,12 @@ def test_code_state_reports_a_dirty_tree(tmp_path: Path):
     assert state.commit_source == "checkout" and receipts.code_state(None).commit_source is None
 
 
-def install_record(monkeypatch: pytest.MonkeyPatch, record: Any) -> None:
-    """Stand in for the direct_url.json of the installed rewirebench."""
+def install_record(monkeypatch: pytest.MonkeyPatch, record: Any, unchanged: bool = True) -> None:
+    """Stand in for the direct_url.json of the installed rewirebench, and for whether its
+    files still match the installer's RECORD."""
     text = record if isinstance(record, str) or record is None else json.dumps(record)
     monkeypatch.setattr(receipts, "_direct_url", lambda: text)
+    monkeypatch.setattr(receipts, "_install_unchanged", lambda: unchanged)
 
 
 GIT_INSTALL = {
@@ -574,6 +579,180 @@ def test_an_install_from_git_gives_the_commit_and_says_where_it_came_from(
     committed = receipt.model_copy(update={
         "recipe": receipt.recipe.model_copy(update={"commit": "c" * 40})})
     assert receipts._verify_commits(committed)["status"] == "not_available"
+    # The gap is the source of the commit, whatever dirty says. A receipt cannot be loaded
+    # with install_metadata and a dirty value, and the check does not rely on that.
+    claimed_clean = committed.model_copy(update={
+        "code": committed.code.model_copy(update={"dirty": False})})
+    found = receipts._verify_commits(claimed_clean)
+    assert found["status"] == "not_available" and "install metadata" in found["detail"]
+    from_checkout = claimed_clean.model_copy(update={
+        "code": claimed_clean.code.model_copy(update={"commit_source": "checkout"})})
+    assert receipts._verify_commits(from_checkout)["status"] == "match"
+
+
+def test_a_code_block_that_contradicts_its_commit_source_is_refused(run_copy: Path):
+    code = json.loads((run_copy / "receipt.json").read_text())["code"]
+    commit = "c" * 40
+    for change, reason in (
+        ({"commit": None, "commit_source": "checkout"}, "code.commit is null"),
+        ({"commit": None, "commit_source": "install_metadata", "dirty": None},
+         "code.commit is null"),
+        ({"commit": commit, "commit_source": "install_metadata", "dirty": False},
+         "code.dirty must be null"),
+        ({"commit": commit, "commit_source": "install_metadata", "dirty": True},
+         "code.dirty must be null"),
+    ):
+        with pytest.raises(ValidationError, match=reason):
+            receipts.Code.model_validate({**code, **change})
+    for change in (
+        {"commit": commit, "commit_source": "install_metadata", "dirty": None},
+        {"commit": commit, "commit_source": "checkout", "dirty": False},
+        {"commit": commit, "commit_source": "checkout", "dirty": True},
+        # git status failed in a checkout.
+        {"commit": commit, "commit_source": "checkout", "dirty": None},
+        # Written before the field existed.
+        {"commit": commit, "commit_source": None, "dirty": False},
+        {"commit": None, "commit_source": None, "dirty": None},
+        {"commit": None, "commit_source": None, "dirty": True},
+    ):
+        assert receipts.Code.model_validate({**code, **change})
+    rewrite_receipt(run_copy, lambda data: data["code"].update(
+        commit_source="install_metadata", dirty=False))
+    with pytest.raises(ValueError, match="code.dirty must be null"):
+        receipts.load_receipt(run_copy)
+
+
+def test_a_source_tree_without_its_own_repository_gets_no_commit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Install metadata is for an installed wheel only, and the HEAD of a repository that
+    merely contains the source tree says nothing about the tree."""
+    install_record(monkeypatch, GIT_INSTALL)
+    assert receipts.code_state(None).commit == "c" * 40
+    # A source tree in no repository: the metadata of some other install is not read.
+    plain = tmp_path / "plain"
+    plain.mkdir()
+    state = receipts.code_state(plain)
+    assert state.commit is None and state.commit_source is None
+    assert state.repository is None and state.dirty is None
+    # A source tree without .git, inside an unrelated repository.
+    outer = tmp_path / "outer"
+    inner = outer / "vendored/tree"
+    inner.mkdir(parents=True)
+    git(outer, "init", "--quiet")
+    git(outer, "remote", "add", "origin", "https://github.com/example/unrelated.git")
+    (outer / "tracked.txt").write_text("one\n")
+    git(outer, "add", "tracked.txt")
+    git(outer, "commit", "--quiet", "-m", "first")
+    (inner / "code.py").write_text("untracked\n")
+    assert receipts.code_state(outer).commit == git(outer, "rev-parse", "HEAD")
+    state = receipts.code_state(inner)
+    assert state.commit is None and state.commit_source is None
+    assert state.repository is None and state.dirty is None
+    # The top of a work tree is still found through a symlink to it.
+    link = tmp_path / "link"
+    link.symlink_to(outer, target_is_directory=True)
+    assert receipts.code_state(link).commit == git(outer, "rev-parse", "HEAD")
+
+
+def test_a_checkout_is_known_by_where_the_module_sits(tmp_path: Path):
+    assert receipts._source_root() == ROOT
+    module = tmp_path / "checkout/packages/rewirebench/src/rewirebench/receipts.py"
+    assert receipts._source_root(module) == (tmp_path / "checkout").resolve()
+    # An installed copy, with a folder named like the source tree made beside it.
+    venv = tmp_path / "venv"
+    (venv / "packages/rewirebench").mkdir(parents=True)
+    installed = venv / "lib/python3.12/site-packages/rewirebench/receipts.py"
+    installed.parent.mkdir(parents=True)
+    installed.write_text("")
+    assert receipts._source_root(installed) is None
+    assert receipts._source_root(tmp_path / "packages/rewirebench/other/rewirebench/x.py") is None
+    assert receipts._source_root(Path("/receipts.py")) is None
+
+
+def installed_wheel(site: Path, files: dict[str, str]) -> importlib.metadata.Distribution:
+    """Write files and a dist-info folder with a RECORD of their digests, as an installer does."""
+    info = site / "rewirebench-0.0.0.dist-info"
+    info.mkdir(parents=True)
+    files = {**files, f"{info.name}/METADATA": "Name: rewirebench\nVersion: 0.0.0\n",
+             f"{info.name}/direct_url.json": json.dumps(GIT_INSTALL)}
+    lines = []
+    for name, text in files.items():
+        (site / name).parent.mkdir(parents=True, exist_ok=True)
+        (site / name).write_text(text)
+        digest = base64.urlsafe_b64encode(hashlib.sha256(text.encode()).digest())
+        lines.append(f"{name},sha256={digest.rstrip(b'=').decode()},{len(text.encode())}")
+    lines += [f"{info.name}/RECORD,,", "rewirebench/__pycache__/sdk.cpython-312.pyc,,"]
+    (info / "RECORD").write_text("\n".join(lines) + "\n")
+    return importlib.metadata.Distribution.at(info)
+
+
+def test_an_edited_install_is_told_from_the_one_the_installer_wrote(tmp_path: Path):
+    files = {"rewirebench/__init__.py": "", "rewirebench/sdk.py": "VALUE = 1\n"}
+    site = tmp_path / "site-packages"
+    wheel = installed_wheel(site, files)
+    package = site / "rewirebench"
+    assert receipts.files_as_installed(wheel, package)
+    assert not receipts.files_as_installed(None, package)
+    # One line appended to a module.
+    (package / "sdk.py").write_text("VALUE = 1\nVALUE = 2\n")
+    assert not receipts.files_as_installed(wheel, package)
+    (package / "sdk.py").write_text("VALUE = 1\n")
+    assert receipts.files_as_installed(wheel, package)
+    # A module the wheel did not ship.
+    (package / "added.py").write_text("")
+    assert not receipts.files_as_installed(wheel, package)
+    (package / "added.py").unlink()
+    # The recorded commit rewritten.
+    direct = site / "rewirebench-0.0.0.dist-info/direct_url.json"
+    direct.write_text(direct.read_text().replace("c" * 40, "d" * 40))
+    assert not receipts.files_as_installed(wheel, package)
+    direct.write_text(json.dumps(GIT_INSTALL))
+    assert receipts.files_as_installed(wheel, package)
+    (package / "sdk.py").unlink()
+    assert not receipts.files_as_installed(wheel, package)
+    # No RECORD, a module listed without a digest, and a digest that is not SHA-256.
+    for number, record in enumerate(("", "rewirebench/__init__.py,,\n",
+                                     "rewirebench/__init__.py,md5=abc,0\n")):
+        other = installed_wheel(tmp_path / f"site-{number}", {"rewirebench/__init__.py": ""})
+        info = tmp_path / f"site-{number}/rewirebench-0.0.0.dist-info"
+        assert receipts.files_as_installed(other, info.parent / "rewirebench")
+        (info / "RECORD").write_text(record)
+        assert not receipts.files_as_installed(other, info.parent / "rewirebench")
+
+
+def test_an_edited_install_gives_no_commit(monkeypatch: pytest.MonkeyPatch):
+    """The commit names the code the installer wrote. After an edit it would name code
+    that did not run, so the receipt has none."""
+    install_record(monkeypatch, GIT_INSTALL, unchanged=False)
+    assert receipts.installed_from() == (
+        "https://github.com/rewire-bio/rewire-benchmarks", None)
+    state = receipts.code_state(None)
+    assert state.commit is None and state.commit_source is None and state.dirty is None
+    # The tests run from a source tree, which is not an install with a RECORD of its files.
+    monkeypatch.undo()
+    assert receipts._install_unchanged() is False
+
+
+def test_a_remote_that_is_a_local_path_is_not_recorded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    for remote in ("file:///Users/name/repo", "file://localhost/Users/name/repo",
+                   "/Users/name/repo", "../repo", "repo.git", "C:\\Users\\name\\repo",
+                   "https://", "https://example.org:port/repo"):
+        assert receipts._without_credentials(remote) is None
+    assert receipts._without_credentials("http://example.org:8080/a/b.git") == \
+        "http://example.org:8080/a/b"
+    install_record(monkeypatch, {**GIT_INSTALL, "url": "file:///Users/name/repo"})
+    assert receipts.installed_from() == (None, "c" * 40)
+    git(tmp_path, "init", "--quiet")
+    git(tmp_path, "remote", "add", "origin", str(tmp_path / "elsewhere"))
+    (tmp_path / "recipe.yaml").write_text("one\n")
+    git(tmp_path, "add", "recipe.yaml")
+    git(tmp_path, "commit", "--quiet", "-m", "first")
+    state = receipts.code_state(tmp_path)
+    assert state.repository is None and state.commit == git(tmp_path, "rev-parse", "HEAD")
+    assert receipts.recipe_origin(tmp_path / "recipe.yaml") == (None, state.commit)
 
 
 @pytest.mark.parametrize("record", [

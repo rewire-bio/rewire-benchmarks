@@ -76,7 +76,10 @@ without a recipe has `scope: null`. The commit condition is checked when the rec
 `code.commit` is the commit of the checkout rewirebench runs from. For an installed wheel it is
 the commit the installer recorded when the wheel was installed from a git URL, with
 `code.commit_source` set to `install_metadata` and `code.dirty` null, and it is null for any
-other install. `recipe.commit` is set only when the recipe file at that commit has the bytes
+other install. It is also null for an install whose files no longer have the digests in the
+wheel's `RECORD`, and for a source tree that is not the top of its own git work tree. A receipt
+with `install_metadata` and a `dirty` value, or a `commit_source` without a commit, does not
+load. A remote that names no host is not recorded as a repository. `recipe.commit` is set only when the recipe file at that commit has the bytes
 that ran. A reviewer should not promote a recipe on a receipt where `recipe.commit` is null, or
 where `code.commit` is null or `code.dirty` is not false. `rewirebench receipt verify --strict` fails on
 such a receipt (its `commits` check), and on a receipt whose run failed.
