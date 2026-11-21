@@ -63,13 +63,23 @@ reports every other file under `invalid`, with exit code 1.
 - A step names paths only under those three folders. Every path option (`--source`,
   `--prepared`, `--predictions`, `--embeddings`, `--manifest`, `--output`) starts with
   `{inputs}`, `{work}` or `{output}` and has no `..` part, and `--output` starts with `{work}`
-  or `{output}`. The same holds for a path inside `--options`, `--adapter-options` or
-  `--baseline-options`: the keys `artifact`, `checkpoint`, `fimo`, `motifs`, `reference` and
-  `split`, and any other text value that is absolute, has a `..` part or names a placeholder.
+  or `{output}`. The same holds for a path inside the JSON options. Which keys hold a path
+  depends on who reads them:
+  - `--options` of `prepare`: `split` for the MFASS protocols and `reference` for ProteinGym.
+    For FLIP2 `split` is the name of a split, so `"split": "one_to_many"` is accepted.
+  - `--adapter-options` and `--baseline-options`: `artifact`, `checkpoint`, `fimo` and
+    `motifs`.
+  - Under any other key, a text value that is absolute, has a `..` part or names a
+    placeholder.
+
+  So `"checkpoint": "x.pt"` is refused and `"checkpoint": "{inputs}/x.pt"` is accepted.
+  `--output` also cannot be `{output}/receipt.json`, `{output}/SHA256SUMS` or anything under
+  `{output}/logs`, which the runner writes itself.
   Validation checks the recipe as written. Just before each step starts, the runner resolves
   the rendered paths, following symbolic links, and refuses the step if one is outside the
-  three folders; the run stops there with no receipt. A file a step reads can itself name
-  other files (the manifest of `prepare-baseline-artifact` does). Those are not checked.
+  three folders; the run stops there with no receipt. Hard links are not detected. A file a
+  step reads can itself name other files (the manifest of `prepare-baseline-artifact` does).
+  Those are not checked.
 - A command may set `timeout_seconds` (default 3600, at most 86400). A step still running then
   is stopped, with any process it started, and the run fails.
 - `outputs` lists the files the run must write, relative to the run folder. `receipt.json`,

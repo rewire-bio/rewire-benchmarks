@@ -80,10 +80,18 @@ STEP_VALUES: dict[str, tuple[str, ...]] = {
     "run-baselines": ("baseline", "batch_size"),
     "prepare-baseline-artifact": ("baseline",),
 }
-# Keys of the JSON options whose value is opened as a file: by a protocol's prepare
-# (split, reference), by a model adapter (checkpoint, motifs, fimo) or by a baseline
-# (artifact, motifs, fimo).
-JSON_PATH_KEYS = ("artifact", "checkpoint", "fimo", "motifs", "reference", "split")
+# Keys of the JSON options whose value is opened as a file. Which keys are paths depends
+# on who reads them. The same key can be a name elsewhere: FLIP2 reads `split` as the
+# name of a split, and MFASS reads it as a file.
+# PREPARE_PATH_KEYS is by protocol module (the values of sdk.PROTOCOLS) and covers
+# `prepare --options`. MODEL_PATH_KEYS covers `run --adapter-options` and
+# `run-baselines --baseline-options`: a model adapter opens checkpoint, motifs and fimo,
+# and a baseline opens artifact, motifs and fimo.
+PREPARE_PATH_KEYS: dict[str, tuple[str, ...]] = {
+    "mfass": ("split",),
+    "proteingym": ("reference",),
+}
+MODEL_PATH_KEYS = ("artifact", "checkpoint", "fimo", "motifs")
 READ_FOLDERS = ("inputs", "work", "output")
 WRITE_FOLDERS = ("work", "output")
 # Names the runner writes into a run folder. A recipe cannot list them as outputs.
@@ -215,21 +223,41 @@ def _looks_like_path(value: str) -> bool:
                 or ".." in re.split(r"[/\\]", value))
 
 
-def _json_paths(value: Any, where: str, listed: bool = False) -> Iterator[tuple[str, str]]:
+def _path_keys(command: str, arguments: Mapping[str, Any]) -> frozenset[str]:
+    """The keys of the step's JSON option whose value is a path whatever it looks like."""
+    if command != "prepare":
+        return frozenset(MODEL_PATH_KEYS)
+    from rewirebench import sdk
+
+    module = sdk.PROTOCOLS.get(arguments["protocol"])
+    if module is None:
+        # No such protocol, so nothing says which keys it reads: hold all of them.
+        return frozenset(key for keys in PREPARE_PATH_KEYS.values() for key in keys)
+    return frozenset(PREPARE_PATH_KEYS.get(module, ()))
+
+
+def _json_paths(value: Any, where: str, keys: frozenset[str],
+                listed: bool = False) -> Iterator[tuple[str, str]]:
     """Each text value of a JSON option that is a path, with the key that holds it.
 
-    A value under one of ``JSON_PATH_KEYS`` is a path whatever it looks like. Any other
-    text is one if it is absolute, has a ``..`` part or names a placeholder, so a path
-    under a key this list does not know is still held to the rule.
+    A value under one of ``keys`` is a path whatever it looks like. Any other text is one
+    if it is absolute, has a ``..`` part or names a placeholder, so a path under a key
+    that is not listed is still held to the rule.
     """
     if isinstance(value, dict):
         for key, item in value.items():
-            yield from _json_paths(item, f"{where} {key!r}", listed or key in JSON_PATH_KEYS)
+            yield from _json_paths(item, f"{where} {key!r}", keys, listed or key in keys)
     elif isinstance(value, list):
         for item in value:
-            yield from _json_paths(item, where, listed)
+            yield from _json_paths(item, where, keys, listed)
     elif isinstance(value, str) and (listed or _looks_like_path(value)):
         yield where, value
+
+
+def _reserved(parts: tuple[str, ...]) -> bool:
+    """Whether a path, given by its parts below the run folder, is one the runner writes."""
+    return bool(parts) and (parts[0] == RESERVED_FOLDER
+                            or (len(parts) == 1 and parts[0] in RESERVED_OUTPUTS))
 
 
 def _resolved(path: str, folder: str) -> Path:
@@ -250,6 +278,9 @@ def check_step_paths(argv: list[str], folders: Mapping[str, str] | None = None) 
     to folder) it checks the rendered argv just before the step runs: every path, with
     symbolic links followed, is inside one of those folders. That catches a link an
     earlier step or an input left behind, which the first check cannot see.
+
+    A step also cannot write to the names the runner writes in the run folder
+    (``receipt.json``, ``SHA256SUMS`` and anything under ``logs/``).
 
     The paths are the path options of the subcommand and the paths inside its JSON
     option. A file that a step reads may itself name other files (the manifest of
@@ -277,9 +308,12 @@ def check_step_paths(argv: list[str], folders: Mapping[str, str] | None = None) 
             content = json.loads(arguments[json_option])
         except json.JSONDecodeError as error:
             raise ValueError(f"{option} is not JSON: {error}") from error
-        found.extend((where, value, READ_FOLDERS) for where, value in _json_paths(content, option))
+        found.extend((where, value, READ_FOLDERS) for where, value
+                     in _json_paths(content, option, _path_keys(command, arguments)))
+    theirs = f"({', '.join(RESERVED_OUTPUTS)} and {RESERVED_FOLDER}/)"
     for where, value, allowed in found:
         names = ", ".join("{" + name + "}" for name in allowed[:-1]) + " or {" + allowed[-1] + "}"
+        writes = allowed is WRITE_FOLDERS
         if folders is None:
             match = _ROOTED.fullmatch(value)
             if (match is None or match.group(1) not in allowed or "\\" in value
@@ -287,12 +321,20 @@ def check_step_paths(argv: list[str], folders: Mapping[str, str] | None = None) 
                 raise ValueError(
                     f"{where} must be a path under {names}, with no .. part: {value!r}"
                 )
+            below = PurePosixPath((match.group(2) or "").lstrip("/")).parts
+            if writes and match.group(1) == "output" and _reserved(below):
+                raise ValueError(
+                    f"{where} uses a name the runner writes itself {theirs}: {value!r}"
+                )
         else:
             path = _resolved(value, folders["work"])
-            roots = [_resolved(folders[name], folders["work"]) for name in allowed]
-            if not any(path == root or root in path.parents for root in roots):
+            roots = {name: _resolved(folders[name], folders["work"]) for name in allowed}
+            if not any(path == root or root in path.parents for root in roots.values()):
                 # The value is a local path, so the message leaves it out.
                 raise ValueError(f"{where} resolves to a path outside {names}")
+            run = roots["output"]
+            if writes and run in path.parents and _reserved(path.relative_to(run).parts):
+                raise ValueError(f"{where} resolves to a name the runner writes itself {theirs}")
 
 
 class Strict(BaseModel):
