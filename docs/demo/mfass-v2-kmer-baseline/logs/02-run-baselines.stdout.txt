@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "kind": "rewire_baseline_batch",
+  "registry_version": "1",
+  "protocol_id": "mfass-v2",
+  "dataset_id": "mfass-assay-pairs-v2",
+  "prepared_sha256": "cbba55d19fea7cb204127343ecb554da169a16f047117eb1db6472a5707f38d3",
+  "scope": "full",
+  "sdk_code_sha256": "3297cfe0fcd27909c5f9aff10a767e425a5a3319a3b5594ac6ac104cc341c50b",
+  "created_at": "2026-11-21T01:07:57.761839+00:00",
+  "publication": "local_only_not_submitted",
+  "baselines": [
+    {
+      "baseline_id": "mfass-kmer-position-v2",
+      "role": "conventional",
+      "configuration": {
+        "window": 21,
+        "k": 3,
+        "orientation": "validated assay-oriented mutant",
+        "max_iter": 300,
+        "learning_rate": 0.06,
+        "max_leaf_nodes": 31,
+        "l2_regularization": 1.0,
+        "seed": 20260914,
+        "additional_inputs": [
+          "position",
+          "region",
+          "phyloP",
+          "phastCons"
+        ],
+        "reference_revision": "bee9133b83f3aedaf2bbb9013f1875515845607e"
+      },
+      "status": "evaluated",
+      "report": "mfass-kmer-position-v2/report.json",
+      "completion": "complete",
+      "coverage": {
+        "denominator": 8324,
+        "scored": 8324,
+        "unscored": 0
+      },
+      "scientific_reproduction": "not_established"
+    }
+  ],
+  "status": "evaluated"
+}

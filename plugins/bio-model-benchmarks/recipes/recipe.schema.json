@@ -1,0 +1,1108 @@
+{
+  "$defs": {
+    "Accelerator": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "none",
+            "gpu"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Count"
+        },
+        "memory_gb": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Memory Gb"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "Accelerator",
+      "type": "object"
+    },
+    "Backends": {
+      "additionalProperties": false,
+      "description": "Where the recipe may run. A backend that is not named here must refuse it.",
+      "properties": {
+        "local": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalBackend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "spark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SparkBackend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "runpod": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunpodBackend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "nextflow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NextflowBackend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "Backends",
+      "type": "object"
+    },
+    "Command": {
+      "additionalProperties": false,
+      "description": "One rewirebench step as an argv list. No shell is involved.\n\nThe first element is ``rewirebench`` and the second one of ``RUNNER_COMMANDS``. A\n``run`` step names a registered model with ``--model``. A step that runs longer than\n``timeout_seconds`` is stopped and the run fails.\n\nThe JSON Schema states the shape of these rules: the program, the subcommand, and\nfor ``run`` a ``--model`` option and no ``--adapter``. Whether the model is\nregistered, may be used in a recipe and is given options it declares is checked by\n``rewirebench recipe validate`` only.",
+      "if": {
+        "properties": {
+          "argv": {
+            "prefixItems": [
+              {},
+              {
+                "const": "run"
+              }
+            ]
+          }
+        }
+      },
+      "properties": {
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
+          "title": "Name",
+          "type": "string"
+        },
+        "argv": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "const": "rewirebench"
+            },
+            {
+              "enum": [
+                "prepare",
+                "evaluate",
+                "run-baselines",
+                "prepare-baseline-artifact",
+                "run"
+              ]
+            }
+          ],
+          "title": "Argv",
+          "type": "array"
+        },
+        "timeout_seconds": {
+          "default": 3600,
+          "exclusiveMinimum": 0,
+          "maximum": 86400,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "argv"
+      ],
+      "then": {
+        "properties": {
+          "argv": {
+            "contains": {
+              "pattern": "^--model(=.+)?$"
+            },
+            "not": {
+              "contains": {
+                "pattern": "^--adapter(=.*)?$"
+              }
+            }
+          }
+        }
+      },
+      "title": "Command",
+      "type": "object"
+    },
+    "Environment": {
+      "additionalProperties": false,
+      "description": "ADR 0005 ``environment``: runtime, Python and one image digest per platform.",
+      "properties": {
+        "runtime": {
+          "enum": [
+            "python",
+            "docker",
+            "podman",
+            "apptainer"
+          ],
+          "title": "Runtime",
+          "type": "string"
+        },
+        "python": {
+          "anyOf": [
+            {
+              "pattern": "^(>=|==)3\\.\\d+(\\.\\d+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Python"
+        },
+        "images": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PlatformImage"
+          },
+          "propertyNames": {
+            "enum": [
+              "linux/amd64",
+              "linux/arm64"
+            ]
+          },
+          "title": "Images",
+          "type": "object"
+        },
+        "lockfile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Lockfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "runtime",
+        "images"
+      ],
+      "title": "Environment",
+      "type": "object"
+    },
+    "Estimate": {
+      "additionalProperties": false,
+      "properties": {
+        "gpu_hours": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "GPU-hours summed over every GPU: two GPUs for one hour is 2.",
+          "title": "Gpu Hours"
+        },
+        "wall_clock_seconds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wall Clock Seconds"
+        },
+        "price_basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PriceBasis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "note": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "title": "Estimate",
+      "type": "object"
+    },
+    "ExpectedArtifact": {
+      "additionalProperties": false,
+      "description": "An output file that is bit-reproducible, checked by SHA-256.",
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "ExpectedArtifact",
+      "type": "object"
+    },
+    "ExpectedOutput": {
+      "additionalProperties": false,
+      "description": "ADR 0005 ``expected_output``: how a reader can tell the run worked.",
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "values": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExpectedValue"
+          },
+          "title": "Values",
+          "type": "array"
+        },
+        "artifacts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExpectedArtifact"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "ExpectedOutput",
+      "type": "object"
+    },
+    "ExpectedValue": {
+      "additionalProperties": false,
+      "description": "A value read from a JSON output file and compared within a tolerance.",
+      "properties": {
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "metric_id": {
+          "minLength": 1,
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "file": {
+          "minLength": 1,
+          "title": "File",
+          "type": "string"
+        },
+        "key": {
+          "items": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Key",
+          "type": "array"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "tolerance": {
+          "minimum": 0,
+          "title": "Tolerance",
+          "type": "number"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "label",
+        "metric_id",
+        "file",
+        "key",
+        "value",
+        "tolerance"
+      ],
+      "title": "ExpectedValue",
+      "type": "object"
+    },
+    "HardwareFloor": {
+      "additionalProperties": false,
+      "description": "ADR 0005 ``hardware_floor``. Every figure shares the stated basis.",
+      "properties": {
+        "accelerator": {
+          "$ref": "#/$defs/Accelerator"
+        },
+        "host_memory_gb": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Host Memory Gb"
+        },
+        "disk_gb": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Disk Gb"
+        },
+        "wall_clock_seconds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wall Clock Seconds"
+        },
+        "basis": {
+          "enum": [
+            "source_stated",
+            "measured_by_rewire"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "accelerator",
+        "basis"
+      ],
+      "title": "HardwareFloor",
+      "type": "object"
+    },
+    "Licence": {
+      "additionalProperties": false,
+      "description": "Free text, an SPDX identifier where one applies.",
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "weights": {
+          "minLength": 1,
+          "title": "Weights",
+          "type": "string"
+        },
+        "data": {
+          "minLength": 1,
+          "title": "Data",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "weights",
+        "data"
+      ],
+      "title": "Licence",
+      "type": "object"
+    },
+    "LocalBackend": {
+      "additionalProperties": false,
+      "properties": {},
+      "title": "LocalBackend",
+      "type": "object"
+    },
+    "Lockfile": {
+      "additionalProperties": false,
+      "description": "A lock file in the recipe's repository. A run refuses a file with other bytes.",
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "Lockfile",
+      "type": "object"
+    },
+    "Missing": {
+      "additionalProperties": false,
+      "description": "Why a block is absent, in the store's missingness vocabulary.",
+      "properties": {
+        "reason": {
+          "enum": [
+            "inapplicable",
+            "unavailable",
+            "unextracted",
+            "unreported"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "title": "Missing",
+      "type": "object"
+    },
+    "NextflowBackend": {
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "minLength": 1,
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "title": "NextflowBackend",
+      "type": "object"
+    },
+    "PlatformImage": {
+      "additionalProperties": false,
+      "description": "A container image by digest for one platform, or the reason there is none.",
+      "properties": {
+        "reference": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference"
+        },
+        "missing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Missing"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "PlatformImage",
+      "type": "object"
+    },
+    "PriceBasis": {
+      "additionalProperties": false,
+      "description": "A dated price observation. Without one, a recipe states no money figure.",
+      "properties": {
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "accelerator": {
+          "minLength": 1,
+          "title": "Accelerator",
+          "type": "string"
+        },
+        "amount_per_hour": {
+          "exclusiveMinimum": 0,
+          "title": "Amount Per Hour",
+          "type": "number"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "rate_source": {
+          "minLength": 1,
+          "title": "Rate Source",
+          "type": "string"
+        },
+        "rate_date": {
+          "format": "date",
+          "title": "Rate Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "accelerator",
+        "amount_per_hour",
+        "currency",
+        "rate_source",
+        "rate_date"
+      ],
+      "title": "PriceBasis",
+      "type": "object"
+    },
+    "RecipeInput": {
+      "additionalProperties": false,
+      "description": "One input file, pinned by SHA-256, from a URL or from this repository.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "repo_path": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Path"
+        },
+        "bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bytes"
+        }
+      },
+      "required": [
+        "name",
+        "sha256"
+      ],
+      "title": "RecipeInput",
+      "type": "object"
+    },
+    "RunpodBackend": {
+      "additionalProperties": false,
+      "description": "Pod shape and the longest the pod may live. The quote is built from these.",
+      "properties": {
+        "gpu_types": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Gpu Types",
+          "type": "array"
+        },
+        "cloud": {
+          "default": "SECURE",
+          "enum": [
+            "SECURE",
+            "COMMUNITY"
+          ],
+          "title": "Cloud",
+          "type": "string"
+        },
+        "disk_gb": {
+          "exclusiveMinimum": 0,
+          "title": "Disk Gb",
+          "type": "integer"
+        },
+        "max_hours": {
+          "exclusiveMinimum": 0,
+          "maximum": 24,
+          "title": "Max Hours",
+          "type": "number"
+        }
+      },
+      "required": [
+        "gpu_types",
+        "disk_gb",
+        "max_hours"
+      ],
+      "title": "RunpodBackend",
+      "type": "object"
+    },
+    "SparkBackend": {
+      "additionalProperties": false,
+      "properties": {
+        "gpus": {
+          "default": true,
+          "title": "Gpus",
+          "type": "boolean"
+        }
+      },
+      "title": "SparkBackend",
+      "type": "object"
+    },
+    "WeightsFile": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "WeightsFile",
+      "type": "object"
+    },
+    "WeightsPin": {
+      "additionalProperties": false,
+      "description": "ADR 0005 ``weights_pin``: where the weights are and which bytes they are.",
+      "properties": {
+        "host": {
+          "enum": [
+            "huggingface",
+            "github",
+            "zenodo",
+            "other"
+          ],
+          "title": "Host",
+          "type": "string"
+        },
+        "repository": {
+          "minLength": 1,
+          "title": "Repository",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/WeightsFile"
+          },
+          "minItems": 1,
+          "title": "Files",
+          "type": "array"
+        },
+        "licence": {
+          "minLength": 1,
+          "title": "Licence",
+          "type": "string"
+        },
+        "gated": {
+          "title": "Gated",
+          "type": "boolean"
+        },
+        "resolved_on": {
+          "format": "date",
+          "title": "Resolved On",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "repository",
+        "files",
+        "licence",
+        "gated",
+        "resolved_on"
+      ],
+      "title": "WeightsPin",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "summary": {
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "model_run",
+        "benchmark_run",
+        "data_prep"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "rescore_predictions",
+        "generate_and_evaluate",
+        "obtain_and_run",
+        "harness_run"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "scope": {
+      "enum": [
+        "synthetic_smoke",
+        "selected_assay",
+        "full_protocol"
+      ],
+      "title": "Scope",
+      "type": "string"
+    },
+    "rewirebench_protocol": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rewirebench Protocol"
+    },
+    "kg_record_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Kg Record Id"
+    },
+    "store_recipe_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Store Recipe Id"
+    },
+    "licence": {
+      "$ref": "#/$defs/Licence"
+    },
+    "environment": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Environment"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "weights_pin": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/WeightsPin"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Weights Pin"
+    },
+    "hardware_floor": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HardwareFloor"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "expected_output": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpectedOutput"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "missing": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Missing"
+      },
+      "default": {},
+      "propertyNames": {
+        "enum": [
+          "weights_pin",
+          "environment",
+          "hardware_floor",
+          "expected_output"
+        ]
+      },
+      "title": "Missing",
+      "type": "object"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/RecipeInput"
+      },
+      "minItems": 1,
+      "title": "Inputs",
+      "type": "array"
+    },
+    "commands": {
+      "items": {
+        "$ref": "#/$defs/Command"
+      },
+      "minItems": 1,
+      "title": "Commands",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "estimate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Estimate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "backends": {
+      "$ref": "#/$defs/Backends"
+    },
+    "limitations": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "summary",
+    "kind",
+    "purpose",
+    "scope",
+    "licence",
+    "inputs",
+    "commands",
+    "outputs",
+    "backends"
+  ],
+  "title": "rewirebench run recipe",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

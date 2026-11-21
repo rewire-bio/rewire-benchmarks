@@ -1,0 +1,90 @@
+schema_version: "1.0"
+id: flip2-synthetic-smoke
+title: FLIP2 plumbing check on a synthetic fixture
+summary: >-
+  Runs the training-mean baseline through the flip2-fitness-v1 protocol on the eight-row
+  synthetic table used by the workflow smoke test. It checks that prepare, run and receipt
+  work offline. It is not a benchmark result.
+kind: benchmark_run
+purpose: harness_run
+scope: synthetic_smoke
+rewirebench_protocol: flip2-fitness-v1
+licence:
+  code: MIT
+  weights: No pretrained weights.
+  data: Synthetic fixture in this repository, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No rewirebench image is published. CI builds containers/Containerfile without pushing it.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No linux/arm64 image has been built.
+hardware_floor:
+  accelerator:
+    kind: none
+  basis: measured_by_rewire
+  note: CPU only. Finishes in seconds; no figure is recorded for a three-row fixture.
+missing:
+  weights_pin:
+    reason: inapplicable
+    note: The baseline uses no pretrained weights.
+inputs:
+  - name: smoke.csv
+    repo_path: workflows/benchmark/examples/smoke.csv
+    sha256: f260bd83895cf43f417f4b3e5a105b052e56a0164f5616238271bac4ad7dc2d3
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - flip2-fitness-v1
+      - --source
+      - "{inputs}/smoke.csv"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"dataset": "flip2-amylase-one-to-many", "allow_unverified": true, "limit": 3}'
+  - name: run-baselines
+    argv:
+      - rewirebench
+      - run-baselines
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/baselines"
+      - --baseline
+      - training-mean-v1
+outputs:
+  - baselines/baseline-manifest.json
+  - baselines/training-mean-v1/report.json
+  - baselines/training-mean-v1/predictions.json
+expected_output:
+  description: >-
+    Three test rows are scored. Row IDs are salted per run and the baseline predicts one
+    constant, so the ranking metrics vary between runs and are not checked.
+  values:
+    - label: Scored rows
+      metric_id: n
+      file: baselines/training-mean-v1/report.json
+      key: [metrics, n]
+      value: 3
+      tolerance: 0
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: baselines/training-mean-v1/report.json
+      key: [coverage, scored]
+      value: 3
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Synthetic rows with allow_unverified, so the result says nothing about any model.

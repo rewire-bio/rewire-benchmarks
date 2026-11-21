@@ -1,0 +1,494 @@
+{
+  "what": "Tool calls made by scripts/demo/mcp_demo.py, a scripted MCP client. No model chose the calls. Local folder names are replaced by labels.",
+  "servers": {
+    "rewire-benchmark-graph": {
+      "command": [
+        "uvx",
+        "--from",
+        "git+https://github.com/rewire-bio/rdf-kg-mcp@v0.4.0",
+        "rdf-kg-mcp",
+        "serve",
+        "https://benchmarks.rewirebio.io/agents/kg.tar.gz"
+      ],
+      "name": "rdf-kg-mcp",
+      "version": "0.4.0",
+      "tools": [
+        "dataset_info",
+        "describe_resource",
+        "describe_schema",
+        "find_entity",
+        "list_queries",
+        "run_query",
+        "search",
+        "sparql_query"
+      ]
+    },
+    "genomics-mcp": {
+      "command": [
+        "uvx",
+        "--python",
+        "3.12",
+        "--no-binary-package",
+        "pybigwig",
+        "--build-constraints",
+        "https://raw.githubusercontent.com/rewire-bio/genomics-mcp/3b395a9648aa57610623c54c4d54dd933470b067/packaging/build-constraints.txt",
+        "--from",
+        "git+https://github.com/rewire-bio/genomics-mcp@3b395a9648aa57610623c54c4d54dd933470b067",
+        "genomics-mcp"
+      ],
+      "name": "genomics-mcp",
+      "version": "0.1.0",
+      "tools": [
+        "cancel_transfer",
+        "compare_samples",
+        "convert_sra_run",
+        "describe_dataset",
+        "describe_synthetic_protocol",
+        "fetch_file",
+        "get_coverage",
+        "get_features",
+        "get_pileup",
+        "get_reads",
+        "get_sample_metadata",
+        "get_sequence",
+        "get_signal",
+        "get_transfer_status",
+        "get_truth_set",
+        "get_variants",
+        "inspect_locus",
+        "list_files",
+        "list_samples",
+        "list_sources",
+        "list_synthetic_protocols",
+        "lookup_gene",
+        "lookup_protein",
+        "lookup_variant",
+        "normalize_variant",
+        "resolve_identifier",
+        "search_datasets"
+      ]
+    },
+    "rewirebench": {
+      "command": [
+        "uvx",
+        "--from",
+        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2#subdirectory=packages/rewirebench",
+        "rewirebench",
+        "mcp",
+        "--recipes-dir",
+        "${CLAUDE_PLUGIN_ROOT}/recipes"
+      ],
+      "name": "rewirebench",
+      "version": "1.30.0",
+      "tools": [
+        "cancel_run",
+        "describe_protocol",
+        "describe_recipe",
+        "evaluate",
+        "get_receipt",
+        "list_models",
+        "list_protocols",
+        "list_recipes",
+        "plan_run",
+        "prepare",
+        "run",
+        "run_status",
+        "verify_receipt"
+      ]
+    }
+  },
+  "calls": [
+    {
+      "number": 1,
+      "at": "2026-11-21T01:12:03+00:00",
+      "server": "rewire-benchmark-graph",
+      "tool": "dataset_info",
+      "arguments": {},
+      "is_error": false,
+      "result": {
+        "dataset": "rewire-benchmark-data",
+        "version": "2026-11-20-72316db0764b",
+        "title": "Rewire benchmark data",
+        "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, and discrepancies between studies' results in a derived graph.",
+        "license": null,
+        "homepage": "https://github.com/rewire-bio/rewire-benchmark-data",
+        "manifest_sha256": "8d7aec4a2b90a684ce55bd061fd29aaea1236596e558d3f774eb6e13383d14c6",
+        "statements": 2769222,
+        "graphs": [
+          {
+            "iri": "https://benchmarks.rewire.it/graph/asserted",
+            "role": "asserted",
+            "statements": 2445824,
+            "description": "Source facts."
+          },
+          {
+            "iri": "https://benchmarks.rewire.it/graph/derived",
+            "role": "derived",
+            "statements": 15491,
+            "description": "Discrepancies between studies' results found by the rules in scripts/kg/contradictions.py, with their review state and follow-up actions. Each is a lead for review, not a finding that a result is wrong."
+          },
+          {
+            "iri": "https://benchmarks.rewire.it/graph/inferred",
+            "role": "inferred",
+            "statements": 299604,
+            "description": "Facts derived from the asserted graph by the ontology when the bundle was built."
+          },
+          {
+            "iri": "https://benchmarks.rewire.it/graph/ontology",
+            "role": "ontology",
+            "statements": 8303,
+            "description": "The vocabulary and its axioms."
+          }
+        ],
+        "prefixes": {
+          "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+          "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+          "owl": "http://www.w3.org/2002/07/owl#",
+          "xsd": "http://www.w3.org/2001/XMLSchema#",
+          "skos": "http://www.w3.org/2004/02/skos/core#",
+          "rb": "https://benchmarks.rewire.it/vocab#",
+          "mls": "http://www.w3.org/ns/mls#",
+          "dcat": "http://www.w3.org/ns/dcat#",
+          "dcterms": "http://purl.org/dc/terms/",
+          "schema": "https://schema.org/",
+          "obo": "http://purl.obolibrary.org/obo/",
+          "id": "https://benchmarks.rewire.it/id/",
+          "agent": "https://benchmarks.rewire.it/vocab/agent/",
+          "algorithm": "https://benchmarks.rewire.it/vocab/algorithm/",
+          "archive-tier": "https://benchmarks.rewire.it/vocab/archive-tier/",
+          "area": "https://benchmarks.rewire.it/vocab/area/",
+          "baseline-type": "https://benchmarks.rewire.it/vocab/baseline-type/",
+          "configuration-type": "https://benchmarks.rewire.it/vocab/configuration-type/",
+          "context": "https://benchmarks.rewire.it/vocab/context/",
+          "derivation-method": "https://benchmarks.rewire.it/vocab/derivation-method/",
+          "direction": "https://benchmarks.rewire.it/vocab/direction/",
+          "discrepancy-action": "https://benchmarks.rewire.it/vocab/discrepancy-action/",
+          "discrepancy-rule": "https://benchmarks.rewire.it/vocab/discrepancy-rule/",
+          "discrepancy-state": "https://benchmarks.rewire.it/vocab/discrepancy-state/",
+          "entity-level": "https://benchmarks.rewire.it/vocab/entity-level/",
+          "licence-basis": "https://benchmarks.rewire.it/vocab/licence-basis/",
+          "licence-family": "https://benchmarks.rewire.it/vocab/licence-family/",
+          "method-type": "https://benchmarks.rewire.it/vocab/method-type/",
+          "metric": "https://benchmarks.rewire.it/vocab/metric/",
+          "missingness": "https://benchmarks.rewire.it/vocab/missingness/",
+          "origin": "https://benchmarks.rewire.it/vocab/origin/",
+          "publication-status": "https://benchmarks.rewire.it/vocab/publication-status/",
+          "relevance": "https://benchmarks.rewire.it/vocab/relevance/",
+          "review-method": "https://benchmarks.rewire.it/vocab/review-method/",
+          "status": "https://benchmarks.rewire.it/vocab/status/",
+          "uncertainty-type": "https://benchmarks.rewire.it/vocab/uncertainty-type/",
+          "unit": "https://benchmarks.rewire.it/vocab/unit/"
+        },
+        "inferred": {
+          "reasoner": {
+            "name": "owlrl",
+            "version": "7.6.2",
+            "profile": "OWL 2 RL"
+          },
+          "rdflib": "7.6.0",
+          "vocabulary_sha256": "b6af806471a9e9770632b4ee24e4831fc85b011b4bdd5991a3188d96672b0544",
+          "kept": "New statements about records in the rewire vocabulary: rb: links and rb: types. Superclasses and superproperties from imported vocabularies are left to the ontology graph. Protected links are never inferred.",
+          "by_predicate": {
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9595,
+            "https://benchmarks.rewire.it/vocab#contains": 1529,
+            "https://benchmarks.rewire.it/vocab#hasResult": 51833,
+            "https://benchmarks.rewire.it/vocab#resultFor": 51833,
+            "https://benchmarks.rewire.it/vocab#resultOn": 51833,
+            "https://benchmarks.rewire.it/vocab#resultOnDataset": 51833,
+            "https://benchmarks.rewire.it/vocab#resultWithin": 34667,
+            "https://benchmarks.rewire.it/vocab#sameDataAs": 86,
+            "https://benchmarks.rewire.it/vocab#testedIn": 24717,
+            "https://benchmarks.rewire.it/vocab#testedWithin": 20149,
+            "https://benchmarks.rewire.it/vocab#within": 1529
+          }
+        },
+        "shacl": {
+          "conforms": true,
+          "engine": "pyshacl 0.40.1",
+          "shapes": "data/ontology/shapes.ttl",
+          "shapes_sha256": "7c44056eece704b37b9dd59f4fd0b85a5fde076b710e7b8bfa585d50358c68fb",
+          "attribute_shapes": "data/ontology/attribute-shapes.ttl",
+          "attribute_shapes_sha256": "20fe364d5266406e44f2de1c61efe05e67a40c956078903590d196fde43d1f65"
+        },
+        "example_queries": [
+          "Results for a system, with assessment and dataset",
+          "Benchmarks by number of results",
+          "Systems tested on a benchmark",
+          "Sources behind a result",
+          "Open discrepancies between studies",
+          "Discrepancies involving a system",
+          "Asserted facts only"
+        ],
+        "queries": [
+          "open_discrepancies",
+          "discrepancies_for_system",
+          "discrepancy_history",
+          "contested_results_for_use_case"
+        ]
+      }
+    },
+    {
+      "number": 2,
+      "at": "2026-11-21T01:12:05+00:00",
+      "server": "genomics-mcp",
+      "tool": "get_truth_set",
+      "arguments": {
+        "sample": "HG002",
+        "assembly": "GRCh38",
+        "variant_type": "snv",
+        "contig": "chr20"
+      },
+      "is_error": false,
+      "result": {
+        "schema_version": "1",
+        "operation": "get_truth_set",
+        "status": "ok",
+        "data": {
+          "records": [
+            {
+              "id": "giab-hg002-v4.2.1-grch38",
+              "title": "GIAB HG002 small-variant benchmark v4.2.1 on GRCh38",
+              "provider": "giab",
+              "sample": "HG002",
+              "release": "NISTv4.2.1",
+              "assembly": "GRCh38",
+              "file_assembly": "human_GRCh38_no_alt_analysis_set.fasta",
+              "contig_style": "chr",
+              "contigs": [
+                "chr1",
+                "chr2",
+                "chr3",
+                "chr4",
+                "chr5",
+                "chr6",
+                "chr7",
+                "chr8",
+                "chr9",
+                "chr10",
+                "chr11",
+                "chr12",
+                "chr13",
+                "chr14",
+                "chr15",
+                "chr16",
+                "chr17",
+                "chr18",
+                "chr19",
+                "chr20",
+                "chr21",
+                "chr22"
+              ],
+              "variant_types": [
+                "snv",
+                "indel"
+              ],
+              "files": [
+                {
+                  "role": "benchmark_vcf",
+                  "file": {
+                    "uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+                    "index_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz.tbi",
+                    "reference_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.gz",
+                    "format": "vcf",
+                    "compression": "bgzf",
+                    "assembly": "human_GRCh38_no_alt_analysis_set.fasta",
+                    "source": "giab",
+                    "accession": "AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+                    "storage_profile": null,
+                    "access_status": "open",
+                    "visibility": "public",
+                    "size_bytes": 156252944,
+                    "checksums": [
+                      {
+                        "algorithm": "md5",
+                        "value": "dc750b3807d4af1f7ffec852e9c2f771"
+                      },
+                      {
+                        "algorithm": "sha256",
+                        "value": "adb4d4a50048aa13353a06b84fcfcbca09a5d17525efaa4cea44f8822e81175c"
+                      }
+                    ],
+                    "relationships": [],
+                    "readiness": null,
+                    "native": {
+                      "checked": "2026-11-17",
+                      "digest_note": "md5 and sha256 computed by streaming this URL on 2026-11-17; GIAB publishes none"
+                    }
+                  },
+                  "published_size": null
+                },
+                {
+                  "role": "benchmark_regions",
+                  "file": {
+                    "uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed",
+                    "index_uri": null,
+                    "reference_uri": null,
+                    "format": "bed",
+                    "compression": "none",
+                    "assembly": "human_GRCh38_no_alt_analysis_set.fasta",
+                    "source": "giab",
+                    "accession": "AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed",
+                    "storage_profile": null,
+                    "access_status": "open",
+                    "visibility": "public",
+                    "size_bytes": 11494021,
+                    "checksums": [
+                      {
+                        "algorithm": "md5",
+                        "value": "97265e922a97c69a0391cf3f92a89b8b"
+                      },
+                      {
+                        "algorithm": "sha256",
+                        "value": "fba9a57c36ec88e5d14ea3e259c8866c7935f4998d3ec0fa2d6c3962da5b5575"
+                      }
+                    ],
+                    "relationships": [],
+                    "readiness": null,
+                    "native": {
+                      "checked": "2026-11-17",
+                      "digest_note": "md5 and sha256 computed by streaming this URL on 2026-11-17; GIAB publishes none"
+                    }
+                  },
+                  "published_size": null
+                },
+                {
+                  "role": "reference_fasta",
+                  "file": {
+                    "uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.gz",
+                    "index_uri": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/references/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.gz.fai",
+                    "reference_uri": null,
+                    "format": "fasta",
+                    "compression": "bgzf",
+                    "assembly": "human_GRCh38_no_alt_analysis_set.fasta",
+                    "source": "giab",
+                    "accession": "references/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta.gz",
+                    "storage_profile": null,
+                    "access_status": "open",
+                    "visibility": "public",
+                    "size_bytes": 886344618,
+                    "checksums": [
+                      {
+                        "algorithm": "md5",
+                        "value": "3a3347eae0893f96ecf495d1c39e2284"
+                      },
+                      {
+                        "algorithm": "sha256",
+                        "value": "3c8def6d325c5d1e934b2dd530c4d1709f027677a15859467071fddf3fff2026"
+                      }
+                    ],
+                    "relationships": [],
+                    "readiness": null,
+                    "native": {
+                      "checked": "2026-11-17",
+                      "digest_note": "md5 and sha256 computed by streaming this URL on 2026-11-17; GIAB publishes none"
+                    }
+                  },
+                  "published_size": null
+                }
+              ],
+              "citations": [
+                {
+                  "key": "wagner2022",
+                  "doi": "10.1016/j.xgen.2022.100128",
+                  "url": "https://doi.org/10.1016/j.xgen.2022.100128",
+                  "authors": "Wagner J et al.",
+                  "title": "Benchmarking challenging small variants with linked and long reads",
+                  "venue": "Cell Genomics 2(5):100128",
+                  "year": 2022
+                }
+              ],
+              "release_url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
+              "notes": [
+                "Autosomes only (1-22). Variants outside the benchmark regions BED are not assessed.",
+                "Compare calls with hap.py or vcfeval restricted to the benchmark regions BED."
+              ],
+              "region": {
+                "contig": "chr20",
+                "start": 0,
+                "end": 64444167,
+                "assembly": "human_GRCh38_no_alt_analysis_set.fasta"
+              }
+            }
+          ]
+        },
+        "error": null,
+        "errors": [],
+        "source_status": [],
+        "provenance": [
+          {
+            "source": "giab",
+            "source_record_id": "giab-hg002-v4.2.1-grch38",
+            "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
+            "method": "curated catalogue in genomics-mcp",
+            "retrieved_at": "2026-11-21T01:12:05.495977Z",
+            "source_version": "NISTv4.2.1",
+            "source_updated_at": null,
+            "terms_url": null,
+            "transformations": []
+          }
+        ],
+        "warnings": [],
+        "truncation": null,
+        "limits": {
+          "max_region_bp": 1000000,
+          "max_records": 10000,
+          "max_response_bytes": 1048576,
+          "timeout_s": 30.0
+        },
+        "metadata_omitted": null
+      }
+    },
+    {
+      "number": 3,
+      "at": "2026-11-21T01:12:25+00:00",
+      "server": "rewirebench",
+      "tool": "list_recipes",
+      "arguments": {},
+      "is_error": false,
+      "result": {
+        "recipes_dir": "${CLAUDE_PLUGIN_ROOT}/recipes",
+        "recipes": [
+          {
+            "id": "flip2-synthetic-smoke",
+            "title": "FLIP2 plumbing check on a synthetic fixture",
+            "kind": "benchmark_run",
+            "scope": "synthetic_smoke",
+            "rewirebench_protocol": "flip2-fitness-v1",
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/flip2/flip2-synthetic-smoke.yaml",
+            "sha256": "1d4bafd3c0042ba7be31014aea78b48793eb5db04aa17e97685d584bd96b0b86"
+          },
+          {
+            "id": "mfass-v2-kmer-baseline",
+            "title": "MFASS v2 corrected k-mer and position baseline on CPU",
+            "kind": "benchmark_run",
+            "scope": "full_protocol",
+            "rewirebench_protocol": "mfass-v2",
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/mfass/mfass-v2-kmer-baseline.yaml",
+            "sha256": "7552c6a78089e0e6eab19eba58fc9108ee7f2ffb5974dd69fcc4815bf5d4f2ab"
+          }
+        ],
+        "invalid": []
+      }
+    }
+  ],
+  "summary": {
+    "rewire-benchmark-graph": {
+      "version": "0.4.0",
+      "tools": 8
+    },
+    "genomics-mcp": {
+      "version": "0.1.0",
+      "tools": 27
+    },
+    "rewirebench": {
+      "version": "1.30.0",
+      "tools": 13
+    }
+  }
+}

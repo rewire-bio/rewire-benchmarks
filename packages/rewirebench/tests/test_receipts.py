@@ -233,12 +233,83 @@ def test_verify_catches_a_changed_recipe_and_changed_inputs(run_copy: Path, tmp_
     assert statuses(result)["inputs"] == "mismatch" and not result["ok"]
 
 
+def test_verify_reads_the_report_and_the_commit_and_says_so(run_copy: Path):
+    """A known limit, held here so that the wording changes when the behaviour does. Verify
+    reads the checked values from the report: it does not score the predictions again, so
+    a folder whose predictions were emptied, with its digests rewritten, still verifies. And
+    the commits check reads the receipt: a commit that exists nowhere is a match."""
+    from rewirebench import mcp_server
+
+    [predictions] = [path for path in run_copy.rglob("predictions.json")]
+    predictions.write_text("{}")
+    name = predictions.relative_to(run_copy).as_posix()
+
+    def change(data: dict[str, Any]) -> None:
+        for record in data["outputs"]:
+            if record["path"] == name:
+                record.update(sha256=recipes.sha256_file(predictions), bytes=2)
+        data["code"].update(commit="a" * 40, dirty=False)
+        data["recipe"].update(commit="a" * 40)
+
+    rewrite_receipt(run_copy, change)
+    result = receipts.verify(run_copy, recipes_dir=RECIPES)
+    found = statuses(result)
+    assert result["ok"] and found["checks"] == found["metrics"] == found["outputs"] == "match"
+    assert found["commits"] == "match"
+    detail = result["results"][-1]["detail"]
+    assert "as the receipt states it" in detail and "not looked up in any repository" in detail
+    note = " ".join(mcp_server.VERIFY_NOTE.split())
+    assert "predictions are not scored again" in note
+    assert "reads the commit the receipt states and does not look it up" in note
+    assert "predictions are not scored again" in mcp_server.INSTRUCTIONS
+
+
 def test_verify_rejects_a_receipt_that_breaks_the_schema(run_copy: Path):
     receipt = json.loads((run_copy / "receipt.json").read_text())
     receipt["cost"] = {"paid_compute": False, "amount": 1.5, "currency": "USD"}
     (run_copy / "receipt.json").write_text(json.dumps(receipt))
-    with pytest.raises(ValidationError, match="Unpaid compute carries no money field"):
+    with pytest.raises(ValueError, match="Unpaid compute carries no money field") as refused:
         receipts.verify(run_copy, recipes_dir=RECIPES)
+    assert not isinstance(refused.value, ValidationError)
+
+
+def test_a_malformed_receipt_is_reported_field_by_field(
+    run_copy: Path, capsys: pytest.CaptureFixture[str]
+):
+    """As for a recipe: the field and the reason, with no dump of the input and no URL."""
+    receipt = json.loads((run_copy / "receipt.json").read_text())
+    receipt["bogus"] = {"a": 1}
+    receipt["wall_seconds"] = "soon"
+    (run_copy / "receipt.json").write_text(json.dumps(receipt))
+    with pytest.raises(ValueError) as refused:
+        receipts.load_receipt(run_copy)
+    message = str(refused.value)
+    assert "is not a valid receipt:" in message
+    assert "bogus: Extra inputs are not permitted" in message.splitlines()
+    assert any(line.startswith("wall_seconds: ") for line in message.splitlines())
+    for unwanted in ("pydantic.dev", "input_value", "validation error for", "[type="):
+        assert unwanted not in message
+    _, code = run_cli(capsys, "receipt", "verify", str(run_copy))
+    assert code == 2
+    (run_copy / "receipt.json").write_text("{not json")
+    with pytest.raises(ValueError, match="is not a receipt"):
+        receipts.load_receipt(run_copy)
+
+
+def test_the_receipt_records_the_versions_of_the_packages_the_run_used(smoke_run: Path):
+    """No image and no lock file means numpy and scikit-learn float. The receipt says
+    which versions scored the run."""
+    from importlib.metadata import version
+
+    packages = json.loads((smoke_run / "receipt.json").read_text())["environment"]["packages"]
+    for name in ("numpy", "scikit-learn", "scipy", "pydantic", "pyyaml"):
+        assert packages[name] == version(name)
+    assert list(packages) == sorted(packages)
+    # An extra that is not installed is left out, not recorded as null.
+    assert all(isinstance(value, str) and value for value in packages.values())
+    # A receipt written before the field existed still loads.
+    old = receipts.load_receipt(ROOT / "docs/demo/mfass-v2-kmer-baseline")
+    assert old.environment.packages is None
 
 
 WRITE = ("import json, pathlib, sys; target = pathlib.Path(sys.argv[1]) / 'result.json'; "
@@ -253,6 +324,8 @@ SCRIPTS = {
               "time.sleep(60)"),
     "environment": WRITE % "2.004" + "; import os; print(sorted(os.environ.items()))",
     "write-receipt": WRITE % "2.004" + "; (target.parent / 'receipt.json').write_text('{}')",
+    "paths": WRITE % "2.004" + ("; import os; print('cwd', os.getcwd()); "
+                                "print('output', sys.argv[1], file=sys.stderr)"),
 }
 
 
@@ -327,6 +400,24 @@ def test_a_step_gets_a_reduced_environment_with_no_cuda_device(
     log = (tmp_path / "out/logs/01-step.stdout.txt").read_text()
     assert "SECRET" not in log and "('CUDA_VISIBLE_DEVICES', '')" in log
     assert f"('{receipts.NESTED_VARIABLE}', '1')" in log
+
+
+def test_step_logs_name_the_recipe_placeholders_and_no_local_folder(
+    tmp_path: Path, scripted: None
+):
+    """A step prints the folders it was given. The scratch folder sits under the machine's
+    temporary folder and the output folder is the caller's, so neither stays in a log."""
+    receipt = run_custom(tmp_path, "paths")
+    assert receipt.checks_passed
+    out = (tmp_path / "out/logs/01-step.stdout.txt").read_text()
+    err = (tmp_path / "out/logs/01-step.stderr.txt").read_text()
+    assert out.strip() == "cwd {work}" and err.strip() == "output {output}"
+    logs = "".join(path.read_text() for path in (tmp_path / "out/logs").iterdir())
+    for folder in (str(tmp_path), str(tmp_path.resolve()), "rewirebench-recipe-"):
+        assert folder not in logs
+    # The digests are of the logs as they were left.
+    result = receipts.verify(tmp_path / "out", recipes_dir=tmp_path / "checkout/recipes")
+    assert statuses(result)["sha256sums"] == statuses(result)["outputs"] == "match"
 
 
 def test_a_step_that_outlives_its_timeout_is_stopped(tmp_path: Path, scripted: None):
@@ -470,6 +561,15 @@ def test_recipe_commit_is_recorded_only_for_the_committed_bytes(tmp_path: Path, 
     found = statuses(result)
     assert found["recipe"] == found["checks"] == found["inputs"] == "match" and result["ok"]
     assert head in result["results"][3]["detail"]
+    # A receipt that names another recipe than the file it cites does not.
+    renamed = Path(shutil.copytree(tmp_path / "committed", tmp_path / "renamed"))
+    rewrite_receipt(renamed, lambda data: data["recipe"].update(id="nope"))
+    result = receipts.verify(renamed, recipes_dir=directory)
+    found = statuses(result)
+    assert found["recipe"] == "mismatch" and not result["ok"] and not result["complete"]
+    assert found["checks"] == "not_available"
+    assert "'nope'" in result["results"][3]["detail"]
+    assert "'custom'" in result["results"][3]["detail"]
     # A receipt that cites bytes no commit holds does not.
     rewrite_receipt(tmp_path / "committed",
                     lambda data: data["recipe"].update(sha256="d" * 64))

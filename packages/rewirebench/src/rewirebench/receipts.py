@@ -17,10 +17,12 @@ from __future__ import annotations
 import contextlib
 import datetime
 import hashlib
+import importlib.metadata
 import json
 import math
 import os
 import platform
+import re
 import shutil
 import signal
 import subprocess
@@ -34,7 +36,7 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 from urllib.parse import urlsplit, urlunsplit
 
-from pydantic import Field, StringConstraints, model_validator
+from pydantic import Field, StringConstraints, ValidationError, model_validator
 
 from rewirebench import sdk
 from rewirebench.recipes import (
@@ -54,6 +56,7 @@ from rewirebench.recipes import (
     check_step,
     get_recipe,
     parse_recipe,
+    problems,
     python_satisfies,
     relative_path,
     sha256_file,
@@ -106,13 +109,20 @@ class Code(Strict):
 
 
 class ReceiptEnvironment(Strict):
-    """Image digest per platform from the recipe, and the image this run used, if any."""
+    """Image digest per platform from the recipe, and the image this run used, if any.
+
+    ``packages`` holds the installed version of each package rewirebench declares as a
+    dependency. Without an image or a lock file these versions float, and two runs of
+    one code digest can differ in the last digits of a metric. It is ``None`` in a
+    receipt written before the field existed.
+    """
 
     images: dict[Literal["linux/amd64", "linux/arm64"], ImageDigest | None]
     image_used: ImageDigest | None
     container_runtime: Text | None
     python: Text
     os: Text
+    packages: dict[str, str] | None = None
 
     @model_validator(mode="after")
     def _both_platforms(self) -> ReceiptEnvironment:
@@ -372,6 +382,30 @@ def _source_root() -> Path | None:
     if len(parents) > 4 and (parents[4] / "packages" / "rewirebench").is_dir():
         return parents[4]
     return None
+
+
+REQUIREMENT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+
+
+def installed_packages() -> dict[str, str]:
+    """Installed version of every package rewirebench declares, extras included.
+
+    A declared package that is not installed (an extra that was not asked for) is left
+    out. Names are lower case with ``-`` as the separator.
+    """
+    try:
+        declared = importlib.metadata.requires("rewirebench") or []
+    except importlib.metadata.PackageNotFoundError:
+        declared = []
+    versions: dict[str, str] = {}
+    for requirement in declared:
+        match = REQUIREMENT_NAME.match(requirement)
+        if match is None:
+            continue
+        name = re.sub(r"[-_.]+", "-", match.group(0)).lower()
+        with contextlib.suppress(importlib.metadata.PackageNotFoundError):
+            versions[name] = importlib.metadata.version(name)
+    return dict(sorted(versions.items()))
 
 
 def _image_used() -> tuple[str | None, str | None]:
@@ -679,6 +713,34 @@ def _execute(
     return process.returncode, time.perf_counter() - started, peak
 
 
+def _without_local_folders(log: Path, labels: dict[str, str]) -> None:
+    """Replace the run's own folders in a step log with the recipe's placeholders.
+
+    A step prints the paths it was given. The scratch folder is under the machine's
+    temporary folder, which on some systems is named per user, and the output folder is
+    wherever the caller put it. A receipt folder is meant to be passed on, so its logs
+    name ``{work}``, ``{inputs}`` and ``{output}`` as the recipe does.
+    """
+    try:
+        text = log.read_bytes()
+    except OSError:
+        return
+    cleaned = text
+    for folder in sorted(labels, key=len, reverse=True):
+        cleaned = cleaned.replace(folder.encode(), labels[folder].encode())
+    if cleaned != text:
+        log.write_bytes(cleaned)
+
+
+def _folder_labels(values: dict[str, str]) -> dict[str, str]:
+    """Each rendered folder, as given and as resolved, mapped to its placeholder."""
+    labels: dict[str, str] = {}
+    for name, folder in values.items():
+        for text in {folder, str(Path(folder).resolve())}:
+            labels[text] = "{" + name + "}"
+    return labels
+
+
 def check_requirements(recipe: Recipe, repo_root: Path, hardware: Hardware) -> None:
     """Refuse a run this machine or checkout does not meet, before anything is fetched."""
     environment = recipe.environment
@@ -779,6 +841,7 @@ def run_recipe(
         folder = folder.resolve()
         (folder / "logs").mkdir()
         values = {"inputs": str(staging), "work": str(work), "output": str(folder)}
+        labels = _folder_labels({**values, "scratch": scratch})
         failed = False
         for index, command in enumerate(recipe.commands, start=1):
             argv = [_render(argument, values) for argument in command.argv]
@@ -791,6 +854,9 @@ def run_recipe(
                 argv, cwd=work, log=folder / "logs" / f"{index:02d}-{command.name}",
                 timeout=command.timeout_seconds, hide_cuda=hide_cuda,
             )
+            for suffix in (".stdout.txt", ".stderr.txt"):
+                _without_local_folders(
+                    folder / "logs" / f"{index:02d}-{command.name}{suffix}", labels)
             failed = exit_code != 0
             # The recipe's own argv is recorded, so a receipt holds no local paths.
             commands.append(CommandRecord(name=command.name, argv=list(command.argv),
@@ -819,6 +885,7 @@ def run_recipe(
         environment=ReceiptEnvironment(
             images=recipe.image_digests(), image_used=image_used, container_runtime=runtime,
             python=platform.python_version(), os=platform.platform(),
+            packages=installed_packages(),
         ),
         inputs=input_records,
         hardware=hardware,
@@ -898,6 +965,7 @@ def write_adhoc_receipt(
         environment=ReceiptEnvironment(
             images=dict.fromkeys(PLATFORMS), image_used=image_used, container_runtime=runtime,
             python=platform.python_version(), os=platform.platform(),
+            packages=installed_packages(),
         ),
         inputs=[
             InputRecord(name=path.name, source="local file", obtained="local",
@@ -934,6 +1002,10 @@ def load_receipt(folder: str | Path) -> Receipt:
         return Receipt.model_validate(json.loads(path.read_text()))
     except json.JSONDecodeError as error:
         raise ValueError(f"{path} is not a receipt: {error}") from error
+    except ValidationError as error:
+        # One line per problem, as for a recipe: no dump of the input and no URL.
+        found = problems(error, top="receipt")
+        raise ValueError(f"{path} is not a valid receipt:\n{found}") from error
 
 
 def _result(check: str, status: CheckStatus, detail: str) -> dict[str, str]:
@@ -1010,6 +1082,13 @@ def _verify_recipe(
         return loaded.recipe, _result("recipe", "match", loaded.sha256)
     # The recipe was edited or removed since the run. The receipt's commit may still hold it.
     earlier = _recipe_at_commit(receipt.recipe, recipes_dir)
+    if earlier is not None and earlier.id != receipt.recipe.id:
+        return None, _result(
+            "recipe", "mismatch",
+            f"The receipt names recipe {receipt.recipe.id!r}, but the file it cites "
+            f"({receipt.recipe.path} at commit {receipt.recipe.commit}) is recipe "
+            f"{earlier.id!r}.",
+        )
     if earlier is not None:
         return earlier, _result(
             "recipe", "match",
@@ -1059,6 +1138,9 @@ def _verify_inputs(
 def _verify_commits(receipt: Receipt) -> dict[str, str]:
     """Whether the receipt names a clean code commit and a committed recipe.
 
+    This reads what the receipt says. It does not look the commit up, so it shows that
+    the run recorded a commit, not that the commit exists or holds this code.
+
     A reviewer needs both before a receipt can support a promotion. A run from a wheel,
     a dirty tree or an uncommitted recipe is still a valid run, so this is never a
     mismatch; ``--strict`` turns it into a failure.
@@ -1072,7 +1154,9 @@ def _verify_commits(receipt: Receipt) -> dict[str, str]:
         gaps.append("recipe.commit is null")
     if gaps:
         return _result("commits", "not_available", "; ".join(gaps))
-    return _result("commits", "match", f"code {receipt.code.commit}")
+    return _result("commits", "match",
+                   f"code {receipt.code.commit}, as the receipt states it. The commit is "
+                   "not looked up in any repository.")
 
 
 def verify(

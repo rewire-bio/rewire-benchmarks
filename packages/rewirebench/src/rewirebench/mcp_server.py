@@ -58,18 +58,21 @@ TOOLS = (
 INSTRUCTIONS = (
     "Runs biological model benchmarks with rewirebench on this machine. Start with "
     "list_recipes or list_protocols. Call plan_run before run: it returns the hardware "
-    "needs, the expected wall time, the price or 'owned hardware', and the exact command. "
+    "needs, the expected wall time, the price or 'owned hardware', the exact command and a "
+    "plan_sha256, which a recipe run requires. Show the person the plan before run. "
     "run starts work on the local backend only and returns at once; poll run_status, then "
     "call get_receipt and verify_receipt. cancel_run stops a run. Nothing here starts a GPU "
     "or paid run, or a program other than rewirebench. A paid backend needs an amount that "
     "a person stated after seeing the quote: ask them, and never copy the amount from the "
     "plan yourself. No paid launch is built, so it is refused in every case. "
     "verify_receipt shows that a run folder is consistent with its receipt and recipe. "
-    "Nothing is signed, so it does not show where the folder came from."
+    "Nothing is signed, so it does not show where the folder came from, and the "
+    "predictions are not scored again."
 )
 LOG_TAIL_BYTES = 4000
 # A model run outside a recipe has no step timeouts of its own, so the server sets one.
 DEFAULT_RUN_SECONDS = 3600.0
+DEFAULT_BATCH_SIZE = 32
 MAX_RUN_SECONDS = 24 * 3600.0
 # On top of a recipe's own step timeouts: time to fetch its inputs.
 RECIPE_MARGIN_SECONDS = 3600.0
@@ -80,7 +83,18 @@ VERIFY_NOTE = (
     "Verification shows the folder is consistent with its receipt and, for a recipe run, "
     "with the recipe. Nothing is signed: hardware, times and who started the run are as "
     "trustworthy as the place the folder came from, and a metric the recipe does not "
-    "check can be changed together with its digests."
+    "check can be changed together with its digests. Checked values are read again from "
+    "the output files; predictions are not scored again, because the prepared data is not "
+    "in the folder. The commits check reads the commit the receipt states and does not "
+    "look it up."
+)
+# A release ID is recorded in the receipt as the caller gave it, so it is held to the
+# shape of an identifier: no spaces, no free text.
+RELEASE_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+# For a protocol whose own description is only its capabilities.
+BARE_PROTOCOL_NOTE = (
+    "This protocol describes only its capabilities here. Its inputs, sizes and licence are "
+    "in a recipe for it (describe_recipe), where one exists, and in its documentation."
 )
 
 Backend = Literal["local", "spark", "runpod"]
@@ -350,7 +364,8 @@ InputsArg = Annotated[str | None, _arg(
     "against its pinned SHA-256.")]
 ReleaseArg = Annotated[str | None, _arg(
     "Knowledge graph release ID to record in the receipt, if the run came from a "
-    "knowledge graph query.")]
+    "knowledge graph query. Recorded as given: it is not checked against the graph.",
+    pattern=RELEASE_ID_PATTERN)]
 ModelName = Annotated[str | None, _arg(
     "Free label for the model in the report. It does not choose what runs.")]
 OverlapArg = Annotated[str | None, _arg(
@@ -398,13 +413,22 @@ def build_server(recipes_dir: str | Path | None = None,
     def describe_protocol(
         protocol: Annotated[str, _arg("Protocol ID, from list_protocols.")],
     ) -> dict[str, Any]:
-        """Describe one protocol: inputs, datasets, metrics, execution rules, reference
-        baselines and the registered models it accepts. Nothing is downloaded or run."""
+        """Describe one protocol: what it can do (capabilities), its reference baselines,
+        the registered models it accepts and the recipes for it. Some protocols also give
+        their datasets, metrics and data access; others give capabilities only, and the
+        reply then says so in note. Inputs with sizes and licence are in describe_recipe.
+        Nothing is downloaded or run."""
         from rewirebench.baselines import describe_baselines
 
         description = sdk.describe(protocol)
+        if set(description) <= {"protocol_id", "capabilities"}:
+            description["note"] = BARE_PROTOCOL_NOTE
         description["baselines"] = describe_baselines(protocol)
         description["models"] = models.list_models(protocol)
+        description["recipes"] = (
+            [item.recipe.id for item in recipes.list_recipes(state.recipes_dir)[0]
+             if item.recipe.rewirebench_protocol == protocol]
+            if state.recipes_dir is not None else [])
         return json.loads(json.dumps(description, default=str))
 
     @server.tool()
@@ -481,8 +505,8 @@ def build_server(recipes_dir: str | Path | None = None,
         inputs: InputsArg = None,
         kg_release_id: ReleaseArg = None,
         plan_sha256: Annotated[str | None, _arg(
-            "plan_sha256 of the plan_run reply for the same arguments. The run is refused "
-            "if the plan has changed. Required for a paid backend.")] = None,
+            "For a recipe run, required: plan_sha256 of the plan_run reply for the same "
+            "arguments. The run is refused without it, or if the plan has changed.")] = None,
         confirmed_amount: Annotated[str | None, _arg(
             "Paid backends only. The amount a person stated after reading the plan's "
             "quote, as decimal text such as \"11.97\". Ask the person. Never copy it "
@@ -498,12 +522,17 @@ def build_server(recipes_dir: str | Path | None = None,
             "types. device must be cpu.")] = None,
         model_name: ModelName = None,
         training_overlap: OverlapArg = None,
-        batch_size: Annotated[int, _arg("For a model run: inputs per model call.", ge=1)] = 32,
-        allow_partial: PartialArg = False,
-        timeout_seconds: Annotated[float, _arg(
-            "For a model run: seconds after which the run is stopped. A recipe run uses "
-            "the recipe's own step timeouts instead.", gt=0, le=MAX_RUN_SECONDS,
-        )] = DEFAULT_RUN_SECONDS,
+        batch_size: Annotated[int | None, _arg(
+            f"For a model run: inputs per model call. Default {DEFAULT_BATCH_SIZE}.",
+            ge=1)] = None,
+        allow_partial: Annotated[bool | None, _arg(
+            "For a model run: score even when some inputs have no prediction. The report "
+            "states the coverage. Default false.")] = None,
+        timeout_seconds: Annotated[float | None, _arg(
+            "For a model run: seconds after which the run is stopped. Default "
+            f"{DEFAULT_RUN_SECONDS:g}. A recipe run uses the recipe's own step timeouts "
+            "and refuses this argument.", gt=0, le=MAX_RUN_SECONDS,
+        )] = None,
     ) -> dict[str, Any]:
         """Start a run on the local backend and return its run_id at once. Poll run_status;
         stop it with cancel_run. One run at a time.
@@ -511,7 +540,11 @@ def build_server(recipes_dir: str | Path | None = None,
         Give either recipe (a recipe run, which writes a receipt checked against the
         recipe), or prepared and model (a registered model on prepared data of a protocol
         the model is registered for). Only rewirebench is started: a model that starts
-        another program is refused. An argument this tool does not declare is an error.
+        another program is refused. An argument this tool does not declare is an error,
+        and so is an argument of the other kind of run.
+
+        A recipe run on local or on a paid backend needs plan_sha256 from plan_run, so
+        that what starts (the downloads included) is what the plan showed.
 
         The spark backend is not started from here; the reply is its dry-run plan. A paid
         backend is refused without plan_sha256, confirmed_amount and confirmed_currency
@@ -542,7 +575,7 @@ def build_server(recipes_dir: str | Path | None = None,
             models.check_cpu(spec, options)
             arguments = ["run", "--prepared", prepared, "--output", str(folder),
                          "--model", spec.id, "--adapter-options", json.dumps(options),
-                         "--batch-size", str(batch_size)]
+                         "--batch-size", str(batch_size or DEFAULT_BATCH_SIZE)]
             if model_name is not None:
                 arguments += ["--model-name", model_name]
             if training_overlap is not None:
@@ -550,13 +583,22 @@ def build_server(recipes_dir: str | Path | None = None,
             if allow_partial:
                 arguments.append("--allow-partial")
             started = _start(state, kind="model_run", arguments=arguments, output=folder,
-                             time_limit_seconds=timeout_seconds)
+                             time_limit_seconds=timeout_seconds or DEFAULT_RUN_SECONDS)
             return _status(started)
+        model_only = {"model_options": model_options, "model_name": model_name,
+                      "training_overlap": training_overlap, "batch_size": batch_size,
+                      "allow_partial": allow_partial, "timeout_seconds": timeout_seconds}
+        given = sorted(name for name, value in model_only.items() if value is not None)
+        if given:
+            raise ValueError(f"{given[0]} applies to a model run, not to a recipe run. "
+                             "Nothing was started.")
         plan = _plan(state, recipe, backend, str(folder), inputs, kg_release_id)
-        if plan_sha256 is None and backend in backends.PAID_BACKENDS:
+        if plan_sha256 is None and backend != "spark":
+            if backend == "local" and not plan.runnable:
+                raise ValueError(plan.not_runnable_reason or "This plan cannot run")
             raise ValueError(
-                "A paid run needs plan_sha256 from plan_run, so that the amount a person "
-                "confirms is the amount of this plan."
+                "A recipe run needs plan_sha256 from plan_run for the same arguments, so "
+                "that what starts is the plan a person was shown. Nothing was started."
             )
         if plan_sha256 is not None and plan_sha256 != plan.plan_sha256:
             raise ValueError(

@@ -187,11 +187,40 @@ Existing scientific artifacts are preserved.
 
 ## Use with an agent
 
-The `bio-model-benchmarks` plugin gives a coding agent two things: a skill that
-explains how to find published results and run each protocol with `rewirebench`, and
-the read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp) as
-an MCP server named `rewire-benchmark-graph`. Runs stay local. The skill never exports
-or submits a result unless you ask for it.
+The `bio-model-benchmarks` plugin gives a coding agent three MCP servers, five skills, six
+commands and one agent definition. Every server runs on your machine.
+
+| MCP server | What it is for | Pinned to |
+| --- | --- | --- |
+| `rewire-benchmark-graph` | The read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp): published results, provenance, disagreements | rdf-kg-mcp v0.4.0 |
+| `genomics-mcp` | [Genomic data](https://github.com/rewire-bio/genomics-mcp), GIAB and HPRC truth sets, synthetic-data protocols | commit `3b395a9648aa57610623c54c4d54dd933470b067` (no release has the truth-set tools yet) |
+| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2` (no release has `rewirebench mcp` yet) |
+
+| Skill | Command | What it does |
+| --- | --- | --- |
+| `find-model-for-use-case` | `/bio-model-benchmarks:find` | Which models have published evidence for a use case, from the graph |
+| `run-benchmark` | `/bio-model-benchmarks:plan`, `/bio-model-benchmarks:run` | Plan a recipe, run it on CPU, get and verify the receipt |
+| `verify-published-result` | `/bio-model-benchmarks:verify`, `/bio-model-benchmarks:demo` | Rerun a published result and compare it with the graph |
+| `prepare-benchmark-data` | `/bio-model-benchmarks:data` | Find a protocol's inputs and truth sets |
+| `bio-model-benchmarks` | | The command-line route and the reference for comparing a run with a published result |
+
+The agent `benchmarking-agent` takes one question from the graph to a verified receipt. Runs
+stay local.
+
+What stops a GPU or paid run, and what does not:
+
+- No tool of the three servers starts one. The `rewirebench` server runs recipes on the
+  `local` backend on CPU, returns a dry-run plan for `spark`, and refuses `runpod` in every
+  case because no launch is built.
+- The agent `benchmarking-agent` has a `tools` list that names the tools of the three servers
+  and nothing else: no shell, no file tools and no other MCP server. It cannot start a run any
+  other way.
+- The skills and commands run in your main session, which has every tool you have given it. If
+  that session has a shell or a RunPod tool, the skills tell it not to use them for a run, but
+  that is an instruction, not a block. Neither shipped recipe names the `spark` or `runpod`
+  backend, so today there is no plan to act on.
+
+Nothing in the plugin exports or submits a result.
 
 In Claude Code:
 
@@ -206,11 +235,31 @@ Claude Code 2.1.275 or later can do both in one step:
 /plugin install bio-model-benchmarks --marketplace rewire-bio/rewire-benchmarks
 ```
 
-The MCP server needs [uv](https://docs.astral.sh/uv/); it downloads and verifies the
-current graph bundle on first start. Then ask, for example, "Reproduce the published
-MFASS-v2 baseline and compare it with the result in the benchmark graph."
+The servers need [uv](https://docs.astral.sh/uv/). The graph server downloads and verifies the
+current graph bundle on first start. `genomics-mcp` builds pyBigWig on first start, which needs
+a C compiler and libcurl and takes a few minutes; if it cannot build, that one server fails and
+the other two still work. Then ask, for example, "Reproduce the published MFASS-v2 baseline
+and compare it with the result in the benchmark graph", or run `/bio-model-benchmarks:demo`.
 
-For other MCP clients, add the server:
+A run of exactly that, through the MCP tools only, is recorded in [docs/demo](docs/demo) with
+its receipt and every tool call.
+
+What an installed plugin cannot do yet:
+
+- The `rewirebench` server is installed from a commit, not a checkout, and reads the plugin's
+  copy of [`recipes/`](recipes). Its receipts verify, but they carry no code or recipe commit,
+  so `verify_receipt` with `strict` reports the commits as not checked. For a receipt that
+  passes `strict`, run `uv run rewirebench mcp` from a clean checkout of this repository.
+  [docs/demo/plugin-run.json](docs/demo/plugin-run.json) records an MFASS v2 run made this way.
+- `uvx` does not apply this repository's `uv.lock`, so Python and the numeric packages are
+  whatever uv resolves on the day. The last digits of a metric can differ from a locked run.
+- The server is the pinned commit. Changes to `packages/rewirebench` after that commit (a
+  recipe run that requires `plan_sha256`, package versions in the receipt, folder placeholders
+  in step logs) reach an installed plugin when the pin is raised.
+- Model extras (`esm`, `dnabert2`) are not installed, so the pretrained models in
+  `list_models` cannot run from the plugin.
+
+For other MCP clients, add the graph server:
 
 ```json
 {
@@ -229,10 +278,13 @@ For other MCP clients, add the server:
 That URL redirects to the latest graph release. For an exact, reproducible graph, use
 a release asset instead, such as
 `https://github.com/rewire-bio/rewire-benchmark-data/releases/download/kg/2026-10-12-cba623554ce3/kg-2026-10-12-cba623554ce3.tar.gz`.
-Then give the agent the skill: copy [`skills/bio-model-benchmarks`](skills/bio-model-benchmarks)
-into the client's skills directory, or paste `SKILL.md` into its instructions and keep the
-`reference/` files beside it. The copy under `plugins/` is kept byte-identical by
-`tests/test_agent_plugin.py`; edit `skills/bio-model-benchmarks` and copy it across.
+The other two entries are in
+[`plugins/bio-model-benchmarks/.mcp.json`](plugins/bio-model-benchmarks/.mcp.json); replace
+`${CLAUDE_PLUGIN_ROOT}/recipes` with the path of `recipes/` in a checkout.
+Then give the agent the skills: copy the folders under [`skills/`](skills) into the client's
+skills directory, or paste a `SKILL.md` into its instructions and keep its `reference/` files
+beside it. The copies under `plugins/` are kept byte-identical by `tests/test_agent_plugin.py`,
+and so is the plugin's copy of `recipes/`; edit `skills/` and `recipes/` and copy them across.
 
 ## Recipes and receipts
 
@@ -253,7 +305,8 @@ See [docs/recipes.md](docs/recipes.md), and
 `uv run rewirebench mcp` serves the same commands to a coding agent as an MCP server on stdio:
 list protocols, recipes and models, prepare, plan, run on this machine, stop a run, and read
 and verify the receipt. It plans and prices the `spark` and `runpod` backends and starts neither. See
-[docs/mcp.md](docs/mcp.md).
+[docs/mcp.md](docs/mcp.md), and [docs/spark.md](docs/spark.md) for what a DGX Spark needs
+before it can run anything.
 
 ## Cleaning local reference data
 

@@ -123,7 +123,8 @@ step has to take the confirmation from a terminal prompt or MCP elicitation.
   the RunPod-only `instance` block. Inputs and outputs are lists with size and SHA-256.
 - The receipt records each command as written in the recipe, with exit code, wall time and peak
   memory. Rendered local paths are not recorded. Standard output and error go to `logs/` in the
-  run folder and are covered by `SHA256SUMS`.
+  run folder, with the run's own folders replaced by the recipe's placeholders, and are covered
+  by `SHA256SUMS`.
 - No `events.jsonl` yet. It arrives with the first backend that has events to record.
 - `weights[].verified` is not in the receipt yet, because no recipe downloads weights yet.
 

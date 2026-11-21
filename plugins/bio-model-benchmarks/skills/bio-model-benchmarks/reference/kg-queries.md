@@ -6,9 +6,12 @@ later release can add records or supersede them, so always read the current valu
 rather than copying these.
 
 The plugin pins v0.4.0. The four tools used here (`dataset_info`, `find_entity`,
-`describe_resource`, `sparql_query`) are still in that release, checked against its
-source. The queries have not been run again on it. v0.4.0 also has `search`,
-`describe_schema`, `list_queries` and `run_query`, which this page does not use yet.
+`describe_resource`, `sparql_query`) are still in that release. On 2026-11-21 these were run
+again on v0.4.0 against release `2026-11-20-72316db0764b`: `dataset_info`, the `find_entity`
+call for MFASS v2, "Published results on a protocol, with coverage" (15 rows, same values),
+the `rb:runRecipes` read for `id:rewire-mfass-v2`, and the use case queries below. The other
+queries on this page have not been run again. v0.4.0 also has `search`, `describe_schema`,
+`list_queries` and `run_query`.
 
 The server predeclares the bundle prefixes (`rb:`, `id:`, `mls:`, `skos:`, `dcterms:`,
 `schema:`, `metric:`, `status:` and others), so queries need no `PREFIX` lines. The
@@ -184,3 +187,51 @@ Returns the pinned artifact tree at `bee9133b83f3aedaf2bbb9013f1875515845607e` a
 locator `benchmarks/mfass/results/baseline-kmer-position-v2.json :: auroc`. Older
 source URLs use the previous repository owner (`timini/rewire-benchmarks`); the same
 commit exists in `rewire-bio/rewire-benchmarks`.
+
+## Use cases
+
+Run on v0.4.0 against release `2026-11-20-72316db0764b`, which holds 31 `rb:UseCase` records.
+
+`search` with `{"text": "splicing variants follow-up experiments", "types": ["rb:UseCase"]}`
+returns `id:use-case-splicing-follow-up` first. `find_entity` with `"type": "rb:UseCase"`
+matches on labels only.
+
+A use case carries `rb:question`, `rb:decision`, `rb:clinicalScope`, `rb:exclusions`,
+`rb:evidenceGaps`, `rb:depthTier` and `rb:status`, and links to its assessments with
+`rb:assessedBy`. Assessments for a use case, with how much evidence each holds:
+
+```sparql
+SELECT ?assessment ?label (COUNT(DISTINCT ?result) AS ?results) (COUNT(DISTINCT ?s) AS ?systems) WHERE {
+  id:use-case-splicing-follow-up rb:assessedBy ?assessment . ?assessment rdfs:label ?label .
+  OPTIONAL { ?result rb:resultOn ?assessment ; rb:resultFor ?s }
+} GROUP BY ?assessment ?label ORDER BY DESC(?results)
+```
+
+Results on one assessment and one metric, best first:
+
+```sparql
+SELECT ?system ?value ?scored ?eligible ?status WHERE {
+  ?result rb:resultOn id:rewire-mfass-v2 ; rb:resultFor ?s ; rb:metric metric:average-precision ;
+          mls:hasValue ?value ; rb:status ?status .
+  ?s rdfs:label ?system .
+  OPTIONAL { ?result rb:coverage ?c . ?c rb:scoredCount ?scored ; rb:eligibleCount ?eligible }
+} ORDER BY DESC(?value)
+```
+
+Returned five rows: Pangolin mask=False 0.3888 (8301/8324), SpliceAI 1.3.1 0.2987
+(8194/8324), the corrected k-mer baseline 0.2864, DNABERT-2 frozen pair embeddings 0.0451 and
+the training prior 0.0378 (each 8324/8324).
+
+## Named queries
+
+`list_queries` returns four: `open_discrepancies` (optional `severity`),
+`discrepancies_for_system` (`system`), `discrepancy_history` (`discrepancy`) and
+`contested_results_for_use_case` (`use_case`). Run one with `run_query`:
+
+```json
+{"name": "contested_results_for_use_case", "params": {"use_case": "id:use-case-splicing-follow-up"}}
+```
+
+Each row is a result on one of the use case's assessments that a discrepancy rule has flagged,
+with its role (`outlier`, `consensus` or `party`), severity, review state and a summary. A
+discrepancy is a lead for review, not a finding that a result is wrong.
