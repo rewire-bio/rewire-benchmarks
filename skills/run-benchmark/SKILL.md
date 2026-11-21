@@ -77,8 +77,9 @@ RunPod with another tool: nothing in it stops the pod, so the quote would not bo
   commit the receipt states and does not look it up.
 - `cost` is `null` with reason `owned hardware` on `local` and `spark`.
 - Installed from the plugin, the server runs from a wheel and the recipes are the plugin's
-  copy, so `code.commit` and `recipe.commit` are `null`. `verify_receipt` passes; `strict`
-  reports `commits` as not checked. For a receipt that passes `strict`, run from a clean
+  copy. `code.commit` is the commit the plugin pins, read from the install metadata and
+  marked so in `code.commit_source`. `code.dirty` and `recipe.commit` are `null`.
+  `verify_receipt` passes; `strict` reports `commits` as not checked. For a receipt that passes `strict`, run from a clean
   checkout of rewire-bio/rewire-benchmarks (`uv run rewirebench mcp`).
 - Installed from the plugin, Python and the numeric packages are not locked. The last digits
   of a metric can then differ from a run in a locked checkout: average precision on MFASS v2

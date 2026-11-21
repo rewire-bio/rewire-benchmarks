@@ -28,7 +28,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2#subdirectory=packages/rewirebench",
+        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@da7694213d5148c4d7fa2ac4db85c6d15077cbea#subdirectory=packages/rewirebench",
         "rewirebench",
         "mcp",
         "--recipes-dir",

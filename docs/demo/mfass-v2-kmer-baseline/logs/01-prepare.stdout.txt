@@ -1,5 +1,5 @@
 {
   "protocol_id": "mfass-v2",
   "scope": "full",
-  "prepared": "/var/folders/gm/q97_3t156tb9mlk3nc2flqm80000gn/T/rewirebench-recipe-ezl5c0jh/work/prepared/prepared.json"
+  "prepared": "{work}/prepared/prepared.json"
 }

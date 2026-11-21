@@ -37,8 +37,9 @@ found. Pass `--recipes-dir` or set `REWIREBENCH_RECIPES_DIR` to use recipes from
 The `bio-model-benchmarks` plugin starts this server from its `.mcp.json`. No release has the
 command yet, so the plugin installs rewirebench from a pinned commit on `main` with `uvx`, and
 passes `--recipes-dir ${CLAUDE_PLUGIN_ROOT}/recipes`, a byte-identical copy of `recipes/` that
-ships inside the plugin. A server started that way is an installed wheel: its receipts have no
-code or recipe commit, so they verify but cannot pass `strict`. A recorded run through these
+ships inside the plugin. A server started that way is an installed wheel. Its receipts name the
+pinned commit, read from the install metadata (`code.commit_source` is `install_metadata`),
+with `code.dirty` null and no recipe commit, so they verify but cannot pass `strict`. A recorded run through these
 tools is in [demo/](demo/README.md).
 
 ## Tools
