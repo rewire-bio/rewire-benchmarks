@@ -92,10 +92,11 @@ Three limits of a pass, `strict` included:
   it shows that a commit was recorded, not that it exists or holds this code.
 - A recipe can pin the SHA-256 of an output under `expected_output.artifacts`. No shipped
   recipe pins its predictions, and for MFASS v2 one digest would not hold on every machine.
-  With the same code and the same locked packages, the run in CI on Linux x86-64 and the run
-  on macOS arm64 give the same row IDs in the same order and the same metric values, but 19 of
-  the 8,324 predictions differ in the last bit (by at most 1.4e-17). A check of predictions
-  across machines needs a tolerance per row, which the recipe schema does not have yet.
+  Measured on 2026-11-21 with the same code and the same locked packages: two runs in CI on
+  Linux x86-64 (one AMD and one Intel runner) gave one digest, and three runs on macOS arm64
+  gave another. Row IDs, their order and every metric value were the same; 19 of the 8,324
+  predictions differed in the last bit (by at most 1.4e-17). A check of predictions across
+  machines needs a tolerance per row, which the recipe schema does not have yet.
 
 Two runs of the same recipe do not give the same output digests, because the report, the
 manifest, the logs and the receipt hold times. Whether `predictions.json` repeats depends on

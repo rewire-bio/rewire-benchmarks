@@ -232,9 +232,11 @@ NOT_TOOLS = {
     "spark", "state", "strict", "version",
 }
 WORD = r"`([a-z0-9]+(?:_[a-z0-9]+)*)`"
-# The tools of genomics-mcp at the commit the plugin pins (src/genomics_mcp/server.py), and
-# of rewirebench at the commit it pins (mcp_server.TOOLS there). A recording that lists
-# another tool was not made with the pinned servers. Update these when a pin is raised.
+# The tools of genomics-mcp at the commit the plugin pins: the values of the Operation enum
+# in src/genomics_mcp/registry.py, which server.py registers one tool for, read at 3b395a9 on
+# 2026-11-21. And of rewirebench at the commit it pins (mcp_server.TOOLS at e5c5662). A
+# recording that lists another tool was not made with the pinned servers. Update these when
+# a pin is raised.
 GENOMICS_TOOLS = {
     "cancel_transfer", "compare_samples", "convert_sra_run", "describe_dataset",
     "describe_synthetic_protocol", "fetch_file", "get_coverage", "get_features", "get_pileup",
@@ -380,6 +382,67 @@ def test_no_page_says_describe_protocol_gives_a_protocols_inputs():
         text = " ".join(body(page).split())
         assert not re.search(r"`describe_protocol`[^.]{0,40}\b(lists?|returns?|gives?|shows?)"
                              r"( each| the| its)? inputs?\b", text), page.name
+
+
+# How each protocol module is named in prose.
+PROTOCOL_NAMES = {
+    "dart_eval": "DART-Eval", "flip2": "FLIP2", "genomic_benchmarks": "Genomic Benchmarks",
+    "mfass": "MFASS v2", "mrnabench": "mRNABench", "proteingym": "ProteinGym",
+    "tdc_admet": "TDC ADMET",
+}
+RANDOM_SOURCES = ("secrets", "uuid", "urandom", "import random", "default_rng", "time.time")
+
+
+def test_the_pages_name_the_protocols_that_give_rows_random_ids():
+    """Why two runs differ depends on the protocol. The pages once said prepare gives rows
+    random IDs for every protocol; it does for four of the seven modules. The list in the
+    skill and the docs is read against the protocol code."""
+    import rewirebench.protocols as protocols
+
+    folder = Path(protocols.__file__).parent
+    modules = {path.stem: path.read_text() for path in folder.glob("*.py")
+               if path.stem != "__init__"}
+    assert set(modules) == set(PROTOCOL_NAMES)
+    random = sorted(name for name, text in modules.items() if "secrets.token_hex(" in text)
+    fixed = sorted(set(modules) - set(random))
+    assert random == ["dart_eval", "flip2", "genomic_benchmarks", "mrnabench"]
+    for name in fixed:
+        for source in RANDOM_SOURCES:
+            assert source not in modules[name], f"{name} draws on {source}"
+    listed = "FLIP2, DART-Eval, mRNABench and Genomic Benchmarks"
+    assert sorted(listed.replace(" and ", ", ").split(", ")) == sorted(
+        PROTOCOL_NAMES[name] for name in random)
+    stable = "MFASS v2, ProteinGym and TDC ADMET"
+    assert sorted(stable.replace(" and ", ", ").split(", ")) == sorted(
+        PROTOCOL_NAMES[name] for name in fixed)
+    texts = {name: " ".join((ROOT / name).read_text().split()) for name in (
+        "skills/run-benchmark/SKILL.md", "docs/mcp.md", "docs/spark.md", "docs/demo/README.md")}
+    for name in ("skills/run-benchmark/SKILL.md", "docs/mcp.md", "docs/spark.md"):
+        assert listed in texts[name], name
+    for name in ("docs/mcp.md", "docs/spark.md"):
+        assert f"{stable} keep their rows' own IDs" in texts[name], name
+    for name, text in texts.items():
+        assert "because `prepare` gives rows random IDs" not in text, name
+        assert "`prepare` gives every row a random opaque ID, so" not in text, name
+    assert "byte-identical between runs on one machine" in texts["skills/run-benchmark/SKILL.md"]
+    assert "do not compare digests across machines" in texts["skills/run-benchmark/SKILL.md"]
+
+
+def test_the_pages_say_what_a_verified_receipt_does_not_show():
+    """A pass, strict included, reads the checked values from the report and the commit from
+    the receipt. The skill, the agent and the docs say so wherever they describe a pass."""
+    skill = " ".join(body(SKILLS / "run-benchmark/SKILL.md").split())
+    assert "It does not score the predictions again" in skill
+    assert ("A pass, `strict` included, does not show that the metrics follow from the "
+            "predictions") in skill
+    assert "reads the commit the receipt states and does not look it up" in skill
+    agent = " ".join(body(PLUGIN / "agents/benchmarking-agent.md").split())
+    assert "without scoring the predictions again" in agent
+    for name in ("docs/mcp.md", "docs/recipes.md", "docs/demo/README.md"):
+        text = " ".join((ROOT / name).read_text().split())
+        assert "predictions are not scored again" in text or (
+            "predictions were not scored again" in text), name
+        assert "not look" in text and "up" in text, name
 
 
 def test_the_values_the_pages_quote_are_the_recorded_ones():

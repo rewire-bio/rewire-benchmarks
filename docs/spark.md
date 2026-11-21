@@ -135,9 +135,9 @@ For each model and protocol pair:
    random IDs, so two separate runs cannot be joined row by row. Prepare once and give both
    machines the same prepared folder. This needs a recipe step or option that does not exist
    yet. MFASS v2, ProteinGym and TDC ADMET keep their rows' own IDs, so two runs of those can
-   be joined as they are. One measured case, on CPU: the MFASS v2 k-mer baseline on macOS
-   arm64 and on Linux x86-64, with the same locked packages, differs in 19 of 8,324
-   predictions, by at most 1.4e-17, and in no metric.
+   be joined as they are. One case measured on CPU, on 2026-11-21: the MFASS v2 k-mer
+   baseline on macOS arm64 and on Linux x86-64, with the same locked packages, differed in
+   19 of 8,324 predictions, by at most 1.4e-17, and in no metric.
 4. **Repeat on each machine first.** Two runs on the H100 and two on the Spark give the
    run-to-run difference on each. A difference between machines means little unless it is
    compared with that.

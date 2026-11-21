@@ -233,6 +233,37 @@ def test_verify_catches_a_changed_recipe_and_changed_inputs(run_copy: Path, tmp_
     assert statuses(result)["inputs"] == "mismatch" and not result["ok"]
 
 
+def test_verify_reads_the_report_and_the_commit_and_says_so(run_copy: Path):
+    """A known limit, held here so that the wording changes when the behaviour does. Verify
+    reads the checked values from the report: it does not score the predictions again, so
+    a folder whose predictions were emptied, with its digests rewritten, still verifies. And
+    the commits check reads the receipt: a commit that exists nowhere is a match."""
+    from rewirebench import mcp_server
+
+    [predictions] = [path for path in run_copy.rglob("predictions.json")]
+    predictions.write_text("{}")
+    name = predictions.relative_to(run_copy).as_posix()
+
+    def change(data: dict[str, Any]) -> None:
+        for record in data["outputs"]:
+            if record["path"] == name:
+                record.update(sha256=recipes.sha256_file(predictions), bytes=2)
+        data["code"].update(commit="a" * 40, dirty=False)
+        data["recipe"].update(commit="a" * 40)
+
+    rewrite_receipt(run_copy, change)
+    result = receipts.verify(run_copy, recipes_dir=RECIPES)
+    found = statuses(result)
+    assert result["ok"] and found["checks"] == found["metrics"] == found["outputs"] == "match"
+    assert found["commits"] == "match"
+    detail = result["results"][-1]["detail"]
+    assert "as the receipt states it" in detail and "not looked up in any repository" in detail
+    note = " ".join(mcp_server.VERIFY_NOTE.split())
+    assert "predictions are not scored again" in note
+    assert "reads the commit the receipt states and does not look it up" in note
+    assert "predictions are not scored again" in mcp_server.INSTRUCTIONS
+
+
 def test_verify_rejects_a_receipt_that_breaks_the_schema(run_copy: Path):
     receipt = json.loads((run_copy / "receipt.json").read_text())
     receipt["cost"] = {"paid_compute": False, "amount": 1.5, "currency": "USD"}

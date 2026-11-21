@@ -79,7 +79,7 @@ It does not show these:
 - **The predictions were not scored again by `verify_receipt`.** It reads the checked values
   from `report.json`. The `commits` check reads the commit the receipt states and does not
   look it up. The recipe pins no digest for `predictions.json`, and one digest would not hold
-  on every machine: the same run in CI on Linux x86-64 gives the same metrics with 19 of the
+  on every machine: two runs of it in CI on Linux x86-64 gave the same metrics with 19 of the
   8,324 predictions different in the last bit.
 
 ## The same run through the plugin as shipped
