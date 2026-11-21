@@ -124,18 +124,23 @@ def test_a_recipe_run_step_names_a_registered_model():
     ((*STEP,), "required"),
     ((*STEP, "--model", "train-mean", "--adapter-options", '{"args": ["x"]}'), "no option"),
     ((*STEP, "--model", "train-mean", "--adapter-options", "{not json"), "not JSON"),
+    # Asking for help text would print to standard output, which the MCP server speaks on.
+    ((*STEP, "--model", "train-mean", "--help"), "asks for help text"),
+    (("-h",), "asks for help text"),
     # A model that starts an executable named in its options stays out of recipes.
     ((*STEP, "--model", "fimo-h12core-hit-count", "--adapter-options",
       '{"fimo": "/bin/sh", "motifs": "m", "fimo_sha256": "0"}'), "starts another program"),
 ])
 def test_a_recipe_run_step_cannot_reach_any_other_callable(
-    arguments: tuple[str, ...], message: str
+    arguments: tuple[str, ...], message: str, capsys: pytest.CaptureFixture[str]
 ):
     with pytest.raises(recipes.RecipeError, match=message):
         parse(with_step(*arguments))
     # The runner applies the same rule to the argv it is about to start.
     with pytest.raises(ValueError, match="runs only rewirebench data commands"):
         receipts._program(["rewirebench", "run", *arguments])
+    captured = capsys.readouterr()
+    assert captured.out == "" and captured.err == ""
 
 
 def test_a_recipe_with_a_model_step_runs_and_verifies(fixture_recipes: Path, tmp_path: Path):

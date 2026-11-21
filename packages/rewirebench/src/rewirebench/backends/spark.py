@@ -32,8 +32,8 @@ DEFAULT_WORKDIR = "/var/tmp/rewirebench-runs"
 HOST_PLACEHOLDER = "<spark host>"
 CONTAINER_RECIPES = "/recipes"
 CONTAINER_OUT = "/out"
-# Time allowed for the image pull and for each copy, and the margin on top of the
-# recipe's own time limit for the container to start and stop.
+# Time allowed for the image pull, for each copy and for fetching inputs in the container,
+# and the margin on top of the recipe's own time limit for the container to start and stop.
 TRANSFER_SECONDS = 3600.0
 MARGIN_SECONDS = 300.0
 _HOST = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*(@[A-Za-z0-9][A-Za-z0-9._-]*)?")
@@ -301,7 +301,9 @@ class SparkBackend:
         remote_step("pull-image", TRANSFER_SECONDS)
         # The recipe run exits 1 when a check fails and still writes a receipt, so the
         # exit code alone does not decide whether there is something to copy back.
-        ran = remote_step("run", plan.time_limit_seconds + MARGIN_SECONDS, check=False)
+        # Inputs are fetched in the container before the first command, hence the allowance.
+        ran = remote_step("run", plan.time_limit_seconds + TRANSFER_SECONDS + MARGIN_SECONDS,
+                          check=False)
         folder.parent.mkdir(parents=True, exist_ok=True)
         try:
             transport.pull(f"{remote}/out/run", folder, timeout=TRANSFER_SECONDS)

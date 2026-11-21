@@ -75,12 +75,18 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
     if args.backend == "spark" and not args.in_container:
         # From this machine: SSH to the Spark and run the pinned image there. Without
         # --execute nothing is contacted and the steps are printed.
+        import subprocess
+
         spark = backends.get_backend("spark", spark=_spark_config(args, required=args.execute))
-        result = spark.run(
-            loaded, recipes_dir=directory, output=args.output, inputs=args.inputs,
-            started_by=started_by, kg_release_id=args.kg_release_id,
-            dry_run=not args.execute,
-        )
+        try:
+            result = spark.run(
+                loaded, recipes_dir=directory, output=args.output, inputs=args.inputs,
+                started_by=started_by, kg_release_id=args.kg_release_id,
+                dry_run=not args.execute,
+            )
+        except (RuntimeError, subprocess.TimeoutExpired) as error:
+            # An unreachable host or a failed step is reported like any other refusal.
+            raise ValueError(f"The spark run did not complete: {error}") from error
         return result, 0 if result.get("dry_run") or result.get("checks_passed") else 1
     if args.in_container and args.backend != "spark":
         raise ValueError("--in-container is set by the spark backend only")
@@ -245,13 +251,20 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def parse_strict(argv: list[str]) -> argparse.Namespace:
-    """Parse an argv list, raising ValueError where the command line would exit."""
-    with contextlib.redirect_stderr(io.StringIO()) as problem:
+    """Parse an argv list, raising ValueError where the command line would exit.
+
+    Nothing is printed: ``--help`` in the list would otherwise write the help text to
+    standard output, which the MCP server uses as its transport.
+    """
+    with (contextlib.redirect_stderr(io.StringIO()) as problem,
+          contextlib.redirect_stdout(io.StringIO())):
         try:
             return build_parser().parse_args(argv)
         except SystemExit:
             lines = problem.getvalue().strip().splitlines()
-            raise ValueError(lines[-1] if lines else "Not a rewirebench command") from None
+            raise ValueError(
+                lines[-1] if lines else "Not a command to run (it asks for help text)"
+            ) from None
 
 
 def main(argv=None):

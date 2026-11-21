@@ -473,6 +473,19 @@ def test_cli_plans_every_backend_and_spark_prints_its_steps_unless_told_to_execu
     with pytest.raises(SystemExit):   # --execute needs a named host
         cli.main(["recipe", "run", *common, "--backend", "spark", "--execute",
                   "--output", str(tmp_path / "out")])
+
+    # A host that cannot be reached is an error message and exit code 2, not a traceback.
+    def unreachable(argv: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(argv, 255, "", "ssh: connect to host: timed out")
+
+    monkeypatch.setattr(subprocess, "run", unreachable)
+    capsys.readouterr()
+    with pytest.raises(SystemExit) as stop:
+        cli.main(["recipe", "run", *common, "--backend", "spark", "--execute",
+                  "--spark-host", HOST, "--output", str(tmp_path / "out")])
+    assert stop.value.code == 2
+    assert "check-architecture failed with exit code 255" in capsys.readouterr().err
+    monkeypatch.setattr(subprocess, "run", None)
     with pytest.raises(SystemExit):   # runpod cannot be run from the command line
         cli.main(["recipe", "run", *common, "--backend", "runpod",
                   "--output", str(tmp_path / "out")])
