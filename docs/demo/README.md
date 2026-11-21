@@ -10,6 +10,7 @@ This folder holds the record.
 | [`mfass-v2-kmer-baseline/`](mfass-v2-kmer-baseline) | The complete run folder: `receipt.json`, `SHA256SUMS`, the outputs and the step logs |
 | [`plugin-servers.json`](plugin-servers.json) | The three servers started exactly as the plugin's `.mcp.json` declares them, with one read-only call to each |
 | [`plugin-run.json`](plugin-run.json) | The same MFASS v2 rerun made through the plugin's own launch lines, from a copy of the plugin folder outside any checkout. Every tool call; the run folder is not committed |
+| [`agent-session.md`](agent-session.md) | One Claude Code session in which a model made the calls, recorded at an older pin (`e5c5662`). Every tool call and result, with local folders replaced by labels; the run folder is not committed |
 
 ## What ran
 
@@ -65,8 +66,9 @@ It does not show these:
 
 - **A model did not choose the calls.** A script made them, in the order the
   `verify-published-result` skill describes. `started_by` in the receipt is `agent` because
-  the MCP server records that for every run it starts. A session in which a coding agent
-  with the plugin installed makes these calls has not been recorded.
+  the MCP server records that for every run it starts. One session in which a coding agent
+  with the plugin loaded makes the calls is recorded separately, at an older pin: see
+  [An agent session](#an-agent-session). None has been recorded at the current pin.
 - **It is not an independent reproduction.** It reruns the project's own baseline with the
   project's own code and data.
 - **genomics-mcp took no part.** The recipe fetches its own two inputs. The server is checked
@@ -139,8 +141,65 @@ test checks that nothing in the folder names a local folder.
 
 In the transcripts local folder names are replaced by labels such as `<run folder>`. The
 client replaces them itself and refuses to write a transcript that still names a local
-folder. All three transcripts are its output as written, with nothing edited by hand. The
+folder. All three JSON transcripts are its output as written, with nothing edited by hand. The
 checkout run was recorded with `--label <path of the checkout> "<checkout>"`.
+
+## An agent session
+
+[`agent-session.md`](agent-session.md) is a copy of one Claude Code session (version 2.1.330)
+in which a model with the plugin loaded made the calls. It was recorded on 2026-11-21 in two
+headless runs of one session. The recordings were kept as recordings of
+`/bio-model-benchmarks:demo`; they do not hold what the user typed.
+
+It was recorded at an older pin than the two runs above. The plugin was version 0.2.0, loaded
+from the plugin folder of a checkout at commit `26fd89b`, where `.mcp.json` pins rewirebench
+at `e5c5662`. The recording does not name that pin itself. The receipt in it has the
+`sdk_code_sha256` `3297cfe0...`, which is the digest of the rewirebench sources at `e5c5662`,
+computed here from that commit. The plugin is now 0.2.1 and pins `023a7a2`. No agent session has been recorded
+at that pin.
+
+What the recording shows:
+
+- The agent made 14 tool calls. Nine went to the plugin's servers: `describe_recipe`,
+  `dataset_info`, `sparql_query` and `plan_run`, then, after it had asked for agreement to the
+  download and the run, `run`, `run_status`, `get_receipt` and `verify_receipt` twice. The
+  other five were Claude Code's own tools.
+- It did not make the calls in the scripted order. It called neither `find_entity` nor
+  `list_recipes`, and it waited for the receipt with a shell loop before one `run_status` call.
+- The run finished with exit code 0 and the 8 recipe checks passed. Precision at 100 was 0.61,
+  AUROC 0.7779498064677238 and average precision 0.28641674595892375, on 8324 variants, with
+  Python 3.12.7.
+- `verify_receipt` passed with `commits` not checked. With `strict` it did not pass. In that
+  receipt `code.commit` is null and `recipe.commit` is `26fd89b`. The plugin folder
+  was inside a checkout.
+
+The copy was made by a script from the two stream-json recordings. It replaces local folders
+by labels and leaves out IDs, times, token counts and the session's list of other tools. The
+file states each change.
+
+## The command line at current main
+
+The same recipe was run once more on 2026-11-21 from the command line, without MCP, from a
+fresh shallow clone of `main` at commit `ff0b45a` (plugin 0.2.1, pin `023a7a2`),
+with Python 3.11.13 and `uv sync --locked --all-packages`:
+
+```sh
+uv run rewirebench recipe run mfass-v2-kmer-baseline --output <folder>
+uv run rewirebench receipt verify <folder> --strict
+```
+
+- The run exited 0 with `checks_passed` true: 8324 variants, 315 positives, precision at 100
+  of 0.61, average precision 0.2864167459589237 and AUROC 0.7779498064677238. These equal the
+  published values in the Result table above. This run did not read the graph.
+- `receipt verify --strict` passed: all eight checks match and nothing was left unchecked. The
+  `commits` check read code commit `ff0b45a03667b1fb48adb7295b8813172dc73684` from the receipt.
+- Wall time was 23.075 seconds including the download, and peak memory 812 MB, on an
+  Apple M4 laptop (numpy 1.26.4, scikit-learn 1.9.1, scipy 1.17.1).
+- `predictions.json` had the SHA-256 `2683ef05...`, as in the two recorded runs.
+- `sdk_code_sha256` was `e0bd6279...`, as at `023a7a2`.
+
+That run folder is not committed. The committed run folder is still the one recorded at
+`023a7a2`.
 
 ## Check it yourself
 
