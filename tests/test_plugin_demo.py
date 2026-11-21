@@ -11,6 +11,8 @@ import importlib.util
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -319,6 +321,55 @@ def test_both_recorded_runs_used_the_same_code_recipe_and_predictions():
     assert digests[0] == hashlib.sha256((RUN / predictions).read_bytes()).hexdigest()
     report = json.loads((RUN / "baselines/mfass-kmer-position-v2/report.json").read_text())
     assert json.dumps(report).count(digests[0]) >= 1
+
+
+def test_the_pages_say_what_the_recorded_plugin_receipt_carries():
+    """The README, docs/mcp.md, the run skill and the agent page each say what a receipt from
+    an installed plugin holds. They are read against the recorded plugin run, so a page
+    cannot keep saying there is no code commit after the recording has one."""
+    code = one(recorded("plugin-run.json")["calls"], "get_receipt")["result"]["code"]
+    assert code["commit"] and code["commit_source"] == "install_metadata"
+    assert code["dirty"] is None
+    pages = {name: " ".join((ROOT / name).read_text().split()) for name in (
+        "README.md", "docs/mcp.md", "docs/demo/README.md", "skills/run-benchmark/SKILL.md",
+        "plugins/bio-model-benchmarks/skills/run-benchmark/SKILL.md",
+        "plugins/bio-model-benchmarks/agents/benchmarking-agent.md")}
+    for name, text in pages.items():
+        assert re.search(r"install[ _]metadata", text), name
+        # docs/mcp.md also describes the container image, whose receipts have no commit.
+        if name != "docs/mcp.md":
+            assert not re.search(r"\bno (code|code or recipe|recipe or code) commit", text), name
+    section = pages["README.md"].split("What an installed plugin cannot do yet:")[1]
+    section = section.split("## ")[0]
+    assert "they name the pinned commit" in section
+    assert "`code.commit_source` is `install_metadata`" in section
+    assert "`code.dirty` is null" in section and "commits as not checked" in section
+    for name in ("docs/mcp.md", "docs/demo/README.md", "skills/run-benchmark/SKILL.md",
+                 "plugins/bio-model-benchmarks/skills/run-benchmark/SKILL.md"):
+        # recipe.commit is not always null for a plugin: it depends on the folder.
+        assert "inside a git work tree whose HEAD holds" in pages[name], name
+        assert "`code.dirty` and `recipe.commit` are `null`" not in pages[name], name
+
+
+def test_a_plugin_recipe_gets_a_commit_only_inside_a_work_tree_that_holds_it(tmp_path: Path):
+    """What the pages above say about recipe.commit, run against the plugin's recipes."""
+    plain = Path(shutil.copytree(PLUGIN / "recipes", tmp_path / "plain/recipes"))
+    name = "mfass/mfass-v2-kmer-baseline.yaml"
+    assert (plain / name).is_file()
+    assert receipts.recipe_origin(plain / name) == (None, None)
+
+    def git(*arguments: str) -> str:
+        return subprocess.run(
+            ["git", "-c", "user.name=Test", "-c", "user.email=test@example.org", *arguments],
+            cwd=tmp_path / "plain", check=True, capture_output=True, text=True).stdout.strip()
+
+    git("init", "--quiet")
+    assert receipts.recipe_origin(plain / name) == (None, None)
+    git("add", "recipes")
+    git("commit", "--quiet", "-m", "a copy of the plugin")
+    assert receipts.recipe_origin(plain / name) == (None, git("rev-parse", "HEAD"))
+    (plain / name).write_text((plain / name).read_text() + "# Edited.\n")
+    assert receipts.recipe_origin(plain / name) == (None, None)
 
 
 def test_the_demo_page_reports_what_the_transcripts_hold():
