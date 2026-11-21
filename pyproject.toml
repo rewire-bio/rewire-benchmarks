@@ -3,6 +3,7 @@ name = "rewire-benchmarks"
 version = "0.1.0"
 description = "Independent, reproducible benchmarks for AI models in biology"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = ["rewirebench", "mfass"]
 
 [tool.uv.workspace]
