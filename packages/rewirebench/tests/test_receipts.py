@@ -296,7 +296,9 @@ def test_a_malformed_receipt_is_reported_field_by_field(
         receipts.load_receipt(run_copy)
 
 
-def test_the_receipt_records_the_versions_of_the_packages_the_run_used(smoke_run: Path):
+def test_the_receipt_records_the_versions_of_the_packages_the_run_used(
+    smoke_run: Path, run_copy: Path
+):
     """No image and no lock file means numpy and scikit-learn float. The receipt says
     which versions scored the run."""
     from importlib.metadata import version
@@ -307,9 +309,12 @@ def test_the_receipt_records_the_versions_of_the_packages_the_run_used(smoke_run
     assert list(packages) == sorted(packages)
     # An extra that is not installed is left out, not recorded as null.
     assert all(isinstance(value, str) and value for value in packages.values())
-    # A receipt written before the field existed still loads.
-    old = receipts.load_receipt(ROOT / "docs/demo/mfass-v2-kmer-baseline")
-    assert old.environment.packages is None
+    # A receipt written before the field existed still loads. The recorded demo folder was
+    # such a receipt until it was recorded again, so the field is taken out of a copy.
+    rewrite_receipt(run_copy, lambda data: data["environment"].pop("packages"))
+    assert receipts.load_receipt(run_copy).environment.packages is None
+    recorded = receipts.load_receipt(ROOT / "docs/demo/mfass-v2-kmer-baseline")
+    assert recorded.environment.packages and recorded.environment.packages["numpy"]
 
 
 WRITE = ("import json, pathlib, sys; target = pathlib.Path(sys.argv[1]) / 'result.json'; "
