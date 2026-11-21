@@ -86,7 +86,8 @@ RunPod with another tool: nothing in it stops the pod, so the quote would not bo
 - Two runs of one recipe give different output digests, because the report, the logs and
   the receipt hold times. For FLIP2, DART-Eval, mRNABench and Genomic Benchmarks, `prepare`
   also gives rows random IDs, so the predictions differ too. For MFASS v2 `predictions.json`
-  was byte-identical between runs. Compare runs by the checked metric values.
+  was byte-identical between runs on one machine, and differed in the last bit of 19 rows
+  between macOS arm64 and Linux x86-64. Compare runs by the checked metric values.
 
 ## Report
 

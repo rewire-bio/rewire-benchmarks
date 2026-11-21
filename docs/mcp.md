@@ -91,15 +91,19 @@ Three limits of a pass, `strict` included:
 - The `commits` check reads the commit the receipt states. It does not look the commit up, so
   it shows that a commit was recorded, not that it exists or holds this code.
 - A recipe can pin the SHA-256 of an output under `expected_output.artifacts`. No shipped
-  recipe pins its predictions yet.
+  recipe pins its predictions, and for MFASS v2 one digest would not hold on every machine.
+  With the same code and the same locked packages, the run in CI on Linux x86-64 and the run
+  on macOS arm64 give the same row IDs in the same order and the same metric values, but 19 of
+  the 8,324 predictions differ in the last bit (by at most 1.4e-17). A check of predictions
+  across machines needs a tolerance per row, which the recipe schema does not have yet.
 
 Two runs of the same recipe do not give the same output digests, because the report, the
 manifest, the logs and the receipt hold times. Whether `predictions.json` repeats depends on
 the protocol. `prepare` gives every row a random opaque ID for FLIP2, DART-Eval, mRNABench and Genomic Benchmarks, so
 that an adapter cannot key on it, and the IDs appear in the predictions. MFASS v2, ProteinGym
 and TDC ADMET keep their rows' own IDs: three MFASS v2 baseline runs on one machine, on Python
-3.11 and 3.12, gave a byte-identical `predictions.json`. Compare two runs by the metric values
-the recipe checks, not by the digest of the folder.
+3.11 and 3.12, gave a byte-identical `predictions.json`. That holds on one machine only, as
+the list above says. Compare two runs by the metric values the recipe checks, not by a digest.
 
 ## What `run` will and will not do
 

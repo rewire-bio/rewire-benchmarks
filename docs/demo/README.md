@@ -78,7 +78,9 @@ It does not show these:
   recipe. It does not prove where the folder came from.
 - **The predictions were not scored again by `verify_receipt`.** It reads the checked values
   from `report.json`. The `commits` check reads the commit the receipt states and does not
-  look it up. The recipe pins no digest for `predictions.json`.
+  look it up. The recipe pins no digest for `predictions.json`, and one digest would not hold
+  on every machine: the same run in CI on Linux x86-64 gives the same metrics with 19 of the
+  8,324 predictions different in the last bit.
 
 ## The same run through the plugin as shipped
 
@@ -143,9 +145,9 @@ uv run python scripts/demo/mcp_demo.py --recipe mfass-v2-kmer-baseline \
 
 This downloads the graph bundle and 80 MB of MFASS data, and takes about a minute. `--strict`
 passes only from a clean tree. The digests of the report, the manifest, the logs and the
-receipt differ between runs, because they hold times. `predictions.json` does not: it had the
-same SHA-256 in all three runs made on this laptop. (Protocols whose `prepare` gives rows
-random IDs, such as FLIP2, differ there too.)
+receipt differ between runs, because they hold times. `predictions.json` does not, on one
+machine: it had the same SHA-256 in all three runs made on this laptop. On Linux x86-64 it has
+another. (Protocols whose `prepare` gives rows random IDs, such as FLIP2, differ there too.)
 
 To record the plugin path, copy `plugins/bio-model-benchmarks` to a folder outside the
 checkout and pass its `.mcp.json` as both `--graph` and `--runner`, without `--strict`.
