@@ -251,8 +251,8 @@ See [docs/recipes.md](docs/recipes.md), and
 [docs/adr-c-recipes-and-receipts.md](docs/adr-c-recipes-and-receipts.md) for the decision.
 
 `uv run rewirebench mcp` serves the same commands to a coding agent as an MCP server on stdio:
-list protocols, recipes and models, prepare, plan, run on this machine, and read and verify the
-receipt. It plans and prices the `spark` and `runpod` backends and starts neither. See
+list protocols, recipes and models, prepare, plan, run on this machine, stop a run, and read
+and verify the receipt. It plans and prices the `spark` and `runpod` backends and starts neither. See
 [docs/mcp.md](docs/mcp.md).
 
 ## Cleaning local reference data

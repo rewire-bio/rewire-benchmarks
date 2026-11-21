@@ -90,10 +90,12 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
         return result, 0 if result.get("dry_run") or result.get("checks_passed") else 1
     if args.in_container and args.backend != "spark":
         raise ValueError("--in-container is set by the spark backend only")
-    receipt = receipts.run_recipe(
-        loaded, output=args.output, recipes_dir=directory, inputs=args.inputs,
-        started_by=args.started_by, kg_release_id=args.kg_release_id, backend=args.backend,
-    )
+    with receipts.stop_on_terminate():
+        receipt = receipts.run_recipe(
+            loaded, output=args.output, recipes_dir=directory, inputs=args.inputs,
+            started_by=args.started_by, kg_release_id=args.kg_release_id,
+            backend=args.backend,
+        )
     return {"recipe_id": loaded.recipe.id, "checks_passed": receipt.checks_passed,
             "metrics": receipt.metrics, "wall_seconds": receipt.wall_seconds,
             "peak_memory_bytes": receipt.peak_memory_bytes,
@@ -109,6 +111,22 @@ def _spark_config(args: argparse.Namespace, *, required: bool) -> Any:
     return spark.SparkConfig.from_environment(
         host=args.spark_host, workdir=args.spark_workdir, required=required
     )
+
+
+def _positive_int(text: str) -> int:
+    value = int(text)
+    if value < 1:
+        raise argparse.ArgumentTypeError(f"must be 1 or more, not {value}")
+    return value
+
+
+def _prepared_protocol(prepared: str) -> Any:
+    """The protocol of a prepared folder or file, read before any model code runs."""
+    try:
+        data = json.loads(_prepared_file(prepared).read_text())
+    except (OSError, ValueError) as error:
+        raise ValueError(f"Prepared data cannot be read: {prepared}") from error
+    return data.get("protocol_id") if isinstance(data, dict) else None
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -137,7 +155,7 @@ def build_parser() -> argparse.ArgumentParser:
     baseline_run.add_argument("--prepared", required=True)
     baseline_run.add_argument("--output", required=True)
     baseline_run.add_argument("--baseline", action="append")
-    baseline_run.add_argument("--batch-size", type=int, default=32)
+    baseline_run.add_argument("--batch-size", type=_positive_int, default=32)
     baseline_run.add_argument("--baseline-options", default="{}",
                               help='JSON {baseline_id: {option: value}} for artifact-backed baselines')
     artifact = sub.add_parser("prepare-baseline-artifact",
@@ -182,7 +200,7 @@ def build_parser() -> argparse.ArgumentParser:
                 "--adapter", help="Explicit local Python module:class to execute"
             )
             cmd.add_argument("--adapter-options", default="{}")
-            cmd.add_argument("--batch-size", type=int, default=32)
+            cmd.add_argument("--batch-size", type=_positive_int, default=32)
             cmd.add_argument("--prediction-type", choices=["scalar", "embedding"])
         else:
             inputs = cmd.add_mutually_exclusive_group(required=True)
@@ -342,6 +360,9 @@ def main(argv=None):
             if args.command == "run" and args.model:
                 from rewirebench import models
                 spec = models.get_model(args.model)
+                # Before any model code is imported: the data must be of a protocol the
+                # model is registered for.
+                models.check_protocol(spec, _prepared_protocol(args.prepared))
                 model_name = args.model_name or spec.title
                 adapter = models.load(spec, json.loads(args.adapter_options))
             elif args.command == "run":

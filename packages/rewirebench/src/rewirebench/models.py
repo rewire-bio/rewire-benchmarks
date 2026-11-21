@@ -14,11 +14,13 @@ way ``--adapter module:Class`` does.
 from __future__ import annotations
 
 import importlib
+import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol, runtime_checkable
 
 Interface = Literal["predict", "embed", "fit"]
+OptionType = Literal["text", "integer", "number", "boolean"]
 ModelInput = dict[str, Any]
 
 
@@ -49,9 +51,10 @@ class FittedModel(Protocol):
 class ModelSpec:
     """One registered adapter.
 
-    ``options`` names every constructor option a caller may set. ``runs_program`` marks
-    an adapter that starts an executable named by an option; such a model cannot be
-    used from a recipe, which must not be able to start another program.
+    ``options`` names every constructor option a caller may set, and ``option_types``
+    the JSON type of each one that is not text. ``runs_program`` marks an adapter that
+    starts an executable named by an option; such a model cannot be used from a recipe
+    or through the MCP server, neither of which may start another program.
     """
 
     id: str
@@ -63,6 +66,7 @@ class ModelSpec:
     extra: str | None = None
     options: Mapping[str, str] | None = None
     required_options: tuple[str, ...] = ()
+    option_types: Mapping[str, OptionType] | None = None
     runs_program: bool = False
     note: str | None = None
 
@@ -73,6 +77,9 @@ class ModelSpec:
     @property
     def recipe_allowed(self) -> bool:
         return not self.runs_program
+
+    def option_type(self, name: str) -> OptionType:
+        return (self.option_types or {}).get(name, "text")
 
     def describe(self) -> dict[str, Any]:
         return {
@@ -85,6 +92,7 @@ class ModelSpec:
             "pretrained": self.pretrained,
             "install_extra": self.extra,
             "options": dict(self.options or {}),
+            "option_types": {name: self.option_type(name) for name in self.options or {}},
             "required_options": list(self.required_options),
             "runs_program": self.runs_program,
             "recipe_allowed": self.recipe_allowed,
@@ -108,7 +116,7 @@ _MODELS: tuple[ModelSpec, ...] = (
         adapter="rewirebench.adapters.sequence:SeededRandomScore",
         interfaces=("predict",), pretrained=False,
         protocols=("proteingym-v1.3-dms-substitutions", "dart-eval-task1-zero-shot-v1"),
-        options={"seed": "Integer seed, default 0."},
+        options={"seed": "Integer seed, default 0."}, option_types={"seed": "integer"},
     ),
     ModelSpec(
         id="sequence-composition", title="Sequence length and composition features",
@@ -123,6 +131,7 @@ _MODELS: tuple[ModelSpec, ...] = (
         interfaces=("fit", "predict"), pretrained=False,
         protocols=("mfass-v2", "genomic-benchmarks-v2", "tdc-admet-group-v1"),
         options={"multiclass": "true for more than two classes."},
+        option_types={"multiclass": "boolean"},
     ),
     ModelSpec(
         id="string-ngram-linear", title="Character 1 to 3-gram counts with a linear head",
@@ -132,6 +141,7 @@ _MODELS: tuple[ModelSpec, ...] = (
         options={"field": "sequence or smiles.",
                  "classification": "false for a regression task.",
                  "multiclass": "true for more than two classes."},
+        option_types={"classification": "boolean", "multiclass": "boolean"},
     ),
     ModelSpec(
         id="paired-composition", title="Paired sequence composition features",
@@ -139,6 +149,7 @@ _MODELS: tuple[ModelSpec, ...] = (
         interfaces=("embed",), pretrained=False,
         protocols=("mfass-v2-frozen-encoder",),
         options={"constant": "true for the constant-feature control."},
+        option_types={"constant": "boolean"},
     ),
     ModelSpec(
         id="mfass-kmer-position", title="MFASS corrected k-mer and position baseline",
@@ -153,6 +164,7 @@ _MODELS: tuple[ModelSpec, ...] = (
         options={"checkpoint": "Folder holding the pinned DNABERT-2 files. Each is "
                                "checked by SHA-256 before loading.",
                  "batch_size": "Encoder batch size, default 2."},
+        option_types={"batch_size": "integer"},
         required_options=("checkpoint",),
     ),
     ModelSpec(
@@ -191,9 +203,10 @@ _MODELS: tuple[ModelSpec, ...] = (
                  "motifs": "Path of the H12CORE MEME file.",
                  "fimo_sha256": "SHA-256 of that executable.",
                  "timeout": "Seconds allowed per FIMO call."},
-        required_options=("fimo", "motifs", "fimo_sha256"),
+        required_options=("fimo", "motifs", "fimo_sha256"), option_types={"timeout": "number"},
         runs_program=True,
-        note="Starts the FIMO executable named in the options, so a recipe cannot use it.",
+        note="Starts the FIMO executable named in the options, so it runs from the command "
+             "line only: a recipe and the MCP server both refuse it.",
     ),
 )
 
@@ -216,8 +229,37 @@ def list_models(protocol: str | None = None) -> list[dict[str, Any]]:
     return [spec.describe() for spec in _MODELS if protocol is None or protocol in spec.protocols]
 
 
+def _has_type(value: Any, wanted: OptionType) -> bool:
+    """JSON types, strictly: true is not an integer and "3" is not a number."""
+    if wanted == "boolean":
+        return isinstance(value, bool)
+    if isinstance(value, bool):
+        return False
+    if wanted == "integer":
+        return isinstance(value, int)
+    if wanted == "number":
+        return isinstance(value, (int, float)) and math.isfinite(value)
+    return isinstance(value, str) and bool(value)
+
+
+def check_protocol(spec: ModelSpec, protocol: Any) -> None:
+    """Refuse prepared data of a protocol the model is not registered for."""
+    if protocol not in spec.protocols:
+        raise ValueError(
+            f"Model {spec.id} is not registered for protocol {protocol}. "
+            f"Its protocols are: {', '.join(spec.protocols)}"
+        )
+
+
+def check_cpu(spec: ModelSpec, options: Mapping[str, Any]) -> None:
+    """Refuse a device other than cpu, where the caller may not use an accelerator."""
+    if options.get("device", "cpu") != "cpu":
+        raise ValueError(f"Model {spec.id}: the local backend is CPU only, so device must be cpu")
+
+
 def check_options(spec: ModelSpec, options: Any) -> dict[str, Any]:
-    """Refuse an option the model does not declare, and a missing required one."""
+    """Refuse an option the model does not declare, one of the wrong JSON type, and a
+    missing required one."""
     if not isinstance(options, dict):
         raise ValueError("Adapter options are a JSON object")  # noqa: TRY004
     allowed = set(spec.options or {})
@@ -227,6 +269,11 @@ def check_options(spec: ModelSpec, options: Any) -> dict[str, Any]:
             f"Model {spec.id} has no option {unknown[0]!r}. "
             f"Its options are: {', '.join(sorted(allowed)) or 'none'}"
         )
+    for name, value in options.items():
+        wanted = spec.option_type(name)
+        if not _has_type(value, wanted):
+            raise ValueError(f"Model {spec.id}: option {name!r} must be {wanted}, "
+                             f"not {value!r}")
     absent = [name for name in spec.required_options if name not in options]
     if absent:
         raise ValueError(f"Model {spec.id} needs the option {absent[0]!r}")

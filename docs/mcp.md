@@ -2,7 +2,7 @@
 
 `rewirebench mcp` serves rewirebench to a coding agent over the Model Context Protocol, on
 stdio, on your own machine. An agent can list what there is to run, prepare data, plan a run,
-run it on the local backend and read and verify the receipt, without a shell.
+run it on the local backend, stop it, and read and verify the receipt, without a shell.
 
 It runs code and can only run on your machine. There is no hosted version.
 
@@ -45,17 +45,34 @@ pins a release and no release has this command yet.
 | `describe_protocol` | Inputs, datasets, metrics, execution rules, baselines and models of one protocol |
 | `list_recipes` | The recipes under `recipes/` with SHA-256, scope and backends |
 | `describe_recipe` | One recipe in full |
-| `list_models` | The registered model adapters, or those one protocol accepts |
+| `list_models` | The registered model adapters, or those registered for one protocol, with each option's type |
 | `prepare` | Prepare a protocol's data from files already on the machine |
 | `plan_run` | What a recipe needs on a backend: hardware, expected wall time, price or "owned hardware", the exact command and a `plan_sha256`. Starts and contacts nothing |
 | `run` | Start a recipe on the local backend, or a registered model on prepared data. Returns a `run_id` at once |
-| `run_status` | Whether a run is going or finished, its exit code, receipt path and whether its checks passed |
+| `run_status` | Whether a run is going or finished, its exit code, receipt path, whether its checks passed, and why it was stopped if it was |
+| `cancel_run` | Stop a run that is still going, with everything it started |
 | `evaluate` | Score a predictions or embeddings file against prepared data |
 | `get_receipt` | `receipt.json` of a run, by `run_id` or by folder |
-| `verify_receipt` | Recompute a receipt folder's digests and checks. `strict` also fails when a check could not be made |
+| `verify_receipt` | Check that a run folder is consistent with its receipt and recipe. `strict` also fails when a check could not be made; `not_checked` lists those |
 
 A typical sequence: `list_recipes`, `describe_recipe`, `plan_run`, `run`, `run_status` until
 `finished`, `get_receipt`, `verify_receipt`.
+
+Every argument is described in the tool's schema. An argument a tool does not declare is an
+error, so a misspelt `backend` or `confirmed_amount` is refused and never read as a default.
+
+### What `verify_receipt` shows
+
+It recomputes the digests in `SHA256SUMS` and the receipt. For a recipe run it also compares
+the inputs with the recipe's pins and reads the checked values again from the outputs. It
+does not show where a folder came from. Nothing is signed: hardware, times and `started_by`
+are as trustworthy as the place the folder came from, and a metric the recipe does not check
+can be changed together with its digests. A model run outside a recipe has no recipe checks,
+so only its digests are verified, `not_checked` lists the rest, and `strict` never passes.
+
+Two runs of the same recipe do not give the same output digests. `prepare` gives every row a
+random opaque ID, so that an adapter cannot key on it, and the IDs appear in the predictions
+and the report. Compare two runs by the metric values the recipe checks, not by digest.
 
 ## What `run` will and will not do
 
@@ -63,19 +80,38 @@ A typical sequence: `list_recipes`, `describe_recipe`, `plan_run`, `run`, `run_s
   and returns. The command is the one `plan_run` printed. One run at a time. `output` is a new
   absolute folder. Every command the server starts has `CUDA_VISIBLE_DEVICES` empty and
   records `started_by: agent`.
+- **time limit and stopping**: a model run is stopped after `timeout_seconds` (default one
+  hour, at most 24). A recipe run is stopped after the sum of its step timeouts plus an hour
+  for fetching inputs. `cancel_run` stops a run at once. When the client closes, or the server
+  gets SIGTERM, the server stops the run it started and removes its log folder, so nothing is
+  left running. A server that is killed outright (SIGKILL) cannot do this; look for
+  `python -m rewirebench.cli` in the process list. A stopped run has no receipt.
 - **spark**: never started from here. The reply is the dry-run plan with the SSH and Docker
   steps. A person can run `rewirebench recipe run <id> --backend spark --execute` at a terminal.
-- **runpod**: refused. Without `confirmed_amount` the reply names the plan's amount. With an
-  amount or currency that differs from the plan it is refused. With the right amount it is
-  still refused, because no launch is built. It is also refused whenever `CI` is set. The
-  server reads no cloud API key.
+- **runpod**: refused. It needs the plan's `plan_sha256`, then `confirmed_amount` and
+  `confirmed_currency` as text. With an amount or currency that differs from the plan it is
+  refused. With the right amount it is still refused, because no launch is built. It is also
+  refused whenever `CI` is set. The server reads no cloud API key.
+
+The confirmed amount is a value, not proof that a person gave it: an agent can read the figure
+in the plan and pass it back. The tool text tells the agent to ask, and the refusals do not
+repeat the figure, but that is guidance. Before a launch exists, the confirmation has to move
+to something only a person can answer: a prompt at a terminal, or MCP elicitation, where the
+client asks the user directly.
 
 A model run takes a model ID from `list_models`, never a Python path, and only the options that
-model declares. `device` must be `cpu`.
+model declares, each of its declared type. `device` must be `cpu`. The data must be of a
+protocol the model is registered for. A model that starts an executable named in its options
+(`fimo-h12core-hit-count`, marked `runs_program`) is refused: the server starts no program
+other than rewirebench. A person can still run it with `rewirebench run --model` at a terminal.
+
+The receipt of a model run records `--model <id>` and `--batch-size`. Other option values are
+local paths and private names and are recorded as `<local value>`.
 
 The server keeps the logs of the commands it starts in its own temporary folder, not in the
-run folder, so a run folder holds only what its `SHA256SUMS` covers. Runs are known by
-`run_id` for the life of the server; afterwards use the folder.
+run folder, so a run folder holds only what its `SHA256SUMS` covers. `run_status` gives the
+log paths. The folder is removed when the server closes. Runs are known by `run_id` for the
+life of the server; afterwards use the folder.
 
 This is not a sandbox. The server and everything it starts run with your user's rights.
 
@@ -88,16 +124,20 @@ This is not a sandbox. The server and everything it starts run with your user's 
 | `hardware` | The recipe's `hardware_floor`, or null with `hardware_note` |
 | `expected_wall_seconds` | From `estimate.wall_clock_seconds`, else `hardware_floor.wall_clock_seconds`. Null when the recipe states neither; `expected_wall_seconds_basis` says which |
 | `time_limit_seconds` | The sum of the commands' timeouts, or the pod's `max_hours` on runpod |
-| `quote` | `paid: false` with `reason: "owned hardware"` on local and spark. On runpod: `max_amount` (hourly rate times `max_hours`, rounded up to the cent), `estimated_amount` (rate times `estimate.gpu_hours`), currency, and the rate's source and date |
+| `quote` | `paid: false` with `reason: "owned hardware"` on local and spark. On runpod: `max_amount` (hourly rate per GPU, times `accelerator_count`, times `max_hours`, rounded up to the cent), `estimated_amount` (rate times `estimate.gpu_hours`), currency, the rate's source and date, and `limit_enforced` |
 | `confirmation` | Whether a person must confirm, and the amount and currency to confirm |
 | `command` | The exact argv. On spark it is the `ssh` call that starts the container |
 | `steps` | On spark, every command in order and where it runs |
-| `pod_specs` | On runpod, one pod request body per GPU type in fallback order |
+| `pod_specs` | On runpod, the pod request body for the GPU type the quote prices. For review only |
 | `runnable`, `not_runnable_reason` | Whether this version can run it, and why not |
 | `plan_sha256` | SHA-256 of the plan's canonical JSON. Pass it to `run` to be sure the plan has not changed |
 
 The runpod quote uses the dated rate written in the recipe. It is not a live price, and it
-leaves out storage and network charges.
+leaves out storage and network charges. The recipe schema requires that rate to be for
+provider `runpod` and for the first entry of `gpu_types`, so the rate and the pod asked for
+cannot drift apart. Later entries of `gpu_types` have no dated rate: they are not priced and
+get no pod spec. `limit_enforced` is false, because nothing deletes the pod at `max_hours`
+yet. Until an image has a start script that does, `max_amount` is not a ceiling.
 
 ## Backends
 
@@ -117,13 +157,19 @@ steps. With `--execute` it:
 3. copies `recipes/` there with `scp`;
 4. pulls the recipe's `linux/arm64` image by digest;
 5. runs `docker run --platform linux/arm64 --gpus all ... recipe run <id> --backend spark
-   --in-container`, which writes the receipt on the host, so it records the host's hardware;
+   --in-container` in a container named `rewirebench-<name of the output folder>`, which
+   writes the receipt on the host, so it records the host's hardware;
 6. copies the run folder back and runs `receipt verify` on it here.
 
 The host comes from `--spark-host` or `REWIREBENCH_SPARK_HOST` and is a plain SSH name or
 `user@name`. The work folder comes from `--spark-workdir` or `REWIREBENCH_SPARK_WORKDIR`
 (default `/var/tmp/rewirebench-runs`). SSH uses your own keys and `BatchMode`, so it never asks
 for a password. The run folder stays on the host; remove it there by hand.
+
+The plan's `scp` steps are the commands the backend runs, option for option. If the run step
+passes its time limit, the backend runs `docker kill` on the container by name and says
+whether that worked. If this machine loses the connection instead, the container keeps going:
+stop it on the host with `docker kill rewirebench-<name of the output folder>`.
 
 Inside the container, `--backend spark` is accepted only when `REWIRE_CONTAINER_DIGEST` equals
 the recipe's `linux/arm64` digest and the machine is arm64. Anywhere else it is refused, so it
@@ -141,12 +187,15 @@ yet. Gated weights have no way in: the step environment passes no token.
 rewire-bio/evo2-cloud-operations: the pod request body (REST v2, one body per GPU type in
 fallback order, Secure Cloud, one SSH port, a `MAX_SECONDS` lifetime) and the instance record
 read from a created pod, which is where that script learns the hourly rate. That script makes
-no price call before it creates a pod, so the quote comes from the recipe.
+no price call before it creates a pod, so the quote comes from the recipe. `launch.sh` asks
+for one GPU; here the count comes from the recipe's hardware floor and the quote multiplies
+by it.
 
-To hand a planned pod to RunPod yourself, or to the RunPod MCP server, use a body from
-`pod_specs`. A rewirebench image has no start script that installs the SSH key, starts sshd
-and deletes the pod after `MAX_SECONDS`, so the body carries no `cmd`. Add one before any
-launch, or the pod will not stop on its own.
+The pod spec is for review. Do not send it to RunPod by hand or with another tool, the RunPod
+MCP server included. A rewirebench image has no start script that installs the SSH key, starts
+sshd and deletes the pod after `MAX_SECONDS`, so the body carries no `cmd`, nothing would stop
+the pod, and the quote would not bound its cost. That start script is a precondition of
+building the launch.
 
 ## Models
 
@@ -154,8 +203,9 @@ launch, or the pod will not stop on its own.
 protocols call: `predict(inputs)` for one score per input, `embed(inputs)` for one vector per
 input, and an optional `fit(inputs, targets)` on the training split
 (`rewirebench.models.ScoreModel`, `EmbeddingModel`, `FittedModel`). `rewirebench run --model
-<id>` runs one on prepared data. `--adapter module:Class` still runs your own adapter from the
-command line; it is not available through MCP or in a recipe.
+<id>` runs one on prepared data, and refuses data of a protocol the model is not registered
+for. `--adapter module:Class` still runs your own adapter from the command line, on any data;
+it is not available through MCP or in a recipe.
 
 `score-variants`, and `embed` or `predict` on your own sequences outside a protocol (#58), are
 not built.

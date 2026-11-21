@@ -97,7 +97,8 @@ working with a person may start a paid run once that person has confirmed the qu
 The receipt keeps `started_by` (`human`, `agent` or `ci`) as a record. The confirmation rule
 belongs to the backend that spends money: `rewirebench.backends.runpod` refuses a launch
 without a confirmed amount and currency equal to the plan's quote, and launches nothing yet
-(see [mcp.md](mcp.md)).
+(see [mcp.md](mcp.md)). An argument cannot show that a person supplied it, so the launch
+step has to take the confirmation from a terminal prompt or MCP elicitation.
 
 ## Changes from the ADR-C draft
 
@@ -109,6 +110,10 @@ without a confirmed amount and currency equal to the plan's quote, and launches 
   device and has a timeout. This is what makes "a local recipe run never starts a GPU or paid
   run" a property of the code. `run` is accepted only with `--model` and a model from the
   registry in `rewirebench.models`, because `--adapter` calls any installed Python callable.
+  On the local backend a `run` step's `device` must be `cpu`, checked at validation and
+  before the step starts, since an empty `CUDA_VISIBLE_DEVICES` does not hide Apple MPS. The
+  FIMO model and the FIMO baseline start an executable named in their options and are
+  refused in a recipe.
   The spark backend did not widen the schema: the container runtime is started by the backend
   on the host, and the steps inside the image are the same rewirebench commands.
 - A `runpod` backend block requires `estimate.price_basis` and caps `max_hours` at 24, so the

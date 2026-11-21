@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 from recipe_fixtures import (
     ARM64_DIGEST,
     INPUT_URL,
@@ -25,7 +26,7 @@ from rewirebench.backends import base, runpod, spark
 
 ROOT = Path(__file__).resolve().parents[3]
 RECIPES = ROOT / "recipes"
-HOST = "tim@spark.local"
+HOST = "user@spark.example"
 
 
 @pytest.fixture(autouse=True)
@@ -103,6 +104,9 @@ def test_runpod_plan_quotes_the_rate_times_the_time_limit(fixture_recipes: Path)
     assert quote.estimated_amount == "2.00"     # 0.5 GPU-hours, rounded up to the cent
     assert quote.amount_per_hour == "3.99" and quote.max_hours == 3
     assert quote.rate_source == "Made-up rate for tests" and str(quote.rate_date) == "2026-10-14"
+    assert quote.accelerator_count == 1
+    # Nothing deletes the pod at the limit yet, and the quote says so.
+    assert quote.limit_enforced is False and "not a ceiling" in quote.note
     assert plan.confirmation.model_dump() == {
         "required": True, "amount": "11.97", "currency": "USD",
         "how": plan.confirmation.how}
@@ -112,10 +116,48 @@ def test_runpod_plan_quotes_the_rate_times_the_time_limit(fixture_recipes: Path)
     assert not plan.runnable and "not built" in plan.not_runnable_reason
 
 
-def test_runpod_pod_specs_follow_the_launcher_in_fallback_order(fixture_recipes: Path):
+def fixture_with(root: Path, change: Any) -> tuple[recipes.LoadedRecipe, Path]:
+    data = gpu_recipe_data()
+    change(data)
+    folder = write_recipes(root, data)
+    return recipes.get_recipe("gpu-fixture", folder), folder
+
+
+def test_runpod_quote_covers_every_gpu_in_the_pod(tmp_path: Path):
+    def two(data: dict[str, Any]) -> None:
+        data["hardware_floor"]["accelerator"]["count"] = 2
+
+    loaded, folder = fixture_with(tmp_path / "two", two)
+    plan = backends.get_backend("runpod").plan(loaded, recipes_dir=folder)
+    assert plan.pod_specs[0]["gpu"] == {"id": "NVIDIA H100 80GB HBM3", "count": 2}
+    assert plan.quote.accelerator_count == 2
+    assert plan.quote.max_amount == "23.94"     # 3.99 an hour, 2 GPUs, at most 3 hours
+    assert plan.confirmation.amount == "23.94"
+    assert plan.quote.estimated_amount == "2.00"  # gpu_hours already counts every GPU
+
+
+@pytest.mark.parametrize(("field", "value"), [
+    ("accelerator", "NVIDIA L40S"),       # the rate of the fallback type, not the first
+    ("accelerator", "NVIDIA RTX A4000"),  # the rate of a type the pod never asks for
+    ("provider", "lambda"),
+])
+def test_a_runpod_recipe_must_price_the_gpu_type_it_asks_for_first(
+    tmp_path: Path, field: str, value: str
+):
+    data = gpu_recipe_data()
+    data["estimate"]["price_basis"][field] = value
+    with pytest.raises(recipes.RecipeError, match="must price the first runpod GPU type"):
+        recipes.parse_recipe(yaml.safe_dump(data))
+
+
+def test_runpod_writes_a_pod_spec_only_for_the_gpu_type_it_prices(fixture_recipes: Path):
     plan = backends.get_backend("runpod").plan(gpu(fixture_recipes), recipes_dir=fixture_recipes)
-    assert [spec["gpu"]["id"] for spec in plan.pod_specs] == [
-        "NVIDIA H100 80GB HBM3", "NVIDIA L40S"]
+    assert [spec["gpu"]["id"] for spec in plan.pod_specs] == ["NVIDIA H100 80GB HBM3"]
+    assert any("NVIDIA L40S" in note and "not priced" in note for note in plan.notes)
+    # Nothing in the plan or the refusal sends a reader to another tool with the spec.
+    text = json.dumps(plan.model_dump(mode="json")) + runpod.NOT_BUILT
+    assert "themselves" not in text and "Do not" in runpod.NOT_BUILT
+    assert "cmd" not in plan.pod_specs[0]
     assert plan.pod_specs[0] == {
         "name": "rewirebench-gpu-fixture",
         "image": f"ghcr.io/rewire-bio/fixture@sha256:{'a' * 64}",
@@ -285,7 +327,8 @@ def test_spark_dry_run_is_the_default_and_contacts_nothing(
     run = next(step for step in plan.steps if step.name == "run")
     image = f"ghcr.io/rewire-bio/fixture@{ARM64_DIGEST}"
     assert run.argv == [
-        "docker", "run", "--rm", "--platform", "linux/arm64", "--gpus", "all",
+        "docker", "run", "--rm", "--name", "rewirebench-first", "--platform", "linux/arm64",
+        "--gpus", "all",
         "-e", f"REWIRE_CONTAINER_DIGEST={ARM64_DIGEST}", "-e", "REWIRE_CONTAINER_RUNTIME=docker",
         "-v", "/data/runs/first/recipes:/recipes:ro", "-v", "/data/runs/first/out:/out", image,
         "recipe", "run", "gpu-fixture", "--recipes-dir", "/recipes", "--output", "/out/run",
@@ -293,6 +336,15 @@ def test_spark_dry_run_is_the_default_and_contacts_nothing(
     # The plan's command is the ssh call for that step, quoted for the remote shell.
     assert plan.command[:5] == ["ssh", "-o", "BatchMode=yes", "--", HOST]
     assert shlex.split(plan.command[5]) == run.argv
+    # The copy steps are the commands the transport runs, option for option.
+    copies = {step.name: step.argv for step in plan.steps if step.argv[0] == "scp"}
+    assert copies == {
+        "copy-recipes": spark.scp_command(str(fixture_recipes),
+                                          f"{HOST}:/data/runs/first/recipes"),
+        "copy-results": spark.scp_command(f"{HOST}:/data/runs/first/out/run",
+                                          str(tmp_path / "runs/first")),
+    }
+    assert copies["copy-recipes"][:6] == ["scp", "-r", "-q", "-o", "BatchMode=yes", "--"]
 
 
 def test_spark_runs_the_image_copies_the_folder_back_and_verifies_it(
@@ -324,6 +376,85 @@ def test_spark_runs_the_image_copies_the_folder_back_and_verifies_it(
     with pytest.raises(FileExistsError):
         spark_backend(fake).run(gpu(fixture_recipes), recipes_dir=fixture_recipes,
                                 output=output, dry_run=False)
+
+
+def test_spark_reports_a_receipt_from_another_image(
+    fixture_recipes: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """The container says it ran another image than the one pinned. The run is not passed."""
+    fake = FakeSpark(tmp_path / "spark", monkeypatch)
+    other = "sha256:" + "c" * 64
+    real_load = receipts.load_receipt
+
+    def from_another_image(folder: Any) -> receipts.Receipt:
+        receipt = real_load(folder)
+        environment = receipt.environment.model_copy(update={"image_used": other})
+        return receipt.model_copy(update={"environment": environment})
+
+    monkeypatch.setattr(spark.receipts, "load_receipt", from_another_image)
+    result = spark_backend(fake).run(gpu(fixture_recipes), recipes_dir=fixture_recipes,
+                                     output=tmp_path / "runs/first", dry_run=False)
+    assert result["problems"] == [f"the receipt's image is {other}"]
+    assert result["checks_passed"] is False
+
+
+@pytest.mark.parametrize(("gpus", "visible"), [(True, "0"), (False, "")])
+def test_a_spark_recipe_without_gpus_hides_cuda_from_its_steps(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, gpus: bool, visible: str
+):
+    def no_gpus(data: dict[str, Any]) -> None:
+        data["backends"]["spark"] = {"gpus": gpus}
+
+    loaded, folder = fixture_with(tmp_path / "checkout", no_gpus)
+    fake = FakeSpark(tmp_path / "spark", monkeypatch)
+    seen: list[str | None] = []
+    real = receipts.step_environment
+
+    def record(*, hide_cuda: bool = True) -> dict[str, str]:
+        environment = real(hide_cuda=hide_cuda)
+        seen.append(environment.get("CUDA_VISIBLE_DEVICES"))
+        return environment
+
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    monkeypatch.setattr(receipts, "step_environment", record)
+    backend = spark_backend(fake)
+    run = backend.docker_run(loaded.recipe, "/data/runs/first", started_by="human",
+                             kg_release_id=None)
+    assert ("--gpus" in run) is gpus
+    result = backend.run(loaded, recipes_dir=folder, output=tmp_path / "runs/first",
+                         dry_run=False)
+    assert result["checks_passed"], result
+    assert seen and set(seen) == {visible}
+
+
+class TimedOutSpark(FakeSpark):
+    """The ssh call for the run step never returns in time."""
+
+    def container(self, argv: list[str]) -> spark.Completed:
+        raise subprocess.TimeoutExpired(argv, 12.0)
+
+    def run(self, argv: list[str], *, timeout: float) -> spark.Completed:
+        if argv[:2] == ["docker", "kill"]:
+            self.commands.append(argv)
+            return spark.Completed(*self.kill)
+        return super().run(argv, timeout=timeout)
+
+
+@pytest.mark.parametrize(("kill", "outcome"), [
+    ((0, "rewirebench-first\n", ""), "was stopped"),
+    ((1, "", "No such container"), "could not be stopped"),
+])
+def test_spark_stops_the_container_when_the_run_passes_its_time_limit(
+    fixture_recipes: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    kill: tuple[int, str, str], outcome: str,
+):
+    fake = TimedOutSpark(tmp_path / "spark", monkeypatch)
+    fake.kill = kill  # type: ignore[attr-defined]
+    with pytest.raises(RuntimeError, match=f"time limit.*rewirebench-first.*{outcome}"):
+        spark_backend(fake).run(gpu(fixture_recipes), recipes_dir=fixture_recipes,
+                                output=tmp_path / "runs/first", dry_run=False)
+    assert fake.commands[-1] == ["docker", "kill", "rewirebench-first"]
+    assert not (tmp_path / "runs/first").exists()
 
 
 def test_spark_keeps_cuda_visible_only_inside_its_image(monkeypatch: pytest.MonkeyPatch):

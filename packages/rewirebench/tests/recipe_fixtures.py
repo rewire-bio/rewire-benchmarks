@@ -35,7 +35,7 @@ def gpu_recipe_data() -> dict[str, Any]:
     data["inputs"] = [{"name": "smoke.csv", "url": INPUT_URL,
                        "sha256": recipes.sha256_file(SMOKE_INPUT)}]
     data["estimate"] = {"gpu_hours": 0.5, "wall_clock_seconds": 1800.0,
-                        "price_basis": PRICE_BASIS}
+                        "price_basis": dict(PRICE_BASIS)}
     data["backends"] = {
         "spark": {},
         "runpod": {"gpu_types": ["NVIDIA H100 80GB HBM3", "NVIDIA L40S"], "disk_gb": 200,

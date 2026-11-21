@@ -94,6 +94,16 @@ def ssh_command(host: str, argv: list[str]) -> list[str]:
     return ["ssh", "-o", "BatchMode=yes", "--", host, shlex.join(argv)]
 
 
+def scp_command(source: str, target: str) -> list[str]:
+    """The local scp command for one copy. The plan prints it and the transport runs it."""
+    return ["scp", "-r", "-q", "-o", "BatchMode=yes", "--", source, target]
+
+
+def container_name(run_name: str) -> str:
+    """The Docker name of a run's container, so it can be found and stopped."""
+    return f"rewirebench-{run_name}"
+
+
 class SshTransport:
     """OpenSSH ``ssh`` and ``scp`` with the caller's own keys and configuration."""
 
@@ -111,14 +121,12 @@ class SshTransport:
         return self._local(ssh_command(self.host, argv), timeout)
 
     def push(self, local: Path, remote: str, *, timeout: float) -> None:
-        done = self._local(["scp", "-r", "-q", "-o", "BatchMode=yes", "--", str(local),
-                            f"{self.host}:{remote}"], timeout)
+        done = self._local(scp_command(str(local), f"{self.host}:{remote}"), timeout)
         if done.exit_code != 0:
             raise RuntimeError(f"Copy to {self.host}:{remote} failed: {done.stderr.strip()}")
 
     def pull(self, remote: str, local: Path, *, timeout: float) -> None:
-        done = self._local(["scp", "-r", "-q", "-o", "BatchMode=yes", "--",
-                            f"{self.host}:{remote}", str(local)], timeout)
+        done = self._local(scp_command(f"{self.host}:{remote}", str(local)), timeout)
         if done.exit_code != 0:
             raise RuntimeError(f"Copy from {self.host}:{remote} failed: {done.stderr.strip()}")
 
@@ -163,7 +171,8 @@ class SparkBackend:
     ) -> list[str]:
         image = _image(recipe)
         assert recipe.backends.spark is not None
-        argv = [self.config.docker, "run", "--rm", "--platform", PLATFORM]
+        argv = [self.config.docker, "run", "--rm", "--name",
+                container_name(remote.rsplit("/", 1)[1]), "--platform", PLATFORM]
         if recipe.backends.spark.gpus:
             argv += ["--gpus", "all"]
         argv += [
@@ -197,7 +206,7 @@ class SparkBackend:
                           note="Fails if the run folder exists, so a run is never mixed "
                                "with an earlier one."),
             base.PlanStep(name="copy-recipes", where="local",
-                          argv=["scp", "-r", str(recipes_dir), f"{host}:{remote}/recipes"]),
+                          argv=scp_command(str(recipes_dir), f"{host}:{remote}/recipes")),
             base.PlanStep(name="pull-image", where="remote",
                           argv=[self.config.docker, "pull", "--platform", PLATFORM, image]),
             base.PlanStep(name="run", where="remote",
@@ -205,7 +214,7 @@ class SparkBackend:
                                                kg_release_id=kg_release_id),
                           note="Writes receipt.json on the Spark."),
             base.PlanStep(name="copy-results", where="local",
-                          argv=["scp", "-r", f"{host}:{remote}/out/run", local_output]),
+                          argv=scp_command(f"{host}:{remote}/out/run", local_output)),
             base.PlanStep(name="verify", where="local",
                           argv=["rewirebench", "receipt", "verify", local_output,
                                 "--recipes-dir", str(recipes_dir)]),
@@ -246,6 +255,8 @@ class SparkBackend:
             notes=[
                 "A dry-run plan: nothing was contacted.",
                 "The Spark keeps the run folder after the copy. Remove it there by hand.",
+                ("The container is named after the output folder. If this machine loses the "
+                 "connection, the container keeps running; stop it there with docker kill."),
                 "The image's entry point must be rewirebench, as in containers/Containerfile.",
                 "Not yet run on a DGX Spark; tested against a fake transport only.",
             ],
@@ -302,8 +313,23 @@ class SparkBackend:
         # The recipe run exits 1 when a check fails and still writes a receipt, so the
         # exit code alone does not decide whether there is something to copy back.
         # Inputs are fetched in the container before the first command, hence the allowance.
-        ran = remote_step("run", plan.time_limit_seconds + TRANSFER_SECONDS + MARGIN_SECONDS,
-                          check=False)
+        try:
+            ran = remote_step(
+                "run", plan.time_limit_seconds + TRANSFER_SECONDS + MARGIN_SECONDS, check=False)
+        except subprocess.TimeoutExpired as error:
+            # The ssh call gave up, but the container goes on without it. Stop it by name.
+            name = container_name(folder.name)
+            try:
+                killed = transport.run([self.config.docker, "kill", name], timeout=60)
+                outcome = ("was stopped" if killed.exit_code == 0 else
+                           f"could not be stopped ({killed.stderr.strip()[-500:]})")
+            except (subprocess.TimeoutExpired, OSError) as problem:
+                outcome = f"could not be stopped ({type(problem).__name__})"
+            raise RuntimeError(
+                f"The run passed its time limit of {error.timeout:g} seconds. Container "
+                f"{name} on {self.config.host} {outcome}. If it is still there, stop it "
+                f"with `{self.config.docker} kill {name}`."
+            ) from error
         folder.parent.mkdir(parents=True, exist_ok=True)
         try:
             transport.pull(f"{remote}/out/run", folder, timeout=TRANSFER_SECONDS)

@@ -44,8 +44,20 @@ reports every other file under `invalid`, with exit code 1.
 - A `run` step names a registered model with `--model <id>` (see `rewirebench models`). It
   cannot use `--adapter`, which calls any installed Python callable, in any spelling:
   `--adapter=x` is refused and abbreviated options are not accepted. `--adapter-options` may
-  set only the options the model declares. A model that starts an executable named in its
-  options (FIMO) cannot be used in a recipe.
+  set only the options the model declares, each of its declared type, and `--batch-size` is
+  1 or more. A model that starts an executable named in its options (FIMO) cannot be used in
+  a recipe. Neither can the FIMO baseline: a `run-baselines` step that selects
+  `dart-h12core-fimo-hit-count-v1`, or passes a `fimo` option in `--baseline-options`, is
+  refused.
+- A recipe that names the `local` backend runs on CPU: a `run` step whose options set
+  `device` to anything but `cpu` is refused at validation and again before the step starts.
+  Hiding CUDA devices would not hide Apple MPS.
+- `recipes/recipe.schema.json` carries the shape of these rules (the program, the
+  subcommand, and for `run` a `--model` option and no `--adapter`). The checks against the
+  model registry need `rewirebench recipe validate`; a JSON Schema validator alone does not
+  make them.
+- With a `runpod` backend, `estimate.price_basis` must be for provider `runpod` and for the
+  first entry of `gpu_types`, because the quote multiplies that rate.
   `{inputs}` is the folder holding the inputs, `{work}` is a scratch folder that is deleted,
   and `{output}` is the run folder.
 - A command may set `timeout_seconds` (default 3600, at most 86400). A step still running then
@@ -79,9 +91,10 @@ check passed and 1 otherwise. A receipt is written in both cases.
 
 What keeps a recipe run from starting a GPU or paid run:
 
-- A recipe can only name five of rewirebench's own commands (see above), and `run` only with
-  a registered model, so it cannot call a shell, `runpodctl`, any other program or an
-  arbitrary Python callable.
+- A recipe can only name five of rewirebench's own commands (see above), `run` only with
+  a registered model, and neither the model nor the baseline that starts an executable named
+  in its options, so it cannot call a shell, `runpodctl`, any other program or an arbitrary
+  Python callable.
 - Each step gets a short list of environment variables (`PATH`, `HOME`, locale, temp folder,
   Python and certificate settings, the container digest variables). API keys and tokens in your
   environment are not passed on, so they cannot reach a step or its logs.

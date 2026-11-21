@@ -30,7 +30,9 @@ PUBLIC_KEY_PLACEHOLDER = "<public key generated at launch>"
 CENT = Decimal("0.01")
 NOT_BUILT = (
     "RunPod launch is not built in this version of rewirebench. The plan and the pod "
-    "spec are for review; a person can create the pod from the spec themselves."
+    "spec are for review only. Do not create the pod with another tool: the spec has no "
+    "start script, so nothing would delete the pod at the time limit and the quote would "
+    "not bound its cost."
 )
 
 
@@ -56,29 +58,45 @@ def _money(amount: Decimal) -> str:
     return str(amount.quantize(CENT, rounding=ROUND_UP))
 
 
+def gpu_count(recipe: Recipe) -> int:
+    """How many accelerators the pod asks for: the hardware floor's count, at least one."""
+    floor = recipe.hardware_floor
+    return floor.accelerator.count if floor and floor.accelerator.count else 1
+
+
 def quote(recipe: Recipe) -> base.Quote:
-    """The most the run can cost: the dated hourly rate times the pod's time limit."""
+    """GPU time at the dated hourly rate, for every GPU asked for, up to the time limit.
+
+    The rate is per accelerator and prices the first GPU type only, which the recipe
+    schema ties to the price basis. ``gpu_hours`` in the estimate already counts every
+    GPU. Nothing deletes the pod at the limit yet, so the amount is not a ceiling.
+    """
     pod = recipe.backends.runpod
     basis = recipe.estimate.price_basis if recipe.estimate else None
     if pod is None or basis is None:
         raise ValueError(f"Recipe {recipe.id} has no runpod backend with a price basis")
+    if basis.accelerator != pod.gpu_types[0]:
+        raise ValueError(f"Recipe {recipe.id}: the price basis is not for {pod.gpu_types[0]}")
     rate = Decimal(str(basis.amount_per_hour))
+    count = gpu_count(recipe)
     gpu_hours = recipe.estimate.gpu_hours if recipe.estimate else None
     return base.Quote(
         paid=True,
         currency=basis.currency,
-        max_amount=_money(rate * Decimal(str(pod.max_hours))),
+        max_amount=_money(rate * count * Decimal(str(pod.max_hours))),
         estimated_amount=_money(rate * Decimal(str(gpu_hours))) if gpu_hours else None,
         amount_per_hour=str(rate),
         max_hours=pod.max_hours,
         provider=basis.provider,
         accelerator=basis.accelerator,
+        accelerator_count=count,
+        limit_enforced=False,
         rate_source=basis.rate_source,
         rate_date=basis.rate_date,
-        note="The rate is the recipe's dated observation, not a live price. The amount "
-             "covers GPU time up to the time limit and leaves out storage and network "
-             "charges. The first GPU type in the list is priced; a fallback type may "
-             "bill at another rate.",
+        note="The rate is the recipe's dated observation per GPU, not a live price. The "
+             "amount is that rate for every GPU in the pod for max_hours. It leaves out "
+             "storage and network charges. It is not a ceiling yet: no start script "
+             "deletes the pod at the time limit, so a pod left running costs more.",
     )
 
 
@@ -104,7 +122,11 @@ def pod_body(
 
 
 def pod_bodies(recipe: Recipe, *, name: str) -> list[dict[str, Any]]:
-    """One body per GPU type, in the recipe's fallback order."""
+    """The body for the GPU type the quote prices: the first in the recipe's list.
+
+    ``launch.sh`` tries every type in order. The recipe's later types have no dated rate,
+    so no body is written for them; the plan names them as unpriced.
+    """
     pod = recipe.backends.runpod
     environment = recipe.environment
     if pod is None or environment is None:
@@ -112,12 +134,10 @@ def pod_bodies(recipe: Recipe, *, name: str) -> list[dict[str, Any]]:
     image = environment.images[PLATFORM].reference
     if image is None:
         raise ValueError(f"Recipe {recipe.id} has no {PLATFORM} image digest")
-    floor = recipe.hardware_floor
-    count = floor.accelerator.count if floor and floor.accelerator.count else 1
     return [
-        pod_body(name=name, image=image, gpu_type=gpu_type, gpu_count=count,
-                 disk_gb=pod.disk_gb, max_seconds=int(pod.max_hours * 3600), cloud=pod.cloud)
-        for gpu_type in pod.gpu_types
+        pod_body(name=name, image=image, gpu_type=pod.gpu_types[0],
+                 gpu_count=gpu_count(recipe), disk_gb=pod.disk_gb,
+                 max_seconds=int(pod.max_hours * 3600), cloud=pod.cloud)
     ]
 
 
@@ -142,25 +162,30 @@ def instance_record(pod: dict[str, Any], *, disk_gb: int) -> dict[str, Any]:
 def check_confirmation(
     plan: base.Plan, *, confirmed_amount: Any, confirmed_currency: str | None
 ) -> None:
-    """Refuse unless a person has confirmed exactly the plan's maximum amount."""
+    """Refuse unless the caller passes exactly the plan's amount and currency.
+
+    The amount is text or a number, never a boolean. This checks a value, not who
+    supplied it: an agent can pass the figure it read in the plan. A real launch needs
+    a confirmation that only a person can give (a terminal prompt, or MCP elicitation).
+    """
     quoted = plan.quote
     if not quoted.paid or quoted.max_amount is None or quoted.currency is None:
         raise LaunchRefused("This plan has no price to confirm")
-    wanted = f"{quoted.max_amount} {quoted.currency}"
     if os.environ.get("CI"):
         raise LaunchRefused("A paid run is never started in CI or by a schedule")
     if confirmed_amount is None:
         raise LaunchRefused(
-            f"A paid run needs confirmed_amount. The plan quotes at most {wanted}. Show the "
-            "person the quote and pass the amount they confirm."
+            "A paid run needs confirmed_amount: the amount a person stated after seeing "
+            "the plan's quote. Show the person the quote and ask. Do not fill it in from "
+            "the plan yourself."
         )
     if confirmed_currency is None:
-        raise LaunchRefused(f"A paid run needs confirmed_currency. The plan quotes {wanted}.")
+        raise LaunchRefused("A paid run needs confirmed_currency, as the person stated it.")
     if (_decimal(confirmed_amount) != Decimal(quoted.max_amount)
             or confirmed_currency != quoted.currency):
         raise LaunchRefused(
             f"The confirmed amount ({confirmed_amount} {confirmed_currency}) is not the "
-            f"plan's amount ({wanted}). Nothing was started."
+            "plan's amount. Nothing was started. Call plan_run and show the person its quote."
         )
 
 
@@ -181,6 +206,10 @@ class RunpodBackend:
         hardware, hardware_note = base.hardware_needs(recipe)
         expected, basis = base.expected_wall(recipe)
         assert recipe.environment is not None
+        fallbacks = list(recipe.backends.runpod.gpu_types[1:])
+        note = (f"Fallback GPU types {fallbacks} have no dated rate in the recipe, so "
+                "they are not priced and have no pod spec.")
+        unpriced = [note] if fallbacks else []
         return base.make_plan(
             recipe=base.recipe_pointer(loaded, recipes_dir),
             backend="runpod",
@@ -194,8 +223,8 @@ class RunpodBackend:
             quote=quoted,
             confirmation=base.Confirmation(
                 required=True, amount=quoted.max_amount, currency=quoted.currency,
-                how="Pass confirmed_amount and confirmed_currency equal to these values, "
-                    "after a person has seen the quote.",
+                how="Show a person the quote. Pass the amount and currency they state as "
+                    "confirmed_amount and confirmed_currency, with this plan's plan_sha256.",
             ),
             command=base.run_arguments(
                 recipe.id, recipes_dir="/recipes", output="/out/run", backend="runpod",
@@ -205,10 +234,12 @@ class RunpodBackend:
             runnable=False,
             not_runnable_reason=NOT_BUILT,
             notes=[
-                f"The pod specs are bodies for POST {API}/pods, tried in order.",
+                (f"The pod spec is the body for POST {API}/pods, for review only. Do not "
+                 "send it with another tool."),
+                *unpriced,
                 ("No start script exists in a rewirebench image yet. Before any launch the "
                  "image needs one that installs the SSH key, starts sshd and deletes the "
-                 "pod after MAX_SECONDS."),
+                 "pod after MAX_SECONDS. Until then nothing bounds the pod's lifetime."),
                 ("The command is what would run in the pod. No rewirebench release accepts "
                  "--backend runpod yet."),
             ],

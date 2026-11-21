@@ -22,8 +22,10 @@ class Quote(Strict):
     """What a run costs. Owned hardware has no price, and says so with a reason.
 
     Amounts are decimal strings so that the figure a person confirms is compared exactly.
-    ``max_amount`` is the hourly rate times the longest the pod may live; ``estimated_amount``
-    is the rate times the recipe's GPU-hour estimate, when it gives one.
+    ``max_amount`` is the hourly rate per accelerator, times ``accelerator_count``, times
+    the longest the pod may live; ``estimated_amount`` is the rate times the recipe's
+    GPU-hour estimate, when it gives one. ``limit_enforced`` says whether anything stops
+    the pod at ``max_hours``. Where it is false, ``max_amount`` is not a ceiling.
     """
 
     paid: bool
@@ -35,6 +37,8 @@ class Quote(Strict):
     max_hours: float | None = None
     provider: Text | None = None
     accelerator: Text | None = None
+    accelerator_count: int | None = None
+    limit_enforced: bool | None = None
     rate_source: Text | None = None
     rate_date: datetime.date | None = None
     note: Text | None = None

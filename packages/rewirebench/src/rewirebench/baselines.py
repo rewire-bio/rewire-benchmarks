@@ -79,6 +79,10 @@ _EVCOUPLINGS_INDEPENDENT = _artifact_entry(
                       "statistics. Homologue overlap with benchmark proteins is not quantified."),
     input_information="assay_id, wild_type_sequence, mutant, mutated_sequence; plus the prepared external model artifact",
 )
+# Baselines whose options name an executable that the adapter starts, and the option
+# that names it. A recipe may not use them; see recipes.check_baselines_step.
+PROGRAM_BASELINES = ("dart-h12core-fimo-hit-count-v1",)
+PROGRAM_OPTION = "fimo"
 _H12CORE_FIMO = _artifact_entry(
     "dart-h12core-fimo-hit-count-v1",
     "HOCOMOCO v12 CORE FIMO total motif hits; Rewire Task 1 reference",
