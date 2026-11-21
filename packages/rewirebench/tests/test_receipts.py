@@ -526,6 +526,84 @@ def test_code_state_reports_a_dirty_tree(tmp_path: Path):
     (tmp_path / "tracked.txt").write_text("two\n")
     assert receipts.code_state(tmp_path).dirty is True
     assert receipts.code_state(None).commit is None and receipts.code_state(None).dirty is None
+    assert state.commit_source == "checkout" and receipts.code_state(None).commit_source is None
+
+
+def install_record(monkeypatch: pytest.MonkeyPatch, record: Any) -> None:
+    """Stand in for the direct_url.json of the installed rewirebench."""
+    text = record if isinstance(record, str) or record is None else json.dumps(record)
+    monkeypatch.setattr(receipts, "_direct_url", lambda: text)
+
+
+GIT_INSTALL = {
+    "url": "https://token@github.com/rewire-bio/rewire-benchmarks.git",
+    "vcs_info": {"vcs": "git", "commit_id": "c" * 40, "requested_revision": "main"},
+    "subdirectory": "packages/rewirebench",
+}
+
+
+def test_an_install_from_git_gives_the_commit_and_says_where_it_came_from(
+    tmp_path: Path, scripted: None, monkeypatch: pytest.MonkeyPatch
+):
+    """A wheel built from a git URL has no checkout. The installer wrote the commit into
+    direct_url.json, and the receipt says the commit was read there."""
+    install_record(monkeypatch, GIT_INSTALL)
+    state = receipts.code_state(None)
+    assert state.commit == "c" * 40 and state.commit_source == "install_metadata"
+    assert state.repository == "https://github.com/rewire-bio/rewire-benchmarks"
+    assert state.dirty is None
+    # A checkout is read first: its HEAD is what runs, whatever the metadata says.
+    git(tmp_path, "init", "--quiet")
+    (tmp_path / "tracked.txt").write_text("one\n")
+    git(tmp_path, "add", "tracked.txt")
+    git(tmp_path, "commit", "--quiet", "-m", "first")
+    checkout = receipts.code_state(tmp_path)
+    assert checkout.commit == git(tmp_path, "rev-parse", "HEAD") != "c" * 40
+    assert checkout.commit_source == "checkout" and checkout.dirty is False
+
+    monkeypatch.setattr(receipts, "_source_root", lambda: None)
+    receipt = run_custom(tmp_path)
+    assert receipt.code == state
+    written = json.loads((tmp_path / "out/receipt.json").read_text())["code"]
+    assert written["commit"] == "c" * 40 and written["commit_source"] == "install_metadata"
+    # No tree was checked and the recipe is in no commit, so strict still fails.
+    result = receipts.verify(tmp_path / "out", recipes_dir=tmp_path / "checkout/recipes")
+    commits = next(item for item in result["results"] if item["check"] == "commits")
+    assert commits["status"] == "not_available"
+    assert "install metadata" in commits["detail"] and "recipe.commit is null" in commits["detail"]
+    committed = receipt.model_copy(update={
+        "recipe": receipt.recipe.model_copy(update={"commit": "c" * 40})})
+    assert receipts._verify_commits(committed)["status"] == "not_available"
+
+
+@pytest.mark.parametrize("record", [
+    None, "", "not json", [], {"url": "file:///somewhere", "dir_info": {"editable": True}},
+    {"url": "https://example.org/rewirebench-0.5.0-py3-none-any.whl", "archive_info": {}},
+    {"url": "https://example.org/repo", "vcs_info": {"vcs": "hg", "commit_id": "c" * 40}},
+    {"url": "https://example.org/repo", "vcs_info": {"vcs": "git", "commit_id": "main"}},
+    {"url": "https://example.org/repo", "vcs_info": {"vcs": "git", "commit_id": "C" * 40}},
+    {"url": "https://example.org/repo", "vcs_info": {"vcs": "git"}},
+])
+def test_an_install_that_records_no_git_commit_gives_none(
+    record: Any, monkeypatch: pytest.MonkeyPatch
+):
+    install_record(monkeypatch, record)
+    assert receipts.installed_from() == (None, None)
+    state = receipts.code_state(None)
+    assert state.commit is None and state.repository is None and state.commit_source is None
+
+
+def test_a_missing_distribution_gives_no_commit(monkeypatch: pytest.MonkeyPatch):
+    def missing(name: str) -> None:
+        raise receipts.importlib.metadata.PackageNotFoundError(name)
+
+    monkeypatch.setattr(receipts.importlib.metadata, "distribution", missing)
+    assert receipts._direct_url() is None and receipts.installed_from() == (None, None)
+
+
+def test_a_receipt_written_before_commit_source_still_loads(run_copy: Path):
+    rewrite_receipt(run_copy, lambda data: data["code"].pop("commit_source", None))
+    assert receipts.load_receipt(run_copy).code.commit_source is None
 
 
 def test_recipe_commit_is_recorded_only_for_the_committed_bytes(tmp_path: Path, scripted: None):

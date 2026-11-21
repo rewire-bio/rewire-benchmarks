@@ -748,6 +748,7 @@ def summary(loaded: LoadedRecipe, directory: Path) -> dict[str, Any]:
         "kind": recipe.kind,
         "scope": recipe.scope,
         "rewirebench_protocol": recipe.rewirebench_protocol,
+        "kg_record_id": recipe.kg_record_id,
         "backends": recipe.backends.names(),
         "path": str(PurePosixPath("recipes", *loaded.path.relative_to(directory).parts)),
         "sha256": loaded.sha256,

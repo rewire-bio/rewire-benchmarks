@@ -123,7 +123,7 @@ The [MCP server](mcp.md) sets it for every command it starts.
 | Field | Content |
 | --- | --- |
 | `recipe` | ID, path and SHA-256 of the recipe file. The commit is given only when the file at that commit has the same bytes |
-| `code` | Repository and commit of the checkout rewirebench ran from (null for an installed wheel), whether it had uncommitted changes, rewirebench version, `sdk_code_sha256` |
+| `code` | Repository and commit of the checkout rewirebench ran from, whether it had uncommitted changes, rewirebench version, `sdk_code_sha256`. An installed wheel has no checkout: if it was installed from a git URL, the commit is the one the installer recorded (`vcs_info.commit_id` in the package's `direct_url.json`), and otherwise it is null. `commit_source` is `checkout` or `install_metadata`; `dirty` is null for the second, because no tree was checked |
 | `environment` | Image digest per platform from the recipe, the image used if any, Python and OS, and `packages`: the installed version of each package rewirebench declares (numpy, scikit-learn, scipy and the others). Without an image or a lock file these float, and the last digits of a metric can differ between two runs of one `sdk_code_sha256` |
 | `inputs` | Source, size and SHA-256 of each input, and how the run obtained it (`fetched`, `repository`, `supplied`, or `local` for a run without a recipe) |
 | `hardware` | Architecture, CPU model and cores, memory, GPUs |
@@ -158,7 +158,8 @@ checks, each `match`, `mismatch` or `not_available`:
 - `metrics`: the receipt's `metrics` equal the values read from the outputs.
 - `commits`: the receipt names a code commit from a clean tree and a commit that holds the
   recipe. This is `not_available`, never a mismatch, for a run from a wheel, a dirty tree or an
-  uncommitted recipe. The commit is read from the receipt and is not looked up in a repository.
+  uncommitted recipe. A commit read from install metadata does not count as a clean tree. The
+  commit is read from the receipt and is not looked up in a repository.
 
 A receipt that is not valid is reported one problem per line, as `field: reason`.
 

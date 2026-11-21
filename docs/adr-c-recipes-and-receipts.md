@@ -73,10 +73,12 @@ commit". The runner does not enforce that when it writes a receipt: a run from a
 wheel, a dirty tree or an agent's laptop is also written as `runner_reproduction`, and a run
 without a recipe has `scope: null`. The commit condition is checked when the receipt is read.
 
-`code.commit` is the commit of the checkout rewirebench runs from, and is null for an installed
-wheel. `recipe.commit` is set only when the recipe file at that commit has the bytes that ran.
-A reviewer should not promote a recipe on a receipt where `recipe.commit` is null, or where
-`code.commit` is null or `code.dirty` is true. `rewirebench receipt verify --strict` fails on
+`code.commit` is the commit of the checkout rewirebench runs from. For an installed wheel it is
+the commit the installer recorded when the wheel was installed from a git URL, with
+`code.commit_source` set to `install_metadata` and `code.dirty` null, and it is null for any
+other install. `recipe.commit` is set only when the recipe file at that commit has the bytes
+that ran. A reviewer should not promote a recipe on a receipt where `recipe.commit` is null, or
+where `code.commit` is null or `code.dirty` is not false. `rewirebench receipt verify --strict` fails on
 such a receipt (its `commits` check), and on a receipt whose run failed.
 
 The `Recipe receipt check` workflow checks out the pull request head, not the temporary merge
