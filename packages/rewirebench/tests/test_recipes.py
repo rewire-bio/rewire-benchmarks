@@ -521,6 +521,18 @@ def test_every_option_of_a_step_command_is_classified():
         assert options == listed, name
 
 
+def test_every_text_option_of_a_model_is_a_path_key_or_known_not_to_be_one():
+    """A model option that holds a path has to be in JSON_PATH_KEYS, or a recipe could name
+    any file with it. A new text option fails here until it is put on one side."""
+    from rewirebench import models
+
+    not_paths = {"alphabet", "artifact_sha256", "device", "field", "fimo_sha256", "model_name"}
+    text = {name for spec in models.REGISTRY.values() for name in spec.options or {}
+            if spec.option_type(name) == "text"}
+    assert text - not_paths == {"artifact", "checkpoint", "fimo", "motifs"}
+    assert text - not_paths <= set(recipes.JSON_PATH_KEYS)
+
+
 def folders(tmp_path: Path) -> dict[str, str]:
     for name in ("scratch/inputs", "scratch/work", "run", "outside"):
         (tmp_path / name).mkdir(parents=True)

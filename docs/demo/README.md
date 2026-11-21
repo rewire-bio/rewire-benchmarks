@@ -153,7 +153,9 @@ headless runs of one session. The recordings were kept as recordings of
 
 It was recorded at an older pin than the two runs above. The plugin was version 0.2.0, loaded
 from the plugin folder of a checkout at commit `26fd89b`, where `.mcp.json` pins rewirebench
-at `e5c5662`. The plugin is now 0.2.1 and pins `023a7a2`. No agent session has been recorded
+at `e5c5662`. The recording does not name that pin itself. The receipt in it has the
+`sdk_code_sha256` `3297cfe0...`, which is the digest of the rewirebench sources at `e5c5662`,
+computed here from that commit. The plugin is now 0.2.1 and pins `023a7a2`. No agent session has been recorded
 at that pin.
 
 What the recording shows:
@@ -177,8 +179,8 @@ file states each change.
 
 ## The command line at current main
 
-The same recipe was run once more on 2026-11-21 without MCP and without an agent choosing
-calls, from a fresh shallow clone of `main` at commit `ff0b45a` (plugin 0.2.1, pin `023a7a2`),
+The same recipe was run once more on 2026-11-21 from the command line, without MCP, from a
+fresh shallow clone of `main` at commit `ff0b45a` (plugin 0.2.1, pin `023a7a2`),
 with Python 3.11.13 and `uv sync --locked --all-packages`:
 
 ```sh
@@ -188,10 +190,10 @@ uv run rewirebench receipt verify <folder> --strict
 
 - The run exited 0 with `checks_passed` true: 8324 variants, 315 positives, precision at 100
   of 0.61, average precision 0.2864167459589237 and AUROC 0.7779498064677238. These equal the
-  values in the graph.
+  published values in the Result table above. This run did not read the graph.
 - `receipt verify --strict` passed: all eight checks match and nothing was left unchecked. The
   `commits` check read code commit `ff0b45a03667b1fb48adb7295b8813172dc73684` from the receipt.
-- Wall time was 23.08 seconds including the download, and peak memory 812 MB, on an
+- Wall time was 23.075 seconds including the download, and peak memory 812 MB, on an
   Apple M4 laptop (numpy 1.26.4, scikit-learn 1.9.1, scipy 1.17.1).
 - `predictions.json` had the SHA-256 `2683ef05...`, as in the two recorded runs.
 - `sdk_code_sha256` was `e0bd6279...`, as at `023a7a2`.

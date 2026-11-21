@@ -11,7 +11,9 @@ same session. Every tool call and its result is below, in order.
   `plugins/bio-model-benchmarks` folder of a checkout. The receipt names commit
   `26fd89ba057efbebced1274e2e83000ee64f21e0` for the recipe. At that commit the plugin's
   `.mcp.json` pins rewirebench at `e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2`. The receipt
-  itself does not name the rewirebench commit: `code.commit` is null in it.
+  itself does not name the rewirebench commit: `code.commit` is null in it. Its
+  `sdk_code_sha256`, `3297cfe0fcd27909c5f9aff10a767e425a5a3319a3b5594ac6ac104cc341c50b`, equals
+  the digest of the rewirebench sources at `e5c5662`, computed from that commit afterwards.
 - The recordings do not hold what the user typed. They were kept as recordings of
   `/bio-model-benchmarks:demo`. Part 1 ends with the agent asking for agreement to the
   download and the run. Part 2 is the same session continued and starts with the `run` call,
