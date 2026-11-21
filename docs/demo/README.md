@@ -9,6 +9,7 @@ This folder holds the record.
 | [`transcript.json`](transcript.json) | Every tool call, in order, with its arguments and result |
 | [`mfass-v2-kmer-baseline/`](mfass-v2-kmer-baseline) | The complete run folder: `receipt.json`, `SHA256SUMS`, the outputs and the step logs |
 | [`plugin-servers.json`](plugin-servers.json) | The three servers started exactly as the plugin's `.mcp.json` declares them, with one read-only call to each |
+| [`plugin-run.json`](plugin-run.json) | The same MFASS v2 rerun made through the plugin's own launch lines, from a copy of the plugin folder outside any checkout. Every tool call; the run folder is not committed |
 
 ## What ran
 
@@ -38,6 +39,11 @@ and starts no rewirebench command itself.
 | AUROC | 0.7779498064677238 | 0.7779498064677238 | 0 |
 | Scored variants | 8324 of 8324 | 8324 | 0 |
 
+The difference of 0 is for this run, in the environment `uv.lock` pins (Python 3.11.13, numpy
+1.26.4). The run through the plugin's launch lines, below, gave an average precision of
+0.28641674595892375, which differs in the last digit (5.6e-17). The client's comparison
+tolerance is 1e-9.
+
 From the receipt:
 
 - recipe `mfass-v2-kmer-baseline`, SHA-256 `7552c6a78089e0e6eab19eba58fc9108ee7f2ffb5974dd69fcc4815bf5d4f2ab`;
@@ -66,19 +72,54 @@ It does not show these:
   only for starting and answering one call, in `plugin-servers.json`.
 - **No GPU and no paid backend.** Nothing here can start either.
 - **The rewirebench server ran from a checkout, not from the plugin's install line.** That is
-  what lets the receipt name a code commit and pass `strict`. Started from the plugin's line
-  (a wheel built from the same commit, with the plugin's copy of the recipes), the offline
-  recipe `flip2-synthetic-smoke` ran and verified, with `code.commit` null and the `commits`
-  check reported as not checked.
+  what lets the receipt name a code commit and pass `strict`. The plugin path is recorded
+  separately: see the next section.
 - **Nothing is signed.** The receipt shows the folder is intact and consistent with the
   recipe. It does not prove where the folder came from.
+- **The predictions were not scored again by `verify_receipt`.** It reads the checked values
+  from `report.json`. The `commits` check reads the commit the receipt states and does not
+  look it up. The recipe pins no digest for `predictions.json`.
+
+## The same run through the plugin as shipped
+
+[`plugin-run.json`](plugin-run.json) is the transcript of the same 17 calls (3 to the graph, 14
+to rewirebench) with both servers started by the launch lines in the plugin's `.mcp.json`.
+The plugin folder was copied outside any checkout first, as an installed plugin is, so
+`${CLAUDE_PLUGIN_ROOT}/recipes` was a plain folder. It was recorded on 2026-11-21 on the same
+laptop.
+
+| | Checkout run (above) | Plugin run |
+| --- | --- | --- |
+| rewirebench | `python -m rewirebench.cli mcp` from a clean checkout of `e5c5662` | `uvx` wheel built from `e5c5662` |
+| Recipes | `recipes/` of the checkout | the plugin's copy, same SHA-256 |
+| Python, packages | 3.11.13, locked by `uv.lock` | 3.12.7, not locked |
+| `code.commit`, `recipe.commit` | `e5c5662` | null |
+| `verify_receipt` | passed with `strict` | passed; `commits` not checked, so `strict` does not pass |
+| Precision at 100 | 0.61 | 0.61 |
+| Average precision | 0.2864167459589237 | 0.28641674595892375 |
+| AUROC | 0.7779498064677238 | 0.7779498064677238 |
+| `sdk_code_sha256` | `3297cfe0...` | `3297cfe0...` |
+| SHA-256 of `predictions.json` | `2683ef05...` | `2683ef05...` |
+| Wall time | 22.37 s | 13.82 s (inputs downloaded again) |
+
+This is what a user of the installed plugin should expect. It is still a scripted client and
+not a Claude Code session with the plugin loaded: `${CLAUDE_PLUGIN_ROOT}` was substituted by
+the client. The receipt at that commit does not record package versions; the code on `main`
+now does.
 
 In the transcripts, the `version` recorded for the `rewirebench` server (1.30.0) is the version
 of the MCP SDK it is built on. The rewirebench version, 0.5.0, is in the receipt.
 
-One line of `logs/01-prepare.stdout.txt` names a temporary folder on the machine that ran it.
-In the transcripts local folder names are replaced by labels such as `<run folder>`; in
-`transcript.json` the temporary folder was replaced after the run.
+One line of `logs/01-prepare.stdout.txt` names a temporary folder on the machine that ran it
+(`/var/folders/...`, with no user name). The file is covered by `SHA256SUMS` and the receipt,
+so it is left as recorded. The runner on `main` now writes `{work}` in a step log instead, and
+a test holds this folder to that one line.
+
+In the transcripts local folder names are replaced by labels such as `<run folder>`. In
+`transcript.json` the temporary folder was replaced by hand after the run, because the client
+then labelled only its own temporary folder. The client now replaces any such folder itself
+and refuses to write a transcript that still names a local folder. `plugin-run.json` is its
+output as written.
 
 ## Check it yourself
 
@@ -101,8 +142,13 @@ uv run python scripts/demo/mcp_demo.py --recipe mfass-v2-kmer-baseline \
 ```
 
 This downloads the graph bundle and 80 MB of MFASS data, and takes about a minute. `--strict`
-passes only from a clean tree. Output digests differ between runs, because `prepare` gives
-rows random IDs; the metric values do not.
+passes only from a clean tree. The digests of the report, the manifest, the logs and the
+receipt differ between runs, because they hold times. `predictions.json` does not: it had the
+same SHA-256 in all three runs made on this laptop. (Protocols whose `prepare` gives rows
+random IDs, such as FLIP2, differ there too.)
+
+To record the plugin path, copy `plugins/bio-model-benchmarks` to a folder outside the
+checkout and pass its `.mcp.json` as both `--graph` and `--runner`, without `--strict`.
 
 To check the plugin's three launch lines (the first start builds pyBigWig, which needs a C
 compiler and libcurl):
@@ -119,4 +165,5 @@ The same client code runs the three-row fixture offline on every pull request, i
 
 Tests tie this folder to the plugin's `.mcp.json`. After raising the rewirebench pin, record
 the run again from a clean checkout of the new commit and replace `transcript.json` and the
-run folder. After raising any of the three pins, record `plugin-servers.json` again.
+run folder, and record `plugin-run.json` again. After raising any of the three pins, record
+`plugin-servers.json` again. After raising the graph pin, record `plugin-run.json` again too.

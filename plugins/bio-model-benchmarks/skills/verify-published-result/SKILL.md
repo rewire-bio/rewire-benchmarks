@@ -40,9 +40,11 @@ Before running anything, check each of these and tell the user the outcome:
 
 ## 3. State the tolerance, then run
 
-State the tolerance before the run, with the reason. A deterministic CPU baseline should
-match the published value to many decimal places. For a stochastic or GPU run, choose and
-state a tolerance first. A published confidence interval is not a tolerance for your run.
+State the tolerance before the run, with the reason. For a deterministic CPU baseline use
+1e-9 on each metric. Do not expect every digit to match: the plugin does not lock Python or
+the numeric packages, and the last digit of a metric can differ from the published run. For a
+stochastic or GPU run, choose and state a tolerance first. A published confidence interval is
+not a tolerance for your run.
 
 Then follow `run-benchmark`: `plan_run`, `run` with the `plan_sha256` and the release ID as
 `kg_release_id`, `run_status`, `get_receipt`, `verify_receipt`.
@@ -63,4 +65,6 @@ sides. Metric names differ between the two: `metric:precision-at-100` is
   passes, or widen the tolerance afterwards.
 - Do not change any record. A discrepancy is a lead for the user to report, with the receipt.
 
-A recorded run of exactly this flow is in the repository at `docs/demo/`.
+Two recorded runs of this flow are in the repository at `docs/demo/`. One is from a checkout
+and passes `strict`. The other is from the plugin's own launch lines: it verifies, with
+`commits` not checked, so it does not pass `strict`. Expect the second from an installed plugin.

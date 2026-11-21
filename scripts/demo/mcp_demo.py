@@ -65,6 +65,11 @@ FIRST_CALLS: dict[str, tuple[str, dict[str, Any]]] = {
                                        "variant_type": "snv", "contig": "chr20"}),
     "rewirebench": ("list_recipes", {}),
 }
+# A per-user temporary folder of macOS, as any process on the machine may print it. The
+# servers and the steps they start can have another temporary folder than this client.
+OTHER_TEMP = re.compile(r"(?:/private)?/var/folders/[^/\s\"\\]+/[^/\s\"\\]+/T\b")
+# What must never be left in a transcript: the start of a path on the recording machine.
+MACHINE_PATHS = ("/Users/", "/home/", "/private/", "/var/folders/")
 LITERAL = re.compile(r'"(.*)"(?:\^\^\S+|@[A-Za-z-]+)?', re.DOTALL)
 PUBLISHED_QUERY = """SELECT ?metric ?value ?scored ?eligible ?status WHERE {{
   ?result rb:resultFor {system} ; rb:resultOn {protocol} ; rb:metric ?metric ;
@@ -96,7 +101,7 @@ class Transcript:
         text = json.dumps(value)
         for path in sorted(self.labels, key=len, reverse=True):
             text = text.replace(json.dumps(path)[1:-1], self.labels[path])
-        return json.loads(text)
+        return json.loads(OTHER_TEMP.sub("<temp>", text))
 
     def label_this_machine(self) -> None:
         """Label the folders a run can name: this Python, the temporary and home folders."""
@@ -114,8 +119,21 @@ class Transcript:
             "summary": self.summary,
         })
 
+    def text(self) -> str:
+        """The transcript as it is written. Refuses to give one that names a local folder,
+        so a recording never needs editing by hand."""
+        text = json.dumps(self.document(), indent=2) + "\n"
+        left = [marker for marker in MACHINE_PATHS if marker in text]
+        if left:
+            where = text.index(left[0])
+            raise DemoError(
+                f"The transcript still names a local folder ({left[0]}...) near "
+                f"{text[max(0, where - 60):where + 20]!r}. Label it with --label PATH NAME."
+            )
+        return text
+
     def write(self, path: Path) -> None:
-        path.write_text(json.dumps(self.document(), indent=2) + "\n")
+        path.write_text(self.text())
 
 
 def _content(result: Any) -> Any:
@@ -189,13 +207,8 @@ def _plain(value: Any) -> Any:
     return value
 
 
-async def published_values(session: ClientSession, transcript: Transcript, *, text: str,
-                           system: str, protocol: str) -> dict[str, Any]:
-    """Ask the graph for its release and the published values of one system on a protocol."""
-    info = await call(session, transcript, GRAPH, "dataset_info")
-    await call(session, transcript, GRAPH, "find_entity", {"text": text, "type": "rb:Protocol"})
-    reply = await call(session, transcript, GRAPH, "sparql_query", {
-        "query": PUBLISHED_QUERY.format(system=system, protocol=protocol)})
+def read_published(reply: Any) -> dict[str, Any]:
+    """The published values in a ``sparql_query`` reply to ``PUBLISHED_QUERY``, by metric."""
     values: dict[str, Any] = {}
     for row in _rows(reply):
         metric = str(row["metric"]).removeprefix("metric:")
@@ -205,6 +218,17 @@ async def published_values(session: ClientSession, transcript: Transcript, *, te
             "eligible": int(_plain(row["eligible"])) if row.get("eligible") else None,
             "status": str(row.get("status", "")).removeprefix("status:") or None,
         }
+    return values
+
+
+async def published_values(session: ClientSession, transcript: Transcript, *, text: str,
+                           system: str, protocol: str) -> dict[str, Any]:
+    """Ask the graph for its release and the published values of one system on a protocol."""
+    info = await call(session, transcript, GRAPH, "dataset_info")
+    await call(session, transcript, GRAPH, "find_entity", {"text": text, "type": "rb:Protocol"})
+    reply = await call(session, transcript, GRAPH, "sparql_query", {
+        "query": PUBLISHED_QUERY.format(system=system, protocol=protocol)})
+    values = read_published(reply)
     if not values:
         raise DemoError(f"The graph holds no result for {system} on {protocol}")
     return {"kg_release_id": info["version"], "system": system, "protocol": protocol,

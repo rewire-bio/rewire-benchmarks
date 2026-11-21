@@ -12,11 +12,18 @@ Uses two MCP servers: `genomics-mcp` (find and read genomic data; fetch bounded 
 
 On `rewirebench`:
 
-1. `list_protocols`, then `describe_protocol`: the inputs, datasets, metrics and execution
-   rules of one protocol. Nothing is downloaded.
-2. `describe_recipe`, if a recipe exists: each input with its URL, SHA-256 and size. A recipe
-   run fetches its own inputs and checks each digest, so you do not fetch them yourself.
-3. `prepare` with `protocol`, `source` (a file or folder already on the machine) and a new
+1. `list_protocols`: the protocols, with the recipes for each.
+2. `describe_recipe`, if the protocol has a recipe: each input with its URL, SHA-256 and size,
+   and the licence. This is the only tool that gives a protocol's inputs with sizes and terms.
+   A recipe run fetches its own inputs and checks each digest, so you do not fetch them
+   yourself.
+3. `describe_protocol`: the protocol's capabilities, its baselines and the models it accepts.
+   Three protocols (`flip2-fitness-v1`, `dart-eval-task1-zero-shot-v1`,
+   `mrnabench-sample-mrl-v1`) also return datasets, metrics and data access. The other five,
+   `mfass-v2` among them, return capabilities only. If neither tool gives the inputs, say so
+   and point to the protocol's page under `docs/` in rewire-bio/rewire-benchmarks. Do not
+   list inputs, sizes or licences from memory.
+4. `prepare` with `protocol`, `source` (a file or folder already on the machine) and a new
    `output` folder. Check that the reply says `"scope": "full"` before calling the result a
    benchmark input.
 

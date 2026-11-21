@@ -618,11 +618,14 @@ _UniqueKeyLoader.add_constructor(
 )
 
 
-def _problems(error: ValidationError) -> str:
-    """One line per problem: the field, then the message. No dump of the recipe, no URL."""
+def problems(error: ValidationError, top: str = "recipe") -> str:
+    """One line per problem: the field, then the message. No dump of the input, no URL.
+
+    ``top`` names the document in a problem that belongs to no single field.
+    """
     lines: list[str] = []
     for problem in error.errors(include_url=False, include_input=False):
-        where = ".".join(str(part) for part in problem["loc"]) or "recipe"
+        where = ".".join(str(part) for part in problem["loc"]) or top
         lines.append(f"{where}: {problem['msg'].removeprefix('Value error, ')}")
     return "\n".join(lines)
 
@@ -639,7 +642,7 @@ def parse_recipe(text: str | bytes) -> Recipe:
     try:
         recipe = Recipe.model_validate(data)
     except ValidationError as error:
-        raise RecipeError(_problems(error)) from error
+        raise RecipeError(problems(error)) from error
     if recipe.rewirebench_protocol is not None:
         from rewirebench import sdk
 

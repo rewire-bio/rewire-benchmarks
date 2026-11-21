@@ -131,9 +131,11 @@ For each model and protocol pair:
    result: the comparison then covers the software as well as the hardware.
 2. **Same precision.** If the H100 run used bf16 or FP8 and the Spark cannot, that is a
    different configuration. Publish it as one. It is not a concordance pass or failure.
-3. **Same rows.** `prepare` gives rows random IDs, so two separate runs cannot be joined row
-   by row. Prepare once and give both machines the same prepared folder. This needs a recipe
-   step or option that does not exist yet.
+3. **Same rows.** For FLIP2, DART-Eval, mRNABench and Genomic Benchmarks, `prepare` gives rows
+   random IDs, so two separate runs cannot be joined row by row. Prepare once and give both
+   machines the same prepared folder. This needs a recipe step or option that does not exist
+   yet. MFASS v2, ProteinGym and TDC ADMET keep their rows' own IDs, so two runs of those can
+   be joined as they are.
 4. **Repeat on each machine first.** Two runs on the H100 and two on the Spark give the
    run-to-run difference on each. A difference between machines means little unless it is
    compared with that.

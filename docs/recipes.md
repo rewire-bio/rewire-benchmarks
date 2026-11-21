@@ -108,8 +108,10 @@ This is not a sandbox. A step runs with your user's rights and can read your hom
 Read a recipe you did not write before you run it.
 
 The run folder holds the outputs, `logs/` with each command's output, `receipt.json` and
-`SHA256SUMS`. Logs can contain local paths and anything a command printed, so read them before
-sharing the folder.
+`SHA256SUMS`. In the logs the run's own folders are written as `{work}`, `{inputs}`, `{output}`
+and `{scratch}`, so a step that prints a path it was given does not record the machine's
+temporary folder. A log can still hold anything else a command printed, so read the logs
+before sharing the folder.
 
 `started_by` is `ci` in CI and `agent` when Claude Code runs the command. Otherwise it is
 `human`. An agent on another harness must pass `--started-by agent` or set
@@ -122,7 +124,7 @@ The [MCP server](mcp.md) sets it for every command it starts.
 | --- | --- |
 | `recipe` | ID, path and SHA-256 of the recipe file. The commit is given only when the file at that commit has the same bytes |
 | `code` | Repository and commit of the checkout rewirebench ran from (null for an installed wheel), whether it had uncommitted changes, rewirebench version, `sdk_code_sha256` |
-| `environment` | Image digest per platform from the recipe, the image used if any, Python and OS |
+| `environment` | Image digest per platform from the recipe, the image used if any, Python and OS, and `packages`: the installed version of each package rewirebench declares (numpy, scikit-learn, scipy and the others). Without an image or a lock file these float, and the last digits of a metric can differ between two runs of one `sdk_code_sha256` |
 | `inputs` | Source, size and SHA-256 of each input, and how the run obtained it (`fetched`, `repository`, `supplied`, or `local` for a run without a recipe) |
 | `hardware` | Architecture, CPU model and cores, memory, GPUs |
 | `commands` | Each command as written in the recipe, with exit code, wall time and peak memory |
@@ -148,14 +150,17 @@ checks, each `match`, `mismatch` or `not_available`:
   not the recipe can be found.
 - `recipe`: the recipe file in `recipes/` has the SHA-256 the receipt cites. If the file has
   changed since the run, the recipe is read from the commit in `recipe.commit` instead, when
-  this checkout has that commit.
+  this checkout has that commit. The recipe read that way must have the ID the receipt names.
 - `inputs`: the receipt's input digests and sizes equal the recipe's pins. With
   `--inputs <folder>` the files are hashed again as well.
-- `checks`: the expected values are read again from the outputs and still pass.
+- `checks`: the expected values are read again from the outputs and still pass. The
+  predictions are not scored again: the prepared data is not in the run folder.
 - `metrics`: the receipt's `metrics` equal the values read from the outputs.
 - `commits`: the receipt names a code commit from a clean tree and a commit that holds the
   recipe. This is `not_available`, never a mismatch, for a run from a wheel, a dirty tree or an
-  uncommitted recipe.
+  uncommitted recipe. The commit is read from the receipt and is not looked up in a repository.
+
+A receipt that is not valid is reported one problem per line, as `field: reason`.
 
 It exits 1 on any `mismatch`. With `--strict` it also exits 1 when a check could not be made.
 `--strict` passes only for a recipe run from a clean commit, which is what a reviewer needs

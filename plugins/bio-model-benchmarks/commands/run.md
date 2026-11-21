@@ -13,4 +13,5 @@ Use the `run-benchmark` skill. Recipe and output folder: $ARGUMENTS
 
 Report each checked value against its expected value, wall time, peak memory, cost and the
 verification result. This command only uses the `local` backend. For `spark` or `runpod`, show
-the plan and stop: these tools start neither.
+the plan and stop: these tools start neither. Never pass `confirmed_amount`, and never start
+the run another way (a shell, or another RunPod tool).

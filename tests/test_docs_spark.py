@@ -41,15 +41,50 @@ def test_every_amd64_pin_in_the_repository_is_listed():
         assert f"{lock.name}`" in PAGE, lock.name
 
 
-def test_no_recipe_names_spark_until_an_arm64_image_exists():
-    """The page says no recipe names the spark backend. Keep that true, or update the page."""
+NO_ARM64 = ("No `linux/arm64` image exists, so no recipe in `recipes/` names the `spark` "
+            "backend")
+
+
+def spark_recipes(recipes_dir: Path) -> list[str]:
+    """Recipes that name the spark backend or pin a linux/arm64 image."""
     import yaml
 
-    for path in (ROOT / "recipes").rglob("*.yaml"):
+    found = []
+    for path in sorted(recipes_dir.rglob("*.yaml")):
         recipe = yaml.safe_load(path.read_text())
         arm64 = recipe["environment"]["images"]["linux/arm64"]
-        if "spark" in recipe["backends"] or "digest" in arm64:
-            assert "No `linux/arm64` image exists" not in TEXT, path.name
+        if "spark" in recipe["backends"] or "missing" not in arm64:
+            found.append(path.name)
+    return found
+
+
+def test_the_page_says_whether_a_recipe_names_spark():
+    """The page says no recipe names the spark backend. It must say so exactly while that
+    is true, and stop saying so when it is not."""
+    recipes = sorted((ROOT / "recipes").rglob("*.yaml"))
+    assert len(recipes) >= 2
+    if spark_recipes(ROOT / "recipes"):
+        assert NO_ARM64 not in TEXT, spark_recipes(ROOT / "recipes")
+    else:
+        assert NO_ARM64 in TEXT
+
+
+def test_a_recipe_that_names_spark_is_found(tmp_path: Path):
+    """The check above reads real recipes, none of which names spark today. This shows it
+    would see one that did."""
+    import yaml
+
+    source = ROOT / "recipes/mfass/mfass-v2-kmer-baseline.yaml"
+    recipe = yaml.safe_load(source.read_text())
+    (tmp_path / "plain.yaml").write_text(yaml.safe_dump(recipe))
+    assert spark_recipes(tmp_path) == []
+    recipe["backends"]["spark"] = {"gpus": True}
+    (tmp_path / "spark.yaml").write_text(yaml.safe_dump(recipe))
+    recipe["backends"].pop("spark")
+    recipe["environment"]["images"]["linux/arm64"] = {
+        "reference": "ghcr.io/rewire-bio/rewirebench@sha256:" + "a" * 64}
+    (tmp_path / "image.yaml").write_text(yaml.safe_dump(recipe))
+    assert spark_recipes(tmp_path) == ["image.yaml", "spark.yaml"]
 
 
 def test_the_page_states_the_publication_rule_and_that_nothing_has_run():

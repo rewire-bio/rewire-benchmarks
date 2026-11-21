@@ -22,4 +22,7 @@ v2:
 4. Compare: precision at 100 should be 0.61, average precision 0.2864 and AUROC 0.7779, on
    8,324 of 8,324 variants.
 
-A recorded run of the same calls is in the repository under `docs/demo/`.
+The values should agree with the graph to within 1e-9. From an installed plugin
+`verify_receipt` passes with `commits` not checked, and `strict` does not pass, because the
+server runs from a wheel. Two recorded runs of the same calls are in the repository under
+`docs/demo/`: one from a checkout and one from the plugin's launch lines.

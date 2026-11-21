@@ -3,6 +3,7 @@
 The plugin must ship the same skills that are reviewed in skills/ and the same recipes
 that are validated in recipes/.
 """
+import hashlib
 import json
 import os
 import re
@@ -87,6 +88,26 @@ def test_commands_and_agent_have_descriptions():
     fields = frontmatter(agent)
     assert fields["name"] == agent.stem == "benchmarking-agent"
     assert fields["description"]
+
+
+def test_the_agent_can_use_the_three_servers_tools_and_nothing_else():
+    """The agent's limits are its tools list, not its prompt. Without the list a plugin
+    agent inherits every tool of the session: a shell, and any RunPod tool installed.
+    Claude Code names a plugin's MCP tool mcp__plugin_<plugin>_<server>__<tool>."""
+    fields = frontmatter(PLUGIN / "agents/benchmarking-agent.md")
+    assert set(fields) == {"name", "description", "tools"}
+    allowed = fields["tools"].split(", ")
+    assert len(allowed) == len(set(allowed))
+    expected = {f"mcp__plugin_bio-model-benchmarks_{server}__{tool}"
+                for server, tools in recorded_tools().items() for tool in tools}
+    assert set(allowed) == expected
+    assert len(allowed) == len(GRAPH_TOOLS) + len(GENOMICS_TOOLS) + len(REWIREBENCH_TOOLS)
+    servers = json.loads((PLUGIN / ".mcp.json").read_text())["mcpServers"]
+    for tool in allowed:
+        assert re.fullmatch(r"mcp__plugin_bio-model-benchmarks_([a-z-]+)__([a-z_]+)", tool), tool
+        assert tool.split("__")[1].removeprefix("plugin_bio-model-benchmarks_") in servers
+    body = (PLUGIN / "agents/benchmarking-agent.md").read_text().split("\n---\n", 1)[1]
+    assert "You have no shell" in body and "you cannot load skills" in body
 
 
 def test_marketplace_lists_the_plugin():
@@ -195,13 +216,37 @@ def test_rewirebench_server_is_pinned_and_reads_the_plugin_recipes():
     assert match.group(1) in (ROOT / "README.md").read_text()
 
 
-# Every backticked snake_case word in the new skills, the commands and the agent is either
-# a tool of one of the three servers or one of these: fields, arguments and values.
+# Every backticked lower-case word in the new skills, the commands and the agent is either
+# a tool of one of the three servers or one of these: fields, arguments and values. A new
+# word must be added here by hand, so a tool that does not exist cannot be named unnoticed.
 NOT_TOOLS = {
-    "average_precision_sklearn", "budget_bytes", "confirmed_amount",
-    "expected_wall_seconds", "full_protocol", "kg_record_id", "kg_release_id",
-    "limit_enforced", "plan_sha256", "pod_specs", "precision_at_capacity", "run_id",
-    "started_by", "synthetic_smoke", "variant_type",
+    "allow_partial", "average_precision_sklearn", "batch_size", "budget_bytes",
+    "confirmed_amount", "expected_wall_seconds", "full_protocol", "kg_record_id",
+    "kg_release_id", "limit_enforced", "model_name", "plan_sha256", "pod_specs",
+    "precision_at_capacity", "run_id", "started_by", "synthetic_smoke", "timeout_seconds",
+    "training_overlap", "variant_type",
+    "20", "assembly", "backend", "chr20", "command", "commits", "contig", "cost", "cpu",
+    "device", "eligible", "finished", "hardware", "limitations", "local", "method", "model",
+    "null", "offline", "output", "planned", "prepared", "protocol", "quote", "recipe",
+    "rewirebench", "runnable", "runpod", "sample", "scope", "scored", "setting", "source",
+    "spark", "state", "strict", "version",
+}
+WORD = r"`([a-z0-9]+(?:_[a-z0-9]+)*)`"
+# The tools of genomics-mcp at the commit the plugin pins (src/genomics_mcp/server.py), and
+# of rewirebench at the commit it pins (mcp_server.TOOLS there). A recording that lists
+# another tool was not made with the pinned servers. Update these when a pin is raised.
+GENOMICS_TOOLS = {
+    "cancel_transfer", "compare_samples", "convert_sra_run", "describe_dataset",
+    "describe_synthetic_protocol", "fetch_file", "get_coverage", "get_features", "get_pileup",
+    "get_reads", "get_sample_metadata", "get_sequence", "get_signal", "get_transfer_status",
+    "get_truth_set", "get_variants", "inspect_locus", "list_files", "list_samples",
+    "list_sources", "list_synthetic_protocols", "lookup_gene", "lookup_protein",
+    "lookup_variant", "normalize_variant", "resolve_identifier", "search_datasets",
+}
+REWIREBENCH_TOOLS = {
+    "list_protocols", "describe_protocol", "list_recipes", "describe_recipe", "list_models",
+    "prepare", "plan_run", "run", "run_status", "cancel_run", "evaluate", "get_receipt",
+    "verify_receipt",
 }
 
 
@@ -211,40 +256,156 @@ def recorded_tools() -> dict[str, set[str]]:
     return {name: set(server["tools"]) for name, server in check["servers"].items()}
 
 
-def test_recorded_tool_lists_hold_the_tools_the_plugin_relies_on():
-    """The recording is what the pinned servers offer. It is not compared with the server
-    code in this checkout, which may gain a tool before the plugin's pin is raised."""
-    tools = recorded_tools()
-    assert tools["rewire-benchmark-graph"] == GRAPH_TOOLS
-    assert {"list_recipes", "describe_recipe", "plan_run", "run", "run_status", "cancel_run",
-            "get_receipt", "verify_receipt", "prepare", "evaluate"} <= tools["rewirebench"]
-    assert {"get_truth_set", "list_synthetic_protocols", "fetch_file"} <= tools["genomics-mcp"]
+def test_recorded_tool_lists_are_the_tools_of_the_pinned_servers():
+    """The recording is what the pinned servers offer. It is compared with lists read at the
+    pinned commits, not with the server code in this checkout, which may gain a tool before
+    the plugin's pin is raised. A tool added to the recording by hand fails here."""
+    assert recorded_tools() == {"rewire-benchmark-graph": GRAPH_TOOLS,
+                                "genomics-mcp": GENOMICS_TOOLS,
+                                "rewirebench": REWIREBENCH_TOOLS}
+    # Both recorded runs listed the same tools for the servers they started.
+    for name in ("transcript.json", "plugin-run.json"):
+        servers = json.loads((ROOT / "docs/demo" / name).read_text())["servers"]
+        assert {server: set(entry["tools"]) for server, entry in servers.items()} == {
+            "rewire-benchmark-graph": GRAPH_TOOLS, "rewirebench": REWIREBENCH_TOOLS}
+
+
+def test_the_recorded_server_check_holds_real_answers():
+    """One read-only call per server, and each answer is read: an error, or a reply that is
+    not what the tool returns, fails."""
+    check = json.loads((ROOT / "docs/demo/plugin-servers.json").read_text())
+    calls = {call["server"]: call for call in check["calls"]}
+    assert [(call["server"], call["tool"]) for call in check["calls"]] == [
+        ("rewire-benchmark-graph", "dataset_info"), ("genomics-mcp", "get_truth_set"),
+        ("rewirebench", "list_recipes")]
+    assert not any(call["is_error"] for call in check["calls"])
+    assert check["summary"] == {
+        name: {"version": server["version"], "tools": len(server["tools"])}
+        for name, server in check["servers"].items()}
+    info = calls["rewire-benchmark-graph"]["result"]
+    assert info["dataset"] == "rewire-benchmark-data"
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}-[0-9a-f]{12}", info["version"])
+    truth = calls["genomics-mcp"]["result"]
+    assert truth["operation"] == "get_truth_set" and truth["status"] == "ok"
+    assert truth["data"]["records"][0]["id"] == "giab-hg002-v4.2.1-grch38"
+    listed = calls["rewirebench"]["result"]
+    assert listed["recipes_dir"] == f"{PLUGIN_ROOT}/recipes" and listed["invalid"] == []
+    shipped = {yaml.safe_load(path.read_text())["id"]: hashlib.sha256(path.read_bytes()).hexdigest()
+               for path in (PLUGIN / "recipes").rglob("*.yaml")}
+    assert {item["id"]: item["sha256"] for item in listed["recipes"]} == shipped
+
+
+def pages() -> list[Path]:
+    """The new skills, the commands and the agent: what an agent reads to choose a tool."""
+    found = [SKILLS / name / "SKILL.md" for name in SKILL_NAMES if name != SKILL.name]
+    return found + sorted((PLUGIN / "commands").glob("*.md")) + sorted(
+        (PLUGIN / "agents").glob("*.md"))
+
+
+def body(page: Path) -> str:
+    """A page without its front matter, where the agent's tools list is."""
+    return page.read_text().split("\n---\n", 1)[1]
 
 
 def test_skills_commands_and_agent_name_only_tools_that_exist():
     tools = set().union(*recorded_tools().values())
-    pages = [SKILLS / name / "SKILL.md" for name in SKILL_NAMES if name != SKILL.name]
-    pages += sorted((PLUGIN / "commands").glob("*.md")) + sorted((PLUGIN / "agents").glob("*.md"))
-    for page in pages:
-        words = set(re.findall(r"`([a-z0-9]+(?:_[a-z0-9]+)+)`", page.read_text()))
-        unknown = sorted(words - tools - NOT_TOOLS)
+    assert not tools & NOT_TOOLS
+    for page in pages():
+        unknown = sorted(set(re.findall(WORD, body(page))) - tools - NOT_TOOLS)
         assert not unknown, f"{page.relative_to(ROOT)} names {unknown}: not a tool of any server"
-    used = set().union(*(
-        set(re.findall(r"`([a-z0-9]+(?:_[a-z0-9]+)+)`", page.read_text())) for page in pages))
-    # The flows the plugin promises are all there.
-    assert {"dataset_info", "run_query", "plan_run", "run_status", "get_receipt",
-            "verify_receipt", "get_truth_set", "describe_protocol"} <= used
+        # A numbered step that starts with a backticked word starts with a tool.
+        for step in re.findall(r"^\s*\d+\. `([a-z0-9_]+)`", body(page), flags=re.MULTILINE):
+            assert step in tools, f"{page.relative_to(ROOT)}: step starts with {step}"
+    used = set().union(*(set(re.findall(WORD, body(page))) for page in pages()))
+    # The flows the plugin promises are all there, single-word tools included.
+    assert {"dataset_info", "run_query", "plan_run", "run", "run_status", "get_receipt",
+            "verify_receipt", "get_truth_set", "describe_protocol", "prepare",
+            "evaluate"} <= used
     assert NOT_TOOLS <= used, sorted(NOT_TOOLS - used)
 
 
-def test_skills_never_tell_an_agent_to_confirm_a_paid_amount():
-    for name in SKILL_NAMES:
-        text = " ".join((SKILLS / name / "SKILL.md").read_text().split())
-        if "confirmed_amount" in text:
-            assert "Never copy an amount from the plan into `confirmed_amount`" in text
-    agent = " ".join((PLUGIN / "agents/benchmarking-agent.md").read_text().split())
+def sentences(page: Path) -> list[str]:
+    return re.split(r"(?<=[.?!])\s+", " ".join(body(page).split()))
+
+
+def test_no_page_tells_an_agent_to_confirm_an_amount_or_send_a_pod_spec():
+    """Skills, commands and the agent. Every sentence that names `confirmed_amount` or
+    `pod_specs` forbids its use, so an instruction to pass one cannot be added beside the
+    sentence that forbids it."""
+    named = []
+    for page in pages() + [SKILL / "SKILL.md"]:
+        for sentence in sentences(page):
+            if "confirmed_amount" in sentence or "pod_specs" in sentence:
+                named.append(page.name)
+                assert re.search(r"\b[Nn]ever\b", sentence), (
+                    f"{page.relative_to(ROOT)}: {sentence!r}")
+            if re.search(r"max_amount|quote", sentence) and re.search(
+                    r"\b(copy|pass|send|confirm)\b", sentence, flags=re.IGNORECASE):
+                assert re.search(r"\b[Nn]ever\b|\bshow\b", sentence), (
+                    f"{page.relative_to(ROOT)}: {sentence!r}")
+    assert named.count("benchmarking-agent.md") >= 1 and named.count("run.md") >= 1
+    skill = " ".join(body(SKILLS / "run-benchmark/SKILL.md").split())
+    assert "Never copy an amount from the plan into `confirmed_amount`" in skill
+    assert "Never send a plan's `pod_specs` to RunPod with another tool" in skill
+    agent = " ".join(body(PLUGIN / "agents/benchmarking-agent.md").split())
     assert "You never start a GPU run or a paid run" in agent
     assert "You never pass `confirmed_amount`" in agent
+    assert "Never call `run` without a `plan_sha256`" in agent
+    run = " ".join(body(PLUGIN / "commands/run.md").split())
+    assert "Never pass `confirmed_amount`" in run
+
+
+def test_no_page_says_describe_protocol_gives_a_protocols_inputs():
+    """For five of the eight protocols the tool returns capabilities only. A page that
+    promised inputs from it would leave an agent to fill them in from memory."""
+    bare = [protocol for protocol in sdk.PROTOCOLS
+            if set(sdk.describe(protocol)) <= {"protocol_id", "capabilities"}]
+    assert len(bare) == 5 and "mfass-v2" in bare
+    fuller = sorted(set(sdk.PROTOCOLS) - set(bare))
+    data = " ".join(body(SKILLS / "prepare-benchmark-data/SKILL.md").split())
+    for protocol in fuller:
+        assert f"`{protocol}`" in (SKILLS / "prepare-benchmark-data/SKILL.md").read_text()
+    assert "The other five, `mfass-v2` among them, return capabilities only" in data
+    assert "Do not list inputs, sizes or licences from memory" in data
+    for page in pages():
+        for sentence in sentences(page):
+            if "`describe_protocol`" in sentence and re.search(
+                    r"\binputs?\b|\blicen[cs]e\b|\bsizes?\b|\bdatasets\b", sentence):
+                assert re.search(r"capabilities|no inputs|[Dd]o not", sentence), (
+                    f"{page.relative_to(ROOT)}: {sentence!r}")
+    command = " ".join(body(PLUGIN / "commands/data.md").split())
+    assert "it gives no inputs" in command and "Do not fill them in from memory" in command
+    assert "`describe_protocol` gives the protocol's capabilities, baselines and models" in command
+    for page in pages():
+        text = " ".join(body(page).split())
+        assert not re.search(r"`describe_protocol`[^.]{0,40}\b(lists?|returns?|gives?|shows?)"
+                             r"( each| the| its)? inputs?\b", text), page.name
+
+
+def test_the_values_the_pages_quote_are_the_recorded_ones():
+    """/demo and the verify skill tell an agent what to expect. Those figures are read
+    against the recorded run and the graph's recorded reply."""
+    transcript = json.loads((ROOT / "docs/demo/transcript.json").read_text())
+    summary = transcript["summary"]
+    values = {name: entry["value"] for name, entry in summary["published"]["values"].items()}
+    demo = " ".join(body(PLUGIN / "commands/demo.md").split())
+    quoted = re.search(r"precision at 100 should be ([0-9.]+), average precision ([0-9.]+) "
+                       r"and AUROC ([0-9.]+), on ([0-9,]+) of ([0-9,]+) variants", demo)
+    assert quoted, "commands/demo.md no longer states the expected values"
+    assert [float(quoted.group(index)) for index in (1, 2, 3)] == [
+        round(summary["metrics"]["precision_at_capacity"], 4),
+        round(summary["metrics"]["average_precision_sklearn"], 4),
+        round(summary["metrics"]["auroc"], 4)]
+    scored = f"{int(summary['metrics']['n']):,}"
+    assert (quoted.group(4), quoted.group(5)) == (scored, scored)
+    skill = " ".join(body(SKILLS / "verify-published-result/SKILL.md").split())
+    assert (f"On release `{summary['kg_release_id']}` this returns AUROC {values['auroc']!r}, "
+            f"average precision {values['average-precision']!r} and precision at 100 of "
+            f"{values['precision-at-100']!r}, each on 8324 of 8324") in skill
+    plugin = json.loads((ROOT / "docs/demo/plugin-run.json").read_text())["summary"]["metrics"]
+    floats = " ".join(body(SKILLS / "run-benchmark/SKILL.md").split())
+    assert (f"was {plugin['average_precision_sklearn']!r} from the plugin and "
+            f"{summary['metrics']['average_precision_sklearn']!r} from the checkout") in floats
 
 
 def test_skill_uses_only_tools_the_pinned_server_has():

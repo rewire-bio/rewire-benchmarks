@@ -377,10 +377,61 @@ def test_a_run_is_stopped_at_its_time_limit(server: FastMCP, tmp_path: Path, slo
     assert gone(grandchild)
 
 
+def test_a_recipe_run_needs_the_plan_and_refuses_model_run_arguments(
+    server: FastMCP, tmp_path: Path
+):
+    """Nothing starts, and nothing is downloaded, before a plan was made for the same
+    arguments. An argument that only a model run reads is an error, never ignored."""
+    output = tmp_path / "out"
+    with pytest.raises(RuntimeError, match="A recipe run needs plan_sha256 from plan_run"):
+        call(server, "run", recipe=SMOKE, output=str(output))
+    plan = call(server, "plan_run", recipe=SMOKE, output=str(output))
+    run = {"recipe": SMOKE, "output": str(output), "plan_sha256": plan["plan_sha256"]}
+    for name, value in (("timeout_seconds", 5), ("batch_size", 7), ("allow_partial", True),
+                        ("allow_partial", False), ("model_name", "FancyModel"),
+                        ("training_overlap", "none"), ("model_options", {"seed": 1})):
+        with pytest.raises(RuntimeError, match=f"{name} applies to a model run"):
+            call(server, "run", **run, **{name: value})
+    assert server.state.runs == {} and not output.exists()
+
+
+def test_a_release_id_is_an_identifier_and_not_free_text(server: FastMCP, tmp_path: Path):
+    output = str(tmp_path / "out")
+    for text in ("the newest release, I think", "2026-11-20 72316db0764b", "", "a" * 65):
+        for tool in ("plan_run", "run"):
+            with pytest.raises(RuntimeError, match="kg_release_id"):
+                call(server, tool, recipe=SMOKE, output=output, kg_release_id=text)
+    plan = call(server, "plan_run", recipe=SMOKE, output=output,
+                kg_release_id="2026-11-20-72316db0764b")
+    assert plan["runnable"] and server.state.runs == {}
+
+
+def test_describe_protocol_says_when_it_holds_capabilities_only(server: FastMCP):
+    """Five protocols describe only their capabilities. The reply says where the inputs
+    are, so a caller does not fill the gap from memory."""
+    bare, fuller = [], []
+    for protocol in sdk.PROTOCOLS:
+        described = call(server, "describe_protocol", protocol=protocol)
+        assert {"protocol_id", "capabilities", "baselines", "models", "recipes"} <= set(described)
+        own = set(sdk.describe(protocol))
+        if own <= {"protocol_id", "capabilities"}:
+            bare.append(protocol)
+            assert described["note"] == mcp_server.BARE_PROTOCOL_NOTE
+        else:
+            fuller.append(protocol)
+            assert "note" not in described
+    assert "mfass-v2" in bare and "flip2-fitness-v1" in fuller
+    assert call(server, "describe_protocol", protocol="flip2-fitness-v1")["recipes"] == [SMOKE]
+    tool = next(tool for tool in anyio.run(server.list_tools)
+                if tool.name == "describe_protocol")
+    assert "capabilities only" in " ".join(tool.description.split())
+
+
 def test_a_recipe_run_is_limited_by_its_own_timeouts(server: FastMCP, tmp_path: Path,
                                                     slow: Path):
     plan = call(server, "plan_run", recipe=SMOKE, output=str(tmp_path / "out"))
-    started = call(server, "run", recipe=SMOKE, output=str(tmp_path / "out"))
+    started = call(server, "run", recipe=SMOKE, output=str(tmp_path / "out"),
+                   plan_sha256=plan["plan_sha256"])
     assert started["time_limit_seconds"] == (plan["time_limit_seconds"]
                                              + mcp_server.RECIPE_MARGIN_SECONDS)
     assert call(server, "cancel_run", run_id=started["run_id"])["cancelled"] is True
@@ -451,7 +502,7 @@ def test_a_paid_backend_is_planned_and_priced_but_never_started(
     run = {"recipe": "gpu-fixture", "backend": "runpod", "output": output}
     # Without the plan's digest nothing else is looked at, the amount included.
     for arguments in ({}, {"confirmed_amount": "11.97", "confirmed_currency": "USD"}):
-        with pytest.raises(RuntimeError, match="A paid run needs plan_sha256"):
+        with pytest.raises(RuntimeError, match="A recipe run needs plan_sha256"):
             call(gpu_server, "run", **run, **arguments)
     with pytest.raises(RuntimeError, match="plan_sha256 does not match"):
         call(gpu_server, "run", **run, plan_sha256="0" * 64, confirmed_amount="11.97",
@@ -569,7 +620,8 @@ def test_rewirebench_mcp_speaks_mcp_over_real_stdio(tmp_path: Path):
             misspelt = await session.call_tool(
                 "plan_run", {"recipe": SMOKE, "bakend": "runpod"})
             run = await session.call_tool(
-                "run", {"recipe": SMOKE, "output": str(tmp_path / "out")})
+                "run", {"recipe": SMOKE, "output": str(tmp_path / "out"),
+                        "plan_sha256": json.loads(plan.content[0].text)["plan_sha256"]})
             with anyio.fail_after(60):
                 while not (record.is_file() and record.read_text()):
                     await anyio.sleep(0.05)
@@ -625,9 +677,13 @@ def test_a_terminated_server_stops_its_run_and_removes_its_logs(tmp_path: Path):
             "clientInfo": {"name": "test", "version": "0"}}})
         assert reply(1)["result"]["serverInfo"]["name"] == "rewirebench"
         send({"method": "notifications/initialized"})
+        arguments = {"recipe": SMOKE, "output": str(tmp_path / "out")}
         send({"id": 2, "method": "tools/call", "params": {
-            "name": "run", "arguments": {"recipe": SMOKE, "output": str(tmp_path / "out")}}})
-        status = json.loads(reply(2)["result"]["content"][0]["text"])
+            "name": "plan_run", "arguments": arguments}})
+        plan = json.loads(reply(2)["result"]["content"][0]["text"])
+        send({"id": 3, "method": "tools/call", "params": {"name": "run", "arguments": {
+            **arguments, "plan_sha256": plan["plan_sha256"]}}})
+        status = json.loads(reply(3)["result"]["content"][0]["text"])
         assert status["state"] == "running"
         run = started_child(record)
         served.send_signal(signal.SIGTERM)

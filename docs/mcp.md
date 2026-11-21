@@ -46,7 +46,7 @@ tools is in [demo/](demo/README.md).
 | Tool | What it does |
 | --- | --- |
 | `list_protocols` | The protocols, with the recipes and registered models for each |
-| `describe_protocol` | Inputs, datasets, metrics, execution rules, baselines and models of one protocol |
+| `describe_protocol` | Capabilities, baselines, registered models and recipes of one protocol. Three protocols also give datasets, metrics and data access; the other five give capabilities only, and the reply says so in `note`. Inputs with sizes and licence are in `describe_recipe` |
 | `list_recipes` | The recipes under `recipes/` with SHA-256, scope and backends |
 | `describe_recipe` | One recipe in full |
 | `list_models` | The registered model adapters, or those registered for one protocol, with each option's type |
@@ -64,6 +64,15 @@ A typical sequence: `list_recipes`, `describe_recipe`, `plan_run`, `run`, `run_s
 
 Every argument is described in the tool's schema. An argument a tool does not declare is an
 error, so a misspelt `backend` or `confirmed_amount` is refused and never read as a default.
+`run` also refuses an argument of the other kind of run: `timeout_seconds`, `batch_size`,
+`allow_partial`, `model_name`, `training_overlap` and `model_options` on a recipe run, and
+`inputs`, `kg_release_id`, `plan_sha256` and the confirmation arguments on a model run.
+
+`kg_release_id` is recorded in the receipt as given. It must look like an identifier (letters,
+digits, `.`, `_` and `-`, at most 64 characters) and is not checked against the graph.
+
+The plugin installs this server from a pinned commit. A rule on this page that is newer than
+the pin reaches an installed plugin when the pin is raised.
 
 ### What `verify_receipt` shows
 
@@ -74,15 +83,30 @@ are as trustworthy as the place the folder came from, and a metric the recipe do
 can be changed together with its digests. A model run outside a recipe has no recipe checks,
 so only its digests are verified, `not_checked` lists the rest, and `strict` never passes.
 
-Two runs of the same recipe do not give the same output digests. `prepare` gives every row a
-random opaque ID, so that an adapter cannot key on it, and the IDs appear in the predictions
-and the report. Compare two runs by the metric values the recipe checks, not by digest.
+Three limits of a pass, `strict` included:
+
+- The checked values are read again from the output files. The predictions are not scored
+  again, because the prepared data is not in the run folder. A report edited inside the
+  recipe's tolerance, with the receipt and digests rewritten, still passes.
+- The `commits` check reads the commit the receipt states. It does not look the commit up, so
+  it shows that a commit was recorded, not that it exists or holds this code.
+- A recipe can pin the SHA-256 of an output under `expected_output.artifacts`. No shipped
+  recipe pins its predictions yet.
+
+Two runs of the same recipe do not give the same output digests, because the report, the
+manifest, the logs and the receipt hold times. Whether `predictions.json` repeats depends on
+the protocol. `prepare` gives every row a random opaque ID for FLIP2, DART-Eval, mRNABench and Genomic Benchmarks, so
+that an adapter cannot key on it, and the IDs appear in the predictions. MFASS v2, ProteinGym
+and TDC ADMET keep their rows' own IDs: three MFASS v2 baseline runs on one machine, on Python
+3.11 and 3.12, gave a byte-identical `predictions.json`. Compare two runs by the metric values
+the recipe checks, not by the digest of the folder.
 
 ## What `run` will and will not do
 
 - **local**: starts `rewirebench recipe run` (or `rewirebench run --model`) as its own process
-  and returns. The command is the one `plan_run` printed. One run at a time. `output` is a new
-  absolute folder. Every command the server starts has `CUDA_VISIBLE_DEVICES` empty and
+  and returns. The command is the one `plan_run` printed. A recipe run needs the plan's
+  `plan_sha256`, so nothing is downloaded or started before a plan was made for the same
+  arguments. One run at a time. `output` is a new absolute folder. Every command the server starts has `CUDA_VISIBLE_DEVICES` empty and
   records `started_by: agent`.
 - **time limit and stopping**: a model run is stopped after `timeout_seconds` (default one
   hour, at most 24). A recipe run is stopped after the sum of its step timeouts plus an hour

@@ -205,8 +205,22 @@ commands and one agent definition. Every server runs on your machine.
 | `bio-model-benchmarks` | | The command-line route and the reference for comparing a run with a published result |
 
 The agent `benchmarking-agent` takes one question from the graph to a verified receipt. Runs
-stay local. Nothing in the plugin starts a GPU or paid run, and nothing exports or submits a
-result unless you ask for it.
+stay local.
+
+What stops a GPU or paid run, and what does not:
+
+- No tool of the three servers starts one. The `rewirebench` server runs recipes on the
+  `local` backend on CPU, returns a dry-run plan for `spark`, and refuses `runpod` in every
+  case because no launch is built.
+- The agent `benchmarking-agent` has a `tools` list that names the tools of the three servers
+  and nothing else: no shell, no file tools and no other MCP server. It cannot start a run any
+  other way.
+- The skills and commands run in your main session, which has every tool you have given it. If
+  that session has a shell or a RunPod tool, the skills tell it not to use them for a run, but
+  that is an instruction, not a block. Neither shipped recipe names the `spark` or `runpod`
+  backend, so today there is no plan to act on.
+
+Nothing in the plugin exports or submits a result.
 
 In Claude Code:
 
@@ -236,6 +250,12 @@ What an installed plugin cannot do yet:
   copy of [`recipes/`](recipes). Its receipts verify, but they carry no code or recipe commit,
   so `verify_receipt` with `strict` reports the commits as not checked. For a receipt that
   passes `strict`, run `uv run rewirebench mcp` from a clean checkout of this repository.
+  [docs/demo/plugin-run.json](docs/demo/plugin-run.json) records an MFASS v2 run made this way.
+- `uvx` does not apply this repository's `uv.lock`, so Python and the numeric packages are
+  whatever uv resolves on the day. The last digits of a metric can differ from a locked run.
+- The server is the pinned commit. Changes to `packages/rewirebench` after that commit (a
+  recipe run that requires `plan_sha256`, package versions in the receipt, folder placeholders
+  in step logs) reach an installed plugin when the pin is raised.
 - Model extras (`esm`, `dnabert2`) are not installed, so the pretrained models in
   `list_models` cannot run from the plugin.
 
