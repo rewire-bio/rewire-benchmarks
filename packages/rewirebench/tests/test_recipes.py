@@ -410,3 +410,178 @@ def test_cli_works_where_no_recipes_directory_exists(
     assert code == 0 and schema["properties"]["schema_version"]
     monkeypatch.setenv(recipes.RECIPES_DIR_VARIABLE, str(RECIPES))
     assert recipes.find_recipes_dir() == RECIPES
+
+
+PREPARE = ["rewirebench", "prepare", "flip2-fitness-v1"]
+EVALUATE = ["rewirebench", "evaluate", "--prepared", "{work}/prepared", "--output",
+            "{output}/scored", "--predictions", "{inputs}/p.json"]
+
+
+def swapped(argv: list[str], old: str, new: str) -> list[str]:
+    return [new if item == old else item for item in argv]
+
+
+@pytest.mark.parametrize("argv", [
+    # The two steps of issue 80.
+    [*PREPARE, "--source", "{inputs}/x", "--output", "/etc/x"],
+    ["rewirebench", "evaluate", "--prepared", "/etc/passwd", "--output", "/etc/x",
+     "--predictions", "p"],
+    [*PREPARE, "--source", "/etc/passwd", "--output", "{work}/prepared"],
+    [*PREPARE, "--source", "{inputs}/x", "--output=/etc/x"],
+    # `prepare` accepts abbreviated options, so the parsed value is what is checked.
+    [*PREPARE, "--source", "{inputs}/x", "--outp", "/etc/x"],
+    [*PREPARE, "--source", "{inputs}/x", "--output", "{work}/../../etc/x"],
+    [*PREPARE, "--source", "{inputs}/x", "--output", "{work}/.."],
+    [*PREPARE, "--source", "{inputs}/x", "--output", "prepared"],
+    [*PREPARE, "--source", "{inputs}/x", "--output", "x/{work}/prepared"],
+    [*PREPARE, "--source", "{inputs}/x", "--output", "{work}x/prepared"],
+    [*PREPARE, "--source", "{inputs}/x", "--output", "{work}\\..\\x"],
+    # A step writes to {work} and {output} only.
+    [*PREPARE, "--source", "{inputs}/x", "--output", "{inputs}/x"],
+    swapped(EVALUATE, "{inputs}/p.json", "~/p.json"),
+    swapped(EVALUATE, "--predictions", "--embeddings")[:-1] + ["/etc/e.npz"],
+    ["rewirebench", "run-baselines", "--prepared", "{work}/prepared", "--output", "/etc/x"],
+    ["rewirebench", "run", "--prepared", "/etc", "--output", "{output}/run", "--model",
+     "train-mean"],
+    ["rewirebench", "prepare-baseline-artifact", "proteingym-evcouplings-independent-v1",
+     "--manifest", "/etc/m.json", "--output", "{output}/a.json"],
+    ["rewirebench", "prepare-baseline-artifact", "proteingym-evcouplings-independent-v1",
+     "--manifest", "{inputs}/m.json", "--output", "/etc/a.json"],
+])
+def test_a_step_names_paths_only_under_the_three_placeholders(argv: list[str]):
+    with pytest.raises(ValueError, match="must be a path under"):
+        recipes.check_step_paths(argv)
+    data = changed()
+    data["commands"][0]["argv"] = argv
+    with pytest.raises(recipes.RecipeError, match=r"^commands\.0: Command prepare: "):
+        parse(data)
+
+
+@pytest.mark.parametrize(("argv", "where"), [
+    ([*PREPARE, "--source", "{inputs}/x", "--output", "{work}/p", "--options",
+      '{"split": "/etc/passwd"}'], "--options 'split'"),
+    ([*PREPARE, "--source", "{inputs}/x", "--output", "{work}/p", "--options",
+      '{"reference": "reference.csv"}'], "--options 'reference'"),
+    # A key the list of path keys does not know, holding what could be used as a path.
+    ([*PREPARE, "--source", "{inputs}/x", "--output", "{work}/p", "--options",
+      '{"other": ["{work}/../x"]}'], "--options 'other'"),
+    ([*PREPARE, "--source", "{inputs}/x", "--output", "{work}/p", "--options",
+      '{"other": {"deep": "~/x"}}'], "--options 'other' 'deep'"),
+    (["rewirebench", "run", "--prepared", "{work}/p", "--output", "{output}/run", "--model",
+      "esm2-embeddings", "--adapter-options", '{"checkpoint": "/home/me/x.pt"}'],
+     "--adapter-options 'checkpoint'"),
+    (["rewirebench", "run-baselines", "--prepared", "{work}/p", "--output", "{output}/b",
+      "--baseline-options",
+      '{"proteingym-evcouplings-independent-v1": {"artifact": "/etc/a.json"}}'],
+     "--baseline-options 'proteingym-evcouplings-independent-v1' 'artifact'"),
+])
+def test_paths_inside_the_json_options_follow_the_same_rule(argv: list[str], where: str):
+    with pytest.raises(ValueError, match="must be a path under") as error:
+        recipes.check_step_paths(argv)
+    assert str(error.value).startswith(where)
+
+
+def test_steps_that_stay_in_the_run_folders_pass():
+    for argv in (
+        EVALUATE,
+        [*PREPARE, "--source", "{inputs}", "--output", "{output}"],
+        [*PREPARE, "--source", "{work}/x", "--output", "{work}/p", "--options",
+         '{"dataset": "flip2-amylase-one-to-many", "split": "{inputs}/split.tsv", "limit": 3}'],
+        ["rewirebench", "run", "--prepared", "{work}/p", "--output", "{output}/run", "--model",
+         "esm2-embeddings", "--adapter-options", '{"checkpoint": "{inputs}/x.pt"}'],
+        ["rewirebench", "run-baselines", "--prepared", "{work}/p", "--output", "{output}/b",
+         "--baseline-options",
+         '{"proteingym-evcouplings-independent-v1": {"artifact": "{work}/a.json"}}'],
+    ):
+        recipes.check_step_paths(argv)
+
+
+def test_a_step_that_does_not_parse_is_refused():
+    with pytest.raises(ValueError):
+        recipes.check_step_paths(["rewirebench", "evaluate", "write", "{output}"])
+    with pytest.raises(ValueError, match="--options is not JSON"):
+        recipes.check_step_paths([*PREPARE, "--source", "{inputs}", "--output", "{work}/p",
+                                  "--options", "{"])
+    with pytest.raises(ValueError, match="Not a recipe step"):
+        recipes.check_step_paths(["rewirebench", "export", "--report", "{output}/r",
+                                  "--output", "{output}/b"])
+
+
+def test_every_option_of_a_step_command_is_classified():
+    """A new option of a step command is a path, JSON or a plain value. Until it is listed
+    as one of them a recipe cannot use it, and this test says so first."""
+    subcommands = next(action for action in cli.build_parser()._actions
+                       if isinstance(action.choices, dict)).choices
+    assert set(recipes.STEP_PATHS) == set(recipes.STEP_VALUES) == set(recipes.RUNNER_COMMANDS)
+    for name in recipes.RUNNER_COMMANDS:
+        options = {action.dest for action in subcommands[name]._actions} - {"help"}
+        listed = {*recipes.STEP_PATHS[name], *recipes.STEP_VALUES[name]}
+        if name in recipes.STEP_JSON:
+            listed.add(recipes.STEP_JSON[name])
+        assert options == listed, name
+
+
+def folders(tmp_path: Path) -> dict[str, str]:
+    for name in ("scratch/inputs", "scratch/work", "run", "outside"):
+        (tmp_path / name).mkdir(parents=True)
+    return {"inputs": str(tmp_path / "scratch/inputs"), "work": str(tmp_path / "scratch/work"),
+            "output": str(tmp_path / "run")}
+
+
+def rendered(argv: list[str], values: dict[str, str]) -> list[str]:
+    for name, value in values.items():
+        argv = [item.replace("{" + name + "}", value) for item in argv]
+    return argv
+
+
+def test_rendered_paths_are_resolved_and_refused_outside_the_run_folders(tmp_path: Path):
+    values = folders(tmp_path)
+    outside = tmp_path / "outside"
+    step = [*PREPARE, "--source", "{inputs}", "--output", "{work}/prepared"]
+    recipes.check_step_paths(rendered(step, values), values)
+    recipes.check_step_paths(rendered(EVALUATE, values), values)
+    for output in (str(outside / "x"), "{work}/../../outside/x", "{inputs}/x", "../x"):
+        with pytest.raises(ValueError, match="--output resolves to a path outside") as error:
+            recipes.check_step_paths(rendered(swapped(step, "{work}/prepared", output), values),
+                                     values)
+        # The rendered value is a local path, so the message does not repeat it.
+        assert str(tmp_path) not in str(error.value)
+    # A relative path is taken from {work}, where the step runs.
+    recipes.check_step_paths(rendered(swapped(step, "{work}/prepared", "prepared"), values),
+                             values)
+
+
+def test_a_link_out_of_the_run_folders_is_followed_and_refused(tmp_path: Path):
+    values = folders(tmp_path)
+    outside = tmp_path / "outside"
+    (outside / "secret.json").write_text("{}")
+    work, inputs = Path(values["work"]), Path(values["inputs"])
+    (work / "folder").symlink_to(outside, target_is_directory=True)
+    (work / "dangling").symlink_to(outside / "not-there-yet")
+    (inputs / "p.json").symlink_to(outside / "secret.json")
+    (work / "inside").symlink_to(Path(values["output"]), target_is_directory=True)
+    step = [*PREPARE, "--source", "{inputs}", "--output", "{work}/prepared"]
+    for output in ("{work}/folder/x", "{work}/folder", "{work}/dangling",
+                   "{work}/inside/../../outside/x"):
+        with pytest.raises(ValueError, match="--output resolves to a path outside"):
+            recipes.check_step_paths(rendered(swapped(step, "{work}/prepared", output), values),
+                                     values)
+    with pytest.raises(ValueError, match="--predictions resolves to a path outside"):
+        recipes.check_step_paths(rendered(EVALUATE, values), values)
+    options = [*step, "--options", '{"split": "{work}/folder/secret.json"}']
+    with pytest.raises(ValueError, match="--options 'split' resolves to a path outside"):
+        recipes.check_step_paths(rendered(options, values), values)
+    # A link that stays inside the run folders is fine.
+    recipes.check_step_paths(rendered(swapped(step, "{work}/prepared", "{work}/inside/x"),
+                                      values), values)
+
+
+def test_the_run_folders_may_themselves_sit_behind_a_link(tmp_path: Path):
+    """The temporary folder is behind a link on macOS, so both sides are resolved."""
+    values = folders(tmp_path / "real")
+    (tmp_path / "alias").symlink_to(tmp_path / "real", target_is_directory=True)
+    aliased = {name: value.replace(str(tmp_path / "real"), str(tmp_path / "alias"))
+               for name, value in values.items()}
+    step = [*PREPARE, "--source", "{inputs}", "--output", "{work}/prepared"]
+    recipes.check_step_paths(rendered(step, aliased), aliased)
+    recipes.check_step_paths(rendered(step, values), aliased)

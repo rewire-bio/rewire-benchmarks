@@ -22,6 +22,7 @@ import hashlib
 import json
 import os
 import re
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Annotated, Any, Literal
@@ -55,6 +56,36 @@ DATA_COMMANDS = ("prepare", "evaluate", "run-baselines", "prepare-baseline-artif
 MODEL_COMMAND = "run"
 BASELINES_COMMAND = "run-baselines"
 RUNNER_COMMANDS = (*DATA_COMMANDS, MODEL_COMMAND)
+# Where the paths of a step are, by subcommand. A recipe step may name a path only under
+# one of the run's three folders: it reads from any of them and writes to {work} and
+# {output}. STEP_PATHS maps each path option to "read" or "write", STEP_JSON names the
+# option that carries JSON, and STEP_VALUES the options that hold no path. An option in
+# none of the three is refused, so a new command-line option has to be classified here
+# before a recipe can use it.
+STEP_PATHS: dict[str, dict[str, Literal["read", "write"]]] = {
+    "prepare": {"source": "read", "output": "write"},
+    "evaluate": {"prepared": "read", "output": "write", "predictions": "read",
+                 "embeddings": "read"},
+    "run": {"prepared": "read", "output": "write"},
+    "run-baselines": {"prepared": "read", "output": "write"},
+    "prepare-baseline-artifact": {"manifest": "read", "output": "write"},
+}
+STEP_JSON = {"prepare": "options", "run": "adapter_options",
+             "run-baselines": "baseline_options"}
+STEP_VALUES: dict[str, tuple[str, ...]] = {
+    "prepare": ("protocol",),
+    "evaluate": ("model_name", "training_overlap", "allow_partial"),
+    "run": ("model_name", "training_overlap", "allow_partial", "model", "adapter",
+            "batch_size", "prediction_type"),
+    "run-baselines": ("baseline", "batch_size"),
+    "prepare-baseline-artifact": ("baseline",),
+}
+# Keys of the JSON options whose value is opened as a file: by a protocol's prepare
+# (split, reference), by a model adapter (checkpoint, motifs, fimo) or by a baseline
+# (artifact, motifs, fimo).
+JSON_PATH_KEYS = ("artifact", "checkpoint", "fimo", "motifs", "reference", "split")
+READ_FOLDERS = ("inputs", "work", "output")
+WRITE_FOLDERS = ("work", "output")
 # Names the runner writes into a run folder. A recipe cannot list them as outputs.
 RESERVED_OUTPUTS = ("receipt.json", "SHA256SUMS")
 RESERVED_FOLDER = "logs"
@@ -172,6 +203,96 @@ def check_step(argv: list[str], *, cpu_only: bool = False) -> None:
         check_run_step(argv, cpu_only=cpu_only)
     elif len(argv) > 1 and argv[1] == BASELINES_COMMAND:
         check_baselines_step(argv)
+
+
+_ROOTED = re.compile(r"\{(inputs|work|output)\}(/.*)?")
+_LOOKS_ABSOLUTE = re.compile(r"[/\\~]|[A-Za-z]:[/\\]")
+
+
+def _looks_like_path(value: str) -> bool:
+    """Whether a JSON text value under an unlisted key could still be used as a path."""
+    return bool(_LOOKS_ABSOLUTE.match(value) or _PLACEHOLDER.search(value)
+                or ".." in re.split(r"[/\\]", value))
+
+
+def _json_paths(value: Any, where: str, listed: bool = False) -> Iterator[tuple[str, str]]:
+    """Each text value of a JSON option that is a path, with the key that holds it.
+
+    A value under one of ``JSON_PATH_KEYS`` is a path whatever it looks like. Any other
+    text is one if it is absolute, has a ``..`` part or names a placeholder, so a path
+    under a key this list does not know is still held to the rule.
+    """
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield from _json_paths(item, f"{where} {key!r}", listed or key in JSON_PATH_KEYS)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _json_paths(item, where, listed)
+    elif isinstance(value, str) and (listed or _looks_like_path(value)):
+        yield where, value
+
+
+def _resolved(path: str, folder: str) -> Path:
+    """The path with every symbolic link followed, relative paths taken from ``folder``."""
+    return Path(os.path.realpath(os.path.join(folder, path)))
+
+
+def check_step_paths(argv: list[str], folders: Mapping[str, str] | None = None) -> None:
+    """Refuse a step that names a path outside the run's folders.
+
+    The step is parsed by the real command-line parser, so ``--output=/etc/x`` and an
+    abbreviated ``--outp /etc/x`` are read as the command would read them. A step that
+    does not parse is refused.
+
+    Without ``folders`` this checks the argv as the recipe writes it: every path starts
+    with ``{inputs}``, ``{work}`` or ``{output}`` and has no ``..`` part, and a path the
+    step writes starts with ``{work}`` or ``{output}``. With ``folders`` (placeholder name
+    to folder) it checks the rendered argv just before the step runs: every path, with
+    symbolic links followed, is inside one of those folders. That catches a link an
+    earlier step or an input left behind, which the first check cannot see.
+
+    The paths are the path options of the subcommand and the paths inside its JSON
+    option. A file that a step reads may itself name other files (the manifest of
+    ``prepare-baseline-artifact`` does); those are not checked here.
+    """
+    from rewirebench import cli
+
+    arguments = vars(cli.parse_strict(argv[1:]))
+    command = arguments.pop("command")
+    if command not in STEP_PATHS:
+        raise ValueError(f"Not a recipe step: {argv[:2]}")
+    json_option = STEP_JSON.get(command)
+    known = {*STEP_PATHS[command], *STEP_VALUES[command], json_option}
+    unknown = sorted(set(arguments) - known)
+    if unknown:
+        raise ValueError(f"A recipe step cannot use the option --{unknown[0].replace('_', '-')}")
+    found: list[tuple[str, str, tuple[str, ...]]] = []
+    for name, access in STEP_PATHS[command].items():
+        if arguments[name] is not None:
+            found.append((f"--{name}", arguments[name],
+                          WRITE_FOLDERS if access == "write" else READ_FOLDERS))
+    if json_option is not None:
+        option = f"--{json_option.replace('_', '-')}"
+        try:
+            content = json.loads(arguments[json_option])
+        except json.JSONDecodeError as error:
+            raise ValueError(f"{option} is not JSON: {error}") from error
+        found.extend((where, value, READ_FOLDERS) for where, value in _json_paths(content, option))
+    for where, value, allowed in found:
+        names = ", ".join("{" + name + "}" for name in allowed[:-1]) + " or {" + allowed[-1] + "}"
+        if folders is None:
+            match = _ROOTED.fullmatch(value)
+            if (match is None or match.group(1) not in allowed or "\\" in value
+                    or ".." in PurePosixPath(value).parts):
+                raise ValueError(
+                    f"{where} must be a path under {names}, with no .. part: {value!r}"
+                )
+        else:
+            path = _resolved(value, folders["work"])
+            roots = [_resolved(folders[name], folders["work"]) for name in allowed]
+            if not any(path == root or root in path.parents for root in roots):
+                # The value is a local path, so the message leaves it out.
+                raise ValueError(f"{where} resolves to a path outside {names}")
 
 
 class Strict(BaseModel):
@@ -373,6 +494,10 @@ class Command(Strict):
                     f"Command {self.name}: unknown placeholder {{{unknown[0]}}}. "
                     "Use {inputs}, {work} or {output}."
                 )
+        try:
+            check_step_paths(list(self.argv))
+        except ValueError as error:
+            raise ValueError(f"Command {self.name}: {error}") from error
         return self
 
 

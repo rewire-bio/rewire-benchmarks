@@ -60,6 +60,16 @@ reports every other file under `invalid`, with exit code 1.
   first entry of `gpu_types`, because the quote multiplies that rate.
   `{inputs}` is the folder holding the inputs, `{work}` is a scratch folder that is deleted,
   and `{output}` is the run folder.
+- A step names paths only under those three folders. Every path option (`--source`,
+  `--prepared`, `--predictions`, `--embeddings`, `--manifest`, `--output`) starts with
+  `{inputs}`, `{work}` or `{output}` and has no `..` part, and `--output` starts with `{work}`
+  or `{output}`. The same holds for a path inside `--options`, `--adapter-options` or
+  `--baseline-options`: the keys `artifact`, `checkpoint`, `fimo`, `motifs`, `reference` and
+  `split`, and any other text value that is absolute, has a `..` part or names a placeholder.
+  Validation checks the recipe as written. Just before each step starts, the runner resolves
+  the rendered paths, following symbolic links, and refuses the step if one is outside the
+  three folders; the run stops there with no receipt. A file a step reads can itself name
+  other files (the manifest of `prepare-baseline-artifact` does). Those are not checked.
 - A command may set `timeout_seconds` (default 3600, at most 86400). A step still running then
   is stopped, with any process it started, and the run fails.
 - `outputs` lists the files the run must write, relative to the run folder. `receipt.json`,

@@ -180,11 +180,11 @@ def test_options_have_the_declared_json_type():
 def test_a_local_recipe_cannot_ask_a_model_for_an_accelerator(device: str):
     """Hiding CUDA devices does not hide Apple MPS, so the device itself is refused."""
     step = (*STEP, "--model", "esm2-embeddings", "--adapter-options",
-            json.dumps({"checkpoint": "x.pt", "device": device}))
+            json.dumps({"checkpoint": "{inputs}/x.pt", "device": device}))
     with pytest.raises(recipes.RecipeError, match="device must be cpu"):
         parse(with_step(*step))
     cpu = (*STEP, "--model", "esm2-embeddings", "--adapter-options",
-           '{"checkpoint": "x.pt", "device": "cpu"}')
+           '{"checkpoint": "{inputs}/x.pt", "device": "cpu"}')
     assert parse(with_step(*cpu)).backends.local is not None
     # The step rule alone allows it, because a spark recipe needs cuda in its image.
     argv = ["rewirebench", "run", *step]
@@ -200,7 +200,7 @@ def test_the_runner_refuses_an_accelerator_wherever_cuda_is_hidden(
     monkeypatch.setattr(receipts.subprocess, "Popen",
                         lambda *args, **kwargs: started.append(args))
     argv = ["rewirebench", "run", *STEP, "--model", "esm2-embeddings", "--adapter-options",
-            '{"checkpoint": "x.pt", "device": "mps"}']
+            '{"checkpoint": "{inputs}/x.pt", "device": "mps"}']
     with pytest.raises(ValueError, match="device must be cpu"):
         receipts._execute(argv, cwd=tmp_path, log=tmp_path / "step", timeout=5)
     assert started == []

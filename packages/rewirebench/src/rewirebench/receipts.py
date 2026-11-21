@@ -55,6 +55,7 @@ from rewirebench.recipes import (
     Strict,
     Text,
     check_step,
+    check_step_paths,
     get_recipe,
     parse_recipe,
     problems,
@@ -981,6 +982,12 @@ def run_recipe(
                                               exit_code=None, wall_seconds=None,
                                               peak_memory_bytes=None))
                 continue
+            # Checked on the rendered argv with links followed, just before the step
+            # runs: an earlier step or an input may have left a link behind.
+            try:
+                check_step_paths(argv, values)
+            except ValueError as error:
+                raise ValueError(f"Command {command.name}: {error}") from error
             exit_code, seconds, peak = _execute(
                 argv, cwd=work, log=folder / "logs" / f"{index:02d}-{command.name}",
                 timeout=command.timeout_seconds, hide_cuda=hide_cuda,

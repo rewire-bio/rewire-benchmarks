@@ -340,18 +340,19 @@ SCRIPTS = {
 @pytest.fixture
 def scripted(monkeypatch: pytest.MonkeyPatch) -> None:
     """A recipe step can only be a rewirebench command, so the tests swap the process
-    behind `rewirebench evaluate <script>` for a short script."""
+    behind `rewirebench evaluate ... --model-name <script>` for a short script."""
 
     def program(argv: list[str]) -> list[str]:
         assert argv[:2] == ["rewirebench", "evaluate"]
-        return [sys.executable, "-c", SCRIPTS[argv[2]], *argv[3:]]
+        return [sys.executable, "-c", SCRIPTS[argv[-1]], argv[argv.index("--output") + 1]]
 
     monkeypatch.setattr(receipts, "_program", program)
 
 
 def custom_recipes(tmp_path: Path, script: str = "write", **fields: Any) -> Path:
     """A recipes directory with one recipe that runs a test script on a small input."""
-    argv = ["rewirebench", "evaluate", script, "{output}"]
+    argv = ["rewirebench", "evaluate", "--prepared", "{work}", "--output", "{output}",
+            "--predictions", "{inputs}/input.txt", "--model-name", script]
     root = tmp_path / "checkout"
     (root / "recipes/test").mkdir(parents=True)
     (root / "data").mkdir()
@@ -426,6 +427,32 @@ def test_step_logs_name_the_recipe_placeholders_and_no_local_folder(
     # The digests are of the logs as they were left.
     result = receipts.verify(tmp_path / "out", recipes_dir=tmp_path / "checkout/recipes")
     assert statuses(result)["sha256sums"] == statuses(result)["outputs"] == "match"
+
+
+def test_a_step_cannot_write_through_a_link_an_earlier_step_left(
+    tmp_path: Path, scripted: None, monkeypatch: pytest.MonkeyPatch
+):
+    """The recipe passes validation: both paths start with {output}. The first step leaves
+    a link out of the run folder, and the second is refused before it starts."""
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    monkeypatch.setitem(SCRIPTS, "link", (
+        f"import os, sys; os.symlink({str(outside)!r}, os.path.join(sys.argv[1], 'escape'))"))
+    step = ["rewirebench", "evaluate", "--prepared", "{work}", "--predictions",
+            "{inputs}/input.txt"]
+    directory = custom_recipes(tmp_path, commands=[
+        {"name": "link", "argv": [*step, "--output", "{output}", "--model-name", "link"]},
+        {"name": "escape", "argv": [*step, "--output", "{output}/escape", "--model-name",
+                                    "write"]},
+    ])
+    loaded = recipes.get_recipe("custom", directory)
+    with pytest.raises(ValueError, match="Command escape: --output resolves to a path "
+                                         "outside") as error:
+        receipts.run_recipe(loaded, output=tmp_path / "out", recipes_dir=directory)
+    assert str(tmp_path) not in str(error.value)
+    assert (tmp_path / "out/escape").is_symlink() and list(outside.iterdir()) == []
+    assert not (tmp_path / "out/logs/02-escape.stdout.txt").exists()
+    assert not (tmp_path / "out/receipt.json").exists()
 
 
 def test_a_step_that_outlives_its_timeout_is_stopped(tmp_path: Path, scripted: None):
