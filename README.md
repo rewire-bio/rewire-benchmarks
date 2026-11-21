@@ -194,7 +194,7 @@ commands and one agent definition. Every server runs on your machine.
 | --- | --- | --- |
 | `rewire-benchmark-graph` | The read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp): published results, provenance, disagreements | rdf-kg-mcp v0.4.0 |
 | `genomics-mcp` | [Genomic data](https://github.com/rewire-bio/genomics-mcp), GIAB and HPRC truth sets, synthetic-data protocols | commit `3b395a9648aa57610623c54c4d54dd933470b067` (no release has the truth-set tools yet) |
-| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2` (no release has `rewirebench mcp` yet) |
+| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `023a7a213d141dee7d73581171475be1d9fd0ba2` (no release has `rewirebench mcp` yet) |
 
 | Skill | Command | What it does |
 | --- | --- | --- |
@@ -247,9 +247,11 @@ its receipt and every tool call.
 What an installed plugin cannot do yet:
 
 - The `rewirebench` server is installed from a commit, not a checkout, and reads the plugin's
-  copy of [`recipes/`](recipes). Its receipts verify, but they carry no code or recipe commit,
-  so `verify_receipt` with `strict` reports the commits as not checked. For a receipt that
-  passes `strict`, run `uv run rewirebench mcp` from a clean checkout of this repository.
+  copy of [`recipes/`](recipes). Its receipts verify, and they name the pinned commit, read
+  from the install metadata (`code.commit_source` is `install_metadata`). No tree was checked
+  for changes, so `code.dirty` is null and `verify_receipt` with `strict` reports the commits
+  as not checked. For a receipt that passes `strict`, run `uv run rewirebench mcp` from a
+  clean checkout of this repository.
   [docs/demo/plugin-run.json](docs/demo/plugin-run.json) records an MFASS v2 run made this way.
 - `uvx` does not apply this repository's `uv.lock`, so Python and the numeric packages are
   whatever uv resolves on the day. The last digits of a metric can differ from a locked run.

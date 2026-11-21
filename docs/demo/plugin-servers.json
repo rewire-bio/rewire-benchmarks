@@ -72,7 +72,7 @@
       "command": [
         "uvx",
         "--from",
-        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2#subdirectory=packages/rewirebench",
+        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@023a7a213d141dee7d73581171475be1d9fd0ba2#subdirectory=packages/rewirebench",
         "rewirebench",
         "mcp",
         "--recipes-dir",
@@ -100,7 +100,7 @@
   "calls": [
     {
       "number": 1,
-      "at": "2026-11-21T01:12:03+00:00",
+      "at": "2026-11-21T03:35:30+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "dataset_info",
       "arguments": {},
@@ -229,7 +229,7 @@
     },
     {
       "number": 2,
-      "at": "2026-11-21T01:12:05+00:00",
+      "at": "2026-11-21T03:35:32+00:00",
       "server": "genomics-mcp",
       "tool": "get_truth_set",
       "arguments": {
@@ -420,7 +420,7 @@
             "source_record_id": "giab-hg002-v4.2.1-grch38",
             "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
             "method": "curated catalogue in genomics-mcp",
-            "retrieved_at": "2026-11-21T01:12:05.495977Z",
+            "retrieved_at": "2026-11-21T03:35:32.411035Z",
             "source_version": "NISTv4.2.1",
             "source_updated_at": null,
             "terms_url": null,
@@ -440,7 +440,7 @@
     },
     {
       "number": 3,
-      "at": "2026-11-21T01:12:25+00:00",
+      "at": "2026-11-21T03:35:33+00:00",
       "server": "rewirebench",
       "tool": "list_recipes",
       "arguments": {},
@@ -454,6 +454,7 @@
             "kind": "benchmark_run",
             "scope": "synthetic_smoke",
             "rewirebench_protocol": "flip2-fitness-v1",
+            "kg_record_id": null,
             "backends": [
               "local"
             ],
@@ -466,6 +467,7 @@
             "kind": "benchmark_run",
             "scope": "full_protocol",
             "rewirebench_protocol": "mfass-v2",
+            "kg_record_id": "rewire-mfass-v2",
             "backends": [
               "local"
             ],

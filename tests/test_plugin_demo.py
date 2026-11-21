@@ -11,6 +11,8 @@ import importlib.util
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -248,7 +250,7 @@ def test_the_recorded_run_gives_the_published_values():
     assert receipt["metrics"]["n"] == 8324 and receipt["metrics"]["positives"] == 315
     for key, value in PUBLISHED.items():
         assert receipt["metrics"][key] == pytest.approx(value, abs=5e-5)
-    assert receipt["code"]["dirty"] is False
+    assert receipt["code"]["dirty"] is False and receipt["code"]["commit_source"] == "checkout"
     assert receipt["code"]["commit"] == receipt["recipe"]["commit"]
     assert receipt["cost"] == {
         "paid_compute": False, "amount": None, "currency": None, "reason": "owned hardware",
@@ -273,9 +275,10 @@ def declared(name: str) -> list[str]:
 
 
 def test_the_plugin_run_was_made_with_the_launch_lines_the_plugin_ships(client: ModuleType):
-    """docs/demo/plugin-run.json: the same run through the plugin as installed. It verifies,
-    and it cannot pass strict, because a wheel has no commit. Raising the rewirebench or
-    graph pin means recording it again."""
+    """docs/demo/plugin-run.json: the same run through the plugin as installed. Its receipt
+    names the pinned commit, read from install metadata. It verifies, and it cannot pass
+    strict, because no tree was checked and the plugin's recipes are in no commit. Raising
+    the rewirebench or graph pin means recording it again."""
     transcript = recorded("plugin-run.json")
     found = check_recorded_run(transcript, client)
     for name in ("rewire-benchmark-graph", "rewirebench"):
@@ -283,10 +286,15 @@ def test_the_plugin_run_was_made_with_the_launch_lines_the_plugin_ships(client: 
     assert one(found["calls"], "list_recipes")["result"]["recipes_dir"] == (
         "${CLAUDE_PLUGIN_ROOT}/recipes")
     receipt, verified = found["receipt"], found["verified"]
-    assert receipt["code"]["commit"] is None and receipt["recipe"]["commit"] is None
+    source = declared("rewirebench")[declared("rewirebench").index("--from") + 1]
+    assert f"@{receipt['code']['commit']}#" in source
+    assert receipt["code"]["commit_source"] == "install_metadata"
+    assert receipt["code"]["dirty"] is None and receipt["recipe"]["commit"] is None
     assert verified["strict"] is False and verified["not_checked"] == ["commits"]
     statuses = {item["check"]: item["status"] for item in verified["results"]}
     assert statuses.pop("commits") == "not_available"
+    [commits] = [item for item in verified["results"] if item["check"] == "commits"]
+    assert "install metadata" in commits["detail"] and "recipe.commit is null" in commits["detail"]
     assert set(statuses.values()) == {"match"} and len(statuses) == 7
     # Unlocked packages may move the last digits; nothing more.
     assert all(row["difference"] <= 1e-12 for row in found["rows"])
@@ -301,6 +309,7 @@ def test_both_recorded_runs_used_the_same_code_recipe_and_predictions():
     plugin = one(recorded("plugin-run.json")["calls"], "get_receipt")["result"]
     args = declared("rewirebench")
     assert f"@{checkout['code']['commit']}#" in args[args.index("--from") + 1]
+    assert checkout["code"]["commit"] == plugin["code"]["commit"]
     assert checkout["code"]["sdk_code_sha256"] == plugin["code"]["sdk_code_sha256"]
     assert checkout["code"]["rewirebench_version"] == plugin["code"]["rewirebench_version"]
     assert checkout["recipe"]["sha256"] == plugin["recipe"]["sha256"]
@@ -312,6 +321,55 @@ def test_both_recorded_runs_used_the_same_code_recipe_and_predictions():
     assert digests[0] == hashlib.sha256((RUN / predictions).read_bytes()).hexdigest()
     report = json.loads((RUN / "baselines/mfass-kmer-position-v2/report.json").read_text())
     assert json.dumps(report).count(digests[0]) >= 1
+
+
+def test_the_pages_say_what_the_recorded_plugin_receipt_carries():
+    """The README, docs/mcp.md, the run skill and the agent page each say what a receipt from
+    an installed plugin holds. They are read against the recorded plugin run, so a page
+    cannot keep saying there is no code commit after the recording has one."""
+    code = one(recorded("plugin-run.json")["calls"], "get_receipt")["result"]["code"]
+    assert code["commit"] and code["commit_source"] == "install_metadata"
+    assert code["dirty"] is None
+    pages = {name: " ".join((ROOT / name).read_text().split()) for name in (
+        "README.md", "docs/mcp.md", "docs/demo/README.md", "skills/run-benchmark/SKILL.md",
+        "plugins/bio-model-benchmarks/skills/run-benchmark/SKILL.md",
+        "plugins/bio-model-benchmarks/agents/benchmarking-agent.md")}
+    for name, text in pages.items():
+        assert re.search(r"install[ _]metadata", text), name
+        # docs/mcp.md also describes the container image, whose receipts have no commit.
+        if name != "docs/mcp.md":
+            assert not re.search(r"\bno (code|code or recipe|recipe or code) commit", text), name
+    section = pages["README.md"].split("What an installed plugin cannot do yet:")[1]
+    section = section.split("## ")[0]
+    assert "they name the pinned commit" in section
+    assert "`code.commit_source` is `install_metadata`" in section
+    assert "`code.dirty` is null" in section and "commits as not checked" in section
+    for name in ("docs/mcp.md", "docs/demo/README.md", "skills/run-benchmark/SKILL.md",
+                 "plugins/bio-model-benchmarks/skills/run-benchmark/SKILL.md"):
+        # recipe.commit is not always null for a plugin: it depends on the folder.
+        assert "inside a git work tree whose HEAD holds" in pages[name], name
+        assert "`code.dirty` and `recipe.commit` are `null`" not in pages[name], name
+
+
+def test_a_plugin_recipe_gets_a_commit_only_inside_a_work_tree_that_holds_it(tmp_path: Path):
+    """What the pages above say about recipe.commit, run against the plugin's recipes."""
+    plain = Path(shutil.copytree(PLUGIN / "recipes", tmp_path / "plain/recipes"))
+    name = "mfass/mfass-v2-kmer-baseline.yaml"
+    assert (plain / name).is_file()
+    assert receipts.recipe_origin(plain / name) == (None, None)
+
+    def git(*arguments: str) -> str:
+        return subprocess.run(
+            ["git", "-c", "user.name=Test", "-c", "user.email=test@example.org", *arguments],
+            cwd=tmp_path / "plain", check=True, capture_output=True, text=True).stdout.strip()
+
+    git("init", "--quiet")
+    assert receipts.recipe_origin(plain / name) == (None, None)
+    git("add", "recipes")
+    git("commit", "--quiet", "-m", "a copy of the plugin")
+    assert receipts.recipe_origin(plain / name) == (None, git("rev-parse", "HEAD"))
+    (plain / name).write_text((plain / name).read_text() + "# Edited.\n")
+    assert receipts.recipe_origin(plain / name) == (None, None)
 
 
 def test_the_demo_page_reports_what_the_transcripts_hold():
@@ -351,7 +409,13 @@ def test_the_demo_page_reports_what_the_transcripts_hold():
             "Average precision": "average_precision_sklearn", "AUROC": "auroc"}
     for label, key in keys.items():
         assert side[label] == [repr(receipt["metrics"][key]), repr(other["metrics"][key])]
-    assert side["`code.commit`, `recipe.commit`"] == [f"`{receipt['code']['commit'][:7]}`", "null"]
+    short = f"`{receipt['code']['commit'][:7]}`"
+    assert side["`code.commit`"] == [short, f"`{other['code']['commit'][:7]}`"] == [short, short]
+    assert side["`code.commit_source`"] == [
+        f"`{receipt['code']['commit_source']}`", f"`{other['code']['commit_source']}`"]
+    assert side["`code.dirty`"] == ["false", "null"]
+    assert (receipt["code"]["dirty"], other["code"]["dirty"]) == (False, None)
+    assert side["`recipe.commit`"] == [short, "null"] and other["recipe"]["commit"] is None
     assert side["Wall time"][0] == f"{receipt['wall_seconds']:.2f} s"
     assert side["Wall time"][1].startswith(f"{other['wall_seconds']:.2f} s")
     assert side["`sdk_code_sha256`"] == [f"`{receipt['code']['sdk_code_sha256'][:8]}...`"] * 2
@@ -378,10 +442,10 @@ def test_recorded_transcripts_name_no_local_folder(name: str, client: ModuleType
         assert marker not in text, marker
 
 
-def test_the_recorded_run_folder_names_one_temporary_folder_and_no_user():
-    """The run folder cannot be edited without breaking its digests. It was recorded before
-    step logs wrote {work} for the scratch folder, and one log line names a temporary
-    folder. Nothing in the folder names a user or a home folder, and nothing else may."""
+def test_the_recorded_run_folder_names_no_local_folder():
+    """The run folder cannot be edited without breaking its digests, so it must be clean as
+    recorded. Step logs write {work} for the scratch folder. Nothing in the folder names a
+    user, a home folder or a temporary folder."""
     found = []
     for path in sorted(RUN.rglob("*")):
         if not path.is_file():
@@ -390,8 +454,6 @@ def test_the_recorded_run_folder_names_one_temporary_folder_and_no_user():
             for marker in ("/Users/", "/home/", "/private/", "/var/folders/", "/tmp/"):
                 if marker in line:
                     found.append((path.relative_to(RUN).as_posix(), number, marker))
-    assert found == [("logs/01-prepare.stdout.txt", 4, "/var/folders/")]
+    assert found == []
     line = (RUN / "logs/01-prepare.stdout.txt").read_text().splitlines()[3]
-    assert re.fullmatch(
-        r'\s*"prepared": "/var/folders/[a-z0-9_]+/[a-z0-9_]+/T/rewirebench-recipe-[a-z0-9_]+'
-        r'/work/prepared/prepared\.json"', line)
+    assert line.strip() == '"prepared": "{work}/prepared/prepared.json"'

@@ -34,7 +34,7 @@ The steps below are the tool sequences of the plugin's skills `find-model-for-us
 
 3. Decide what can be rerun. Only a result on a rewirebench protocol with a recipe from
    `list_recipes` can be rerun here. Match the recipe's `kg_record_id`, which
-   `describe_recipe` returns, to the protocol record. If there is no recipe, report the
+   `list_recipes` returns, to the protocol record. If there is no recipe, report the
    published evidence and say what is missing. Do not improvise a protocol or a split.
 4. Plan before running. Call `describe_recipe` and `plan_run`, and show the user the inputs
    (source, size, licence, all from `describe_recipe`), the hardware, the expected time and
@@ -69,4 +69,5 @@ The steps below are the tool sequences of the plugin's skills `find-model-for-us
 - Nothing in a receipt is signed, and `verify_receipt` reads the checked values from the
   report without scoring the predictions again. Say so when the user will pass the receipt
   to someone else. From an installed plugin `strict` does not pass, because the server runs
-  from a wheel and the receipt names no commit.
+  from a wheel: the receipt's code commit comes from install metadata, not from a checked
+  tree.
