@@ -1,0 +1,271 @@
+{
+  "schema_version": "1.0",
+  "kind": "rewire_run_receipt",
+  "receipt_kind": "runner_reproduction",
+  "scope": "full_protocol",
+  "verified_on": "2026-11-21",
+  "started_by": "agent",
+  "backend": "local",
+  "recipe": {
+    "id": "mfass-v2-kmer-baseline",
+    "repository": "https://github.com/rewire-bio/rewire-benchmarks",
+    "commit": "e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2",
+    "path": "recipes/mfass/mfass-v2-kmer-baseline.yaml",
+    "sha256": "7552c6a78089e0e6eab19eba58fc9108ee7f2ffb5974dd69fcc4815bf5d4f2ab"
+  },
+  "recipe_missing": null,
+  "kg_release_id": "2026-11-20-72316db0764b",
+  "code": {
+    "repository": "https://github.com/rewire-bio/rewire-benchmarks",
+    "commit": "e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2",
+    "dirty": false,
+    "rewirebench_version": "0.5.0",
+    "sdk_code_sha256": "3297cfe0fcd27909c5f9aff10a767e425a5a3319a3b5594ac6ac104cc341c50b"
+  },
+  "environment": {
+    "images": {
+      "linux/amd64": null,
+      "linux/arm64": null
+    },
+    "image_used": null,
+    "container_runtime": null,
+    "python": "3.11.13",
+    "os": "macOS-26.6.2-arm64-arm-64bit"
+  },
+  "inputs": [
+    {
+      "name": "snv_data_clean.txt",
+      "source": "https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt",
+      "obtained": "fetched",
+      "sha256": "a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8",
+      "bytes": 41445250
+    },
+    {
+      "name": "snv_func_annot.txt",
+      "source": "https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt",
+      "obtained": "fetched",
+      "sha256": "71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1",
+      "bytes": 38514140
+    }
+  ],
+  "hardware": {
+    "architecture": "arm64",
+    "cpu": {
+      "model": "Apple M4",
+      "logical_cores": 10
+    },
+    "memory_bytes": 17179869184,
+    "gpus": []
+  },
+  "commands": [
+    {
+      "name": "prepare",
+      "argv": [
+        "rewirebench",
+        "prepare",
+        "mfass-v2",
+        "--source",
+        "{inputs}",
+        "--output",
+        "{work}/prepared"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 2.681,
+      "peak_memory_bytes": 807141376
+    },
+    {
+      "name": "run-baselines",
+      "argv": [
+        "rewirebench",
+        "run-baselines",
+        "--prepared",
+        "{work}/prepared",
+        "--output",
+        "{output}/baselines",
+        "--baseline",
+        "mfass-kmer-position-v2"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 3.894,
+      "peak_memory_bytes": 482344960
+    }
+  ],
+  "started_at": "2026-11-21T01:07:38.390689Z",
+  "finished_at": "2026-11-21T01:08:00.760586Z",
+  "wall_seconds": 22.37,
+  "peak_memory_bytes": 807141376,
+  "outputs": [
+    {
+      "path": "baselines/baseline-manifest.json",
+      "bytes": 1336,
+      "sha256": "d23b81c03a263a82b7f27d29ab6f3f4cbef27882f7c8ab2fc96304858644d269"
+    },
+    {
+      "path": "baselines/baseline-plan.json",
+      "bytes": 1445,
+      "sha256": "70722d53186cc5366742cb9c6891a93fcc92baf7972d23e2aa14a27bcb2d88cb"
+    },
+    {
+      "path": "baselines/mfass-kmer-position-v2/predictions.json",
+      "bytes": 389147,
+      "sha256": "2683ef05f0fdf4690529b8630386471a650fb86376c6f6419ad5c8503661b198"
+    },
+    {
+      "path": "baselines/mfass-kmer-position-v2/report.json",
+      "bytes": 4454,
+      "sha256": "0c7c84461df07e8aa5595c932423a1f11432cee548ef4151c2dd7427a8da09eb"
+    },
+    {
+      "path": "baselines/mfass-kmer-position-v2/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "baselines/mfass-kmer-position-v2.status.json",
+      "bytes": 714,
+      "sha256": "4e49ffc6914cbfddea818e98b1cf6973749ab6529665cb939b18dfa15fb90f81"
+    },
+    {
+      "path": "logs/01-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/01-prepare.stdout.txt",
+      "bytes": 173,
+      "sha256": "531e5719cca0a1b12f98f6ce3de7cfb320674e497f3207ea7e7b3b5dfac95032"
+    },
+    {
+      "path": "logs/02-run-baselines.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/02-run-baselines.stdout.txt",
+      "bytes": 1336,
+      "sha256": "22b60474beca7c11c4a9e500b233121d0498c3d273d129333ce25b3ad194d643"
+    }
+  ],
+  "metrics": {
+    "n": 8324.0,
+    "positives": 315.0,
+    "precision_at_capacity": 0.61,
+    "average_precision_sklearn": 0.2864167459589237,
+    "auroc": 0.7779498064677238
+  },
+  "checks": [
+    {
+      "kind": "output",
+      "label": "baselines/baseline-manifest.json written",
+      "metric_id": null,
+      "file": "baselines/baseline-manifest.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "baselines/mfass-kmer-position-v2/report.json written",
+      "metric_id": null,
+      "file": "baselines/mfass-kmer-position-v2/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "baselines/mfass-kmer-position-v2/predictions.json written",
+      "metric_id": null,
+      "file": "baselines/mfass-kmer-position-v2/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "Scored variants",
+      "metric_id": "n",
+      "file": "baselines/mfass-kmer-position-v2/report.json",
+      "key": [
+        "metrics",
+        "n"
+      ],
+      "expected": 8324.0,
+      "tolerance": 0.0,
+      "observed": 8324.0,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "Positives",
+      "metric_id": "positives",
+      "file": "baselines/mfass-kmer-position-v2/report.json",
+      "key": [
+        "metrics",
+        "positives"
+      ],
+      "expected": 315.0,
+      "tolerance": 0.0,
+      "observed": 315.0,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "Precision at 100",
+      "metric_id": "precision_at_capacity",
+      "file": "baselines/mfass-kmer-position-v2/report.json",
+      "key": [
+        "metrics",
+        "precision_at_capacity"
+      ],
+      "expected": 0.61,
+      "tolerance": 0.0005,
+      "observed": 0.61,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "Average precision",
+      "metric_id": "average_precision_sklearn",
+      "file": "baselines/mfass-kmer-position-v2/report.json",
+      "key": [
+        "metrics",
+        "average_precision_sklearn"
+      ],
+      "expected": 0.286,
+      "tolerance": 0.001,
+      "observed": 0.2864167459589237,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AUROC",
+      "metric_id": "auroc",
+      "file": "baselines/mfass-kmer-position-v2/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.778,
+      "tolerance": 0.0005,
+      "observed": 0.7779498064677238,
+      "passed": true
+    }
+  ],
+  "checks_passed": true,
+  "cost": {
+    "paid_compute": false,
+    "amount": null,
+    "currency": null,
+    "reason": "owned hardware",
+    "hourly_rate": null,
+    "rate_source": null,
+    "rate_date": null
+  }
+}

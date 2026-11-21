@@ -1,0 +1,9 @@
+sequence,target,set,validation
+AAA,-2,train,False
+AAC,1,train,False
+ACC,2,train,False
+CCC,100,train,True
+AAD,-1,test,False
+ADD,0,test,False
+DDD,2,test,False
+DDA,2,test,False

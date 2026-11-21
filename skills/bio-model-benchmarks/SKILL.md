@@ -12,6 +12,12 @@ Two tools work together:
 - **`rewirebench`** (Python CLI and SDK) prepares a protocol, runs baselines and models,
   and scores them. It runs locally and uploads nothing.
 
+With the plugin installed, `rewirebench` is also an MCP server, and `genomics-mcp` supplies
+data and truth sets. Four shorter skills cover the main flows through those servers:
+`find-model-for-use-case`, `run-benchmark`, `verify-published-result` and
+`prepare-benchmark-data`. Prefer them when the servers are available. This skill is the
+command-line route and the reference for comparing a run with a published result.
+
 Reference files in this skill:
 
 - `reference/protocols.md`: protocol IDs, data access and licences, extras, baselines, KG records.

@@ -9,6 +9,31 @@
         "serve",
         "https://benchmarks.rewirebio.io/agents/kg.tar.gz"
       ]
+    },
+    "genomics-mcp": {
+      "command": "uvx",
+      "args": [
+        "--python",
+        "3.12",
+        "--no-binary-package",
+        "pybigwig",
+        "--build-constraints",
+        "https://raw.githubusercontent.com/rewire-bio/genomics-mcp/3b395a9648aa57610623c54c4d54dd933470b067/packaging/build-constraints.txt",
+        "--from",
+        "git+https://github.com/rewire-bio/genomics-mcp@3b395a9648aa57610623c54c4d54dd933470b067",
+        "genomics-mcp"
+      ]
+    },
+    "rewirebench": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@e5c5662a19d4a7b9a776ae6dd52e797edfb9b6a2#subdirectory=packages/rewirebench",
+        "rewirebench",
+        "mcp",
+        "--recipes-dir",
+        "${CLAUDE_PLUGIN_ROOT}/recipes"
+      ]
     }
   }
 }

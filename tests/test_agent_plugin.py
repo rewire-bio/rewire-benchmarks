@@ -1,4 +1,8 @@
-"""The Claude Code plugin must ship the same skill that is reviewed in skills/."""
+"""The Claude Code plugin: its skills, commands, agent, MCP pins and copied recipes.
+
+The plugin must ship the same skills that are reviewed in skills/ and the same recipes
+that are validated in recipes/.
+"""
 import json
 import os
 import re
@@ -6,11 +10,17 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from rewirebench import sdk
+import yaml
+from rewirebench import mcp_server, sdk
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL = ROOT / "skills/bio-model-benchmarks"
+SKILLS = ROOT / "skills"
+SKILL = SKILLS / "bio-model-benchmarks"
 PLUGIN = ROOT / "plugins/bio-model-benchmarks"
+SKILL_NAMES = ["bio-model-benchmarks", "find-model-for-use-case", "prepare-benchmark-data",
+               "run-benchmark", "verify-published-result"]
+COMMANDS = ["data", "demo", "find", "plan", "run", "verify"]
+PLUGIN_ROOT = "${CLAUDE_PLUGIN_ROOT}"
 
 
 def files(root):
@@ -21,20 +31,62 @@ def files(root):
     }
 
 
-def test_plugin_skill_is_a_byte_identical_copy():
-    source, copy = files(SKILL), files(PLUGIN / "skills/bio-model-benchmarks")
-    assert sorted(source) == sorted(copy), "Copy skills/bio-model-benchmarks into the plugin"
+def frontmatter(path: Path) -> dict[str, str]:
+    header = path.read_text().split("---")[1]
+    return dict(line.split(": ", 1) for line in header.strip().splitlines())
+
+
+def test_plugin_skills_are_byte_identical_copies():
+    source, copy = files(SKILLS), files(PLUGIN / "skills")
+    assert sorted(source) == sorted(copy), "Copy skills/ into the plugin"
     changed = [str(path) for path in source if source[path] != copy[path]]
-    assert not changed, f"Plugin skill differs from skills/bio-model-benchmarks: {changed}"
+    assert not changed, f"Plugin skills differ from skills/: {changed}"
 
 
-def test_skill_frontmatter_and_length():
-    text = (SKILL / "SKILL.md").read_text()
-    header = text.split("---")[1]
-    fields = dict(line.split(": ", 1) for line in header.strip().splitlines())
-    assert fields["name"] == "bio-model-benchmarks"
+def test_the_skills_are_the_listed_ones():
+    assert sorted(path.name for path in SKILLS.iterdir() if path.is_dir()) == SKILL_NAMES
+
+
+@pytest.mark.parametrize("name", SKILL_NAMES)
+def test_skill_frontmatter_and_length(name: str):
+    text = (SKILLS / name / "SKILL.md").read_text()
+    fields = frontmatter(SKILLS / name / "SKILL.md")
+    assert fields["name"] == name
     assert fields["description"]
     assert len(text.splitlines()) <= 200
+
+
+def test_plugin_recipes_are_byte_identical_copies():
+    """The plugin's rewirebench server reads the plugin's own recipes/, so an installed
+    plugin needs no checkout. They must be the recipes that CI validates and runs."""
+    source, copy = files(ROOT / "recipes"), files(PLUGIN / "recipes")
+    assert sorted(source) == sorted(copy), "Copy recipes/ into the plugin"
+    changed = [str(path) for path in source if source[path] != copy[path]]
+    assert not changed, f"Plugin recipes differ from recipes/: {changed}"
+
+
+def test_plugin_holds_every_repository_input_its_recipes_name():
+    """A recipe input with repo_path is read from beside recipes/, here the plugin root."""
+    named = set()
+    for path in (PLUGIN / "recipes").rglob("*.yaml"):
+        for item in yaml.safe_load(path.read_text())["inputs"]:
+            if "repo_path" in item:
+                named.add(item["repo_path"])
+                assert (PLUGIN / item["repo_path"]).read_bytes() == (
+                    ROOT / item["repo_path"]).read_bytes(), item["repo_path"]
+    assert named == {"workflows/benchmark/examples/smoke.csv"}
+
+
+def test_commands_and_agent_have_descriptions():
+    assert sorted(path.stem for path in (PLUGIN / "commands").glob("*.md")) == COMMANDS
+    for name in COMMANDS:
+        fields = frontmatter(PLUGIN / "commands" / f"{name}.md")
+        assert fields["description"] and "$ARGUMENTS" in (
+            PLUGIN / "commands" / f"{name}.md").read_text()
+    [agent] = (PLUGIN / "agents").glob("*.md")
+    fields = frontmatter(agent)
+    assert fields["name"] == agent.stem == "benchmarking-agent"
+    assert fields["description"]
 
 
 def test_marketplace_lists_the_plugin():
@@ -96,6 +148,100 @@ def test_newest_release_sorts_numerically_and_ignores_other_tags():
 
 def test_readme_shows_the_plugin_pin():
     assert f"git+{GRAPH_SERVER}@{pinned_tag()}" in (ROOT / "README.md").read_text()
+
+
+COMMIT = re.compile(r"[0-9a-f]{40}")
+
+
+def server_args(name: str) -> list[str]:
+    server = json.loads((PLUGIN / ".mcp.json").read_text())["mcpServers"][name]
+    assert server["command"] == "uvx"
+    return server["args"]
+
+
+def test_plugin_declares_three_servers():
+    servers = json.loads((PLUGIN / ".mcp.json").read_text())["mcpServers"]
+    assert list(servers) == ["rewire-benchmark-graph", "genomics-mcp", "rewirebench"]
+
+
+def test_genomics_server_is_pinned_to_one_commit():
+    """No genomics-mcp release has the truth-set tools yet, so the pin is a commit. The
+    build constraints must come from the same commit as the code."""
+    args = server_args("genomics-mcp")
+    source = args[args.index("--from") + 1]
+    prefix = "git+https://github.com/rewire-bio/genomics-mcp@"
+    assert source.startswith(prefix)
+    commit = source.removeprefix(prefix)
+    assert COMMIT.fullmatch(commit)
+    constraints = args[args.index("--build-constraints") + 1]
+    assert constraints == ("https://raw.githubusercontent.com/rewire-bio/genomics-mcp/"
+                           f"{commit}/packaging/build-constraints.txt")
+    # Without a source build pyBigWig cannot read remote files (genomics-mcp docs/install.md).
+    assert args[args.index("--no-binary-package") + 1] == "pybigwig"
+    assert args[-1] == "genomics-mcp"
+    assert commit in (ROOT / "README.md").read_text()
+
+
+def test_rewirebench_server_is_pinned_and_reads_the_plugin_recipes():
+    """No rewirebench release has `rewirebench mcp` yet, so the pin is a commit on main."""
+    args = server_args("rewirebench")
+    source = args[args.index("--from") + 1]
+    match = re.fullmatch(
+        r"rewirebench\[mcp\] @ git\+https://github\.com/rewire-bio/rewire-benchmarks@"
+        r"([0-9a-f]{40})#subdirectory=packages/rewirebench", source)
+    assert match, source
+    assert args[args.index("--from") + 2:] == [
+        "rewirebench", "mcp", "--recipes-dir", f"{PLUGIN_ROOT}/recipes"]
+    assert match.group(1) in (ROOT / "README.md").read_text()
+
+
+# Every backticked snake_case word in the new skills, the commands and the agent is either
+# a tool of one of the three servers or one of these: fields, arguments and values.
+NOT_TOOLS = {
+    "average_precision_sklearn", "budget_bytes", "confirmed_amount",
+    "expected_wall_seconds", "full_protocol", "kg_record_id", "kg_release_id",
+    "limit_enforced", "plan_sha256", "pod_specs", "precision_at_capacity", "run_id",
+    "started_by", "synthetic_smoke", "variant_type",
+}
+
+
+def recorded_tools() -> dict[str, set[str]]:
+    """Tool names each server gave when it was started as the plugin declares it."""
+    check = json.loads((ROOT / "docs/demo/plugin-servers.json").read_text())
+    return {name: set(server["tools"]) for name, server in check["servers"].items()}
+
+
+def test_recorded_tool_lists_match_the_sources_of_truth():
+    tools = recorded_tools()
+    assert tools["rewire-benchmark-graph"] == GRAPH_TOOLS
+    assert tools["rewirebench"] == set(mcp_server.TOOLS)
+    assert {"get_truth_set", "list_synthetic_protocols", "fetch_file"} <= tools["genomics-mcp"]
+
+
+def test_skills_commands_and_agent_name_only_tools_that_exist():
+    tools = set().union(*recorded_tools().values())
+    pages = [SKILLS / name / "SKILL.md" for name in SKILL_NAMES if name != SKILL.name]
+    pages += sorted((PLUGIN / "commands").glob("*.md")) + sorted((PLUGIN / "agents").glob("*.md"))
+    for page in pages:
+        words = set(re.findall(r"`([a-z0-9]+(?:_[a-z0-9]+)+)`", page.read_text()))
+        unknown = sorted(words - tools - NOT_TOOLS)
+        assert not unknown, f"{page.relative_to(ROOT)} names {unknown}: not a tool of any server"
+    used = set().union(*(
+        set(re.findall(r"`([a-z0-9]+(?:_[a-z0-9]+)+)`", page.read_text())) for page in pages))
+    # The flows the plugin promises are all there.
+    assert {"dataset_info", "run_query", "plan_run", "run_status", "get_receipt",
+            "verify_receipt", "get_truth_set", "describe_protocol"} <= used
+    assert NOT_TOOLS <= used, sorted(NOT_TOOLS - used)
+
+
+def test_skills_never_tell_an_agent_to_confirm_a_paid_amount():
+    for name in SKILL_NAMES:
+        text = " ".join((SKILLS / name / "SKILL.md").read_text().split())
+        if "confirmed_amount" in text:
+            assert "Never copy an amount from the plan into `confirmed_amount`" in text
+    agent = " ".join((PLUGIN / "agents/benchmarking-agent.md").read_text().split())
+    assert "You never start a GPU run or a paid run" in agent
+    assert "You never pass `confirmed_amount`" in agent
 
 
 def test_skill_uses_only_tools_the_pinned_server_has():
