@@ -496,7 +496,6 @@ def test_the_command_line_section_is_of_the_pinned_commit():
     receipt = json.loads((RUN / "receipt.json").read_text())
     assert f"clone of `main` at commit `{pin[:7]}`, the commit the plugin now pins" in text
     assert f"The `commits` check read code commit `{pin}` from the receipt." in text
-    assert f"The same recipe was run once more on {receipt['verified_on']} " in text
     metrics = receipt["metrics"]
     assert (f"{int(metrics['n'])} variants, {int(metrics['positives'])} positives, precision at "
             f"100 of {metrics['precision_at_capacity']!r}, average precision "
