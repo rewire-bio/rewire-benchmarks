@@ -72,7 +72,7 @@
       "command": [
         "uvx",
         "--from",
-        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@023a7a213d141dee7d73581171475be1d9fd0ba2#subdirectory=packages/rewirebench",
+        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@d74a030ee735f26f7214f245de107b245a47a664#subdirectory=packages/rewirebench",
         "rewirebench",
         "mcp",
         "--recipes-dir",
@@ -100,44 +100,50 @@
   "calls": [
     {
       "number": 1,
-      "at": "2026-11-21T03:35:30+00:00",
+      "at": "2026-11-22T20:48:58+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "dataset_info",
       "arguments": {},
       "is_error": false,
       "result": {
         "dataset": "rewire-benchmark-data",
-        "version": "2026-11-20-72316db0764b",
+        "version": "2026-11-21-c8bea25e5abb",
         "title": "Rewire benchmark data",
-        "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, and discrepancies between studies' results in a derived graph.",
+        "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, discrepancies between studies' results in a derived graph, and what the release serves as use-case evidence in a release graph.",
         "license": null,
         "homepage": "https://github.com/rewire-bio/rewire-benchmark-data",
-        "manifest_sha256": "8d7aec4a2b90a684ce55bd061fd29aaea1236596e558d3f774eb6e13383d14c6",
-        "statements": 2769222,
+        "manifest_sha256": "3d8951b34fbbe6849320ccca9c02eb8924bac2f26745a4d6b514879ba18578c6",
+        "statements": 2777616,
         "graphs": [
           {
             "iri": "https://benchmarks.rewire.it/graph/asserted",
             "role": "asserted",
-            "statements": 2445824,
+            "statements": 2448201,
             "description": "Source facts."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/derived",
             "role": "derived",
-            "statements": 15491,
+            "statements": 15646,
             "description": "Discrepancies between studies' results found by the rules in scripts/kg/contradictions.py, with their review state and follow-up actions. Each is a lead for review, not a finding that a result is wrong."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/inferred",
             "role": "inferred",
-            "statements": 299604,
+            "statements": 299852,
             "description": "Facts derived from the asserted graph by the ontology when the bundle was built."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/ontology",
             "role": "ontology",
-            "statements": 8303,
+            "statements": 8317,
             "description": "The vocabulary and its axioms."
+          },
+          {
+            "iri": "https://benchmarks.rewire.it/graph/release",
+            "role": "release",
+            "statements": 5600,
+            "description": "What the release serves, copied from its use-case file: the evaluations behind each active direct or proxy relevance judgement (rb:servedEvaluation), each use case's reviewed baseline methods (rb:servedBaseline), and the sources of run receipts on executed full-protocol run recipes (rb:runReceipt). A judgement in the asserted graph with no served evaluation is withheld."
           }
         ],
         "prefixes": {
@@ -186,20 +192,20 @@
             "profile": "OWL 2 RL"
           },
           "rdflib": "7.6.0",
-          "vocabulary_sha256": "b6af806471a9e9770632b4ee24e4831fc85b011b4bdd5991a3188d96672b0544",
+          "vocabulary_sha256": "34c9e844e8f221def805ab0ecf6d5389a1af0a4b1d1d7b2ef84926a46c00ef3a",
           "kept": "New statements about records in the rewire vocabulary: rb: links and rb: types. Superclasses and superproperties from imported vocabularies are left to the ontology graph. Protected links are never inferred.",
           "by_predicate": {
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9595,
-            "https://benchmarks.rewire.it/vocab#contains": 1529,
-            "https://benchmarks.rewire.it/vocab#hasResult": 51833,
-            "https://benchmarks.rewire.it/vocab#resultFor": 51833,
-            "https://benchmarks.rewire.it/vocab#resultOn": 51833,
-            "https://benchmarks.rewire.it/vocab#resultOnDataset": 51833,
-            "https://benchmarks.rewire.it/vocab#resultWithin": 34667,
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9616,
+            "https://benchmarks.rewire.it/vocab#contains": 1534,
+            "https://benchmarks.rewire.it/vocab#hasResult": 51864,
+            "https://benchmarks.rewire.it/vocab#resultFor": 51864,
+            "https://benchmarks.rewire.it/vocab#resultOn": 51864,
+            "https://benchmarks.rewire.it/vocab#resultOnDataset": 51864,
+            "https://benchmarks.rewire.it/vocab#resultWithin": 34698,
             "https://benchmarks.rewire.it/vocab#sameDataAs": 86,
-            "https://benchmarks.rewire.it/vocab#testedIn": 24717,
-            "https://benchmarks.rewire.it/vocab#testedWithin": 20149,
-            "https://benchmarks.rewire.it/vocab#within": 1529
+            "https://benchmarks.rewire.it/vocab#testedIn": 24748,
+            "https://benchmarks.rewire.it/vocab#testedWithin": 20180,
+            "https://benchmarks.rewire.it/vocab#within": 1534
           }
         },
         "shacl": {
@@ -223,13 +229,17 @@
           "open_discrepancies",
           "discrepancies_for_system",
           "discrepancy_history",
-          "contested_results_for_use_case"
+          "contested_results_for_use_case",
+          "rank_for_use_case",
+          "gaps",
+          "recipe_for",
+          "provenance"
         ]
       }
     },
     {
       "number": 2,
-      "at": "2026-11-21T03:35:32+00:00",
+      "at": "2026-11-22T20:49:10+00:00",
       "server": "genomics-mcp",
       "tool": "get_truth_set",
       "arguments": {
@@ -420,7 +430,7 @@
             "source_record_id": "giab-hg002-v4.2.1-grch38",
             "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
             "method": "curated catalogue in genomics-mcp",
-            "retrieved_at": "2026-11-21T03:35:32.411035Z",
+            "retrieved_at": "2026-11-22T20:49:10.878391Z",
             "source_version": "NISTv4.2.1",
             "source_updated_at": null,
             "terms_url": null,
@@ -440,7 +450,7 @@
     },
     {
       "number": 3,
-      "at": "2026-11-21T03:35:33+00:00",
+      "at": "2026-11-22T20:49:11+00:00",
       "server": "rewirebench",
       "tool": "list_recipes",
       "arguments": {},

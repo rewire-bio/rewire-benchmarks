@@ -117,6 +117,18 @@ def test_marketplace_lists_the_plugin():
     assert entry["name"] == plugin["name"] == "bio-model-benchmarks"
     assert (ROOT / entry["source"]).resolve() == PLUGIN
     assert entry["version"] == plugin["version"]
+    assert entry["description"] == plugin["description"]
+
+
+def test_marketplace_describes_what_the_plugin_does_today():
+    """The plugin reruns registered CPU baselines. It does not reproduce a paper's result
+    independently, and a GPU run gets a quote and is not started."""
+    marketplace = json.loads((ROOT / ".claude-plugin/marketplace.json").read_text())
+    description = marketplace["metadata"]["description"]
+    assert "find published results" in description
+    assert "rerun registered CPU baselines" in description
+    assert "A GPU run is quoted, not launched." in description
+    assert "reproduc" not in description.lower()
 
 
 GRAPH_SERVER = "https://github.com/rewire-bio/rdf-kg-mcp"
@@ -234,7 +246,7 @@ NOT_TOOLS = {
 WORD = r"`([a-z0-9]+(?:_[a-z0-9]+)*)`"
 # The tools of genomics-mcp at the commit the plugin pins: the values of the Operation enum
 # in src/genomics_mcp/registry.py, which server.py registers one tool for, read at 3b395a9 on
-# 2026-11-21. And of rewirebench at the commit it pins (mcp_server.TOOLS at 023a7a2). A
+# 2026-11-21. And of rewirebench at the commit it pins (mcp_server.TOOLS at d74a030). A
 # recording that lists another tool was not made with the pinned servers. Update these when
 # a pin is raised.
 GENOMICS_TOOLS = {

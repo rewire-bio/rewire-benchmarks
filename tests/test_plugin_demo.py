@@ -164,6 +164,11 @@ def table(page: str, heading: str) -> list[list[str]]:
     return [[cell.strip() for cell in line.strip("|").split("|")] for line in lines[2:]]
 
 
+def section(page: str, heading: str) -> str:
+    """The text under one second-level heading of a Markdown page."""
+    return page.split(f"## {heading}\n", 1)[1].split("\n## ", 1)[0]
+
+
 def check_recorded_run(transcript: dict[str, Any], client: ModuleType) -> dict[str, Any]:
     """What must hold in any recorded recipe run. Every value in the summary is worked out
     again from the recorded calls, so the summary cannot be edited apart from them."""
@@ -400,8 +405,14 @@ def test_the_demo_page_reports_what_the_transcripts_hold():
     receipt = one(calls, "get_receipt")["result"]
     assert results[3][1:3] == ["8324 of 8324", str(int(receipt["metrics"]["n"]))]
     assert f"SHA-256 `{receipt['recipe']['sha256']}`" in page
-    assert f"commit `{receipt['code']['commit']}`" in page
-    assert f"wall time {receipt['wall_seconds']:.2f} seconds" in page
+    listed = " ".join(section(page, "Result").split("From the receipt:")[1].split())
+    assert (f"code and recipe commit `{receipt['code']['commit']}` on `main`, clean tree, "
+            f"`commit_source` `{receipt['code']['commit_source']}`") in listed
+    assert receipt["recipe"]["commit"] == receipt["code"]["commit"]
+    assert (f"wall time {receipt['wall_seconds']:.2f} seconds including the download, peak "
+            f"memory {receipt['peak_memory_bytes'] / 1e6:.0f} MB") in listed
+    assert page.startswith(f"# Recorded demo: MFASS v2 baseline, rerun through MCP tools only"
+                           f"\n\nOn {receipt['verified_on']} ")
 
     side = {row[0]: row[1:] for row in table(page, "The same run through the plugin as shipped")}
     other = one(plugin["calls"], "get_receipt")["result"]
@@ -422,6 +433,80 @@ def test_the_demo_page_reports_what_the_transcripts_hold():
     graph = [call for call in plugin["calls"] if call["server"] == "rewire-benchmark-graph"]
     assert (f"the same {len(plugin['calls'])} calls ({len(graph)} to the graph, "
             f"{len(plugin['calls']) - len(graph)} to rewirebench)") in " ".join(page.split())
+    shipped = " ".join(section(page, "The same run through the plugin as shipped").split())
+    counts = [sum(call["tool"] == "run_status" for call in run["calls"])
+              for run in (plugin, transcript)]
+    assert (f"It makes {counts[0]} `run_status` calls where the checkout run made "
+            f"{counts[1]}") in shipped
+    assert f"The checkout run made {len(calls)}." in shipped
+    assert f"It was recorded on {other['verified_on']} " in shipped
+    checked = [one(run["calls"], "verify_receipt")["result"] for run in (transcript, plugin)]
+    assert [(result["strict"], result["passed"], result["not_checked"]) for result in checked] == [
+        (True, True, []), (False, True, ["commits"])]
+    assert side["`verify_receipt`"] == [
+        "passed with `strict`", "passed; `commits` not checked, so `strict` does not pass"]
+
+
+def pinned_commit() -> str:
+    source = declared("rewirebench")[declared("rewirebench").index("--from") + 1]
+    found = re.search(r"@([0-9a-f]{40})#", source)
+    assert found, source
+    return found.group(1)
+
+
+def test_the_demo_page_says_which_pin_the_agent_session_is_from():
+    """docs/demo/agent-session.md names the pin it was recorded at. While that is not the pin
+    in the plugin's .mcp.json, the demo page must say so in both places that mention it, and
+    must give the plugin's present version and pin."""
+    session = " ".join((DEMO / "agent-session.md").read_text().split())
+    found = re.search(r"`\.mcp\.json` pins rewirebench at `([0-9a-f]{40})`", session)
+    assert found, "agent-session.md no longer names the pin it was recorded at"
+    old, now = found.group(1), pinned_commit()
+    digest = re.search(r"`sdk_code_sha256`, `([0-9a-f]{64})`", session)
+    assert digest and session.count(digest.group(1)) >= 2
+    page = (DEMO / "README.md").read_text()
+    version = json.loads((PLUGIN / ".claude-plugin/plugin.json").read_text())["version"]
+    about = " ".join(section(page, "An agent session").split())
+    assert f"The plugin is now {version} and pins `{now[:7]}`." in about
+    current = one(recorded("transcript.json")["calls"], "get_receipt")["result"]["code"]
+    assert current["commit"] == now
+    if old == now:
+        assert digest.group(1) == current["sdk_code_sha256"]
+        return
+    assert digest.group(1) != current["sdk_code_sha256"]
+    assert f"pins rewirebench at `{old[:7]}`" in about
+    assert f"`sdk_code_sha256` `{digest.group(1)[:8]}...`" in about
+    assert f"has not been recorded again: not at `{now[:7]}`" in about
+    assert f"What follows describes the recording made at `{old[:7]}`." in about
+    line = " ".join(section(page, "The command line at the pinned commit").split())
+    assert (f"The agent session in [`agent-session.md`](agent-session.md) is from `{old[:7]}` "
+            "and has not been recorded again.") in line
+    whole = " ".join(page.split())
+    assert "None has been recorded at the current pin." in whole
+    assert f"recorded at an older pin (`{old[:7]}`)" in whole
+    assert not re.search(r"(?<!not been )recorded again at", whole)
+
+
+def test_the_command_line_section_is_of_the_pinned_commit():
+    """The command line run's folder is not committed, so its times cannot be checked here.
+    Its commit must be the plugin's pin, and its metrics and two digests the recorded ones."""
+    page = (DEMO / "README.md").read_text()
+    text = " ".join(section(page, "The command line at the pinned commit").split())
+    pin = pinned_commit()
+    receipt = json.loads((RUN / "receipt.json").read_text())
+    assert f"clone of `main` at commit `{pin[:7]}`, the commit the plugin now pins" in text
+    assert f"The `commits` check read code commit `{pin}` from the receipt." in text
+    metrics = receipt["metrics"]
+    assert (f"{int(metrics['n'])} variants, {int(metrics['positives'])} positives, precision at "
+            f"100 of {metrics['precision_at_capacity']!r}, average precision "
+            f"{metrics['average_precision_sklearn']!r} and AUROC {metrics['auroc']!r}") in text
+    assert "`receipt verify --strict` passed: all eight checks match" in text
+    outputs = {item["path"]: item["sha256"] for item in receipt["outputs"]}
+    predictions = outputs["baselines/mfass-kmer-position-v2/predictions.json"]
+    assert f"`predictions.json` had the SHA-256 `{predictions[:8]}...`" in text
+    assert f"`sdk_code_sha256` was `{receipt['code']['sdk_code_sha256'][:8]}...`" in text
+    assert "That run folder is not committed." in text
+    assert f"needs commit `{pin[:7]}` in your clone's history" in " ".join(page.split())
 
 
 def test_the_server_check_was_recorded_with_the_launch_lines_the_plugin_ships():

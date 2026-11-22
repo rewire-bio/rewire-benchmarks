@@ -5,14 +5,14 @@
     "url": "https://github.com/rewire-bio"
   },
   "metadata": {
-    "description": "Agent plugins for finding and reproducing biological model benchmarks."
+    "description": "Agent plugins that find published results on biological model benchmarks and rerun registered CPU baselines. A GPU run is quoted, not launched."
   },
   "plugins": [
     {
       "name": "bio-model-benchmarks",
       "source": "./plugins/bio-model-benchmarks",
       "description": "Find the right model for a use case in the Rewire benchmark graph, prepare data and truth sets, and plan, run and verify benchmarks locally with rewirebench, each run with a receipt.",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "license": "MIT",
       "homepage": "https://benchmarks.rewirebio.io/",
       "repository": "https://github.com/rewire-bio/rewire-benchmarks",
