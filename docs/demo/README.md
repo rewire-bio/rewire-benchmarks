@@ -229,8 +229,9 @@ uv run python scripts/demo/mcp_demo.py --recipe mfass-v2-kmer-baseline \
 This downloads the graph bundle and 80 MB of MFASS data, and takes about a minute. `--strict`
 passes only from a clean tree. The digests of the report, the manifest, the logs and the
 receipt differ between runs, because they hold times. `predictions.json` does not, on one
-machine: it had the same SHA-256 in every run made on this laptop, at each of the four commits pinned so far. On Linux x86-64 it has
-another. (Protocols whose `prepare` gives rows random IDs, such as FLIP2, differ there too.)
+machine: it had the same SHA-256 in every run made on this laptop, at each of the three
+rewirebench commits the plugin has pinned on `main` (`e5c5662`, `023a7a2` and `d74a030`). On
+Linux x86-64 it has another. (Protocols whose `prepare` gives rows random IDs, such as FLIP2, differ there too.)
 
 To record the plugin path, copy `plugins/bio-model-benchmarks` to a folder outside the
 checkout and pass its `.mcp.json` as both `--graph` and `--runner`, without `--strict`. If the
@@ -257,3 +258,10 @@ must name a commit on `main`, so a runner change and the pin that picks it up ar
 requests. Record `plugin-servers.json` from the copied plugin folder too, so it starts the new
 pin. After raising any of the three pins, record
 `plugin-servers.json` again. After raising the graph pin, record `plugin-run.json` again too.
+
+After raising the rewirebench pin, also run the two commands in
+[The command line at the pinned commit](#the-command-line-at-the-pinned-commit) from a fresh
+clone of the new commit and rewrite that section. A test reads its commit and its two digests
+against the pin and the recordings. Its wall time and peak memory are not checked, because
+that run folder is not committed. The same test requires this page to say that the agent
+session has not been recorded again for as long as `agent-session.md` names another pin.

@@ -117,6 +117,18 @@ def test_marketplace_lists_the_plugin():
     assert entry["name"] == plugin["name"] == "bio-model-benchmarks"
     assert (ROOT / entry["source"]).resolve() == PLUGIN
     assert entry["version"] == plugin["version"]
+    assert entry["description"] == plugin["description"]
+
+
+def test_marketplace_describes_what_the_plugin_does_today():
+    """The plugin reruns registered CPU baselines. It does not reproduce a paper's result
+    independently, and a GPU run gets a quote and is not started."""
+    marketplace = json.loads((ROOT / ".claude-plugin/marketplace.json").read_text())
+    description = marketplace["metadata"]["description"]
+    assert "find published results" in description
+    assert "rerun registered CPU baselines" in description
+    assert "A GPU run is quoted, not launched." in description
+    assert "reproduc" not in description.lower()
 
 
 GRAPH_SERVER = "https://github.com/rewire-bio/rdf-kg-mcp"
