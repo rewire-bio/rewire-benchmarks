@@ -1,5 +1,10 @@
-# Linux x86-64 CPU build, pinned base inspected 2026-09-17.
-FROM docker.io/library/python:3.11.13-slim-bookworm@sha256:cec9aa7aa96eea4fa036e9b82be1e6b325f2e3707f462d885868df51ec0a4b47
+# Linux CPU build for x86-64 and arm64. The base is pinned by the digest of the multi-platform
+# index of python:3.11.13-slim-bookworm, inspected 2026-11-23. It resolves to
+#   linux/amd64  sha256:cec9aa7aa96eea4fa036e9b82be1e6b325f2e3707f462d885868df51ec0a4b47
+#   linux/arm64  sha256:18ce9b03d18802119f4f9270d10a1ceb45d0acb768c305b7fbbd7c6b5b5a020b
+# The linux/amd64 manifest is the one this file pinned directly from 2026-09-17.
+# The esm and dnabert2 locks pin an x86-64 torch wheel, so those two build for linux/amd64 only.
+FROM docker.io/library/python:3.11.13-slim-bookworm@sha256:86adf8dbadc3d6e82ee5dd2c74bec2e1c2467cdad47886280501df722372d2e1
 ARG ENVIRONMENT=core
 COPY containers/${ENVIRONMENT}.lock.txt /opt/requirements.lock.txt
 RUN pip install --no-cache-dir --require-hashes -r /opt/requirements.lock.txt

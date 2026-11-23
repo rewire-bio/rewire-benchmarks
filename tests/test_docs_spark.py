@@ -32,7 +32,8 @@ def test_the_pins_the_page_quotes_are_the_pins_in_the_package():
 def test_every_amd64_pin_in_the_repository_is_listed():
     assert "linux/amd64" in (ROOT / ".github/workflows/sdk.yml").read_text()
     assert "linux/amd64" in (ROOT / ".github/workflows/sdk-release.yml").read_text()
-    assert "x86-64" in (ROOT / "containers/Containerfile").read_text()
+    containerfile = (ROOT / "containers/Containerfile").read_text()
+    assert "x86-64" in containerfile and "linux/arm64" in containerfile
     for place in ("containers/Containerfile", ".github/workflows/sdk.yml", "sdk-release.yml",
                   "containers/esm.lock.txt", "dnabert2.lock.txt", "docs/hpc.md",
                   "workflows/benchmark/nextflow.config"):
@@ -91,3 +92,16 @@ def test_the_page_states_the_publication_rule_and_that_nothing_has_run():
     assert "No run has been made on a Spark" in TEXT
     assert "Until both legs exist for a model, its Spark numbers are not published" in TEXT
     assert "No launch is built" in TEXT
+
+
+def test_the_page_names_the_registry_the_workflow_pushes_to():
+    import yaml
+
+    workflow = yaml.safe_load((ROOT / ".github/workflows/image.yml").read_text())
+    image = workflow["env"]["IMAGE"]
+    assert image == "ghcr.io/rewire-bio/rewirebench"
+    readme = (ROOT / "README.md").read_text()
+    for page in (PAGE, readme):
+        assert f"{image}@sha256:" in page
+    assert "`.github/workflows/image.yml`" in PAGE and "scripts/set_recipe_image.py" in PAGE
+    assert "Change visibility" in PAGE and "No GPU image" in TEXT

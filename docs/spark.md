@@ -10,6 +10,11 @@ Status on 2026-11-21: the `spark` backend is built and tested against a fake tra
 recipe in `recipes/` names the `spark` backend. Everything below marked "not verified" is a
 claim to test on the machine, not a finding.
 
+Update on 2026-11-23: the registry is decided (GitHub Container Registry, public), and a
+workflow builds the CPU image for `linux/arm64` and pushes it from main. See
+[Published images](#published-images). The sentence above about `linux/arm64` stays until the
+workflow has run on main and a recipe names the digest it printed. No GPU image exists.
+
 ## The machine
 
 From NVIDIA's product and documentation pages, read on 2026-11-20:
@@ -30,13 +35,13 @@ stands. An amd64 image under emulation is not an option for GPU work.
 
 | What | Where | Pinned to | Needed for the Spark |
 | --- | --- | --- | --- |
-| Runner image | `containers/Containerfile` | "Linux x86-64 CPU build", base `python:3.11.13-slim-bookworm` by digest | A `linux/arm64` build with its own digest. Check whether the base digest is the multi-platform index or the amd64 manifest (`docker buildx imagetools inspect`) |
-| CPU locks | `containers/core.lock.txt`, `sequence.lock.txt` | Exported from `uv.lock` with hashes | Probably usable as they are, if the export carries the aarch64 wheel hashes. Not verified: install them with `--require-hashes` on arm64 |
+| Runner image | `containers/Containerfile` | Base `python:3.11.13-slim-bookworm`, by the digest of its multi-platform index since 2026-11-23. Before that it was the amd64 manifest, which the index still resolves to | Done for CPU: `.github/workflows/image.yml` builds `core` and `sequence` for `linux/arm64` on an arm64 runner. No GPU image |
+| CPU locks | `containers/core.lock.txt`, `sequence.lock.txt` | Exported from `uv.lock` with hashes | Usable as they are. On 2026-11-23 every package in both locks had the hash of a pure Python or `manylinux` aarch64 CPython 3.11 wheel on PyPI, and the arm64 build installs them with `--require-hashes` |
 | Model locks | `containers/esm.lock.txt`, `dnabert2.lock.txt`, `generate_cpu_locks.py` | The wheel `torch-2.2.2+cpu-cp311-cp311-linux_x86_64.whl`, by URL and SHA-256 | New locks. That wheel cannot install on arm64, and the generator asserts its name |
 | Model extras | `packages/rewirebench/pyproject.toml` | `esm`: `torch==2.2.2`, `fair-esm==2.0.0`. `dnabert2`: `torch==2.2.2`, `transformers==4.29.2`, `einops==0.6.1` | A torch built for arm64 with CUDA 13. torch 2.2.2 predates the GB10, and `uv.lock` gives it CUDA libraries on x86-64 only, so on arm64 it is a CPU build. A newer torch is a different model stack: see the concordance check |
-| CI image build | `.github/workflows/sdk.yml`, `sdk-release.yml` | `podman build --platform linux/amd64`, Apptainer `amd64` package | An arm64 job (a GitHub arm64 runner, or the Spark itself as the builder). Parity checks run per platform |
+| CI image build | `.github/workflows/sdk.yml`, `sdk-release.yml` | `podman build --platform linux/amd64`, Apptainer `amd64` package | Done for the pushed image: `.github/workflows/image.yml` builds and runs the parity check on a GitHub arm64 runner. These two workflows, the release artifacts and the Apptainer check are still amd64 only |
 | HPC instructions | `docs/hpc.md` | "These are Linux x86-64 environments" | A note that the Spark uses the `spark` backend and its own image |
-| Recipes | `recipes/**/*.yaml`, `environment.images` | Both platforms `missing: unavailable` | A `linux/arm64` digest, and `backends.spark`, in every recipe that should run there |
+| Recipes | `recipes/**/*.yaml`, `environment.images` | Both platforms `missing: unavailable` | A `linux/arm64` digest, written with `scripts/set_recipe_image.py`, and `backends.spark`, in every recipe that should run there |
 | Nextflow `dgx` profile | `workflows/benchmark/nextflow.config` | Apptainer with `--nv`; never run | Not for the Spark. DGX OS ships Docker; use the `spark` backend |
 | Evo 2 image | rewire-bio/evo2-cloud-operations | The `linux/amd64` manifest of `nvcr.io/nvidia/pytorch:25.04-py3` | An arm64 base with a matching PyTorch. Whether `flash_attn` and `transformer_engine` (FP8) build and run on the GB10 is not verified |
 | genomics-mcp image | rewire-bio/genomics-mcp | `linux/amd64` only | Nothing, unless the server itself should run on the Spark. It runs beside the agent, not beside the model |
@@ -47,7 +52,8 @@ publishes a `linux/arm64` manifest, and pin that manifest's digest.
 ### Order of work
 
 1. Build the `core` and `sequence` environments for `linux/arm64` and publish the image by
-   digest. This needs a decision on a registry; nothing is published today.
+   digest. The workflow for this exists; see [Published images](#published-images) for the
+   steps that remain after its first run on main.
 2. Add the digest and a `spark` block with `gpus: false` to `mfass-v2-kmer-baseline`, and run
    it on the Spark. A spark recipe with `gpus: false` is held to `device: cpu`. This tests SSH,
    Docker, the image and the receipt with no model stack in the way. The metrics must equal
@@ -66,12 +72,79 @@ These are known from review and are not fixed:
   need the first two, and gated weights need a token route. The spark path must not reuse the
   local allowlist unchanged.
 - A receipt written inside the image has no code commit and no recipe commit, so it cannot pass
-  `receipt verify --strict`. The image needs to carry the commit it was built from.
+  `receipt verify --strict`. A published image carries its commit in the label
+  `org.opencontainers.image.revision`, and nothing reads that label into a receipt yet.
 - Inputs must be URLs. `--inputs` and `repo_path` inputs are refused.
 - `weights_pin` is validated, and nothing fetches or verifies weights yet.
 - The run folder stays on the host. If the local machine loses the SSH connection the
   container keeps running; stop it with `docker kill rewirebench-<output folder name>`.
 - `hardware_floor` is enforced for host memory only.
+
+## Published images
+
+Decided on 2026-11-23 (issue #88): runner images go to GitHub Container Registry, public, as
+`ghcr.io/rewire-bio/rewirebench`.
+
+`.github/workflows/image.yml` builds `containers/Containerfile` for the `core` and `sequence`
+environments, each for `linux/amd64` and `linux/arm64`. Each platform builds on a GitHub
+runner of its own architecture (`ubuntu-24.04` and `ubuntu-24.04-arm`), with no emulation,
+and each build must pass `containers/check_image.sh`: the parity check against the native
+environment, and the `protocols` and `recipe` commands.
+
+| When | What happens |
+| --- | --- |
+| Pull request that touches the image inputs | Both platforms are built and checked. Nothing is pushed |
+| Push to main that touches the image inputs, or a manual run from main | The checked images are pushed, one manifest per environment covering both platforms. The workflow prints the digests, then pulls the `linux/amd64` image by digest and checks it again |
+
+The image inputs are `containers/`, `packages/rewirebench/`, `uv.lock`, `.containerignore` and
+the workflow file.
+
+Tags: `core-<commit>` and `sequence-<commit>` never move. `core` and `sequence` follow main.
+A recipe never uses a tag. The run summary and the `image-digests` artifact give three digests
+for each environment: the manifest for both platforms, and one for each platform. A recipe
+records the platform digests.
+
+Pull by digest:
+
+```sh
+docker pull ghcr.io/rewire-bio/rewirebench@sha256:<digest>
+docker buildx imagetools inspect ghcr.io/rewire-bio/rewirebench@sha256:<digest>
+```
+
+The second command shows the platform of a digest, or both platforms for a manifest digest.
+
+### After the first push
+
+No image exists until the workflow has run on main. Then:
+
+1. The owner makes the package public, once. A new GHCR package is private. On GitHub: the
+   rewire-bio organisation, Packages, `rewirebench`, Package settings, Change visibility,
+   Public. Until then a pull needs a token, and neither RunPod nor the Spark can pull.
+2. Download `image-digests.json` from the run (the `image-digests` artifact) and write the
+   digests into each recipe:
+
+   ```sh
+   gh run download <run id> --name image-digests
+   uv run python scripts/set_recipe_image.py mfass-v2-kmer-baseline --digests image-digests.json --environment core
+   uv run python scripts/set_recipe_image.py flip2-synthetic-smoke --digests image-digests.json --environment core
+   ```
+
+   The script changes only `environment.images`, in `recipes/` and in the plugin's copy. It
+   prints any line that still says no image is published, to edit by hand. To set one
+   platform, give `--platform` and `--reference`.
+3. A recipe's SHA-256 changes with it. The recorded demo in `docs/demo/` quotes the SHA-256
+   of `mfass-v2-kmer-baseline`, so record the demo again in the same pull request, and
+   update this page and [mcp.md](mcp.md#spark) where they say no `linux/arm64` image exists.
+
+### Not covered
+
+- No GPU image. The repository has no GPU Containerfile. The published images are CPU
+  only, so on the Spark they serve a recipe with `gpus: false`.
+- The `esm` and `dnabert2` environments are not published. Their locks pin an x86-64 torch
+  wheel; see the model locks row above.
+- A run inside the image still cannot pass `receipt verify --strict`; see the gaps above.
+- The published image is built with Docker. `sdk.yml` builds the same Containerfile with
+  Podman for `linux/amd64` and converts it for Apptainer. No Apptainer check runs on arm64.
 
 ## Per-model readiness checklist
 
