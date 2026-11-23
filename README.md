@@ -194,7 +194,7 @@ commands and one agent definition. Every server runs on your machine.
 | --- | --- | --- |
 | `rewire-benchmark-graph` | The read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp): published results, provenance, disagreements | rdf-kg-mcp v0.4.0 |
 | `genomics-mcp` | [Genomic data](https://github.com/rewire-bio/genomics-mcp), GIAB and HPRC truth sets, synthetic-data protocols | commit `3b395a9648aa57610623c54c4d54dd933470b067` (no release has the truth-set tools yet) |
-| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `6d98f09c4dec545891acd25cdbbf77d390a575cb` (no release has `rewirebench mcp` yet) |
+| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | `rewirebench` `v0.6.0` on PyPI (`rewirebench[mcp]==0.6.0`) |
 
 | Skill | Command | What it does |
 | --- | --- | --- |
@@ -246,18 +246,18 @@ its receipt and every tool call.
 
 What an installed plugin cannot do yet:
 
-- The `rewirebench` server is installed from a commit, not a checkout, and reads the plugin's
-  copy of [`recipes/`](recipes). Its receipts verify, and they name the pinned commit, read
-  from the install metadata (`code.commit_source` is `install_metadata`). No tree was checked
-  for changes, so `code.dirty` is null and `verify_receipt` with `strict` reports the commits
-  as not checked. For a receipt that passes `strict`, run `uv run rewirebench mcp` from a
-  clean checkout of this repository.
-  [docs/demo/plugin-run.json](docs/demo/plugin-run.json) records an MFASS v2 run made this way.
+- The `rewirebench` server runs from the released PyPI package (`rewirebench[mcp]==0.6.0`)
+  and reads the plugin's copy of [`recipes/`](recipes) (the wheel also ships [`recipes/`](recipes)
+  for standalone installs). Because a PyPI install is not a git checkout, its receipts record
+  the package version without a repository commit check, so `verify_receipt` with `strict`
+  reports commits as not checked. For a receipt that passes `strict`, run `uv run rewirebench mcp`
+  from a clean checkout of this repository.
+  [docs/demo/plugin-run.json](docs/demo/plugin-run.json) records an earlier MFASS v2 run made under the pre-release commit pin.
 - `uvx` does not apply this repository's `uv.lock`, so Python and the numeric packages are
   whatever uv resolves on the day. The last digits of a metric can differ from a locked run.
-- The server is the pinned commit. Changes to `packages/rewirebench` after that commit (a
-  recipe run that requires `plan_sha256`, package versions in the receipt, folder placeholders
-  in step logs) reach an installed plugin when the pin is raised.
+- The server is pinned to a released PyPI version (`rewirebench[mcp]==0.6.0`). Changes to
+  `packages/rewirebench` reach an installed plugin when a new version is released and the pin
+  is raised.
 - Model extras (`esm`, `dnabert2`) are not installed, so the pretrained models in
   `list_models` cannot run from the plugin.
 

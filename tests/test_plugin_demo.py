@@ -280,10 +280,10 @@ def declared(name: str) -> list[str]:
 
 
 def test_the_plugin_run_was_made_with_the_launch_lines_the_plugin_ships(client: ModuleType):
-    """docs/demo/plugin-run.json: the same run through the plugin as installed. Its receipt
-    names the pinned commit, read from install metadata. It verifies, and it cannot pass
-    strict, because no tree was checked and the plugin's recipes are in no commit. Raising
-    the rewirebench or graph pin means recording it again."""
+    """docs/demo/plugin-run.json: the same run through the plugin as installed. Running from
+    the PyPI wheel records code.rewirebench_version with null code.commit. It verifies, and
+    cannot pass strict because no tree was checked and the plugin's recipes are in no commit.
+    Raising the rewirebench or graph pin means recording it again."""
     transcript = recorded("plugin-run.json")
     found = check_recorded_run(transcript, client)
     for name in ("rewire-benchmark-graph", "rewirebench"):
@@ -292,29 +292,30 @@ def test_the_plugin_run_was_made_with_the_launch_lines_the_plugin_ships(client: 
         "${CLAUDE_PLUGIN_ROOT}/recipes")
     receipt, verified = found["receipt"], found["verified"]
     source = declared("rewirebench")[declared("rewirebench").index("--from") + 1]
-    assert f"@{receipt['code']['commit']}#" in source
-    assert receipt["code"]["commit_source"] == "install_metadata"
+    assert source == f"rewirebench[mcp]=={receipt['code']['rewirebench_version']}"
+    assert receipt["code"]["commit"] is None
+    assert receipt["code"]["commit_source"] is None
     assert receipt["code"]["dirty"] is None and receipt["recipe"]["commit"] is None
     assert verified["strict"] is False and verified["not_checked"] == ["commits"]
     statuses = {item["check"]: item["status"] for item in verified["results"]}
     assert statuses.pop("commits") == "not_available"
     [commits] = [item for item in verified["results"] if item["check"] == "commits"]
-    assert "install metadata" in commits["detail"] and "recipe.commit is null" in commits["detail"]
+    assert "code.commit is null" in commits["detail"] and "recipe.commit is null" in commits["detail"]
     assert set(statuses.values()) == {"match"} and len(statuses) == 7
     # Unlocked packages may move the last digits; nothing more.
     assert all(row["difference"] <= 1e-12 for row in found["rows"])
 
 
 def test_both_recorded_runs_used_the_same_code_recipe_and_predictions():
-    """The checkout run names a commit; nothing here can look that commit up. What ties it to
-    the plugin's pin is the wheel uvx built from the pinned commit: the plugin run, made with
-    that wheel, reports the same digest of the SDK code, the same recipe bytes and the same
-    predictions as the checkout run."""
+    """The checkout run names the release commit and sdk_code_sha256. The plugin run installs
+    the matching PyPI wheel version and reports the same digest of the SDK code, the same
+    recipe bytes and the same predictions as the checkout run."""
     checkout = json.loads((RUN / "receipt.json").read_text())
     plugin = one(recorded("plugin-run.json")["calls"], "get_receipt")["result"]
     args = declared("rewirebench")
-    assert f"@{checkout['code']['commit']}#" in args[args.index("--from") + 1]
-    assert checkout["code"]["commit"] == plugin["code"]["commit"]
+    assert args[args.index("--from") + 1] == f"rewirebench[mcp]=={checkout['code']['rewirebench_version']}"
+    assert checkout["code"]["commit"]
+    assert plugin["code"]["commit"] is None and plugin["code"]["commit_source"] is None
     assert checkout["code"]["sdk_code_sha256"] == plugin["code"]["sdk_code_sha256"]
     assert checkout["code"]["rewirebench_version"] == plugin["code"]["rewirebench_version"]
     assert checkout["recipe"]["sha256"] == plugin["recipe"]["sha256"]
@@ -330,25 +331,20 @@ def test_both_recorded_runs_used_the_same_code_recipe_and_predictions():
 
 def test_the_pages_say_what_the_recorded_plugin_receipt_carries():
     """The README, docs/mcp.md, the run skill and the agent page each say what a receipt from
-    an installed plugin holds. They are read against the recorded plugin run, so a page
-    cannot keep saying there is no code commit after the recording has one."""
+    an installed plugin holds."""
     code = one(recorded("plugin-run.json")["calls"], "get_receipt")["result"]["code"]
-    assert code["commit"] and code["commit_source"] == "install_metadata"
-    assert code["dirty"] is None
+    assert code["commit"] is None and code["commit_source"] is None
+    assert code["dirty"] is None and code["rewirebench_version"] == pinned_version()
     pages = {name: " ".join((ROOT / name).read_text().split()) for name in (
         "README.md", "docs/mcp.md", "docs/demo/README.md", "skills/run-benchmark/SKILL.md",
         "plugins/bio-model-benchmarks/skills/run-benchmark/SKILL.md",
         "plugins/bio-model-benchmarks/agents/benchmarking-agent.md")}
     for name, text in pages.items():
-        assert re.search(r"install[ _]metadata", text), name
-        # docs/mcp.md also describes the container image, whose receipts have no commit.
-        if name != "docs/mcp.md":
-            assert not re.search(r"\bno (code|code or recipe|recipe or code) commit", text), name
+        assert re.search(r"strict", text) and re.search(r"wheel|PyPI", text), name
     section = pages["README.md"].split("What an installed plugin cannot do yet:")[1]
     section = section.split("## ")[0]
-    assert "they name the pinned commit" in section
-    assert "`code.commit_source` is `install_metadata`" in section
-    assert "`code.dirty` is null" in section and "commits as not checked" in section
+    assert f"rewirebench[mcp]=={pinned_version()}" in section
+    assert "commits as not checked" in section
     for name in ("docs/mcp.md", "docs/demo/README.md", "skills/run-benchmark/SKILL.md",
                  "plugins/bio-model-benchmarks/skills/run-benchmark/SKILL.md"):
         # recipe.commit is not always null for a plugin: it depends on the folder.
@@ -421,9 +417,8 @@ def test_the_demo_page_reports_what_the_transcripts_hold():
     for label, key in keys.items():
         assert side[label] == [repr(receipt["metrics"][key]), repr(other["metrics"][key])]
     short = f"`{receipt['code']['commit'][:7]}`"
-    assert side["`code.commit`"] == [short, f"`{other['code']['commit'][:7]}`"] == [short, short]
-    assert side["`code.commit_source`"] == [
-        f"`{receipt['code']['commit_source']}`", f"`{other['code']['commit_source']}`"]
+    assert side["`code.commit`"] == [short, "null"]
+    assert side["`code.commit_source`"] == [f"`{receipt['code']['commit_source']}`", "null"]
     assert side["`code.dirty`"] == ["false", "null"]
     assert (receipt["code"]["dirty"], other["code"]["dirty"]) == (False, None)
     assert side["`recipe.commit`"] == [short, "null"] and other["recipe"]["commit"] is None
@@ -447,9 +442,9 @@ def test_the_demo_page_reports_what_the_transcripts_hold():
         "passed with `strict`", "passed; `commits` not checked, so `strict` does not pass"]
 
 
-def pinned_commit() -> str:
+def pinned_version() -> str:
     source = declared("rewirebench")[declared("rewirebench").index("--from") + 1]
-    found = re.search(r"@([0-9a-f]{40})#", source)
+    found = re.fullmatch(r"rewirebench\[mcp\]==([0-9]+\.[0-9]+\.[0-9]+)", source)
     assert found, source
     return found.group(1)
 
@@ -461,15 +456,15 @@ def test_the_demo_page_says_which_pin_the_agent_session_is_from():
     session = " ".join((DEMO / "agent-session.md").read_text().split())
     found = re.search(r"`\.mcp\.json` pins rewirebench at `([0-9a-f]{40})`", session)
     assert found, "agent-session.md no longer names the pin it was recorded at"
-    old, now = found.group(1), pinned_commit()
+    current = one(recorded("transcript.json")["calls"], "get_receipt")["result"]["code"]
+    old, now = found.group(1), current["commit"]
+    assert current["rewirebench_version"] == pinned_version()
     digest = re.search(r"`sdk_code_sha256`, `([0-9a-f]{64})`", session)
     assert digest and session.count(digest.group(1)) >= 2
     page = (DEMO / "README.md").read_text()
     version = json.loads((PLUGIN / ".claude-plugin/plugin.json").read_text())["version"]
     about = " ".join(section(page, "An agent session").split())
-    assert f"The plugin is now {version} and pins `{now[:7]}`." in about
-    current = one(recorded("transcript.json")["calls"], "get_receipt")["result"]["code"]
-    assert current["commit"] == now
+    assert f"The plugin is now {version} and pins `rewirebench[mcp]=={pinned_version()}` (`v{pinned_version()}`, commit `{now[:7]}`)." in about
     if old == now:
         assert digest.group(1) == current["sdk_code_sha256"]
         return
@@ -489,12 +484,14 @@ def test_the_demo_page_says_which_pin_the_agent_session_is_from():
 
 def test_the_command_line_section_is_of_the_pinned_commit():
     """The command line run's folder is not committed, so its times cannot be checked here.
-    Its commit must be the plugin's pin, and its metrics and two digests the recorded ones."""
+    Its commit must be the release commit matching the plugin's pin, and its metrics and two
+    digests the recorded ones."""
     page = (DEMO / "README.md").read_text()
     text = " ".join(section(page, "The command line at the pinned commit").split())
-    pin = pinned_commit()
     receipt = json.loads((RUN / "receipt.json").read_text())
-    assert f"clone of `main` at commit `{pin[:7]}`, the commit the plugin now pins" in text
+    pin = receipt["code"]["commit"]
+    assert receipt["code"]["rewirebench_version"] == pinned_version()
+    assert f"clone of tag `v{pinned_version()}` at commit `{pin[:7]}`, the release the plugin now pins" in text
     assert f"The `commits` check read code commit `{pin}` from the receipt." in text
     metrics = receipt["metrics"]
     assert (f"{int(metrics['n'])} variants, {int(metrics['positives'])} positives, precision at "

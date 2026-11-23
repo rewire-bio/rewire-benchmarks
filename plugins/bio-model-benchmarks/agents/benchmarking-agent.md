@@ -69,5 +69,5 @@ The steps below are the tool sequences of the plugin's skills `find-model-for-us
 - Nothing in a receipt is signed, and `verify_receipt` reads the checked values from the
   report without scoring the predictions again. Say so when the user will pass the receipt
   to someone else. From an installed plugin `strict` does not pass, because the server runs
-  from a wheel: the receipt's code commit comes from install metadata, not from a checked
-  tree.
+  from a wheel: `code.commit` is null on a PyPI install (or read from install metadata on a
+  git install), not from a checked tree.

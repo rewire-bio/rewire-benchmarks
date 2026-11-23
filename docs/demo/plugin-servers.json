@@ -72,7 +72,7 @@
       "command": [
         "uvx",
         "--from",
-        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@6d98f09c4dec545891acd25cdbbf77d390a575cb#subdirectory=packages/rewirebench",
+        "rewirebench[mcp]==0.6.0",
         "rewirebench",
         "mcp",
         "--recipes-dir",
@@ -100,37 +100,37 @@
   "calls": [
     {
       "number": 1,
-      "at": "2026-11-23T10:29:04+00:00",
+      "at": "2026-11-23T15:43:01+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "dataset_info",
       "arguments": {},
       "is_error": false,
       "result": {
         "dataset": "rewire-benchmark-data",
-        "version": "2026-11-22-bbed7dce2323",
+        "version": "2026-11-23-ce0bfe468ac4",
         "title": "Rewire benchmark data",
         "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, discrepancies between studies' results in a derived graph, and what the release serves as use-case evidence in a release graph.",
         "license": null,
         "homepage": "https://github.com/rewire-bio/rewire-benchmark-data",
-        "manifest_sha256": "41e98cd38383ec7776b3bf76fb0e81042bf9033bed725090d39e026d50d57f0c",
-        "statements": 2777663,
+        "manifest_sha256": "8922ec7f3032ed8c83a8694fa89aca51079703c563b8527d42d89db5cfafe356",
+        "statements": 2785342,
         "graphs": [
           {
             "iri": "https://benchmarks.rewire.it/graph/asserted",
             "role": "asserted",
-            "statements": 2448247,
+            "statements": 2454510,
             "description": "Source facts."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/derived",
             "role": "derived",
-            "statements": 15646,
+            "statements": 16252,
             "description": "Discrepancies between studies' results found by the rules in scripts/kg/contradictions.py, with their review state and follow-up actions. Each is a lead for review, not a finding that a result is wrong."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/inferred",
             "role": "inferred",
-            "statements": 299853,
+            "statements": 300663,
             "description": "Facts derived from the asserted graph by the ontology when the bundle was built."
           },
           {
@@ -195,17 +195,17 @@
           "vocabulary_sha256": "34c9e844e8f221def805ab0ecf6d5389a1af0a4b1d1d7b2ef84926a46c00ef3a",
           "kept": "New statements about records in the rewire vocabulary: rb: links and rb: types. Superclasses and superproperties from imported vocabularies are left to the ontology graph. Protected links are never inferred.",
           "by_predicate": {
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9617,
-            "https://benchmarks.rewire.it/vocab#contains": 1534,
-            "https://benchmarks.rewire.it/vocab#hasResult": 51864,
-            "https://benchmarks.rewire.it/vocab#resultFor": 51864,
-            "https://benchmarks.rewire.it/vocab#resultOn": 51864,
-            "https://benchmarks.rewire.it/vocab#resultOnDataset": 51864,
-            "https://benchmarks.rewire.it/vocab#resultWithin": 34698,
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9656,
+            "https://benchmarks.rewire.it/vocab#contains": 1537,
+            "https://benchmarks.rewire.it/vocab#hasResult": 51999,
+            "https://benchmarks.rewire.it/vocab#resultFor": 51999,
+            "https://benchmarks.rewire.it/vocab#resultOn": 51999,
+            "https://benchmarks.rewire.it/vocab#resultOnDataset": 51999,
+            "https://benchmarks.rewire.it/vocab#resultWithin": 34833,
             "https://benchmarks.rewire.it/vocab#sameDataAs": 86,
-            "https://benchmarks.rewire.it/vocab#testedIn": 24748,
-            "https://benchmarks.rewire.it/vocab#testedWithin": 20180,
-            "https://benchmarks.rewire.it/vocab#within": 1534
+            "https://benchmarks.rewire.it/vocab#testedIn": 24793,
+            "https://benchmarks.rewire.it/vocab#testedWithin": 20225,
+            "https://benchmarks.rewire.it/vocab#within": 1537
           }
         },
         "shacl": {
@@ -239,7 +239,7 @@
     },
     {
       "number": 2,
-      "at": "2026-11-23T10:29:10+00:00",
+      "at": "2026-11-23T15:43:04+00:00",
       "server": "genomics-mcp",
       "tool": "get_truth_set",
       "arguments": {
@@ -430,7 +430,7 @@
             "source_record_id": "giab-hg002-v4.2.1-grch38",
             "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
             "method": "curated catalogue in genomics-mcp",
-            "retrieved_at": "2026-11-23T10:29:10.752446Z",
+            "retrieved_at": "2026-11-23T15:43:04.034568Z",
             "source_version": "NISTv4.2.1",
             "source_updated_at": null,
             "terms_url": null,
@@ -450,7 +450,7 @@
     },
     {
       "number": 3,
-      "at": "2026-11-23T10:29:11+00:00",
+      "at": "2026-11-23T15:43:05+00:00",
       "server": "rewirebench",
       "tool": "list_recipes",
       "arguments": {},
