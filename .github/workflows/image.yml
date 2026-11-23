@@ -12,7 +12,6 @@ on:
       - 'containers/**'
       - 'packages/rewirebench/**'
       - 'uv.lock'
-      - '.containerignore'
       - '.github/workflows/image.yml'
   push:
     branches: [main]
@@ -20,7 +19,6 @@ on:
       - 'containers/**'
       - 'packages/rewirebench/**'
       - 'uv.lock'
-      - '.containerignore'
       - '.github/workflows/image.yml'
   workflow_dispatch:
 permissions:
@@ -128,7 +126,8 @@ jobs:
             done
             amd64=$(digest_of "$IMAGE:$tag-amd64")
             arm64=$(digest_of "$IMAGE:$tag-arm64")
-            # The tag <environment>-<commit> never moves. The tag <environment> follows main.
+            # Tags are for people. The tag <environment> follows main, and a rerun on one commit
+            # pushes <environment>-<commit> again with new digests. Only a digest is stable.
             docker buildx imagetools create -t "$IMAGE:$tag" -t "$IMAGE:$environment" \
               "$IMAGE@$amd64" "$IMAGE@$arm64"
             manifest=$(digest_of "$IMAGE:$tag")

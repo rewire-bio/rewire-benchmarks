@@ -96,11 +96,14 @@ environment, and the `protocols` and `recipe` commands.
 | Pull request that touches the image inputs | Both platforms are built and checked. Nothing is pushed |
 | Push to main that touches the image inputs, or a manual run from main | The checked images are pushed, one manifest per environment covering both platforms. The workflow prints the digests, then pulls the `linux/amd64` image by digest and checks it again |
 
-The image inputs are `containers/`, `packages/rewirebench/`, `uv.lock`, `.containerignore` and
-the workflow file.
+The image inputs are `containers/`, `packages/rewirebench/`, `uv.lock` and the workflow file.
+Every later push to main that touches them publishes new digests. A recipe keeps the digest it
+names until someone changes it.
 
-Tags: `core-<commit>` and `sequence-<commit>` never move. `core` and `sequence` follow main.
-A recipe never uses a tag. The run summary and the `image-digests` artifact give three digests
+Tags: `core-<commit>` and `sequence-<commit>` name the build of one commit, and `core` and
+`sequence` follow main. A second run on the same commit builds again and moves the tag to new
+digests, because the build is not byte-reproducible. Only a digest is stable, and a recipe
+never uses a tag. The run summary and the `image-digests` artifact give three digests
 for each environment: the manifest for both platforms, and one for each platform. A recipe
 records the platform digests.
 
