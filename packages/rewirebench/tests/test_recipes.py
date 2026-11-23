@@ -426,6 +426,35 @@ def test_cli_works_where_no_recipes_directory_exists(
     assert recipes.find_recipes_dir() == RECIPES
 
 
+def test_packaged_recipes_fallback_and_wheel_config(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Installed wheels fall back to packaged recipes when no repo or cwd recipes exist."""
+    import shutil
+    import tomllib
+
+    pyproject = tomllib.loads((ROOT / "packages/rewirebench/pyproject.toml").read_text())
+    assert pyproject["tool"]["hatch"]["build"]["hooks"]["custom"]["path"] == "hatch_build.py"
+    assert (ROOT / "packages/rewirebench/hatch_build.py").is_file()
+
+    pkg_root = tmp_path / "site-packages/rewirebench"
+    pkg_recipes = pkg_root / "resources/recipes"
+    shutil.copytree(RECIPES, pkg_recipes)
+    empty_cwd = tmp_path / "empty"
+    empty_cwd.mkdir()
+    monkeypatch.chdir(empty_cwd)
+    monkeypatch.delenv(recipes.RECIPES_DIR_VARIABLE, raising=False)
+    monkeypatch.setattr(recipes, "__file__", str(pkg_root / "recipes.py"))
+    assert recipes.find_recipes_dir() == pkg_recipes.resolve()
+    listing, code = run_cli(capsys, "recipe", "list")
+    assert code == 0 and listing["recipes"]
+
+    cwd_recipes = empty_cwd / "recipes"
+    cwd_recipes.mkdir()
+    (cwd_recipes / recipes.SCHEMA_FILENAME).write_text((RECIPES / recipes.SCHEMA_FILENAME).read_text())
+    assert recipes.find_recipes_dir() == cwd_recipes.resolve()
+
+
 PREPARE = ["rewirebench", "prepare", "flip2-fitness-v1"]
 FLIP2 = [*PREPARE, "--source", "{inputs}/x", "--output", "{work}/p"]
 MFASS = ["rewirebench", "prepare", "mfass-v2", "--source", "{inputs}", "--output", "{work}/p"]

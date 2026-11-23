@@ -832,12 +832,12 @@ def load_recipe(path: str | Path) -> LoadedRecipe:
 
 
 def find_recipes_dir(explicit: str | Path | None = None) -> Path | None:
-    """Locate ``recipes/``: the argument, the environment, the checkout, the working tree.
+    """Locate ``recipes/``: the argument, the environment, the checkout, the working tree, or package data.
 
     The checkout rewirebench runs from comes before the working directory, so running
     from inside another folder that has its own ``recipes/`` does not swap the recipes.
-    The wheel does not ship recipes; an installed wheel looks at the working directory
-    and its parents, and returns ``None`` when none has a ``recipes/``.
+    When neither a checkout nor a working tree supplies ``recipes/``, an installed wheel
+    falls back to the packaged recipes shipped inside ``rewirebench/resources/recipes``.
     """
     named = explicit or os.environ.get(RECIPES_DIR_VARIABLE)
     if named:
@@ -852,6 +852,9 @@ def find_recipes_dir(explicit: str | Path | None = None) -> Path | None:
     for folder in (here, *here.parents):
         if (folder / "recipes" / SCHEMA_FILENAME).is_file():
             return folder / "recipes"
+    packaged = Path(__file__).resolve().parent / "resources" / "recipes"
+    if (packaged / SCHEMA_FILENAME).is_file():
+        return packaged
     return None
 
 
