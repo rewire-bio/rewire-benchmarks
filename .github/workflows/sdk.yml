@@ -25,14 +25,7 @@ jobs:
       - name: Build and verify with Podman
         run: |
           podman build --platform linux/amd64 --build-arg ENVIRONMENT="${{ matrix.environment }}" -f containers/Containerfile -t localhost/rewirebench:check .
-          podman run --rm --network none --read-only --tmpfs /tmp:rw,size=512m --entrypoint python -v "$PWD:/workspace:ro" localhost/rewirebench:check /workspace/containers/parity.py --environment "${{ matrix.environment }}" > /tmp/container.json
-          uv run --no-sync python containers/parity.py --compare /tmp/native.json /tmp/container.json
-          podman run --rm --network none --read-only localhost/rewirebench:check protocols
-          # The recipe and receipt commands need pydantic and PyYAML from the hash lock.
-          podman run --rm --network none --read-only localhost/rewirebench:check recipe schema > /tmp/recipe.schema.json
-          cmp /tmp/recipe.schema.json recipes/recipe.schema.json
-          podman run --rm --network none --read-only localhost/rewirebench:check recipe list
-          podman run --rm --network none --read-only -v "$PWD/recipes:/recipes:ro" localhost/rewirebench:check recipe validate --recipes-dir /recipes
+          containers/check_image.sh podman localhost/rewirebench:check "${{ matrix.environment }}" /tmp/native.json /tmp/container.json
       - name: Verify optional CPU framework imports
         if: matrix.environment == 'esm' || matrix.environment == 'dnabert2'
         run: |

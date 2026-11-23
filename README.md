@@ -310,6 +310,24 @@ and verify the receipt. It plans and prices the `spark` and `runpod` backends an
 [docs/mcp.md](docs/mcp.md), and [docs/spark.md](docs/spark.md) for what a DGX Spark needs
 before it can run anything.
 
+### Runner images
+
+The CPU runner image is published to GitHub Container Registry as
+`ghcr.io/rewire-bio/rewirebench`, for `linux/amd64` and `linux/arm64`, in two environments
+(`core` and `sequence`). [`.github/workflows/image.yml`](.github/workflows/image.yml) builds
+and checks both platforms on every pull request that touches the image, and pushes from main.
+Pull by digest, never by tag:
+
+```sh
+docker pull ghcr.io/rewire-bio/rewirebench@sha256:<digest>
+docker run --rm --network none --read-only ghcr.io/rewire-bio/rewirebench@sha256:<digest> protocols
+```
+
+The digests are in the summary of each run of the workflow on main. The recipes do not name
+a digest yet: [docs/spark.md](docs/spark.md#published-images) lists the steps after the first
+push, including the one manual step (the owner makes the package public in its settings) and
+the command that writes a digest into a recipe. There is no GPU image.
+
 ## Cleaning local reference data
 
 Preview old expanded reference files whose adjacent gzip archives contain exactly the same bytes:
