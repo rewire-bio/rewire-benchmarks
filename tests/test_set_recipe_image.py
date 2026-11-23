@@ -4,6 +4,7 @@ from __future__ import annotations
 import difflib
 import importlib.util
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -21,11 +22,24 @@ AMD64 = f"{script.IMAGE}@sha256:{'a' * 64}"
 ARM64 = f"{script.IMAGE}@sha256:{'b' * 64}"
 
 
+def without_images(text: str) -> str:
+    """A recipe as it was before any image existed: both platforms missing."""
+    for platform in ("linux/amd64", "linux/arm64"):
+        text = re.sub(
+            rf"(    {platform}:\n)      reference: \S+\n",
+            rf"\1      missing:\n        reason: unavailable\n        note: No {platform} image has been built.\n",
+            text)
+    assert "reference:" not in text
+    return text
+
+
 @pytest.fixture
 def folders(tmp_path: Path) -> tuple[Path, Path]:
     recipes, copy = tmp_path / "recipes", tmp_path / "plugin/recipes"
     shutil.copytree(ROOT / "recipes", recipes)
-    shutil.copytree(ROOT / "recipes", copy)
+    for path in recipes.rglob("*.yaml"):
+        path.write_text(without_images(path.read_text()))
+    shutil.copytree(recipes, copy)
     return recipes, copy
 
 
@@ -61,7 +75,12 @@ def test_both_platforms_from_the_workflow_digest_file(folders, tmp_path, capsys)
     assert run(folders, "--digests", str(digests), "--environment", "core") == 0
     images = yaml.safe_load((recipes / "mfass" / f"{RECIPE}.yaml").read_text())["environment"]["images"]
     assert images == {"linux/amd64": {"reference": AMD64}, "linux/arm64": {"reference": ARM64}}
-    # The recipe still says it runs without an image; the script points at that line.
+    assert "written before an image existed" not in capsys.readouterr().out
+    path = recipes / "mfass" / f"{RECIPE}.yaml"
+    path.write_text(path.read_text() + "# no container image is published\n")
+    shutil.copyfile(path, tmp_path / "plugin/recipes/mfass" / f"{RECIPE}.yaml")
+    assert run(folders, "--digests", str(digests), "--environment", "core") == 0
+    # A line written before an image existed is pointed at, for a person to edit.
     assert "written before an image existed" in capsys.readouterr().out
     assert run(folders, "--digests", str(digests), "--environment", "sequence") == 1
 
@@ -103,9 +122,10 @@ def test_nothing_is_written_when_the_copy_has_drifted_or_the_recipe_is_unknown(f
 
 def test_every_recipe_on_main_can_take_both_digests():
     for path in sorted((ROOT / "recipes").rglob("*.yaml")):
-        text = script.set_image(script.set_image(path.read_text(), "linux/amd64", AMD64), "linux/arm64", ARM64)
-        images = yaml.safe_load(text)["environment"]["images"]
-        assert images == {"linux/amd64": {"reference": AMD64}, "linux/arm64": {"reference": ARM64}}
+        for start in (path.read_text(), without_images(path.read_text())):
+            text = script.set_image(script.set_image(start, "linux/amd64", AMD64), "linux/arm64", ARM64)
+            images = yaml.safe_load(text)["environment"]["images"]
+            assert images == {"linux/amd64": {"reference": AMD64}, "linux/arm64": {"reference": ARM64}}
 
 
 def test_the_script_names_the_image_the_workflow_pushes():

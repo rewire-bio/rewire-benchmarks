@@ -72,7 +72,7 @@
       "command": [
         "uvx",
         "--from",
-        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@d74a030ee735f26f7214f245de107b245a47a664#subdirectory=packages/rewirebench",
+        "rewirebench[mcp] @ git+https://github.com/rewire-bio/rewire-benchmarks@6d98f09c4dec545891acd25cdbbf77d390a575cb#subdirectory=packages/rewirebench",
         "rewirebench",
         "mcp",
         "--recipes-dir",
@@ -100,25 +100,25 @@
   "calls": [
     {
       "number": 1,
-      "at": "2026-11-22T20:48:58+00:00",
+      "at": "2026-11-23T10:29:04+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "dataset_info",
       "arguments": {},
       "is_error": false,
       "result": {
         "dataset": "rewire-benchmark-data",
-        "version": "2026-11-21-c8bea25e5abb",
+        "version": "2026-11-22-bbed7dce2323",
         "title": "Rewire benchmark data",
         "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, discrepancies between studies' results in a derived graph, and what the release serves as use-case evidence in a release graph.",
         "license": null,
         "homepage": "https://github.com/rewire-bio/rewire-benchmark-data",
-        "manifest_sha256": "3d8951b34fbbe6849320ccca9c02eb8924bac2f26745a4d6b514879ba18578c6",
-        "statements": 2777616,
+        "manifest_sha256": "41e98cd38383ec7776b3bf76fb0e81042bf9033bed725090d39e026d50d57f0c",
+        "statements": 2777663,
         "graphs": [
           {
             "iri": "https://benchmarks.rewire.it/graph/asserted",
             "role": "asserted",
-            "statements": 2448201,
+            "statements": 2448247,
             "description": "Source facts."
           },
           {
@@ -130,7 +130,7 @@
           {
             "iri": "https://benchmarks.rewire.it/graph/inferred",
             "role": "inferred",
-            "statements": 299852,
+            "statements": 299853,
             "description": "Facts derived from the asserted graph by the ontology when the bundle was built."
           },
           {
@@ -195,7 +195,7 @@
           "vocabulary_sha256": "34c9e844e8f221def805ab0ecf6d5389a1af0a4b1d1d7b2ef84926a46c00ef3a",
           "kept": "New statements about records in the rewire vocabulary: rb: links and rb: types. Superclasses and superproperties from imported vocabularies are left to the ontology graph. Protected links are never inferred.",
           "by_predicate": {
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9616,
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9617,
             "https://benchmarks.rewire.it/vocab#contains": 1534,
             "https://benchmarks.rewire.it/vocab#hasResult": 51864,
             "https://benchmarks.rewire.it/vocab#resultFor": 51864,
@@ -239,7 +239,7 @@
     },
     {
       "number": 2,
-      "at": "2026-11-22T20:49:10+00:00",
+      "at": "2026-11-23T10:29:10+00:00",
       "server": "genomics-mcp",
       "tool": "get_truth_set",
       "arguments": {
@@ -430,7 +430,7 @@
             "source_record_id": "giab-hg002-v4.2.1-grch38",
             "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
             "method": "curated catalogue in genomics-mcp",
-            "retrieved_at": "2026-11-22T20:49:10.878391Z",
+            "retrieved_at": "2026-11-23T10:29:10.752446Z",
             "source_version": "NISTv4.2.1",
             "source_updated_at": null,
             "terms_url": null,
@@ -450,7 +450,7 @@
     },
     {
       "number": 3,
-      "at": "2026-11-22T20:49:11+00:00",
+      "at": "2026-11-23T10:29:11+00:00",
       "server": "rewirebench",
       "tool": "list_recipes",
       "arguments": {},
@@ -469,7 +469,7 @@
               "local"
             ],
             "path": "recipes/flip2/flip2-synthetic-smoke.yaml",
-            "sha256": "1d4bafd3c0042ba7be31014aea78b48793eb5db04aa17e97685d584bd96b0b86"
+            "sha256": "9bcb7ee86fd4f0a49f7c81a4307f121aea4b7da4b0baad63d5b2ee68def5b56d"
           },
           {
             "id": "mfass-v2-kmer-baseline",
@@ -482,7 +482,7 @@
               "local"
             ],
             "path": "recipes/mfass/mfass-v2-kmer-baseline.yaml",
-            "sha256": "7552c6a78089e0e6eab19eba58fc9108ee7f2ffb5974dd69fcc4815bf5d4f2ab"
+            "sha256": "0857cabd37d1bc2097f2354846ebb1334e77f5523b02620d92c68c8e7e8643a0"
           }
         ],
         "invalid": []

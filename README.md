@@ -194,7 +194,7 @@ commands and one agent definition. Every server runs on your machine.
 | --- | --- | --- |
 | `rewire-benchmark-graph` | The read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp): published results, provenance, disagreements | rdf-kg-mcp v0.4.0 |
 | `genomics-mcp` | [Genomic data](https://github.com/rewire-bio/genomics-mcp), GIAB and HPRC truth sets, synthetic-data protocols | commit `3b395a9648aa57610623c54c4d54dd933470b067` (no release has the truth-set tools yet) |
-| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `d74a030ee735f26f7214f245de107b245a47a664` (no release has `rewirebench mcp` yet) |
+| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `6d98f09c4dec545891acd25cdbbf77d390a575cb` (no release has `rewirebench mcp` yet) |
 
 | Skill | Command | What it does |
 | --- | --- | --- |
@@ -323,10 +323,10 @@ docker pull ghcr.io/rewire-bio/rewirebench@sha256:<digest>
 docker run --rm --network none --read-only ghcr.io/rewire-bio/rewirebench@sha256:<digest> protocols
 ```
 
-The digests are in the summary of each run of the workflow on main. The recipes do not name
-a digest yet: [docs/spark.md](docs/spark.md#published-images) lists the steps after the first
-push, including the one manual step (the owner makes the package public in its settings) and
-the command that writes a digest into a recipe. There is no GPU image.
+The digests are in the summary of each run of the workflow on main. Both recipes name the
+`core` digests of the first push: [docs/spark.md](docs/spark.md#published-images) lists them,
+and gives the command that writes a digest into a recipe. The package is public, which the
+owner sets once in the package settings. There is no GPU image.
 
 ## Cleaning local reference data
 

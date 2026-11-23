@@ -71,12 +71,15 @@ def test_the_page_says_whether_a_recipe_names_spark():
 
 
 def test_a_recipe_that_names_spark_is_found(tmp_path: Path):
-    """The check above reads real recipes, none of which names spark today. This shows it
-    would see one that did."""
+    """The check above reads the real recipes. This shows it tells a recipe with neither a
+    spark backend nor a linux/arm64 image from one with either."""
     import yaml
 
     source = ROOT / "recipes/mfass/mfass-v2-kmer-baseline.yaml"
     recipe = yaml.safe_load(source.read_text())
+    missing = {"missing": {"reason": "unavailable", "note": "No image."}}
+    recipe["environment"]["images"]["linux/arm64"] = missing
+    recipe["backends"].pop("spark", None)
     (tmp_path / "plain.yaml").write_text(yaml.safe_dump(recipe))
     assert spark_recipes(tmp_path) == []
     recipe["backends"]["spark"] = {"gpus": True}

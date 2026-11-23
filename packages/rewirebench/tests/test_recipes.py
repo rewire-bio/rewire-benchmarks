@@ -33,6 +33,14 @@ def changed(**fields: Any) -> dict[str, Any]:
     return data
 
 
+def without_images(data: dict[str, Any]) -> dict[str, Any]:
+    """The recipe with no image for either platform, as before any image was published."""
+    data["environment"]["images"] = {
+        platform: {"missing": {"reason": "unavailable", "note": "No image."}}
+        for platform in ("linux/amd64", "linux/arm64")}
+    return data
+
+
 def run_cli(capsys: pytest.CaptureFixture[str], *argv: str) -> tuple[Any, int]:
     code = 0
     try:
@@ -71,7 +79,11 @@ def test_mfass_recipe_pins_the_published_inputs_and_values():
     expected = {value.metric_id: value.value for value in recipe.expected_output.values}
     assert expected == {"n": 8324, "positives": 315, "precision_at_capacity": 0.61,
                         "average_precision_sklearn": 0.286, "auroc": 0.778}
-    assert recipe.image_digests() == {"linux/amd64": None, "linux/arm64": None}
+    # Both platforms name the published core image by digest.
+    assert set(recipe.image_digests()) == {"linux/amd64", "linux/arm64"}
+    for image in recipe.environment.images.values():
+        assert image.reference.startswith("ghcr.io/rewire-bio/rewirebench@sha256:")
+    assert len(set(recipe.image_digests().values())) == 2
     assert recipe.backends.names() == ["local"]
 
 
@@ -99,7 +111,7 @@ def test_a_block_is_present_or_named_missing_never_both_or_neither():
 
 
 def test_images_are_by_digest_for_both_platforms():
-    data = changed()
+    data = without_images(changed())
     data["environment"]["images"]["linux/amd64"] = {"reference": "ghcr.io/rewire-bio/x:latest"}
     with pytest.raises(recipes.RecipeError, match="by digest"):
         parse(data)
@@ -108,7 +120,7 @@ def test_images_are_by_digest_for_both_platforms():
     del data["environment"]["images"]["linux/arm64"]
     with pytest.raises(recipes.RecipeError, match="exactly these platforms"):
         parse(data)
-    data = changed()
+    data = without_images(changed())
     data["environment"]["images"]["linux/arm64"] = {}
     with pytest.raises(recipes.RecipeError, match="exactly one of reference or missing"):
         parse(data)
@@ -116,7 +128,7 @@ def test_images_are_by_digest_for_both_platforms():
 
 def test_gpu_backends_need_the_image_for_their_platform():
     runpod = {"gpu_types": ["NVIDIA H100 80GB HBM3"], "disk_gb": 200, "max_hours": 3}
-    data = changed(backends={"runpod": runpod})
+    data = without_images(changed(backends={"runpod": runpod}))
     with pytest.raises(recipes.RecipeError, match="linux/amd64 image digest"):
         parse(data)
     data["environment"]["images"]["linux/amd64"] = {"reference": f"ghcr.io/rewire-bio/x@{DIGEST}"}

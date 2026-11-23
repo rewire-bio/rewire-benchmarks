@@ -67,7 +67,8 @@ def test_receipt_records_everything_the_run_depends_on(smoke_run: Path):
     assert data["recipe"]["commit"] in (None, data["code"]["commit"])
     assert data["code"]["commit"] is None or len(data["code"]["commit"]) == 40
     assert len(data["code"]["sdk_code_sha256"]) == 64
-    assert data["environment"]["images"] == {"linux/amd64": None, "linux/arm64": None}
+    assert data["environment"]["images"] == loaded.recipe.image_digests()
+    assert data["environment"]["image_used"] is None
     assert data["inputs"] == [{
         "name": "smoke.csv", "source": "repository:workflows/benchmark/examples/smoke.csv",
         "obtained": "repository",
