@@ -1,0 +1,20 @@
+[
+  {
+    "filename": "clinvar_20261108.vcf.gz",
+    "url": "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2026/clinvar_20261108.vcf.gz",
+    "bytes": 201585046,
+    "sha256": "5f9921471596d13950e8425b4b70f2f40fc90b23288ca3172420927220a40e15"
+  },
+  {
+    "filename": "clinvar_20231226.vcf.gz",
+    "url": "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2023/clinvar_20231226.vcf.gz",
+    "bytes": 90917025,
+    "sha256": "510c54e3fd04b0786f0a110bab63853e9e8fc3e9dde9e07ce7bc83f10cb63786"
+  },
+  {
+    "filename": "clinvar_20250330.vcf.gz",
+    "url": "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250330.vcf.gz",
+    "bytes": 149930438,
+    "sha256": "8a9032f5faf3cfab459136a9a90c5c4f47eed954bc5dd90490fc43ed66ba910a"
+  }
+]

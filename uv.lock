@@ -21,6 +21,7 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "clingen-pp3-bp4",
     "mfass",
     "rewire-benchmarks",
     "rewirebench",
@@ -359,6 +360,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/45/37/edbf1b0707709013c
 wheels = [
     { url = "https://files.pythonhosted.org/packages/31/7d/164b7ffc8624fe9efb4221bf9af485d5c1e41b9ae118045d2b6dc5457d8b/click-8.5.1-py3-none-any.whl", hash = "sha256:8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37", size = 126163, upload-time = "2026-11-06T17:36:59.287Z" },
 ]
+
+[[package]]
+name = "clingen-pp3-bp4"
+version = "0.1.0"
+source = { editable = "benchmarks/clingen-pp3-bp4" }
+dependencies = [
+    { name = "rewirebench" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "rewirebench", editable = "packages/rewirebench" }]
 
 [[package]]
 name = "cloudpickle"
