@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "kind": "clingen_pp3_bp4_cpu_calibration",
+  "completed_at": "2026-11-23T16:03:02.723657+00:00",
+  "runtime_seconds": 173.51,
+  "seed": 20261123,
+  "parameters": {
+    "alpha": 0.0441,
+    "c_const": 1124.0,
+    "minpoints": 100,
+    "gft": 0.03,
+    "n_boot": 1000
+  },
+  "cost": {
+    "paid_compute": false,
+    "reason": "owned CPU workstation + precomputed public tables"
+  },
+  "environment": {
+    "python": "3.12.7",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "numpy": "1.26.4"
+  },
+  "inputs": [
+    {
+      "path": "cohorts/cohort_summary.json",
+      "bytes": 596,
+      "sha256": "35d55b71ca04d5f03db31222df789049607957cc4981316210257e1fd13d7d02"
+    },
+    {
+      "path": "cohorts/gnomad_ref_missense.tsv",
+      "bytes": 522482,
+      "sha256": "818ad7178c61c6eeddb489d6969b98728895cd70baf95dcd3a3ec7008442ac83"
+    },
+    {
+      "path": "cohorts/variants_post_2023_12.tsv",
+      "bytes": 1271595,
+      "sha256": "90ec52d2b5dcbc4019113e60bd4b3099bf4e0761c821c2f2c7055b2c8b650438"
+    },
+    {
+      "path": "cohorts/variants_post_2025_03.tsv",
+      "bytes": 500644,
+      "sha256": "0566277b1b393ee621144703e2c6e04f288a553d8bbc9fffb0553d9ac81b2156"
+    },
+    {
+      "path": "raw/clinvar_20231226.vcf.gz",
+      "bytes": 90917025,
+      "sha256": "510c54e3fd04b0786f0a110bab63853e9e8fc3e9dde9e07ce7bc83f10cb63786"
+    },
+    {
+      "path": "raw/clinvar_20250330.vcf.gz",
+      "bytes": 149930438,
+      "sha256": "8a9032f5faf3cfab459136a9a90c5c4f47eed954bc5dd90490fc43ed66ba910a"
+    },
+    {
+      "path": "raw/clinvar_20261108.vcf.gz",
+      "bytes": 201585046,
+      "sha256": "5f9921471596d13950e8425b4b70f2f40fc90b23288ca3172420927220a40e15"
+    },
+    {
+      "path": "raw/download_manifest.json",
+      "bytes": 794,
+      "sha256": "6160e23258a44493bd64f67cf9ae66a7665b4b8fb31a78518f662341f4f43fe8"
+    },
+    {
+      "path": "scores/scores_am.tsv",
+      "bytes": 394870,
+      "sha256": "4d5e091bff4737650da0e82259fe8cdded8df6128e7640d84da5c1ff6a4bb5fd"
+    },
+    {
+      "path": "scores/scores_avi.tsv",
+      "bytes": 546369,
+      "sha256": "9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501"
+    },
+    {
+      "path": "scores/scores_cadd.tsv",
+      "bytes": 380474,
+      "sha256": "58b427e2e85c30299af5a0464e9f552c92b80d6423bba3cf26cf8c8f3add8a14"
+    },
+    {
+      "path": "scores/scores_evee.tsv",
+      "bytes": 652248,
+      "sha256": "65c5d527efc59cf560879ef0bb576d6c5c35dc07431ef803b9dbedfc9bc9e393"
+    },
+    {
+      "path": "scores/scores_gpnmsa.tsv",
+      "bytes": 380995,
+      "sha256": "b7d188f75c15a552e5d66df8f5fbdbb261779c42000d236e4e40cdf5355c9770"
+    },
+    {
+      "path": "scores/scores_gpnstar_m.tsv",
+      "bytes": 411298,
+      "sha256": "fd7f857518e3966bee4e8c89b81ce1a4f143621faef5a2bef1828c802c0447ef"
+    },
+    {
+      "path": "scores/scores_gpnstar_v.tsv",
+      "bytes": 412452,
+      "sha256": "05b681f74de63d5697174696b717c8aa0615402531e220c4a69423ec65eea1a9"
+    },
+    {
+      "path": "scores/scores_revel.tsv",
+      "bytes": 390195,
+      "sha256": "a2e4466f585556ffe2a972c9e4c10a2046eddb1fc5b40dc8b66473383103b90e"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "results/calibration_summary.json",
+      "bytes": 174604,
+      "sha256": "fc5e690c5026711e9c1acb24b3f0c49acfaf6acb18fd9103760a9671d3455a60"
+    },
+    {
+      "path": "results/calibration_tables.tsv",
+      "bytes": 4412,
+      "sha256": "af5930a74b345f892bd96f3cc0de5b3578ec3ff3de7d8049b0d3afd9dfd59076"
+    },
+    {
+      "path": "results/report.md",
+      "bytes": 4283,
+      "sha256": "c32aa0c559079fbfd6945dd1063ae6e1b55a7925175f467a2164d4cea64cea8e"
+    }
+  ]
+}

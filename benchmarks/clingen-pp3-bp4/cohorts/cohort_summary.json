@@ -1,0 +1,29 @@
+{
+  "latest_all_2star_missense": {
+    "0": 43133,
+    "1": 25216
+  },
+  "post_2023_12": {
+    "total": 9450,
+    "pathogenic_lp": 5508,
+    "benign_lb": 3942,
+    "novel_total": 4188,
+    "rare_af001_pathogenic_lp": 5454,
+    "rare_af001_benign_lb": 2687
+  },
+  "post_2025_03": {
+    "total": 3818,
+    "pathogenic_lp": 2306,
+    "benign_lb": 1512,
+    "novel_total": 1134,
+    "rare_af001_pathogenic_lp": 2290,
+    "rare_af001_benign_lb": 909
+  },
+  "gnomad_ref_missense": {
+    "total": 6312,
+    "sources": {
+      "clinvar_vus_pop_af": 5155,
+      "rare_disease_v2_af5_bg": 1157
+    }
+  }
+}

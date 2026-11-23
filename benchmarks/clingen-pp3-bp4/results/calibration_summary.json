@@ -1,0 +1,6757 @@
+{
+  "n_boot": 1000,
+  "seed": 20261123,
+  "parameters": {
+    "alpha": 0.0441,
+    "c_const": 1124.0,
+    "minpoints": 100,
+    "gft": 0.03
+  },
+  "posterior_cutoffs": {
+    "VeryStrong_8": 0.9810803910197666,
+    "Strong_4": 0.607336738578053,
+    "Intermediate_3": 0.39127638906443957,
+    "Moderate_2": 0.2108130918429401,
+    "Supporting_1": 0.09992012488836323
+  },
+  "benign_posterior_cutoffs": {
+    "VeryStrong_8": 0.9999589567265225,
+    "Strong_4": 0.9986258132393879,
+    "Intermediate_3": 0.9966997025048447,
+    "Moderate_2": 0.9920952539526388,
+    "Supporting_1": 0.9811881021306476
+  },
+  "strata": {
+    "post_2023_12": {
+      "gpn_msa": {
+        "n_pos": 5508,
+        "n_neg": 3942,
+        "n_g_ref": 6312,
+        "auroc": 0.8628613442483182,
+        "auroc_ci95": [
+          0.8551755728810305,
+          0.870419761192336
+        ],
+        "auprc": 0.8775301643396561,
+        "auprc_ci95": [
+          0.8690132840578861,
+          0.8859058749266415
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.54,
+            "Supporting_1": 8.66
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.2,
+            "Intermediate_3": 3.01,
+            "Moderate_2": 4.29,
+            "Supporting_1": 5.49
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.75,
+            "Supporting_1": 9.27
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.03,
+            "Intermediate_3": 1.27,
+            "Moderate_2": 3.81,
+            "Supporting_1": 4.72
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              10.08,
+              10.78
+            ],
+            "Supporting_1": [
+              8.08,
+              9.30025
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.20500000000000015,
+              1.9729999999999994
+            ],
+            "Intermediate_3": [
+              1.24,
+              3.68025
+            ],
+            "Moderate_2": [
+              3.78,
+              4.51
+            ],
+            "Supporting_1": [
+              4.69,
+              5.62
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1152,
+            "share": 0.20915032679738563
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 1448,
+            "share": 0.26289034132171385
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 7,
+            "share": 0.001270878721859114
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 1,
+            "share": 0.00018155410312273057
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 65,
+            "share": 0.011801016702977488
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 99,
+            "share": 0.017973856209150325
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 2736,
+            "share": 0.49673202614379086
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 88,
+            "share": 0.022323693556570268
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 222,
+            "share": 0.0563165905631659
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 535,
+            "share": 0.13571790969051242
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 63,
+            "share": 0.01598173515981735
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 898,
+            "share": 0.22780314561136478
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 414,
+            "share": 0.1050228310502283
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1722,
+            "share": 0.4368340943683409
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1152,
+            "n_neg": 88,
+            "lr_plus": 9.368983957219251
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 1448,
+            "n_neg": 222,
+            "lr_plus": 4.668079844550433
+          }
+        },
+        "label": "GPN-MSA (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "gpnstar_v": {
+        "n_pos": 5508,
+        "n_neg": 3942,
+        "n_g_ref": 6312,
+        "auroc": 0.8885586418831959,
+        "auroc_ci95": [
+          0.8819505353957732,
+          0.8952143516307813
+        ],
+        "auprc": 0.9070366497997613,
+        "auprc_ci95": [
+          0.9006345872864585,
+          0.9139902069677165
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 11.49,
+            "Moderate_2": 9.97,
+            "Supporting_1": 8.28
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.97,
+            "Intermediate_3": 3.1,
+            "Moderate_2": 4.47,
+            "Supporting_1": 5.15
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 12.7,
+            "Moderate_2": 10.14,
+            "Supporting_1": 8.77
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": -0.3,
+            "Intermediate_3": 2.08,
+            "Moderate_2": 3.57,
+            "Supporting_1": 4.94
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              10.919,
+              12.845
+            ],
+            "Moderate_2": [
+              9.59975,
+              10.22025
+            ],
+            "Supporting_1": [
+              8.18,
+              8.79
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              -0.4129999999999999,
+              2.11
+            ],
+            "Intermediate_3": [
+              2.05975,
+              3.22
+            ],
+            "Moderate_2": [
+              3.4297500000000003,
+              4.7
+            ],
+            "Supporting_1": [
+              4.87975,
+              5.52
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 84,
+            "share": 0.015250544662309368
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1590,
+            "share": 0.2886710239651416
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 1406,
+            "share": 0.2552650689905592
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 5,
+            "share": 0.0009077705156136529
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 13,
+            "share": 0.0023602033405954975
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 53,
+            "share": 0.00962236746550472
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 132,
+            "share": 0.023965141612200435
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 2225,
+            "share": 0.40395787944807554
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 1,
+            "share": 0.0002536783358701167
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 80,
+            "share": 0.020294266869609334
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 227,
+            "share": 0.057584982242516486
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 364,
+            "share": 0.09233891425672247
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 676,
+            "share": 0.17148655504819887
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 621,
+            "share": 0.15753424657534246
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 608,
+            "share": 0.15423642820903094
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1365,
+            "share": 0.3462709284627093
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 84,
+            "n_neg": 1,
+            "lr_plus": 60.117647058823536
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1590,
+            "n_neg": 80,
+            "lr_plus": 14.224264705882353
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 1406,
+            "n_neg": 227,
+            "lr_plus": 4.4328409778008115
+          }
+        },
+        "label": "GPN-Star vertebrate v100 (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "gpnstar_m": {
+        "n_pos": 5508,
+        "n_neg": 3942,
+        "n_g_ref": 6312,
+        "auroc": 0.8509304947151268,
+        "auroc_ci95": [
+          0.843105413273696,
+          0.859047477802685
+        ],
+        "auprc": 0.8628527262193424,
+        "auprc_ci95": [
+          0.8537502910642195,
+          0.8717842525694417
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 9.77,
+            "Supporting_1": 7.97
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 2.88,
+            "Moderate_2": 4.4,
+            "Supporting_1": 5.22
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.18,
+            "Supporting_1": 8.33
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": -1.99,
+            "Moderate_2": 3.69,
+            "Supporting_1": 4.9
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              9.45,
+              10.361749999999997
+            ],
+            "Supporting_1": [
+              7.81,
+              8.34
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              -2.2515,
+              3.57
+            ],
+            "Moderate_2": [
+              3.67,
+              4.55
+            ],
+            "Supporting_1": [
+              4.89,
+              5.3302499999999995
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 486,
+            "share": 0.08823529411764706
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 1999,
+            "share": 0.36292665214233844
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 7,
+            "share": 0.001270878721859114
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 60,
+            "share": 0.010893246187363835
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 125,
+            "share": 0.02269426289034132
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 2831,
+            "share": 0.5139796659404503
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 29,
+            "share": 0.007356671740233384
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 333,
+            "share": 0.08447488584474885
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 142,
+            "share": 0.03602232369355657
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 1425,
+            "share": 0.3614916286149163
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 571,
+            "share": 0.14485032978183662
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1442,
+            "share": 0.36580416032470825
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 486,
+            "n_neg": 29,
+            "lr_plus": 11.993914807302232
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 1999,
+            "n_neg": 333,
+            "lr_plus": 4.296266855090385
+          }
+        },
+        "label": "GPN-Star mammal m447 (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "avi": {
+        "n_pos": 5508,
+        "n_neg": 3942,
+        "n_g_ref": 6312,
+        "auroc": 0.9442666669614272,
+        "auroc_ci95": [
+          0.939715222579251,
+          0.9490794235182846
+        ],
+        "auprc": 0.9552707484270264,
+        "auprc_ci95": [
+          0.9504061340292738,
+          0.960116832612072
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 2.397,
+            "Intermediate_3": 1.409,
+            "Moderate_2": 1.26,
+            "Supporting_1": 1.093
+          },
+          "BP4": {
+            "VeryStrong_8": -0.4,
+            "Strong_4": 0.117,
+            "Intermediate_3": 0.431,
+            "Moderate_2": 0.573,
+            "Supporting_1": 0.829
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 2.876,
+            "Intermediate_3": 1.493,
+            "Moderate_2": 1.323,
+            "Supporting_1": 1.148
+          },
+          "BP4": {
+            "VeryStrong_8": -0.501,
+            "Strong_4": 0.056,
+            "Intermediate_3": 0.156,
+            "Moderate_2": 0.551,
+            "Supporting_1": 0.682
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              1.611,
+              2.768
+            ],
+            "Intermediate_3": [
+              1.365,
+              1.500025
+            ],
+            "Moderate_2": [
+              1.226,
+              1.329
+            ],
+            "Supporting_1": [
+              1.0589,
+              1.1561249999999998
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              -0.501,
+              0.055
+            ],
+            "Strong_4": [
+              0.056,
+              0.212
+            ],
+            "Intermediate_3": [
+              0.139,
+              0.503
+            ],
+            "Moderate_2": [
+              0.545975,
+              0.656
+            ],
+            "Supporting_1": [
+              0.677,
+              0.842
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 4,
+            "share": 0.0007262164124909223
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 2164,
+            "share": 0.39288307915758897
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1415,
+            "share": 0.25689905591866374
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 713,
+            "share": 0.1294480755265069
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.00036310820624546115
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 10,
+            "share": 0.0018155410312273058
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 96,
+            "share": 0.017429193899782137
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 124,
+            "share": 0.02251270878721859
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 980,
+            "share": 0.17792302106027597
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 55,
+            "share": 0.013952308472856417
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 75,
+            "share": 0.01902587519025875
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 105,
+            "share": 0.02663622526636225
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 8,
+            "share": 0.0020294266869609334
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 503,
+            "share": 0.1276002029426687
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 331,
+            "share": 0.08396752917300862
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 1346,
+            "share": 0.34145104008117705
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 532,
+            "share": 0.13495687468290207
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 987,
+            "share": 0.2503805175038052
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 4,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 2164,
+            "n_neg": 55,
+            "lr_plus": 28.159001782531195
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1415,
+            "n_neg": 75,
+            "lr_plus": 13.502614379084967
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 713,
+            "n_neg": 105,
+            "lr_plus": 4.85985060690943
+          }
+        },
+        "label": "AlphaGenome AVI (raw)",
+        "role": "foundation_model",
+        "note": "Trained on gnomAD allele frequency classes; inspect AF<0.1% sub-stratum.",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "avi_phred": {
+        "n_pos": 5508,
+        "n_neg": 3942,
+        "n_g_ref": 6312,
+        "auroc": 0.9442666669614272,
+        "auroc_ci95": [
+          0.939715222579251,
+          0.9490794235182846
+        ],
+        "auprc": 0.9552707484270263,
+        "auprc_ci95": [
+          0.9504061340292737,
+          0.960116832612072
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 42.8,
+            "Intermediate_3": 27.6,
+            "Moderate_2": 25.9,
+            "Supporting_1": 24.9
+          },
+          "BP4": {
+            "VeryStrong_8": 1.5,
+            "Strong_4": 8.7,
+            "Intermediate_3": 17.5,
+            "Moderate_2": 21.0,
+            "Supporting_1": 23.1
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 52.5,
+            "Intermediate_3": 28.7,
+            "Moderate_2": 26.3,
+            "Supporting_1": 25.2
+          },
+          "BP4": {
+            "VeryStrong_8": 1.4,
+            "Strong_4": 6.4,
+            "Intermediate_3": 10.2,
+            "Moderate_2": 19.8,
+            "Supporting_1": 21.8
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              30.6125,
+              49.787499999999994
+            ],
+            "Intermediate_3": [
+              27.0,
+              28.9
+            ],
+            "Moderate_2": [
+              25.7,
+              26.4
+            ],
+            "Supporting_1": [
+              24.6,
+              25.2
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              1.3,
+              6.4
+            ],
+            "Strong_4": [
+              6.3,
+              11.8
+            ],
+            "Intermediate_3": [
+              9.4,
+              18.9
+            ],
+            "Moderate_2": [
+              19.8,
+              21.3025
+            ],
+            "Supporting_1": [
+              21.7,
+              23.3
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 2,
+            "share": 0.00036310820624546115
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 2240,
+            "share": 0.4066811909949165
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1384,
+            "share": 0.2512708787218591
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 656,
+            "share": 0.11909949164851126
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.00036310820624546115
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 11,
+            "share": 0.0019970951343500363
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 93,
+            "share": 0.016884531590413945
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 130,
+            "share": 0.023602033405954976
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 990,
+            "share": 0.17973856209150327
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 57,
+            "share": 0.01445966514459665
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 75,
+            "share": 0.01902587519025875
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 96,
+            "share": 0.0243531202435312
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 213,
+            "share": 0.05403348554033485
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 300,
+            "share": 0.076103500761035
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 339,
+            "share": 0.08599695585996955
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 1323,
+            "share": 0.3356164383561644
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 558,
+            "share": 0.1415525114155251
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 981,
+            "share": 0.24885844748858446
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 2,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 2240,
+            "n_neg": 57,
+            "lr_plus": 28.12521499828002
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1384,
+            "n_neg": 75,
+            "lr_plus": 13.206797385620915
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 656,
+            "n_neg": 96,
+            "lr_plus": 4.890522875816994
+          }
+        },
+        "label": "AlphaGenome AVI (PHRED)",
+        "role": "foundation_model",
+        "note": "PHRED-scaled AVI; same gnomAD frequency training structure as raw AVI.",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "alphamissense": {
+        "n_pos": 5438,
+        "n_neg": 3623,
+        "n_g_ref": 6105,
+        "auroc": 0.9493030967511009,
+        "auroc_ci95": [
+          0.9451392225429925,
+          0.9533298653468193
+        ],
+        "auprc": 0.9637592475248566,
+        "auprc_ci95": [
+          0.9603125146543124,
+          0.9670739272517875
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.969,
+            "Intermediate_3": 0.934,
+            "Moderate_2": 0.796,
+            "Supporting_1": 0.536
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.088,
+            "Intermediate_3": 0.092,
+            "Moderate_2": 0.122,
+            "Supporting_1": 0.217
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.975,
+            "Intermediate_3": 0.951,
+            "Moderate_2": 0.826,
+            "Supporting_1": 0.628
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.069,
+            "Intermediate_3": 0.089,
+            "Moderate_2": 0.12,
+            "Supporting_1": 0.162
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.961,
+              0.976
+            ],
+            "Intermediate_3": [
+              0.912,
+              0.952
+            ],
+            "Moderate_2": [
+              0.761,
+              0.8360249999999999
+            ],
+            "Supporting_1": [
+              0.473,
+              0.656
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.068,
+              0.09
+            ],
+            "Intermediate_3": [
+              0.089,
+              0.11029999999999995
+            ],
+            "Moderate_2": [
+              0.12,
+              0.15329999999999996
+            ],
+            "Supporting_1": [
+              0.1617,
+              0.23229999999999998
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 1924,
+            "share": 0.35380654652445753
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 491,
+            "share": 0.09029054799558661
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1085,
+            "share": 0.1995218830452372
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 711,
+            "share": 0.13074659801397573
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 5,
+            "share": 0.0009194556822361162
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 16,
+            "share": 0.002942258183155572
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 66,
+            "share": 0.012136815005516733
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 103,
+            "share": 0.018940787054063993
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1037,
+            "share": 0.1906951084957705
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 20,
+            "share": 0.005520287054926856
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 13,
+            "share": 0.0035881865857024567
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 74,
+            "share": 0.020425062103229367
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 114,
+            "share": 0.03146563621308308
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 605,
+            "share": 0.1669886834115374
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 817,
+            "share": 0.22550372619376208
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 690,
+            "share": 0.19044990339497653
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 416,
+            "share": 0.11482197074247862
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 874,
+            "share": 0.2412365443003036
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 1924,
+            "n_neg": 20,
+            "lr_plus": 64.09205590290549
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 491,
+            "n_neg": 13,
+            "lr_plus": 25.163281183693098
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1085,
+            "n_neg": 74,
+            "lr_plus": 9.768483544228303
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 711,
+            "n_neg": 114,
+            "lr_plus": 4.155218636882755
+          }
+        },
+        "label": "AlphaMissense",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 0.9872912127814089,
+        "coverage_neg": 0.9190766108574328
+      },
+      "revel": {
+        "n_pos": 5493,
+        "n_neg": 3839,
+        "n_g_ref": 6265,
+        "auroc": 0.968430207912915,
+        "auroc_ci95": [
+          0.9652670307569458,
+          0.9716920151802763
+        ],
+        "auprc": 0.9764391092855671,
+        "auprc_ci95": [
+          0.9735177116674436,
+          0.97940631098554
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.894,
+            "Intermediate_3": 0.835,
+            "Moderate_2": 0.742,
+            "Supporting_1": 0.642
+          },
+          "BP4": {
+            "VeryStrong_8": 0.015,
+            "Strong_4": 0.065,
+            "Intermediate_3": 0.202,
+            "Moderate_2": 0.302,
+            "Supporting_1": 0.443
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.909,
+            "Intermediate_3": 0.854,
+            "Moderate_2": 0.758,
+            "Supporting_1": 0.665
+          },
+          "BP4": {
+            "VeryStrong_8": 0.014,
+            "Strong_4": 0.057,
+            "Intermediate_3": 0.157,
+            "Moderate_2": 0.282,
+            "Supporting_1": 0.372
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.873,
+              0.913
+            ],
+            "Intermediate_3": [
+              0.798,
+              0.856
+            ],
+            "Moderate_2": [
+              0.7169749999999999,
+              0.759025
+            ],
+            "Supporting_1": [
+              0.624,
+              0.671025
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              0.014,
+              0.056
+            ],
+            "Strong_4": [
+              0.056,
+              0.158
+            ],
+            "Intermediate_3": [
+              0.156,
+              0.232
+            ],
+            "Moderate_2": [
+              0.27997500000000003,
+              0.362025
+            ],
+            "Supporting_1": [
+              0.370975,
+              0.469
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 2395,
+            "share": 0.4360094665938467
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 879,
+            "share": 0.1600218459858001
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 881,
+            "share": 0.16038594574913526
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 522,
+            "share": 0.09503003823047515
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.0003640997633351538
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 29,
+            "share": 0.005279446568359731
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 83,
+            "share": 0.015110140178408884
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 85,
+            "share": 0.015474239941744038
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 617,
+            "share": 0.11232477698889495
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 13,
+            "share": 0.003386298515238343
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 25,
+            "share": 0.006512112529304506
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 56,
+            "share": 0.014587132065642095
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 80,
+            "share": 0.02083876009377442
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 87,
+            "share": 0.022662151601979683
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 617,
+            "share": 0.16071893722323521
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 1140,
+            "share": 0.2969523313362855
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 868,
+            "share": 0.22610054701745247
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 376,
+            "share": 0.09794217244073977
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 577,
+            "share": 0.15029955717634802
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 2395,
+            "n_neg": 13,
+            "lr_plus": 128.75694940413675
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 879,
+            "n_neg": 25,
+            "lr_plus": 24.572954669579467
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 881,
+            "n_neg": 56,
+            "lr_plus": 10.995029388052325
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 522,
+            "n_neg": 80,
+            "lr_plus": 4.5602539595849265
+          }
+        },
+        "label": "REVEL v1.3",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 0.9972766884531591,
+        "coverage_neg": 0.973871131405378
+      },
+      "cadd_phred": {
+        "n_pos": 5508,
+        "n_neg": 3942,
+        "n_g_ref": 6312,
+        "auroc": 0.8996650828811522,
+        "auroc_ci95": [
+          0.893519802914777,
+          0.9062856925142231
+        ],
+        "auprc": 0.9067243693097432,
+        "auprc_ci95": [
+          0.8989932943251935,
+          0.914571833284246
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 37.0,
+            "Moderate_2": 27.7,
+            "Supporting_1": 25.7
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 8.2,
+            "Intermediate_3": 14.3,
+            "Moderate_2": 21.1,
+            "Supporting_1": 22.4
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 29.3,
+            "Supporting_1": 26.0
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.9,
+            "Intermediate_3": 11.4,
+            "Moderate_2": 19.7,
+            "Supporting_1": 22.3
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              27.397499999999997,
+              31.0
+            ],
+            "Supporting_1": [
+              25.4,
+              26.0
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              1.8,
+              11.5
+            ],
+            "Intermediate_3": [
+              11.0,
+              16.704999999999995
+            ],
+            "Moderate_2": [
+              19.6,
+              21.4
+            ],
+            "Supporting_1": [
+              22.3,
+              22.8
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1879,
+            "share": 0.34114015976761075
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 1889,
+            "share": 0.3429557007988381
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 4,
+            "share": 0.0007262164124909223
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 14,
+            "share": 0.002541757443718228
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 97,
+            "share": 0.017610748002904866
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 159,
+            "share": 0.02886710239651416
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1466,
+            "share": 0.26615831517792304
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 132,
+            "share": 0.0334855403348554
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 263,
+            "share": 0.06671740233384069
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 418,
+            "share": 0.10603754439370877
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 568,
+            "share": 0.14408929477422627
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 1006,
+            "share": 0.2552004058853374
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 570,
+            "share": 0.1445966514459665
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 985,
+            "share": 0.24987316083206493
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1879,
+            "n_neg": 132,
+            "lr_plus": 10.18768568033274
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 1889,
+            "n_neg": 263,
+            "lr_plus": 5.140423469768136
+          }
+        },
+        "label": "CADD v1.7 (PHRED)",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "evee": {
+        "n_pos": 5344,
+        "n_neg": 3802,
+        "n_g_ref": 5822,
+        "auroc": 0.9663352312996312,
+        "auroc_ci95": [
+          0.9632791354839635,
+          0.969803283072532
+        ],
+        "auprc": 0.9739857491674464,
+        "auprc_ci95": [
+          0.9709380746705445,
+          0.9772505593877907
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.873,
+            "Intermediate_3": 0.798,
+            "Moderate_2": 0.658,
+            "Supporting_1": 0.424
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.006,
+            "Intermediate_3": 0.026,
+            "Moderate_2": 0.072,
+            "Supporting_1": 0.11
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.891,
+            "Intermediate_3": 0.828,
+            "Moderate_2": 0.701,
+            "Supporting_1": 0.471
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.005,
+            "Intermediate_3": 0.015,
+            "Moderate_2": 0.046,
+            "Supporting_1": 0.094
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.849,
+              0.894
+            ],
+            "Intermediate_3": [
+              0.751975,
+              0.834
+            ],
+            "Moderate_2": [
+              0.60495,
+              0.703
+            ],
+            "Supporting_1": [
+              0.357975,
+              0.475
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.005,
+              0.016
+            ],
+            "Intermediate_3": [
+              0.015,
+              0.042
+            ],
+            "Moderate_2": [
+              0.045,
+              0.076
+            ],
+            "Supporting_1": [
+              0.087,
+              0.14
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 2203,
+            "share": 0.4122380239520958
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 601,
+            "share": 0.1124625748502994
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 769,
+            "share": 0.1438997005988024
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 797,
+            "share": 0.14913922155688622
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 8,
+            "share": 0.0014970059880239522
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 22,
+            "share": 0.004116766467065869
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 53,
+            "share": 0.009917664670658683
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 88,
+            "share": 0.016467065868263474
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 803,
+            "share": 0.1502619760479042
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 11,
+            "share": 0.0028932140978432403
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 17,
+            "share": 0.004471330878485008
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 49,
+            "share": 0.012887953708574434
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 112,
+            "share": 0.029458179905312992
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 1368,
+            "share": 0.35981062598632296
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 691,
+            "share": 0.18174644923724356
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 617,
+            "share": 0.16228300894266176
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 357,
+            "share": 0.09389794844818516
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 580,
+            "share": 0.15255128879537086
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 2203,
+            "n_neg": 11,
+            "lr_plus": 142.48445155144256
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 601,
+            "n_neg": 17,
+            "lr_plus": 25.151924092990487
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 769,
+            "n_neg": 49,
+            "lr_plus": 11.165442075033607
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 797,
+            "n_neg": 112,
+            "lr_plus": 5.062743931779298
+          }
+        },
+        "label": "EVEE (ClinVar-supervised, descriptive)",
+        "role": "descriptive_leaked",
+        "note": "Published table trained with ClinVar labels through 2026-03-20.",
+        "coverage_pos": 0.9702251270878722,
+        "coverage_neg": 0.9644850329781837
+      }
+    },
+    "post_2023_12_af001": {
+      "gpn_msa": {
+        "n_pos": 5454,
+        "n_neg": 2687,
+        "n_g_ref": 6312,
+        "auroc": 0.8513241102053388,
+        "auroc_ci95": [
+          0.8420416291877296,
+          0.8605708941133536
+        ],
+        "auprc": 0.9031237591715455,
+        "auprc_ci95": [
+          0.8949535811297266,
+          0.9106039845888072
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.69,
+            "Supporting_1": 9.22
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.11,
+            "Intermediate_3": 3.0,
+            "Moderate_2": 4.29,
+            "Supporting_1": 5.46
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 11.03,
+            "Supporting_1": 9.37
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.24,
+            "Intermediate_3": 1.38,
+            "Moderate_2": 3.8,
+            "Supporting_1": 4.67
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              10.16975,
+              11.2105
+            ],
+            "Supporting_1": [
+              8.50975,
+              9.430499999999999
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              -0.26099999999999995,
+              2.13
+            ],
+            "Intermediate_3": [
+              1.30975,
+              3.63
+            ],
+            "Moderate_2": [
+              3.75,
+              4.51
+            ],
+            "Supporting_1": [
+              4.61,
+              5.57
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 907,
+            "share": 0.1662999633296663
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 1595,
+            "share": 0.29244591125779246
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 5,
+            "share": 0.0009167583425009168
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 4,
+            "share": 0.0007334066740007334
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 61,
+            "share": 0.011184451778511184
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 89,
+            "share": 0.01631829849651632
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 2793,
+            "share": 0.5121012101210121
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 46,
+            "share": 0.017119464086341647
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 167,
+            "share": 0.0621510978786751
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 233,
+            "share": 0.0867138072199479
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 164,
+            "share": 0.06103461109043543
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 560,
+            "share": 0.2084108671380722
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 251,
+            "share": 0.09341272794938593
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1266,
+            "share": 0.4711574246371418
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 907,
+            "n_neg": 46,
+            "lr_plus": 9.714086988408985
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 1595,
+            "n_neg": 167,
+            "lr_plus": 4.705402176944242
+          }
+        },
+        "label": "GPN-MSA (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "gpnstar_v": {
+        "n_pos": 5454,
+        "n_neg": 2687,
+        "n_g_ref": 6312,
+        "auroc": 0.8755829279739783,
+        "auroc_ci95": [
+          0.867335385070575,
+          0.8834739979084126
+        ],
+        "auprc": 0.924397087390234,
+        "auprc_ci95": [
+          0.9180629659750115,
+          0.9303710625760625
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 12.62,
+            "Moderate_2": 10.15,
+            "Supporting_1": 8.8
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.97,
+            "Intermediate_3": 3.13,
+            "Moderate_2": 4.49,
+            "Supporting_1": 4.99
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.46,
+            "Supporting_1": 9.01
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": -0.42,
+            "Intermediate_3": 2.07,
+            "Moderate_2": 3.43,
+            "Supporting_1": 4.88
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              9.89,
+              10.53
+            ],
+            "Supporting_1": [
+              8.37,
+              9.06
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              -0.5605,
+              2.1205
+            ],
+            "Intermediate_3": [
+              2.03,
+              3.34
+            ],
+            "Moderate_2": [
+              3.22,
+              4.67
+            ],
+            "Supporting_1": [
+              4.849749999999999,
+              5.5802499999999995
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1376,
+            "share": 0.2522918958562523
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 1452,
+            "share": 0.2662266226622662
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 4,
+            "share": 0.0007334066740007334
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 13,
+            "share": 0.0023835716905023837
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 41,
+            "share": 0.007517418408507517
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 126,
+            "share": 0.0231023102310231
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 2442,
+            "share": 0.44774477447744776
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 43,
+            "share": 0.016002977298101972
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 160,
+            "share": 0.0595459620394492
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 221,
+            "share": 0.08224786006698921
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 432,
+            "share": 0.16077409750651284
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 365,
+            "share": 0.13583922590249348
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 420,
+            "share": 0.15630815035355414
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1046,
+            "share": 0.38928172683289913
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1376,
+            "n_neg": 43,
+            "lr_plus": 15.765309864319764
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 1452,
+            "n_neg": 160,
+            "lr_plus": 4.470943344334433
+          }
+        },
+        "label": "GPN-Star vertebrate v100 (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "gpnstar_m": {
+        "n_pos": 5454,
+        "n_neg": 2687,
+        "n_g_ref": 6312,
+        "auroc": 0.8300772547171601,
+        "auroc_ci95": [
+          0.8196640715274851,
+          0.8396774511838977
+        ],
+        "auprc": 0.885168992977724,
+        "auprc_ci95": [
+          0.8767559080985587,
+          0.8932845219078225
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.78,
+            "Supporting_1": 8.75
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 2.92,
+            "Moderate_2": 4.33,
+            "Supporting_1": 4.94
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 11.94,
+            "Supporting_1": 8.96
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": -2.44,
+            "Moderate_2": 3.72,
+            "Supporting_1": 4.88
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              9.762,
+              11.94
+            ],
+            "Supporting_1": [
+              8.01,
+              9.04
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              -2.6584999999999996,
+              3.59
+            ],
+            "Moderate_2": [
+              3.68975,
+              4.460249999999999
+            ],
+            "Supporting_1": [
+              4.88,
+              5.39
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 4,
+            "share": 0.0007334066740007334
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 1674,
+            "share": 0.3069306930693069
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 3,
+            "share": 0.00055005500550055
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 60,
+            "share": 0.011001100110011002
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 115,
+            "share": 0.021085441877521087
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 3598,
+            "share": 0.6596993032636597
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 158,
+            "share": 0.05880163751395608
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 66,
+            "share": 0.024562709341272793
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 926,
+            "share": 0.34462225530331225
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 343,
+            "share": 0.12765165612206922
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1194,
+            "share": 0.44436174171938964
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 4,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 1674,
+            "n_neg": 158,
+            "lr_plus": 5.219764381501442
+          }
+        },
+        "label": "GPN-Star mammal m447 (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "avi": {
+        "n_pos": 5454,
+        "n_neg": 2687,
+        "n_g_ref": 6312,
+        "auroc": 0.9407700756429694,
+        "auroc_ci95": [
+          0.9351299817985769,
+          0.9458305091922168
+        ],
+        "auprc": 0.9649903480313885,
+        "auprc_ci95": [
+          0.9605510160701662,
+          0.9687709084159417
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 2.768,
+            "Intermediate_3": 1.423,
+            "Moderate_2": 1.286,
+            "Supporting_1": 1.086
+          },
+          "BP4": {
+            "VeryStrong_8": -0.4,
+            "Strong_4": 0.134,
+            "Intermediate_3": 0.431,
+            "Moderate_2": 0.639,
+            "Supporting_1": 0.831
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 1.527,
+            "Moderate_2": 1.334,
+            "Supporting_1": 1.17
+          },
+          "BP4": {
+            "VeryStrong_8": -0.501,
+            "Strong_4": 0.065,
+            "Intermediate_3": 0.184,
+            "Moderate_2": 0.56,
+            "Supporting_1": 0.683
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              1.374,
+              1.558025
+            ],
+            "Moderate_2": [
+              1.229,
+              1.339
+            ],
+            "Supporting_1": [
+              1.0599750000000001,
+              1.174
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              -0.501,
+              0.065
+            ],
+            "Strong_4": [
+              0.065,
+              0.28
+            ],
+            "Intermediate_3": [
+              0.14495,
+              0.501
+            ],
+            "Moderate_2": [
+              0.557,
+              0.661
+            ],
+            "Supporting_1": [
+              0.68,
+              0.855
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 1869,
+            "share": 0.3426842684268427
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1637,
+            "share": 0.30014668133480016
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 699,
+            "share": 0.12816281628162815
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.0003667033370003667
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 12,
+            "share": 0.0022002200220022
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 92,
+            "share": 0.016868353502016868
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 115,
+            "share": 0.021085441877521087
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1028,
+            "share": 0.1884855152181885
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 34,
+            "share": 0.012653516933382954
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 61,
+            "share": 0.022701898027540007
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 66,
+            "share": 0.024562709341272793
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 8,
+            "share": 0.00297729810197246
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 354,
+            "share": 0.13174544101228136
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 224,
+            "share": 0.08336434685522888
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 865,
+            "share": 0.32192035727577223
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 350,
+            "share": 0.13025679196129514
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 725,
+            "share": 0.2698176404912542
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 1869,
+            "n_neg": 34,
+            "lr_plus": 27.08213615479195
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1637,
+            "n_neg": 61,
+            "lr_plus": 13.221215290928
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 699,
+            "n_neg": 66,
+            "lr_plus": 5.217780111344467
+          }
+        },
+        "label": "AlphaGenome AVI (raw)",
+        "role": "foundation_model",
+        "note": "Trained on gnomAD allele frequency classes; inspect AF<0.1% sub-stratum.",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "avi_phred": {
+        "n_pos": 5454,
+        "n_neg": 2687,
+        "n_g_ref": 6312,
+        "auroc": 0.9407700756429694,
+        "auroc_ci95": [
+          0.9351299817985769,
+          0.9458305091922168
+        ],
+        "auprc": 0.9649903480313886,
+        "auprc_ci95": [
+          0.9605510160701662,
+          0.9687709084159417
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 49.7,
+            "Intermediate_3": 27.9,
+            "Moderate_2": 26.1,
+            "Supporting_1": 24.9
+          },
+          "BP4": {
+            "VeryStrong_8": 1.5,
+            "Strong_4": 9.3,
+            "Intermediate_3": 17.5,
+            "Moderate_2": 21.1,
+            "Supporting_1": 23.1
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 29.4,
+            "Moderate_2": 26.6,
+            "Supporting_1": 25.3
+          },
+          "BP4": {
+            "VeryStrong_8": 1.4,
+            "Strong_4": 6.8,
+            "Intermediate_3": 11.0,
+            "Moderate_2": 20.0,
+            "Supporting_1": 21.9
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              27.1,
+              29.702499999999997
+            ],
+            "Moderate_2": [
+              25.7,
+              26.6
+            ],
+            "Supporting_1": [
+              24.6,
+              25.4
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              1.3,
+              6.8
+            ],
+            "Strong_4": [
+              6.6,
+              13.9
+            ],
+            "Intermediate_3": [
+              9.7,
+              18.9
+            ],
+            "Moderate_2": [
+              19.9,
+              21.5
+            ],
+            "Supporting_1": [
+              21.7,
+              23.3
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 1820,
+            "share": 0.3337000366703337
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1618,
+            "share": 0.2966629996332967
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 770,
+            "share": 0.14118078474514117
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.0003667033370003667
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 12,
+            "share": 0.0022002200220022
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 92,
+            "share": 0.016868353502016868
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 129,
+            "share": 0.023652365236523653
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1011,
+            "share": 0.18536853685368537
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 31,
+            "share": 0.011537030145143283
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 58,
+            "share": 0.021585411239300335
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 73,
+            "share": 0.0271678451804987
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 150,
+            "share": 0.05582433941198362
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 213,
+            "share": 0.07927056196501675
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 225,
+            "share": 0.08373650911797544
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 862,
+            "share": 0.32080387048753256
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 372,
+            "share": 0.1384443617417194
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 703,
+            "share": 0.26163007071082994
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 1820,
+            "n_neg": 31,
+            "lr_plus": 28.92425801719957
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1618,
+            "n_neg": 58,
+            "lr_plus": 13.743680689908071
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 770,
+            "n_neg": 73,
+            "lr_plus": 5.196613268632799
+          }
+        },
+        "label": "AlphaGenome AVI (PHRED)",
+        "role": "foundation_model",
+        "note": "PHRED-scaled AVI; same gnomAD frequency training structure as raw AVI.",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "alphamissense": {
+        "n_pos": 5384,
+        "n_neg": 2471,
+        "n_g_ref": 6105,
+        "auroc": 0.9468246969451882,
+        "auroc_ci95": [
+          0.9417483728787365,
+          0.9519294704530954
+        ],
+        "auprc": 0.9724432832681177,
+        "auprc_ci95": [
+          0.9692862621530681,
+          0.975417775091931
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.974,
+            "Intermediate_3": 0.949,
+            "Moderate_2": 0.797,
+            "Supporting_1": 0.547
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.088,
+            "Intermediate_3": 0.091,
+            "Moderate_2": 0.123,
+            "Supporting_1": 0.217
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.987,
+            "Intermediate_3": 0.959,
+            "Moderate_2": 0.873,
+            "Supporting_1": 0.723
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": null,
+            "Supporting_1": null
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.965,
+              0.989
+            ],
+            "Intermediate_3": [
+              0.919975,
+              0.961
+            ],
+            "Moderate_2": [
+              0.758,
+              0.893
+            ],
+            "Supporting_1": [
+              0.479,
+              0.7290249999999999
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": null,
+            "Supporting_1": null
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 1469,
+            "share": 0.2728454680534918
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 809,
+            "share": 0.15026002971768201
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 940,
+            "share": 0.17459138187221396
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 689,
+            "share": 0.12797176820208023
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 0,
+            "share": 0.0
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1477,
+            "share": 0.27433135215453197
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 8,
+            "share": 0.003237555645487657
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 16,
+            "share": 0.006475111290975314
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 42,
+            "share": 0.0169971671388102
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 57,
+            "share": 0.023067583974099554
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 0,
+            "share": 0.0
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 2348,
+            "share": 0.9502225819506273
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 1469,
+            "n_neg": 8,
+            "lr_plus": 84.27514394502228
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 809,
+            "n_neg": 16,
+            "lr_plus": 23.205783339524515
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 940,
+            "n_neg": 42,
+            "lr_plus": 10.271792966815253
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 689,
+            "n_neg": 57,
+            "lr_plus": 5.547688407497198
+          }
+        },
+        "label": "AlphaMissense",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 0.9871653832049871,
+        "coverage_neg": 0.9196129512467436
+      },
+      "revel": {
+        "n_pos": 5439,
+        "n_neg": 2615,
+        "n_g_ref": 6265,
+        "auroc": 0.9686104921013415,
+        "auroc_ci95": [
+          0.9648567064157066,
+          0.9721591063690217
+        ],
+        "auprc": 0.9835000663460391,
+        "auprc_ci95": [
+          0.9810789037744736,
+          0.985830360399514
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.893,
+            "Intermediate_3": 0.833,
+            "Moderate_2": 0.742,
+            "Supporting_1": 0.645
+          },
+          "BP4": {
+            "VeryStrong_8": 0.01,
+            "Strong_4": 0.063,
+            "Intermediate_3": 0.217,
+            "Moderate_2": 0.354,
+            "Supporting_1": 0.458
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.916,
+            "Intermediate_3": 0.856,
+            "Moderate_2": 0.754,
+            "Supporting_1": 0.683
+          },
+          "BP4": {
+            "VeryStrong_8": 0.009,
+            "Strong_4": 0.057,
+            "Intermediate_3": 0.157,
+            "Moderate_2": 0.283,
+            "Supporting_1": 0.371
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.873975,
+              0.923025
+            ],
+            "Intermediate_3": [
+              0.78695,
+              0.858
+            ],
+            "Moderate_2": [
+              0.7189749999999999,
+              0.757
+            ],
+            "Supporting_1": [
+              0.623,
+              0.685
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              0.008,
+              0.05502499999999998
+            ],
+            "Strong_4": [
+              0.057,
+              0.156
+            ],
+            "Intermediate_3": [
+              0.155,
+              0.248
+            ],
+            "Moderate_2": [
+              0.282,
+              0.365
+            ],
+            "Supporting_1": [
+              0.371,
+              0.48
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 2258,
+            "share": 0.4151498437212723
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 975,
+            "share": 0.17926089354660782
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 926,
+            "share": 0.17025188453759882
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 407,
+            "share": 0.07482993197278912
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.00036771465342893915
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 27,
+            "share": 0.004964147821290678
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 80,
+            "share": 0.014708586137157566
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 80,
+            "share": 0.014708586137157566
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 684,
+            "share": 0.12575841147269717
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 7,
+            "share": 0.0026768642447418736
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 20,
+            "share": 0.0076481835564053535
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 34,
+            "share": 0.0130019120458891
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 49,
+            "share": 0.018738049713193115
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 25,
+            "share": 0.009560229445506692
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 412,
+            "share": 0.1575525812619503
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 760,
+            "share": 0.29063097514340347
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 622,
+            "share": 0.23785850860420651
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 268,
+            "share": 0.10248565965583174
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 418,
+            "share": 0.1598470363288719
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 2258,
+            "n_neg": 7,
+            "lr_plus": 155.08812019016102
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 975,
+            "n_neg": 20,
+            "lr_plus": 23.438361831218973
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 926,
+            "n_neg": 34,
+            "lr_plus": 13.094372884288852
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 407,
+            "n_neg": 49,
+            "lr_plus": 3.993474940996807
+          }
+        },
+        "label": "REVEL v1.3",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 0.9972497249724972,
+        "coverage_neg": 0.9732043170822479
+      },
+      "cadd_phred": {
+        "n_pos": 5454,
+        "n_neg": 2687,
+        "n_g_ref": 6312,
+        "auroc": 0.8942748697397962,
+        "auroc_ci95": [
+          0.8862410557207562,
+          0.901898250161823
+        ],
+        "auprc": 0.9284531849770563,
+        "auprc_ci95": [
+          0.9215343611698702,
+          0.9353372964947911
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 37.0,
+            "Moderate_2": 28.9,
+            "Supporting_1": 25.7
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 8.2,
+            "Intermediate_3": 14.4,
+            "Moderate_2": 21.3,
+            "Supporting_1": 22.5
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 32.0,
+            "Supporting_1": 26.0
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.9,
+            "Intermediate_3": 11.6,
+            "Moderate_2": 19.7,
+            "Supporting_1": 22.4
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              27.5975,
+              32.0
+            ],
+            "Supporting_1": [
+              25.5,
+              26.1
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              1.8,
+              11.8
+            ],
+            "Intermediate_3": [
+              11.4,
+              16.9
+            ],
+            "Moderate_2": [
+              19.197499999999998,
+              21.4
+            ],
+            "Supporting_1": [
+              22.3,
+              23.1
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 1225,
+            "share": 0.22460579391272462
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 2519,
+            "share": 0.4618628529519619
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 4,
+            "share": 0.0007334066740007334
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 13,
+            "share": 0.0023835716905023837
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 91,
+            "share": 0.016685001833516684
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 170,
+            "share": 0.03116978364503117
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1432,
+            "share": 0.2625595892922626
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 51,
+            "share": 0.018980275400074433
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 234,
+            "share": 0.08708596948269445
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 265,
+            "share": 0.09862299962783774
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 391,
+            "share": 0.145515444733904
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 631,
+            "share": 0.23483438779307778
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 437,
+            "share": 0.16263490882024562
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 678,
+            "share": 0.252326014142166
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 1225,
+            "n_neg": 51,
+            "lr_plus": 11.833642514578255
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 2519,
+            "n_neg": 234,
+            "lr_plus": 5.303527717444109
+          }
+        },
+        "label": "CADD v1.7 (PHRED)",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "evee": {
+        "n_pos": 5290,
+        "n_neg": 2628,
+        "n_g_ref": 5822,
+        "auroc": 0.9680714524115746,
+        "auroc_ci95": [
+          0.9643791540426928,
+          0.971813003160669
+        ],
+        "auprc": 0.981814535866858,
+        "auprc_ci95": [
+          0.9787903534229961,
+          0.9844750478819678
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.861,
+            "Intermediate_3": 0.795,
+            "Moderate_2": 0.66,
+            "Supporting_1": 0.406
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.014,
+            "Intermediate_3": 0.026,
+            "Moderate_2": 0.071,
+            "Supporting_1": 0.11
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.883,
+            "Intermediate_3": 0.826,
+            "Moderate_2": 0.71,
+            "Supporting_1": 0.468
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.006,
+            "Intermediate_3": 0.016,
+            "Moderate_2": 0.046,
+            "Supporting_1": 0.095
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.835,
+              0.886
+            ],
+            "Intermediate_3": [
+              0.753,
+              0.831
+            ],
+            "Moderate_2": [
+              0.6049749999999999,
+              0.7310249999999999
+            ],
+            "Supporting_1": [
+              0.356,
+              0.539
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.006,
+              0.017
+            ],
+            "Intermediate_3": [
+              0.015,
+              0.043
+            ],
+            "Moderate_2": [
+              0.045,
+              0.075
+            ],
+            "Supporting_1": [
+              0.091,
+              0.158
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 2282,
+            "share": 0.43137996219281666
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 526,
+            "share": 0.09943289224952741
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 696,
+            "share": 0.13156899810964084
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 841,
+            "share": 0.15897920604914934
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 7,
+            "share": 0.0013232514177693763
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 18,
+            "share": 0.003402646502835539
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 52,
+            "share": 0.009829867674858222
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 85,
+            "share": 0.01606805293005671
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 783,
+            "share": 0.14801512287334592
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 11,
+            "share": 0.004185692541856925
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 7,
+            "share": 0.002663622526636225
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 30,
+            "share": 0.01141552511415525
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 85,
+            "share": 0.032343987823439876
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 1045,
+            "share": 0.3976407914764079
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 439,
+            "share": 0.16704718417047185
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 402,
+            "share": 0.15296803652968036
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 235,
+            "share": 0.08942161339421613
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 374,
+            "share": 0.14231354642313546
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 2282,
+            "n_neg": 11,
+            "lr_plus": 103.06059460388384
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 526,
+            "n_neg": 7,
+            "lr_plus": 37.32994869025115
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 696,
+            "n_neg": 30,
+            "lr_plus": 11.525444234404539
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 841,
+            "n_neg": 85,
+            "lr_plus": 4.915262982319582
+          }
+        },
+        "label": "EVEE (ClinVar-supervised, descriptive)",
+        "role": "descriptive_leaked",
+        "note": "Published table trained with ClinVar labels through 2026-03-20.",
+        "coverage_pos": 0.9699303263659699,
+        "coverage_neg": 0.9780424264979531
+      }
+    },
+    "post_2025_03": {
+      "gpn_msa": {
+        "n_pos": 2306,
+        "n_neg": 1512,
+        "n_g_ref": 6312,
+        "auroc": 0.8679521618322572,
+        "auroc_ci95": [
+          0.8560281086090117,
+          0.8791319236509773
+        ],
+        "auprc": 0.8952526883425067,
+        "auprc_ci95": [
+          0.8847322692085142,
+          0.9052004228155768
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 12.78,
+            "Moderate_2": 10.57,
+            "Supporting_1": 9.15
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.97,
+            "Intermediate_3": 3.09,
+            "Moderate_2": 4.57,
+            "Supporting_1": 5.48
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.98,
+            "Supporting_1": 9.58
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": -2.6,
+            "Intermediate_3": 2.16,
+            "Moderate_2": 3.67,
+            "Supporting_1": 5.15
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              10.08,
+              11.05
+            ],
+            "Supporting_1": [
+              8.06975,
+              9.62
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              -2.032,
+              2.82
+            ],
+            "Intermediate_3": [
+              1.9465000000000001,
+              3.65
+            ],
+            "Moderate_2": [
+              3.62975,
+              4.76
+            ],
+            "Supporting_1": [
+              4.94975,
+              5.97
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 429,
+            "share": 0.1860364267129228
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 562,
+            "share": 0.24371205550737207
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 1,
+            "share": 0.0004336513443191674
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 8,
+            "share": 0.003469210754553339
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 19,
+            "share": 0.00823937554206418
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 68,
+            "share": 0.029488291413703384
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1219,
+            "share": 0.528620988725065
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 18,
+            "share": 0.011904761904761904
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 76,
+            "share": 0.05026455026455026
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 46,
+            "share": 0.03042328042328042
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 276,
+            "share": 0.18253968253968253
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 233,
+            "share": 0.1541005291005291
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 248,
+            "share": 0.164021164021164
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 615,
+            "share": 0.40674603174603174
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 429,
+            "n_neg": 18,
+            "lr_plus": 15.627059843885517
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 562,
+            "n_neg": 76,
+            "lr_plus": 4.848587209567718
+          }
+        },
+        "label": "GPN-MSA (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "gpnstar_v": {
+        "n_pos": 2306,
+        "n_neg": 1512,
+        "n_g_ref": 6312,
+        "auroc": 0.8902844890485827,
+        "auroc_ci95": [
+          0.8797538311604876,
+          0.9007128251524664
+        ],
+        "auprc": 0.9147382163806352,
+        "auprc_ci95": [
+          0.9056543053135915,
+          0.9235961217881786
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 12.34,
+            "Moderate_2": 9.91,
+            "Supporting_1": 8.28
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 1.74,
+            "Intermediate_3": 1.99,
+            "Moderate_2": 4.66,
+            "Supporting_1": 5.29
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.37,
+            "Supporting_1": 8.76
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": -6.46,
+            "Intermediate_3": 1.75,
+            "Moderate_2": 3.76,
+            "Supporting_1": 5.02
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              9.34,
+              10.45
+            ],
+            "Supporting_1": [
+              8.15,
+              8.92025
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              -6.46,
+              1.95
+            ],
+            "Intermediate_3": [
+              1.72,
+              3.50025
+            ],
+            "Moderate_2": [
+              3.7,
+              4.890249999999999
+            ],
+            "Supporting_1": [
+              4.99,
+              5.59
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 612,
+            "share": 0.2653946227233304
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 672,
+            "share": 0.29141370338248046
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 6,
+            "share": 0.0026019080659150044
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 32,
+            "share": 0.013876843018213356
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 50,
+            "share": 0.02168256721595837
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 934,
+            "share": 0.40503035559410233
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 26,
+            "share": 0.017195767195767195
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 87,
+            "share": 0.057539682539682536
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 4,
+            "share": 0.0026455026455026454
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 339,
+            "share": 0.22420634920634921
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 330,
+            "share": 0.21825396825396826
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 222,
+            "share": 0.14682539682539683
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 504,
+            "share": 0.3333333333333333
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 612,
+            "n_neg": 26,
+            "lr_plus": 15.4337180599106
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 672,
+            "n_neg": 87,
+            "lr_plus": 5.064569189819661
+          }
+        },
+        "label": "GPN-Star vertebrate v100 (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "gpnstar_m": {
+        "n_pos": 2306,
+        "n_neg": 1512,
+        "n_g_ref": 6312,
+        "auroc": 0.8562831548250022,
+        "auroc_ci95": [
+          0.8428920758821019,
+          0.8686012406673181
+        ],
+        "auprc": 0.8779108564549807,
+        "auprc_ci95": [
+          0.8652329098287339,
+          0.8900773579763326
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 9.78,
+            "Supporting_1": 7.93
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": -6.9,
+            "Intermediate_3": 3.23,
+            "Moderate_2": 4.13,
+            "Supporting_1": 5.13
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 10.86,
+            "Supporting_1": 8.66
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": -3.84,
+            "Moderate_2": 3.77,
+            "Supporting_1": 5.02
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              9.48,
+              11.01025
+            ],
+            "Supporting_1": [
+              7.79,
+              8.72
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              -4.14875,
+              3.7
+            ],
+            "Moderate_2": [
+              3.66,
+              4.78
+            ],
+            "Supporting_1": [
+              4.929749999999999,
+              5.36
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 64,
+            "share": 0.027753686036426712
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 838,
+            "share": 0.3633998265394623
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 31,
+            "share": 0.013443191673894189
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 70,
+            "share": 0.030355594102341718
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 1303,
+            "share": 0.5650477016478751
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 4,
+            "share": 0.0026455026455026454
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 101,
+            "share": 0.0667989417989418
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 31,
+            "share": 0.0205026455026455
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 583,
+            "share": 0.3855820105820106
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 239,
+            "share": 0.15806878306878308
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 554,
+            "share": 0.3664021164021164
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 64,
+            "n_neg": 4,
+            "lr_plus": 10.490893321769297
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 838,
+            "n_neg": 101,
+            "lr_plus": 5.440203343838287
+          }
+        },
+        "label": "GPN-Star mammal m447 (-LLR)",
+        "role": "foundation_model",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "avi": {
+        "n_pos": 2306,
+        "n_neg": 1512,
+        "n_g_ref": 6312,
+        "auroc": 0.9412132830389551,
+        "auroc_ci95": [
+          0.9333997254401906,
+          0.9485119047619047
+        ],
+        "auprc": 0.9562170307281969,
+        "auprc_ci95": [
+          0.9489650552483441,
+          0.9627038804146896
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 2.545,
+            "Intermediate_3": 1.41,
+            "Moderate_2": 1.238,
+            "Supporting_1": 1.115
+          },
+          "BP4": {
+            "VeryStrong_8": -0.443,
+            "Strong_4": 0.169,
+            "Intermediate_3": 0.319,
+            "Moderate_2": 0.653,
+            "Supporting_1": 0.817
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 1.586,
+            "Moderate_2": 1.336,
+            "Supporting_1": 1.148
+          },
+          "BP4": {
+            "VeryStrong_8": -0.574,
+            "Strong_4": 0.076,
+            "Intermediate_3": 0.274,
+            "Moderate_2": 0.542,
+            "Supporting_1": 0.686
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              1.361,
+              1.606125
+            ],
+            "Moderate_2": [
+              1.199,
+              1.351
+            ],
+            "Supporting_1": [
+              1.0729499999999998,
+              1.158
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              -0.574,
+              0.094
+            ],
+            "Strong_4": [
+              0.023,
+              0.2830499999999999
+            ],
+            "Intermediate_3": [
+              0.21897500000000006,
+              0.45907499999999996
+            ],
+            "Moderate_2": [
+              0.533675,
+              0.677
+            ],
+            "Supporting_1": [
+              0.684,
+              0.847
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 508,
+            "share": 0.22029488291413704
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 960,
+            "share": 0.4163052905464007
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 337,
+            "share": 0.14614050303555942
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.0008673026886383347
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 6,
+            "share": 0.0026019080659150044
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 41,
+            "share": 0.01777970511708586
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 51,
+            "share": 0.022116218560277536
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 401,
+            "share": 0.17389418907198612
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 8,
+            "share": 0.005291005291005291
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 44,
+            "share": 0.0291005291005291
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 41,
+            "share": 0.027116402116402115
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 1,
+            "share": 0.0006613756613756613
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 201,
+            "share": 0.13293650793650794
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 230,
+            "share": 0.15211640211640212
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 395,
+            "share": 0.2612433862433862
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 222,
+            "share": 0.14682539682539683
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 370,
+            "share": 0.2447089947089947
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 508,
+            "n_neg": 8,
+            "lr_plus": 41.6357328707719
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 960,
+            "n_neg": 44,
+            "lr_plus": 14.305763620594497
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 337,
+            "n_neg": 41,
+            "lr_plus": 5.389376599750387
+          }
+        },
+        "label": "AlphaGenome AVI (raw)",
+        "role": "foundation_model",
+        "note": "Trained on gnomAD allele frequency classes; inspect AF<0.1% sub-stratum.",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "avi_phred": {
+        "n_pos": 2306,
+        "n_neg": 1512,
+        "n_g_ref": 6312,
+        "auroc": 0.9412132830389551,
+        "auroc_ci95": [
+          0.9333997254401906,
+          0.9485119047619047
+        ],
+        "auprc": 0.9562170307281969,
+        "auprc_ci95": [
+          0.9489650552483441,
+          0.9627038804146896
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 46.6,
+            "Intermediate_3": 27.6,
+            "Moderate_2": 25.7,
+            "Supporting_1": 25.0
+          },
+          "BP4": {
+            "VeryStrong_8": 1.5,
+            "Strong_4": 10.3,
+            "Intermediate_3": 15.1,
+            "Moderate_2": 21.5,
+            "Supporting_1": 23.0
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 30.3,
+            "Moderate_2": 26.6,
+            "Supporting_1": 25.2
+          },
+          "BP4": {
+            "VeryStrong_8": 1.3,
+            "Strong_4": 7.3,
+            "Intermediate_3": 13.7,
+            "Moderate_2": 19.6,
+            "Supporting_1": 21.7
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              26.9,
+              30.6
+            ],
+            "Moderate_2": [
+              25.4,
+              26.8
+            ],
+            "Supporting_1": [
+              24.8,
+              25.3
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              1.2,
+              7.8
+            ],
+            "Strong_4": [
+              4.6,
+              14.0
+            ],
+            "Intermediate_3": [
+              13.1975,
+              18.6
+            ],
+            "Moderate_2": [
+              19.5,
+              21.6
+            ],
+            "Supporting_1": [
+              21.7,
+              23.3
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 520,
+            "share": 0.22549869904596703
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 923,
+            "share": 0.4002601908065915
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 352,
+            "share": 0.15264527320034693
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 2,
+            "share": 0.0008673026886383347
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 6,
+            "share": 0.0026019080659150044
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 40,
+            "share": 0.017346053772766695
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 47,
+            "share": 0.020381613183000868
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 416,
+            "share": 0.18039895923677363
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 8,
+            "share": 0.005291005291005291
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 41,
+            "share": 0.027116402116402115
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 41,
+            "share": 0.027116402116402115
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 72,
+            "share": 0.047619047619047616
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 130,
+            "share": 0.08597883597883597
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 230,
+            "share": 0.15211640211640212
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 387,
+            "share": 0.25595238095238093
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 220,
+            "share": 0.1455026455026455
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 383,
+            "share": 0.2533068783068783
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 520,
+            "n_neg": 8,
+            "lr_plus": 42.619254119687774
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 923,
+            "n_neg": 41,
+            "lr_plus": 14.760814841452838
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 352,
+            "n_neg": 41,
+            "lr_plus": 5.629259831193282
+          }
+        },
+        "label": "AlphaGenome AVI (PHRED)",
+        "role": "foundation_model",
+        "note": "PHRED-scaled AVI; same gnomAD frequency training structure as raw AVI.",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "alphamissense": {
+        "n_pos": 2268,
+        "n_neg": 1390,
+        "n_g_ref": 6105,
+        "auroc": 0.9466878877850101,
+        "auroc_ci95": [
+          0.9392211865428293,
+          0.9540571511045132
+        ],
+        "auprc": 0.9648113877185823,
+        "auprc_ci95": [
+          0.9591172791742093,
+          0.9701283430692313
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.973,
+            "Intermediate_3": 0.933,
+            "Moderate_2": 0.807,
+            "Supporting_1": 0.74
+          },
+          "BP4": {
+            "VeryStrong_8": 0.063,
+            "Strong_4": 0.068,
+            "Intermediate_3": 0.09,
+            "Moderate_2": 0.119,
+            "Supporting_1": 0.252
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 0.959,
+            "Moderate_2": 0.826,
+            "Supporting_1": 0.766
+          },
+          "BP4": {
+            "VeryStrong_8": 0.061,
+            "Strong_4": 0.063,
+            "Intermediate_3": 0.071,
+            "Moderate_2": 0.113,
+            "Supporting_1": 0.198
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              0.892975,
+              0.96
+            ],
+            "Moderate_2": [
+              0.783,
+              0.83705
+            ],
+            "Supporting_1": [
+              0.461975,
+              0.77
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              0.061,
+              0.066
+            ],
+            "Strong_4": [
+              0.064,
+              0.089
+            ],
+            "Intermediate_3": [
+              0.07580000000000003,
+              0.11
+            ],
+            "Moderate_2": [
+              0.113,
+              0.15679999999999997
+            ],
+            "Supporting_1": [
+              0.19940000000000002,
+              0.28
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 975,
+            "share": 0.4298941798941799
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 521,
+            "share": 0.22971781305114639
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 113,
+            "share": 0.04982363315696649
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 4,
+            "share": 0.001763668430335097
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 31,
+            "share": 0.013668430335097001
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 87,
+            "share": 0.03835978835978836
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 537,
+            "share": 0.23677248677248677
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 15,
+            "share": 0.01079136690647482
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 27,
+            "share": 0.019424460431654675
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 11,
+            "share": 0.007913669064748202
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 95,
+            "share": 0.0683453237410072
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 25,
+            "share": 0.017985611510791366
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 114,
+            "share": 0.08201438848920864
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 506,
+            "share": 0.3640287769784173
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 301,
+            "share": 0.21654676258992805
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 296,
+            "share": 0.21294964028776978
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 975,
+            "n_neg": 15,
+            "lr_plus": 39.836860670194
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 521,
+            "n_neg": 27,
+            "lr_plus": 11.826213338559018
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 113,
+            "n_neg": 11,
+            "lr_plus": 6.295895462562129
+          }
+        },
+        "label": "AlphaMissense",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 0.9835212489158717,
+        "coverage_neg": 0.9193121693121693
+      },
+      "revel": {
+        "n_pos": 2302,
+        "n_neg": 1481,
+        "n_g_ref": 6265,
+        "auroc": 0.9607385704002802,
+        "auroc_ci95": [
+          0.954705208194618,
+          0.9668233696911531
+        ],
+        "auprc": 0.9719990122817794,
+        "auprc_ci95": [
+          0.9661616926458363,
+          0.9776408331396891
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.938,
+            "Intermediate_3": 0.861,
+            "Moderate_2": 0.765,
+            "Supporting_1": 0.662
+          },
+          "BP4": {
+            "VeryStrong_8": 0.005,
+            "Strong_4": 0.149,
+            "Intermediate_3": 0.174,
+            "Moderate_2": 0.327,
+            "Supporting_1": 0.464
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.994,
+            "Intermediate_3": 0.876,
+            "Moderate_2": 0.797,
+            "Supporting_1": 0.713
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.005,
+            "Intermediate_3": 0.15,
+            "Moderate_2": 0.242,
+            "Supporting_1": 0.396
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.886,
+              0.994
+            ],
+            "Intermediate_3": [
+              0.8429749999999999,
+              0.879
+            ],
+            "Moderate_2": [
+              0.733,
+              0.8
+            ],
+            "Supporting_1": [
+              0.625,
+              0.716
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.004,
+              0.15327499999999997
+            ],
+            "Intermediate_3": [
+              0.149,
+              0.237
+            ],
+            "Moderate_2": [
+              0.238,
+              0.369
+            ],
+            "Supporting_1": [
+              0.381975,
+              0.488
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 17,
+            "share": 0.007384882710686359
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 1198,
+            "share": 0.5204170286707211
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 393,
+            "share": 0.17072111207645527
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 253,
+            "share": 0.10990443092962641
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 13,
+            "share": 0.005647263249348393
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 28,
+            "share": 0.01216333622936577
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 58,
+            "share": 0.02519548218940052
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 342,
+            "share": 0.14856646394439618
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 15,
+            "share": 0.01012829169480081
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 27,
+            "share": 0.01823092505064146
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 29,
+            "share": 0.019581363943281565
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 4,
+            "share": 0.0027008777852802163
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 652,
+            "share": 0.4402430790006752
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 275,
+            "share": 0.18568534773801484
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 234,
+            "share": 0.15800135043889263
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 245,
+            "share": 0.16542876434841322
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 17,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 1198,
+            "n_neg": 15,
+            "lr_plus": 51.3825079640892
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 393,
+            "n_neg": 27,
+            "lr_plus": 9.36436914760112
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 253,
+            "n_neg": 29,
+            "lr_plus": 5.612705593337129
+          }
+        },
+        "label": "REVEL v1.3",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 0.9982653946227233,
+        "coverage_neg": 0.9794973544973545
+      },
+      "cadd_phred": {
+        "n_pos": 2306,
+        "n_neg": 1512,
+        "n_g_ref": 6312,
+        "auroc": 0.8945322358971535,
+        "auroc_ci95": [
+          0.8846033337807513,
+          0.9051982018956759
+        ],
+        "auprc": 0.9099434382843782,
+        "auprc_ci95": [
+          0.8990088555495775,
+          0.9209789114177775
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 36.0,
+            "Moderate_2": 28.7,
+            "Supporting_1": 25.7
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": 8.4,
+            "Intermediate_3": 13.8,
+            "Moderate_2": 21.2,
+            "Supporting_1": 22.3
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": 30.0,
+            "Supporting_1": 26.9
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": 9.6,
+            "Moderate_2": 17.3,
+            "Supporting_1": 22.0
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": null,
+            "Moderate_2": [
+              27.3,
+              31.0
+            ],
+            "Supporting_1": [
+              25.6,
+              26.9
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": null,
+            "Strong_4": null,
+            "Intermediate_3": [
+              8.8,
+              17.2
+            ],
+            "Moderate_2": [
+              17.2,
+              21.7
+            ],
+            "Supporting_1": [
+              21.9,
+              22.5
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 631,
+            "share": 0.27363399826539464
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 712,
+            "share": 0.30875975715524717
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 8,
+            "share": 0.003469210754553339
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 22,
+            "share": 0.009540329575021683
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 72,
+            "share": 0.031222896790980052
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 861,
+            "share": 0.3733738074588031
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 39,
+            "share": 0.025793650793650792
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 75,
+            "share": 0.0496031746031746
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 317,
+            "share": 0.20965608465608465
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 279,
+            "share": 0.18452380952380953
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 345,
+            "share": 0.22817460317460317
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 457,
+            "share": 0.30224867724867727
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 631,
+            "n_neg": 39,
+            "lr_plus": 10.608579625058377
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 712,
+            "n_neg": 75,
+            "lr_plus": 6.224596704249783
+          }
+        },
+        "label": "CADD v1.7 (PHRED)",
+        "role": "clinical_baseline",
+        "note": "",
+        "coverage_pos": 1.0,
+        "coverage_neg": 1.0
+      },
+      "evee": {
+        "n_pos": 2153,
+        "n_neg": 1376,
+        "n_g_ref": 5822,
+        "auroc": 0.9575826793873342,
+        "auroc_ci95": [
+          0.9513147217511531,
+          0.9633790338859245
+        ],
+        "auprc": 0.9693516511241507,
+        "auprc_ci95": [
+          0.9633869972489153,
+          0.9748190160933142
+        ],
+        "point_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.896,
+            "Intermediate_3": 0.801,
+            "Moderate_2": 0.718,
+            "Supporting_1": 0.486
+          },
+          "BP4": {
+            "VeryStrong_8": 0.0,
+            "Strong_4": 0.005,
+            "Intermediate_3": 0.032,
+            "Moderate_2": 0.071,
+            "Supporting_1": 0.126
+          }
+        },
+        "discounted_thresholds": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": 0.916,
+            "Intermediate_3": 0.87,
+            "Moderate_2": 0.751,
+            "Supporting_1": 0.585
+          },
+          "BP4": {
+            "VeryStrong_8": 0.0,
+            "Strong_4": 0.004,
+            "Intermediate_3": 0.014,
+            "Moderate_2": 0.041,
+            "Supporting_1": 0.102
+          }
+        },
+        "bootstrap_intervals_95": {
+          "PP3": {
+            "VeryStrong_8": null,
+            "Strong_4": [
+              0.86495,
+              0.92405
+            ],
+            "Intermediate_3": [
+              0.755975,
+              0.8730249999999999
+            ],
+            "Moderate_2": [
+              0.671,
+              0.76
+            ],
+            "Supporting_1": [
+              0.375975,
+              0.6061249999999999
+            ]
+          },
+          "BP4": {
+            "VeryStrong_8": [
+              0.0,
+              0.003
+            ],
+            "Strong_4": [
+              0.004,
+              0.02
+            ],
+            "Intermediate_3": [
+              0.013,
+              0.042
+            ],
+            "Moderate_2": [
+              0.041,
+              0.096
+            ],
+            "Supporting_1": [
+              0.101,
+              0.19002499999999997
+            ]
+          }
+        },
+        "pathogenic_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 746,
+            "share": 0.346493265211333
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 231,
+            "share": 0.1072921504876916
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 364,
+            "share": 0.16906641895030192
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 288,
+            "share": 0.13376683697166744
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 0,
+            "share": 0.0
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 3,
+            "share": 0.0013934045517882026
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 11,
+            "share": 0.005109150023223409
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 18,
+            "share": 0.008360427310729215
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 43,
+            "share": 0.019972131908964234
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 449,
+            "share": 0.20854621458430098
+          }
+        },
+        "benign_reach": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "count": 0,
+            "share": 0.0
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "count": 5,
+            "share": 0.003633720930232558
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "count": 5,
+            "share": 0.003633720930232558
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "count": 15,
+            "share": 0.010901162790697675
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "count": 40,
+            "share": 0.029069767441860465
+          },
+          "BP4_VeryStrong_8": {
+            "points": -8,
+            "count": 1,
+            "share": 0.0007267441860465116
+          },
+          "BP4_Strong_4": {
+            "points": -4,
+            "count": 390,
+            "share": 0.28343023255813954
+          },
+          "BP4_Intermediate_3": {
+            "points": -3,
+            "count": 266,
+            "share": 0.1933139534883721
+          },
+          "BP4_Moderate_2": {
+            "points": -2,
+            "count": 216,
+            "share": 0.1569767441860465
+          },
+          "BP4_Supporting_1": {
+            "points": -1,
+            "count": 195,
+            "share": 0.14171511627906977
+          },
+          "Indeterminate_0": {
+            "points": 0,
+            "count": 243,
+            "share": 0.17659883720930233
+          }
+        },
+        "interval_lr": {
+          "PP3_VeryStrong_8": {
+            "points": 8,
+            "n_pos": 0,
+            "n_neg": 0,
+            "lr_plus": null
+          },
+          "PP3_Strong_4": {
+            "points": 4,
+            "n_pos": 746,
+            "n_neg": 5,
+            "lr_plus": 95.35494658615885
+          },
+          "PP3_Intermediate_3": {
+            "points": 3,
+            "n_pos": 231,
+            "n_neg": 5,
+            "lr_plus": 29.52679981421273
+          },
+          "PP3_Moderate_2": {
+            "points": 2,
+            "n_pos": 364,
+            "n_neg": 15,
+            "lr_plus": 15.509026165041028
+          },
+          "PP3_Supporting_1": {
+            "points": 1,
+            "n_pos": 288,
+            "n_neg": 40,
+            "lr_plus": 4.60157919182536
+          }
+        },
+        "label": "EVEE (ClinVar-supervised, descriptive)",
+        "role": "descriptive_leaked",
+        "note": "Published table trained with ClinVar labels through 2026-03-20.",
+        "coverage_pos": 0.9336513443191674,
+        "coverage_neg": 0.91005291005291
+      }
+    }
+  },
+  "bergquist_2025_post_hoc": {
+    "post_2023_12": {
+      "alphamissense": {
+        "BP4_Intermediate_3": {
+          "n_pos": 6,
+          "n_neg": 657,
+          "lr_plus": 0.006084361528294884,
+          "pos_share": 0.0011033468186833395,
+          "neg_share": 0.18134142975434722
+        },
+        "BP4_Moderate_2": {
+          "n_pos": 42,
+          "n_neg": 1012,
+          "lr_plus": 0.027650176550027838,
+          "pos_share": 0.007723427730783376,
+          "neg_share": 0.27932652497929894
+        },
+        "BP4_Supporting_1": {
+          "n_pos": 158,
+          "n_neg": 838,
+          "lr_plus": 0.12561520143320978,
+          "pos_share": 0.029054799558661273,
+          "neg_share": 0.23130002760143528
+        },
+        "Indeterminate_0": {
+          "n_pos": 1540,
+          "n_neg": 931,
+          "lr_plus": 1.1020471369670959,
+          "pos_share": 0.2831923501287238,
+          "neg_share": 0.25696936240684515
+        },
+        "PP3_Supporting_1": {
+          "n_pos": 717,
+          "n_neg": 57,
+          "lr_plus": 8.380567546117963,
+          "pos_share": 0.13184994483265908,
+          "neg_share": 0.01573281810654154
+        },
+        "PP3_Moderate_2": {
+          "n_pos": 949,
+          "n_neg": 47,
+          "lr_plus": 13.452329157309086,
+          "pos_share": 0.17451268848841486,
+          "neg_share": 0.012972674579078112
+        },
+        "PP3_Intermediate_3": {
+          "n_pos": 643,
+          "n_neg": 14,
+          "lr_plus": 30.599340618925023,
+          "pos_share": 0.11824200073556454,
+          "neg_share": 0.0038642009384487995
+        },
+        "PP3_Strong_4": {
+          "n_pos": 1299,
+          "n_neg": 5,
+          "lr_plus": 173.0885251930857,
+          "pos_share": 0.23887458624494298,
+          "neg_share": 0.001380071763731714
+        }
+      },
+      "revel": {
+        "BP4_Strong_4": {
+          "n_pos": 0,
+          "n_neg": 107,
+          "lr_plus": 0.0,
+          "pos_share": 0.0,
+          "neg_share": 0.027871841625423287
+        },
+        "BP4_Intermediate_3": {
+          "n_pos": 2,
+          "n_neg": 528,
+          "lr_plus": 0.002647308695916014,
+          "pos_share": 0.0003640997633351538,
+          "neg_share": 0.13753581661891118
+        },
+        "BP4_Moderate_2": {
+          "n_pos": 45,
+          "n_neg": 1412,
+          "lr_plus": 0.02227339044439253,
+          "pos_share": 0.008192244675040962,
+          "neg_share": 0.3678041156551185
+        },
+        "BP4_Supporting_1": {
+          "n_pos": 74,
+          "n_neg": 710,
+          "lr_plus": 0.0728420037794581,
+          "pos_share": 0.013471691243400691,
+          "neg_share": 0.184943995832248
+        },
+        "Indeterminate_0": {
+          "n_pos": 606,
+          "n_neg": 881,
+          "lr_plus": 0.48073443179049674,
+          "pos_share": 0.1103222282905516,
+          "neg_share": 0.2294868455326908
+        },
+        "PP3_Supporting_1": {
+          "n_pos": 733,
+          "n_neg": 114,
+          "lr_plus": 4.493736845299121,
+          "pos_share": 0.1334425632623339,
+          "neg_share": 0.02969523313362855
+        },
+        "PP3_Moderate_2": {
+          "n_pos": 1124,
+          "n_neg": 63,
+          "lr_plus": 12.469076082402134,
+          "pos_share": 0.20462406699435645,
+          "neg_share": 0.016410523573847355
+        },
+        "PP3_Intermediate_3": {
+          "n_pos": 1022,
+          "n_neg": 14,
+          "lr_plus": 51.01893318769342,
+          "pos_share": 0.1860549790642636,
+          "neg_share": 0.0036467830164105238
+        },
+        "PP3_Strong_4": {
+          "n_pos": 1887,
+          "n_neg": 10,
+          "lr_plus": 131.8804478427089,
+          "pos_share": 0.3435281267067176,
+          "neg_share": 0.0026048450117218025
+        }
+      }
+    },
+    "post_2023_12_af001": {
+      "alphamissense": {
+        "BP4_Intermediate_3": {
+          "n_pos": 6,
+          "n_neg": 470,
+          "lr_plus": 0.005858967468622554,
+          "pos_share": 0.001114413075780089,
+          "neg_share": 0.19020639417239985
+        },
+        "BP4_Moderate_2": {
+          "n_pos": 39,
+          "n_neg": 666,
+          "lr_plus": 0.026875594018981836,
+          "pos_share": 0.00724368499257058,
+          "neg_share": 0.2695265074868474
+        },
+        "BP4_Supporting_1": {
+          "n_pos": 152,
+          "n_neg": 541,
+          "lr_plus": 0.12894782377030045,
+          "pos_share": 0.02823179791976226,
+          "neg_share": 0.2189397005261028
+        },
+        "Indeterminate_0": {
+          "n_pos": 1511,
+          "n_neg": 658,
+          "lr_plus": 1.0539166482248428,
+          "pos_share": 0.28064635958395245,
+          "neg_share": 0.26628895184135976
+        },
+        "PP3_Supporting_1": {
+          "n_pos": 709,
+          "n_neg": 41,
+          "lr_plus": 7.936519225890624,
+          "pos_share": 0.13168647845468054,
+          "neg_share": 0.01659247268312424
+        },
+        "PP3_Moderate_2": {
+          "n_pos": 945,
+          "n_neg": 40,
+          "lr_plus": 10.842751671619613,
+          "pos_share": 0.17552005943536403,
+          "neg_share": 0.016187778227438283
+        },
+        "PP3_Intermediate_3": {
+          "n_pos": 640,
+          "n_neg": 10,
+          "lr_plus": 29.37295690936107,
+          "pos_share": 0.1188707280832095,
+          "neg_share": 0.004046944556859571
+        },
+        "PP3_Strong_4": {
+          "n_pos": 1298,
+          "n_neg": 4,
+          "lr_plus": 148.9300705794948,
+          "pos_share": 0.2410846953937593,
+          "neg_share": 0.0016187778227438284
+        }
+      },
+      "revel": {
+        "BP4_Strong_4": {
+          "n_pos": 0,
+          "n_neg": 58,
+          "lr_plus": 0.0,
+          "pos_share": 0.0,
+          "neg_share": 0.022179732313575527
+        },
+        "BP4_Intermediate_3": {
+          "n_pos": 2,
+          "n_neg": 330,
+          "lr_plus": 0.0029138600567172,
+          "pos_share": 0.00036771465342893915,
+          "neg_share": 0.12619502868068833
+        },
+        "BP4_Moderate_2": {
+          "n_pos": 42,
+          "n_neg": 961,
+          "lr_plus": 0.021012539222736937,
+          "pos_share": 0.007722007722007722,
+          "neg_share": 0.3674952198852772
+        },
+        "BP4_Supporting_1": {
+          "n_pos": 72,
+          "n_neg": 497,
+          "lr_plus": 0.0696512222812884,
+          "pos_share": 0.013237727523441808,
+          "neg_share": 0.19005736137667303
+        },
+        "Indeterminate_0": {
+          "n_pos": 590,
+          "n_neg": 629,
+          "lr_plus": 0.45097659224390996,
+          "pos_share": 0.10847582276153704,
+          "neg_share": 0.24053537284894838
+        },
+        "PP3_Supporting_1": {
+          "n_pos": 720,
+          "n_neg": 83,
+          "lr_plus": 4.170681623349437,
+          "pos_share": 0.13237727523441808,
+          "neg_share": 0.03173996175908222
+        },
+        "PP3_Moderate_2": {
+          "n_pos": 1112,
+          "n_neg": 40,
+          "lr_plus": 13.365876080161796,
+          "pos_share": 0.20444934730649017,
+          "neg_share": 0.015296367112810707
+        },
+        "PP3_Intermediate_3": {
+          "n_pos": 1018,
+          "n_neg": 11,
+          "lr_plus": 44.49464306607164,
+          "pos_share": 0.18716675859533002,
+          "neg_share": 0.004206500956022944
+        },
+        "PP3_Strong_4": {
+          "n_pos": 1883,
+          "n_neg": 6,
+          "lr_plus": 150.88695838695838,
+          "pos_share": 0.3462033462033462,
+          "neg_share": 0.002294455066921606
+        }
+      }
+    },
+    "post_2025_03": {
+      "alphamissense": {
+        "BP4_Intermediate_3": {
+          "n_pos": 3,
+          "n_neg": 219,
+          "lr_plus": 0.00839554492522529,
+          "pos_share": 0.0013227513227513227,
+          "neg_share": 0.15755395683453238
+        },
+        "BP4_Moderate_2": {
+          "n_pos": 22,
+          "n_neg": 392,
+          "lr_plus": 0.03439603354569341,
+          "pos_share": 0.009700176366843033,
+          "neg_share": 0.2820143884892086
+        },
+        "BP4_Supporting_1": {
+          "n_pos": 74,
+          "n_neg": 348,
+          "lr_plus": 0.1303239473737558,
+          "pos_share": 0.03262786596119929,
+          "neg_share": 0.2503597122302158
+        },
+        "Indeterminate_0": {
+          "n_pos": 594,
+          "n_neg": 362,
+          "lr_plus": 1.0056564062088924,
+          "pos_share": 0.2619047619047619,
+          "neg_share": 0.260431654676259
+        },
+        "PP3_Supporting_1": {
+          "n_pos": 305,
+          "n_neg": 17,
+          "lr_plus": 10.995694574125947,
+          "pos_share": 0.13447971781305115,
+          "neg_share": 0.01223021582733813
+        },
+        "PP3_Moderate_2": {
+          "n_pos": 401,
+          "n_neg": 17,
+          "lr_plus": 14.456634505654113,
+          "pos_share": 0.17680776014109348,
+          "neg_share": 0.01223021582733813
+        },
+        "PP3_Intermediate_3": {
+          "n_pos": 272,
+          "n_neg": 8,
+          "lr_plus": 20.83774250440917,
+          "pos_share": 0.11992945326278659,
+          "neg_share": 0.0057553956834532375
+        },
+        "PP3_Strong_4": {
+          "n_pos": 568,
+          "n_neg": 3,
+          "lr_plus": 116.03762492651381,
+          "pos_share": 0.25044091710758376,
+          "neg_share": 0.002158273381294964
+        }
+      },
+      "revel": {
+        "BP4_Strong_4": {
+          "n_pos": 0,
+          "n_neg": 44,
+          "lr_plus": 0.0,
+          "pos_share": 0.0,
+          "neg_share": 0.029709655638082377
+        },
+        "BP4_Intermediate_3": {
+          "n_pos": 1,
+          "n_neg": 178,
+          "lr_plus": 0.0036143460986538326,
+          "pos_share": 0.0004344048653344917,
+          "neg_share": 0.12018906144496962
+        },
+        "BP4_Moderate_2": {
+          "n_pos": 21,
+          "n_neg": 530,
+          "lr_plus": 0.025491369276920806,
+          "pos_share": 0.009122502172024326,
+          "neg_share": 0.35786630654962864
+        },
+        "BP4_Supporting_1": {
+          "n_pos": 35,
+          "n_neg": 270,
+          "lr_plus": 0.08339768960967918,
+          "pos_share": 0.015204170286707211,
+          "neg_share": 0.18230925050641458
+        },
+        "Indeterminate_0": {
+          "n_pos": 259,
+          "n_neg": 358,
+          "lr_plus": 0.4654429716205,
+          "pos_share": 0.11251086012163336,
+          "neg_share": 0.24172856178257934
+        },
+        "PP3_Supporting_1": {
+          "n_pos": 306,
+          "n_neg": 52,
+          "lr_plus": 3.785888525028404,
+          "pos_share": 0.13292788879235448,
+          "neg_share": 0.035111411208642807
+        },
+        "PP3_Moderate_2": {
+          "n_pos": 480,
+          "n_neg": 36,
+          "lr_plus": 8.57804807413843,
+          "pos_share": 0.20851433536055602,
+          "neg_share": 0.024307900067521943
+        },
+        "PP3_Intermediate_3": {
+          "n_pos": 415,
+          "n_neg": 8,
+          "lr_plus": 33.37396828844483,
+          "pos_share": 0.18027801911381408,
+          "neg_share": 0.0054017555705604325
+        },
+        "PP3_Strong_4": {
+          "n_pos": 785,
+          "n_neg": 5,
+          "lr_plus": 101.00651607298002,
+          "pos_share": 0.341007819287576,
+          "neg_share": 0.00337609723160027
+        }
+      }
+    }
+  }
+}
