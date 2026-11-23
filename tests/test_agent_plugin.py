@@ -216,16 +216,17 @@ def test_genomics_server_is_pinned_to_one_commit():
 
 
 def test_rewirebench_server_is_pinned_and_reads_the_plugin_recipes():
-    """No rewirebench release has `rewirebench mcp` yet, so the pin is a commit on main."""
+    """The plugin pins the released rewirebench PyPI version matching packages/rewirebench."""
+    import tomllib
+
+    version = tomllib.loads((ROOT / "packages/rewirebench/pyproject.toml").read_text())["project"]["version"]
     args = server_args("rewirebench")
     source = args[args.index("--from") + 1]
-    match = re.fullmatch(
-        r"rewirebench\[mcp\] @ git\+https://github\.com/rewire-bio/rewire-benchmarks@"
-        r"([0-9a-f]{40})#subdirectory=packages/rewirebench", source)
-    assert match, source
+    assert source == f"rewirebench[mcp]=={version}", source
     assert args[args.index("--from") + 2:] == [
         "rewirebench", "mcp", "--recipes-dir", f"{PLUGIN_ROOT}/recipes"]
-    assert match.group(1) in (ROOT / "README.md").read_text()
+    readme = (ROOT / "README.md").read_text()
+    assert f"v{version}" in readme and f"rewirebench[mcp]=={version}" in readme
 
 
 # Every backticked lower-case word in the new skills, the commands and the agent is either
@@ -233,8 +234,8 @@ def test_rewirebench_server_is_pinned_and_reads_the_plugin_recipes():
 # word must be added here by hand, so a tool that does not exist cannot be named unnoticed.
 NOT_TOOLS = {
     "allow_partial", "average_precision_sklearn", "batch_size", "budget_bytes",
-    "confirmed_amount", "expected_wall_seconds", "full_protocol", "kg_record_id",
-    "kg_release_id", "limit_enforced", "model_name", "plan_sha256", "pod_specs",
+    "confirmed_amount", "expected_wall_seconds", "full_protocol", "install_metadata",
+    "kg_record_id", "kg_release_id", "limit_enforced", "model_name", "plan_sha256", "pod_specs",
     "precision_at_capacity", "run_id", "started_by", "synthetic_smoke", "timeout_seconds",
     "training_overlap", "variant_type",
     "20", "assembly", "backend", "chr20", "command", "commits", "contig", "cost", "cpu",

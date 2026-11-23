@@ -9,8 +9,8 @@ It runs code and can only run on your machine. There is no hosted version.
 ## Install and start
 
 The server needs the `mcp` extra of rewirebench (the official MCP Python SDK). In a checkout
-of this repository `uv sync` installs it with the development tools. rewirebench is not on
-PyPI yet, so elsewhere install the wheel from a release as `rewirebench[mcp]`.
+of this repository `uv sync` installs it with the development tools. Outside a checkout, install
+from PyPI as `uvx --from 'rewirebench[mcp]==0.6.0' rewirebench mcp` or install the release wheel.
 
 ```sh
 uv run rewirebench mcp               # speaks MCP on stdin and stdout
@@ -30,19 +30,17 @@ For an MCP client, from a checkout of this repository:
 }
 ```
 
-The wheel ships no recipes. Outside a checkout, `list_protocols`, `list_models`, `prepare`,
-`evaluate` and a model `run` work, and the recipe tools say that no recipes directory was
-found. Pass `--recipes-dir` or set `REWIREBENCH_RECIPES_DIR` to use recipes from a checkout.
+The released wheel ships packaged copies of `recipes/` as a fallback outside a checkout.
+Pass `--recipes-dir` or set `REWIREBENCH_RECIPES_DIR` to use recipes from another folder.
 
-The `bio-model-benchmarks` plugin starts this server from its `.mcp.json`. No release has the
-command yet, so the plugin installs rewirebench from a pinned commit on `main` with `uvx`, and
-passes `--recipes-dir ${CLAUDE_PLUGIN_ROOT}/recipes`, a byte-identical copy of `recipes/` that
-ships inside the plugin. A server started that way is an installed wheel. Its receipts name the
-pinned commit, read from the install metadata (`code.commit_source` is `install_metadata`),
-with `code.dirty` null, so they verify but cannot pass `strict`. `recipe.commit` is null when
-the plugin folder is a plain copy; if the folder is inside a git work tree whose HEAD holds the
-recipe file, it is that commit. A recorded run through these tools is in
-[demo/](demo/README.md).
+The `bio-model-benchmarks` plugin starts this server from its `.mcp.json` using the pinned PyPI
+release (`rewirebench[mcp]==0.6.0`) with `uvx`, and passes `--recipes-dir ${CLAUDE_PLUGIN_ROOT}/recipes`,
+a byte-identical copy of `recipes/` that ships inside the plugin. A server started from a PyPI
+wheel has `code.commit` and `code.commit_source` set to null (whereas a wheel installed from a
+git URL reads `code.commit` from `install_metadata`) and `code.dirty` null, so receipts verify
+but report `commits` as not checked under `strict`. `recipe.commit` is null when the plugin
+folder is a plain copy; if the folder is inside a git work tree whose HEAD holds the recipe
+file, it is that commit. A recorded run through these tools is in [demo/](demo/README.md).
 
 ## Tools
 
