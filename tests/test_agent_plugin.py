@@ -246,7 +246,7 @@ NOT_TOOLS = {
 WORD = r"`([a-z0-9]+(?:_[a-z0-9]+)*)`"
 # The tools of genomics-mcp at the commit the plugin pins: the values of the Operation enum
 # in src/genomics_mcp/registry.py, which server.py registers one tool for, read at 3b395a9 on
-# 2026-11-21. And of rewirebench at the commit it pins (mcp_server.TOOLS at d74a030). A
+# 2026-11-21. And of rewirebench at the commit it pins (mcp_server.TOOLS at 6d98f09). A
 # recording that lists another tool was not made with the pinned servers. Update these when
 # a pin is raised.
 GENOMICS_TOOLS = {

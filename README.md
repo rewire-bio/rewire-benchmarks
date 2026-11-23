@@ -194,7 +194,7 @@ commands and one agent definition. Every server runs on your machine.
 | --- | --- | --- |
 | `rewire-benchmark-graph` | The read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp): published results, provenance, disagreements | rdf-kg-mcp v0.4.0 |
 | `genomics-mcp` | [Genomic data](https://github.com/rewire-bio/genomics-mcp), GIAB and HPRC truth sets, synthetic-data protocols | commit `3b395a9648aa57610623c54c4d54dd933470b067` (no release has the truth-set tools yet) |
-| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `d74a030ee735f26f7214f245de107b245a47a664` (no release has `rewirebench mcp` yet) |
+| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | commit `6d98f09c4dec545891acd25cdbbf77d390a575cb` (no release has `rewirebench mcp` yet) |
 
 | Skill | Command | What it does |
 | --- | --- | --- |

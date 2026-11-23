@@ -10,7 +10,7 @@
     "selected": 8324,
     "unscored_file_scope": "selected inputs only; not_selected counted separately"
   },
-  "created_at": "2026-11-22T20:47:38.819374+00:00",
+  "created_at": "2026-11-23T10:27:56.275130+00:00",
   "dataset_id": "mfass-assay-pairs-v2",
   "environment": {
     "architecture": "arm64",
@@ -31,7 +31,7 @@
     },
     "batch_size": 32,
     "fitting": "train_only",
-    "inference_and_fit_seconds": 1.8073882500175387,
+    "inference_and_fit_seconds": 1.8033093749545515,
     "mode": "local_adapter",
     "prediction_type": "scalar"
   },
@@ -130,6 +130,6 @@
   "schema_version": "1.0",
   "scope": "full",
   "timing_seconds": {
-    "evaluation": 0.39887558412738144
+    "evaluation": 0.37731975014321506
   }
 }
