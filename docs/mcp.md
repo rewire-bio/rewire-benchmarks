@@ -212,8 +212,8 @@ the recipe's `linux/arm64` digest and the machine is arm64. Anywhere else it is 
 is not a way to run a GPU recipe on some other machine. CUDA devices stay visible to the steps
 only on this path.
 
-Known gaps: no `linux/arm64` image is published, so no recipe in `recipes/` names `spark`. A
-spark recipe's inputs must be URLs (`--inputs` and `repo_path` inputs are refused). The receipt
+Known gaps: the published `linux/arm64` image is CPU only and no recipe in `recipes/` names
+`spark`. A spark recipe's inputs must be URLs (`--inputs` and `repo_path` inputs are refused). The receipt
 written in the image has no code or recipe commit, so it cannot pass `receipt verify --strict`
 yet. Gated weights have no way in: the step environment passes no token.
 

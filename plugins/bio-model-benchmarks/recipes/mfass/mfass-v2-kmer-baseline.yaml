@@ -19,13 +19,9 @@ environment:
   python: ">=3.11"
   images:
     linux/amd64:
-      missing:
-        reason: unavailable
-        note: No rewirebench image is published. CI builds containers/Containerfile without pushing it.
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:beb2537c26950553f0df1e61b161507d484511988848f7973b0190285fd4f55c
     linux/arm64:
-      missing:
-        reason: unavailable
-        note: No linux/arm64 image has been built.
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:0d9636331a18f40aadb35bf8f118b1811fd45491aafbeef6fa0db4ba9ade998c
 hardware_floor:
   accelerator:
     kind: none
@@ -110,4 +106,4 @@ backends:
   local: {}
 limitations:
   - A rerun with the project's own code and data, not an independent reproduction by another group.
-  - Runs in the host Python environment because no container image is published yet.
+  - The local backend runs in the host Python environment, not in the published image the recipe names.

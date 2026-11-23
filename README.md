@@ -323,10 +323,10 @@ docker pull ghcr.io/rewire-bio/rewirebench@sha256:<digest>
 docker run --rm --network none --read-only ghcr.io/rewire-bio/rewirebench@sha256:<digest> protocols
 ```
 
-The digests are in the summary of each run of the workflow on main. The recipes do not name
-a digest yet: [docs/spark.md](docs/spark.md#published-images) lists the steps after the first
-push, including the one manual step (the owner makes the package public in its settings) and
-the command that writes a digest into a recipe. There is no GPU image.
+The digests are in the summary of each run of the workflow on main. Both recipes name the
+`core` digests of the first push: [docs/spark.md](docs/spark.md#published-images) lists them,
+and gives the command that writes a digest into a recipe. The package is public, which the
+owner sets once in the package settings. There is no GPU image.
 
 ## Cleaning local reference data
 
