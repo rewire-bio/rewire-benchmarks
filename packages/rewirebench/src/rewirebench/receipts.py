@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import base64
 import contextlib
+import csv
 import datetime
 import hashlib
 import importlib.metadata
@@ -386,26 +387,30 @@ def files_as_installed(
     folder is missing from the list. It compares the install with its own ``RECORD``, so
     it finds an edit made after the install, not a ``RECORD`` rewritten to match.
     """
-    files = distribution.files if distribution is not None else None
-    if not files:
+    record = distribution.read_text("RECORD") if distribution is not None else None
+    if not record:
         return False
     listed: set[Path] = set()
-    for item in files:
-        path = Path(str(distribution.locate_file(item))).resolve()
+    for row in csv.reader(record.splitlines()):
+        if not row:
+            continue
+        name = row[0]
+        digest_spec = row[1] if len(row) > 1 else ""
+        path = Path(str(distribution.locate_file(name))).resolve()
         listed.add(path)
-        if item.hash is None:
+        if not digest_spec:
             if path.suffix == ".py":
                 return False
             continue
-        if item.hash.mode != "sha256":
+        if not digest_spec.startswith("sha256="):
             return False
         try:
             digest = hashlib.sha256(path.read_bytes()).digest()
         except OSError:
             return False
-        if base64.urlsafe_b64encode(digest).rstrip(b"=").decode() != item.hash.value:
+        if base64.urlsafe_b64encode(digest).rstrip(b"=").decode() != digest_spec.removeprefix("sha256="):
             return False
-    return all(path.resolve() in listed for path in package.rglob("*.py"))
+    return bool(listed) and all(path.resolve() in listed for path in package.rglob("*.py"))
 
 
 def _install_unchanged() -> bool:

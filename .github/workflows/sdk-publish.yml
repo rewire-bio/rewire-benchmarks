@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Reviewed merged release tag, for example v0.5.0
+        description: Reviewed merged release tag, for example v0.6.0
         required: true
       preparation_run_id:
         description: Successful Prepare SDK release artifacts run ID
@@ -84,3 +84,65 @@ jobs:
             dist/publication/validation-receipt.json
             dist/publication/SHA256SUMS
           retention-days: 30
+
+  pypi:
+    needs: publication
+    if: inputs.dry_run == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      id-token: write
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install uv==0.8.2
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.preparation_run_id }}
+          name: reviewed-sdk-release-candidate-core
+          path: dist/prepared
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdk-publication-plan
+          path: dist/plan
+      - name: Verify distributions against publication plan
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, shutil
+          from pathlib import Path
+
+          plans = list(Path("dist/plan").rglob("publication-plan.json"))
+          assert len(plans) == 1, f"Expected one publication-plan.json, found {plans}"
+          plan = json.loads(plans[0].read_text())
+          assert plan["publication_status"] == "published", plan["publication_status"]
+          assert plan["tag"] == os.environ["RELEASE_TAG"], plan["tag"]
+
+          dist_assets = [
+              asset for asset in plan["assets"]
+              if asset["name"].endswith(".whl") or asset["name"].endswith(".tar.gz")
+          ]
+          assert {a["name"].split(".")[-1] for a in dist_assets} == {"whl", "gz"}
+          assert len(dist_assets) == 2, dist_assets
+
+          pypi_dir = Path("dist/pypi")
+          pypi_dir.mkdir(parents=True, exist_ok=True)
+          for asset in dist_assets:
+              src = Path("dist/prepared") / asset["name"]
+              assert src.is_file(), f"Missing distribution {src}"
+              data = src.read_bytes()
+              assert len(data) == asset["bytes"], asset["name"]
+              assert hashlib.sha256(data).hexdigest() == asset["sha256"], asset["name"]
+              shutil.copy2(src, pypi_dir / asset["name"])
+          PY
+      - name: Publish distributions to PyPI via trusted publishing
+        run: uv publish --trusted-publishing always dist/pypi/*
