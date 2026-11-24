@@ -72,7 +72,7 @@
       "command": [
         "uvx",
         "--from",
-        "rewirebench[mcp]==0.6.0",
+        "rewirebench[mcp]==0.6.1",
         "rewirebench",
         "mcp",
         "--recipes-dir",
@@ -100,37 +100,37 @@
   "calls": [
     {
       "number": 1,
-      "at": "2026-11-23T15:43:01+00:00",
+      "at": "2026-11-24T13:26:52+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "dataset_info",
       "arguments": {},
       "is_error": false,
       "result": {
         "dataset": "rewire-benchmark-data",
-        "version": "2026-11-23-ce0bfe468ac4",
+        "version": "2026-11-23-066f267ebcf4",
         "title": "Rewire benchmark data",
         "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, discrepancies between studies' results in a derived graph, and what the release serves as use-case evidence in a release graph.",
         "license": null,
         "homepage": "https://github.com/rewire-bio/rewire-benchmark-data",
-        "manifest_sha256": "8922ec7f3032ed8c83a8694fa89aca51079703c563b8527d42d89db5cfafe356",
-        "statements": 2785342,
+        "manifest_sha256": "fd92288d5130df6bc62577126cde98136b078faf39d3e94e7406da26d2b711b2",
+        "statements": 2804072,
         "graphs": [
           {
             "iri": "https://benchmarks.rewire.it/graph/asserted",
             "role": "asserted",
-            "statements": 2454510,
+            "statements": 2470124,
             "description": "Source facts."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/derived",
             "role": "derived",
-            "statements": 16252,
+            "statements": 16696,
             "description": "Discrepancies between studies' results found by the rules in scripts/kg/contradictions.py, with their review state and follow-up actions. Each is a lead for review, not a finding that a result is wrong."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/inferred",
             "role": "inferred",
-            "statements": 300663,
+            "statements": 302910,
             "description": "Facts derived from the asserted graph by the ontology when the bundle was built."
           },
           {
@@ -142,7 +142,7 @@
           {
             "iri": "https://benchmarks.rewire.it/graph/release",
             "role": "release",
-            "statements": 5600,
+            "statements": 6025,
             "description": "What the release serves, copied from its use-case file: the evaluations behind each active direct or proxy relevance judgement (rb:servedEvaluation), each use case's reviewed baseline methods (rb:servedBaseline), and the sources of run receipts on executed full-protocol run recipes (rb:runReceipt). A judgement in the asserted graph with no served evaluation is withheld."
           }
         ],
@@ -195,17 +195,17 @@
           "vocabulary_sha256": "34c9e844e8f221def805ab0ecf6d5389a1af0a4b1d1d7b2ef84926a46c00ef3a",
           "kept": "New statements about records in the rewire vocabulary: rb: links and rb: types. Superclasses and superproperties from imported vocabularies are left to the ontology graph. Protected links are never inferred.",
           "by_predicate": {
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9656,
-            "https://benchmarks.rewire.it/vocab#contains": 1537,
-            "https://benchmarks.rewire.it/vocab#hasResult": 51999,
-            "https://benchmarks.rewire.it/vocab#resultFor": 51999,
-            "https://benchmarks.rewire.it/vocab#resultOn": 51999,
-            "https://benchmarks.rewire.it/vocab#resultOnDataset": 51999,
-            "https://benchmarks.rewire.it/vocab#resultWithin": 34833,
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9673,
+            "https://benchmarks.rewire.it/vocab#contains": 1540,
+            "https://benchmarks.rewire.it/vocab#hasResult": 52433,
+            "https://benchmarks.rewire.it/vocab#resultFor": 52433,
+            "https://benchmarks.rewire.it/vocab#resultOn": 52433,
+            "https://benchmarks.rewire.it/vocab#resultOnDataset": 52433,
+            "https://benchmarks.rewire.it/vocab#resultWithin": 35267,
             "https://benchmarks.rewire.it/vocab#sameDataAs": 86,
-            "https://benchmarks.rewire.it/vocab#testedIn": 24793,
-            "https://benchmarks.rewire.it/vocab#testedWithin": 20225,
-            "https://benchmarks.rewire.it/vocab#within": 1537
+            "https://benchmarks.rewire.it/vocab#testedIn": 24820,
+            "https://benchmarks.rewire.it/vocab#testedWithin": 20252,
+            "https://benchmarks.rewire.it/vocab#within": 1540
           }
         },
         "shacl": {
@@ -239,7 +239,7 @@
     },
     {
       "number": 2,
-      "at": "2026-11-23T15:43:04+00:00",
+      "at": "2026-11-24T13:26:55+00:00",
       "server": "genomics-mcp",
       "tool": "get_truth_set",
       "arguments": {
@@ -430,7 +430,7 @@
             "source_record_id": "giab-hg002-v4.2.1-grch38",
             "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
             "method": "curated catalogue in genomics-mcp",
-            "retrieved_at": "2026-11-23T15:43:04.034568Z",
+            "retrieved_at": "2026-11-24T13:26:55.663997Z",
             "source_version": "NISTv4.2.1",
             "source_updated_at": null,
             "terms_url": null,
@@ -450,7 +450,7 @@
     },
     {
       "number": 3,
-      "at": "2026-11-23T15:43:05+00:00",
+      "at": "2026-11-24T13:26:57+00:00",
       "server": "rewirebench",
       "tool": "list_recipes",
       "arguments": {},
@@ -458,6 +458,19 @@
       "result": {
         "recipes_dir": "${CLAUDE_PLUGIN_ROOT}/recipes",
         "recipes": [
+          {
+            "id": "clingen-pp3-bp4-af001-calibration",
+            "title": "ClinGen PP3/BP4 local posterior calibration on rare post-2023-12 ClinVar missense SNVs (CPU)",
+            "kind": "benchmark_run",
+            "scope": "full_protocol",
+            "rewirebench_protocol": "clingen-pp3-bp4-v1",
+            "kg_record_id": "rewire-local-20261123-clingen-protocol-post-2023-12-af001",
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/clingen-pp3-bp4/clingen-pp3-bp4-af001-calibration.yaml",
+            "sha256": "3a66001b46aa6dca971010821a91b33b1c279a35463c7fd869c546740b60d88a"
+          },
           {
             "id": "flip2-synthetic-smoke",
             "title": "FLIP2 plumbing check on a synthetic fixture",

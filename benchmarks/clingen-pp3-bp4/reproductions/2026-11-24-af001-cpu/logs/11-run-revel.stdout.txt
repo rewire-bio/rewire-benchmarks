@@ -1,0 +1,39 @@
+{
+  "coverage": {
+    "denominator": 14453,
+    "scored": 14319,
+    "unscored": 134
+  },
+  "metrics": {
+    "n": 14319,
+    "n_pos": 5439,
+    "n_neg": 2615,
+    "n_ref": 6265,
+    "auroc": 0.9686104921013415,
+    "auroc_ci95_lo": 0.9648567064157066,
+    "auroc_ci95_hi": 0.9721591063690217,
+    "auprc": 0.9835000663460391,
+    "auprc_ci95_lo": 0.9810789037744736,
+    "auprc_ci95_hi": 0.985830360399514,
+    "pp3_supporting": 0.683,
+    "pp3_moderate": 0.754,
+    "pp3_intermediate": 0.856,
+    "pp3_strong": 0.916,
+    "pp3_very_strong": null,
+    "bp4_supporting": 0.371,
+    "bp4_moderate": 0.283,
+    "bp4_intermediate": 0.157,
+    "bp4_strong": 0.057,
+    "bp4_very_strong": 0.009,
+    "plp_reaching_pp3_supporting_share": 0.839492553778268,
+    "plp_reaching_pp3_strong_share": 0.4151498437212723,
+    "blb_reaching_bp4_supporting_share": 0.7980879541108987,
+    "blb_reaching_bp4_moderate_share": 0.6956022944550669,
+    "max_pp3_points": 4,
+    "max_bp4_points": 8,
+    "coverage_pos": 0.9972497249724972,
+    "coverage_neg": 0.9732043170822479,
+    "coverage_ref": 0.992553865652725
+  },
+  "report": "{output}/revel/report.json"
+}

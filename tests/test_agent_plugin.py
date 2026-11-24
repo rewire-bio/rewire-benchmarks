@@ -223,13 +223,11 @@ def test_rewirebench_server_is_pinned_and_reads_the_plugin_recipes():
     version = tomllib.loads((ROOT / "packages/rewirebench/pyproject.toml").read_text())["project"]["version"]
     args = server_args("rewirebench")
     source = args[args.index("--from") + 1]
-    assert source.startswith("rewirebench[mcp]=="), source
-    pinned = source.removeprefix("rewirebench[mcp]==")
-    assert version_tuple(f"v{pinned}") <= version_tuple(f"v{version}"), (pinned, version)
+    assert source == f"rewirebench[mcp]=={version}", source
     assert args[args.index("--from") + 2:] == [
         "rewirebench", "mcp", "--recipes-dir", f"{PLUGIN_ROOT}/recipes"]
     readme = (ROOT / "README.md").read_text()
-    assert f"v{pinned}" in readme and f"rewirebench[mcp]=={pinned}" in readme
+    assert f"v{version}" in readme and f"rewirebench[mcp]=={version}" in readme
 
 
 # Every backticked lower-case word in the new skills, the commands and the agent is either
@@ -315,9 +313,7 @@ def test_the_recorded_server_check_holds_real_answers():
     assert listed["recipes_dir"] == f"{PLUGIN_ROOT}/recipes" and listed["invalid"] == []
     shipped = {yaml.safe_load(path.read_text())["id"]: hashlib.sha256(path.read_bytes()).hexdigest()
                for path in (PLUGIN / "recipes").rglob("*.yaml")}
-    recorded_recipes = {item["id"]: item["sha256"] for item in listed["recipes"]}
-    assert "mfass-v2-kmer-baseline" in recorded_recipes
-    assert {k: shipped[k] for k in recorded_recipes} == recorded_recipes
+    assert {item["id"]: item["sha256"] for item in listed["recipes"]} == shipped
 
 
 def pages() -> list[Path]:

@@ -1,0 +1,39 @@
+{
+  "coverage": {
+    "denominator": 14453,
+    "scored": 14453,
+    "unscored": 0
+  },
+  "metrics": {
+    "n": 14453,
+    "n_pos": 5454,
+    "n_neg": 2687,
+    "n_ref": 6312,
+    "auroc": 0.9407700756429694,
+    "auroc_ci95_lo": 0.9351299817985769,
+    "auroc_ci95_hi": 0.9458305091922168,
+    "auprc": 0.9649903480313886,
+    "auprc_ci95_lo": 0.9605510160701662,
+    "auprc_ci95_hi": 0.9687709084159417,
+    "pp3_supporting": 25.3,
+    "pp3_moderate": 26.6,
+    "pp3_intermediate": 29.4,
+    "pp3_strong": null,
+    "pp3_very_strong": null,
+    "bp4_supporting": 21.9,
+    "bp4_moderate": 20.0,
+    "bp4_intermediate": 11.0,
+    "bp4_strong": 6.8,
+    "bp4_very_strong": 1.4,
+    "plp_reaching_pp3_supporting_share": 0.7715438210487715,
+    "plp_reaching_pp3_strong_share": 0.0,
+    "blb_reaching_bp4_supporting_share": 0.6780796427242277,
+    "blb_reaching_bp4_moderate_share": 0.5396352809825083,
+    "max_pp3_points": 3,
+    "max_bp4_points": 8,
+    "coverage_pos": 1.0,
+    "coverage_neg": 1.0,
+    "coverage_ref": 1.0
+  },
+  "report": "{output}/alphagenome-avi-phred/report.json"
+}

@@ -1,11 +1,11 @@
-43b5b13569f4e83c1e75c44a22ba5215bd19601e7e3b568c1e74e0b1673ce622  ./baselines/baseline-manifest.json
-d55cf583e781a88917f97d203289d4f86f00e59b507da0994c4f664aa897161b  ./baselines/baseline-plan.json
+ad55dac5bbbd0e0253ffe9fa1b501edc81fa22e9ab02366d0e373c9ed0aa4c7f  ./baselines/baseline-manifest.json
+d85f2e40b114419f0775b18615bc52ce8d8c5a5140e6befe649b283b13a3435f  ./baselines/baseline-plan.json
 2683ef05f0fdf4690529b8630386471a650fb86376c6f6419ad5c8503661b198  ./baselines/mfass-kmer-position-v2/predictions.json
-b3996d0ec361feade71a8b1a29fd5f20ca3b095836751abe2582c2c948abc225  ./baselines/mfass-kmer-position-v2/report.json
+3c103feeb53c445e0f9374c8284fa1a7d4c1307d0eeff29a001e6589130ac8bb  ./baselines/mfass-kmer-position-v2/report.json
 ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356  ./baselines/mfass-kmer-position-v2/unscored.json
 4e49ffc6914cbfddea818e98b1cf6973749ab6529665cb939b18dfa15fb90f81  ./baselines/mfass-kmer-position-v2.status.json
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./logs/01-prepare.stderr.txt
 c9511db3893ef573c4f632725fc0b0fbd78192e3c662944f1d53de08511bb6f1  ./logs/01-prepare.stdout.txt
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./logs/02-run-baselines.stderr.txt
-e6b3dbd8c23b1e79b2432834fe8b55383396290b9547234d5d2bb990d41feca7  ./logs/02-run-baselines.stdout.txt
-f1c2abb528c2a7e5701853a849d42b007a6ba875bc5baac66f84c50d4530e383  ./receipt.json
+6c4a55f20390aaf56ed4e88d866eb120c0d5960682c043b4cd8267036d61b47f  ./logs/02-run-baselines.stdout.txt
+5fa38d6b64ca9de798047da062670708ec73e75a6efc6a6320414c1fc93edec1  ./receipt.json

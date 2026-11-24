@@ -1,0 +1,39 @@
+{
+  "coverage": {
+    "denominator": 14453,
+    "scored": 14453,
+    "unscored": 0
+  },
+  "metrics": {
+    "n": 14453,
+    "n_pos": 5454,
+    "n_neg": 2687,
+    "n_ref": 6312,
+    "auroc": 0.8755829279739783,
+    "auroc_ci95_lo": 0.867335385070575,
+    "auroc_ci95_hi": 0.8834739979084126,
+    "auprc": 0.924397087390234,
+    "auprc_ci95_lo": 0.9180629659750115,
+    "auprc_ci95_hi": 0.9303710625760625,
+    "pp3_supporting": 9.01,
+    "pp3_moderate": 10.46,
+    "pp3_intermediate": null,
+    "pp3_strong": null,
+    "pp3_very_strong": null,
+    "bp4_supporting": 4.88,
+    "bp4_moderate": 3.43,
+    "bp4_intermediate": 2.07,
+    "bp4_strong": -0.42,
+    "bp4_very_strong": null,
+    "plp_reaching_pp3_supporting_share": 0.5185185185185185,
+    "plp_reaching_pp3_strong_share": 0.0,
+    "blb_reaching_bp4_supporting_share": 0.5351693338295497,
+    "blb_reaching_bp4_moderate_share": 0.3788611834759955,
+    "max_pp3_points": 2,
+    "max_bp4_points": 4,
+    "coverage_pos": 1.0,
+    "coverage_neg": 1.0,
+    "coverage_ref": 1.0
+  },
+  "report": "{output}/gpn-star-v/report.json"
+}

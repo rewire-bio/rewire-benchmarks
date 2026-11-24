@@ -10,16 +10,16 @@
     "selected": 8324,
     "unscored_file_scope": "selected inputs only; not_selected counted separately"
   },
-  "created_at": "2026-11-23T15:42:48.521541+00:00",
+  "created_at": "2026-11-24T13:17:29.486803+00:00",
   "dataset_id": "mfass-assay-pairs-v2",
   "environment": {
     "architecture": "arm64",
     "container_digest": "unreported",
     "container_runtime": "unreported",
     "platform": "macOS-26.6.2-arm64-arm-64bit",
-    "python": "3.11.13",
-    "rewirebench": "0.6.0",
-    "sdk_code_sha256": "968630d4ed0fd632f9d3d317d5a0fbbf3e93fdd7afa3197c125cc35dab9f4659",
+    "python": "3.12.7",
+    "rewirebench": "0.6.1",
+    "sdk_code_sha256": "9a02a143d41585f11402af4f857b34a1338512346fa730f98352472b3153048d",
     "sif_sha256": "unreported"
   },
   "execution": {
@@ -31,7 +31,7 @@
     },
     "batch_size": 32,
     "fitting": "train_only",
-    "inference_and_fit_seconds": 3.334942667046562,
+    "inference_and_fit_seconds": 4.791812875000687,
     "mode": "local_adapter",
     "prediction_type": "scalar"
   },
@@ -130,6 +130,6 @@
   "schema_version": "1.0",
   "scope": "full",
   "timing_seconds": {
-    "evaluation": 0.43325908319093287
+    "evaluation": 0.3685460000015155
   }
 }

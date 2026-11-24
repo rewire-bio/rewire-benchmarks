@@ -1,0 +1,328 @@
+{
+  "completion": "complete",
+  "coverage": {
+    "denominator": 14453,
+    "scored": 14453,
+    "unscored": 0
+  },
+  "coverage_context": {
+    "not_selected": 0,
+    "selected": 14453,
+    "unscored_file_scope": "selected inputs only; not_selected counted separately"
+  },
+  "created_at": "2026-11-24T13:16:17.737628+00:00",
+  "dataset_id": "clingen-pp3-bp4-post_2023_12_af001",
+  "environment": {
+    "architecture": "arm64",
+    "container_digest": "unreported",
+    "container_runtime": "unreported",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.12.7",
+    "rewirebench": "0.6.1",
+    "sdk_code_sha256": "9a02a143d41585f11402af4f857b34a1338512346fa730f98352472b3153048d",
+    "sif_sha256": "unreported"
+  },
+  "execution": {
+    "adapter": "ScoreTableLookup",
+    "adapter_provenance": {
+      "implementation_sha256": "9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501"
+    },
+    "batch_size": 4096,
+    "fitting": "none",
+    "inference_and_fit_seconds": 0.021077041999888024,
+    "mode": "local_adapter",
+    "prediction_type": "scalar"
+  },
+  "independently_reproduced": false,
+  "input_information": "unreported",
+  "kind": "rewire_local_evaluation",
+  "metrics": {
+    "auprc": 0.9649903480313885,
+    "auprc_ci95_hi": 0.9687709084159417,
+    "auprc_ci95_lo": 0.9605510160701662,
+    "auroc": 0.9407700756429694,
+    "auroc_ci95_hi": 0.9458305091922168,
+    "auroc_ci95_lo": 0.9351299817985769,
+    "blb_reaching_bp4_moderate_share": 0.540007443245255,
+    "blb_reaching_bp4_supporting_share": 0.6702642352065501,
+    "bp4_intermediate": 0.184,
+    "bp4_moderate": 0.56,
+    "bp4_strong": 0.065,
+    "bp4_supporting": 0.683,
+    "bp4_very_strong": -0.501,
+    "coverage_neg": 1.0,
+    "coverage_pos": 1.0,
+    "coverage_ref": 1.0,
+    "max_bp4_points": 8,
+    "max_pp3_points": 3,
+    "n": 14453,
+    "n_neg": 2687,
+    "n_pos": 5454,
+    "n_ref": 6312,
+    "plp_reaching_pp3_strong_share": 0.0,
+    "plp_reaching_pp3_supporting_share": 0.770993766043271,
+    "pp3_intermediate": 1.527,
+    "pp3_moderate": 1.334,
+    "pp3_strong": null,
+    "pp3_supporting": 1.17,
+    "pp3_very_strong": null
+  },
+  "model": {
+    "name": "AlphaGenome AVI (raw)",
+    "training_overlap": "No ClinVar supervision; trained on gnomAD allele-frequency structure (rare AF<0.1% stratum isolates label confounding)."
+  },
+  "model_configuration": {},
+  "predictions_sha256": "fd95113b5d9b1f3e6a9805a9d45bbd9924088d2dd24ef4321b35b06e2dcf375b",
+  "prepared_sha256": "7c122bb99fa36644df2a15d79a37455e9a67cff610cf373b439655a075fb8c33",
+  "protocol_configuration": {
+    "canonical_neg_count": 2687,
+    "canonical_pos_count": 5454,
+    "canonical_ref_count": 6312,
+    "canonical_total_count": 14453,
+    "decimals": 3,
+    "increment": 0.005,
+    "n_boot": 1000,
+    "score_semantics": "higher scalar score means stronger pathogenicity evidence; Pejaver 2022 and Bergquist 2025 local posterior odds calibration",
+    "seed": 20261123,
+    "smoke_limit_per_role": null,
+    "stratum": "post_2023_12_af001"
+  },
+  "protocol_id": "clingen-pp3-bp4-v1",
+  "protocol_results": {
+    "benign_reach": {
+      "BP4_Intermediate_3": {
+        "count": 224,
+        "points": -3,
+        "share": 0.08336434685522888
+      },
+      "BP4_Moderate_2": {
+        "count": 865,
+        "points": -2,
+        "share": 0.32192035727577223
+      },
+      "BP4_Strong_4": {
+        "count": 354,
+        "points": -4,
+        "share": 0.13174544101228136
+      },
+      "BP4_Supporting_1": {
+        "count": 350,
+        "points": -1,
+        "share": 0.13025679196129514
+      },
+      "BP4_VeryStrong_8": {
+        "count": 8,
+        "points": -8,
+        "share": 0.00297729810197246
+      },
+      "Indeterminate_0": {
+        "count": 725,
+        "points": 0,
+        "share": 0.2698176404912542
+      },
+      "PP3_Intermediate_3": {
+        "count": 34,
+        "points": 3,
+        "share": 0.012653516933382954
+      },
+      "PP3_Moderate_2": {
+        "count": 61,
+        "points": 2,
+        "share": 0.022701898027540007
+      },
+      "PP3_Strong_4": {
+        "count": 0,
+        "points": 4,
+        "share": 0.0
+      },
+      "PP3_Supporting_1": {
+        "count": 66,
+        "points": 1,
+        "share": 0.024562709341272793
+      },
+      "PP3_VeryStrong_8": {
+        "count": 0,
+        "points": 8,
+        "share": 0.0
+      }
+    },
+    "complete": true,
+    "coverage": {
+      "denominator": 14453,
+      "scored": 14453,
+      "unscored": 0
+    },
+    "discounted_thresholds": {
+      "BP4": {
+        "Intermediate_3": 0.184,
+        "Moderate_2": 0.56,
+        "Strong_4": 0.065,
+        "Supporting_1": 0.683,
+        "VeryStrong_8": -0.501
+      },
+      "PP3": {
+        "Intermediate_3": 1.527,
+        "Moderate_2": 1.334,
+        "Strong_4": null,
+        "Supporting_1": 1.17,
+        "VeryStrong_8": null
+      }
+    },
+    "interval_lr": {
+      "PP3_Intermediate_3": {
+        "lr_plus": 27.08213615479195,
+        "n_neg": 34,
+        "n_pos": 1869,
+        "points": 3
+      },
+      "PP3_Moderate_2": {
+        "lr_plus": 13.221215290928,
+        "n_neg": 61,
+        "n_pos": 1637,
+        "points": 2
+      },
+      "PP3_Strong_4": {
+        "lr_plus": null,
+        "n_neg": 0,
+        "n_pos": 0,
+        "points": 4
+      },
+      "PP3_Supporting_1": {
+        "lr_plus": 5.217780111344467,
+        "n_neg": 66,
+        "n_pos": 699,
+        "points": 1
+      },
+      "PP3_VeryStrong_8": {
+        "lr_plus": null,
+        "n_neg": 0,
+        "n_pos": 0,
+        "points": 8
+      }
+    },
+    "metrics": {
+      "auprc": 0.9649903480313885,
+      "auprc_ci95_hi": 0.9687709084159417,
+      "auprc_ci95_lo": 0.9605510160701662,
+      "auroc": 0.9407700756429694,
+      "auroc_ci95_hi": 0.9458305091922168,
+      "auroc_ci95_lo": 0.9351299817985769,
+      "blb_reaching_bp4_moderate_share": 0.540007443245255,
+      "blb_reaching_bp4_supporting_share": 0.6702642352065501,
+      "bp4_intermediate": 0.184,
+      "bp4_moderate": 0.56,
+      "bp4_strong": 0.065,
+      "bp4_supporting": 0.683,
+      "bp4_very_strong": -0.501,
+      "coverage_neg": 1.0,
+      "coverage_pos": 1.0,
+      "coverage_ref": 1.0,
+      "max_bp4_points": 8,
+      "max_pp3_points": 3,
+      "n": 14453,
+      "n_neg": 2687,
+      "n_pos": 5454,
+      "n_ref": 6312,
+      "plp_reaching_pp3_strong_share": 0.0,
+      "plp_reaching_pp3_supporting_share": 0.770993766043271,
+      "pp3_intermediate": 1.527,
+      "pp3_moderate": 1.334,
+      "pp3_strong": null,
+      "pp3_supporting": 1.17,
+      "pp3_very_strong": null
+    },
+    "pathogenic_reach": {
+      "BP4_Intermediate_3": {
+        "count": 12,
+        "points": -3,
+        "share": 0.0022002200220022
+      },
+      "BP4_Moderate_2": {
+        "count": 92,
+        "points": -2,
+        "share": 0.016868353502016868
+      },
+      "BP4_Strong_4": {
+        "count": 2,
+        "points": -4,
+        "share": 0.0003667033370003667
+      },
+      "BP4_Supporting_1": {
+        "count": 115,
+        "points": -1,
+        "share": 0.021085441877521087
+      },
+      "BP4_VeryStrong_8": {
+        "count": 0,
+        "points": -8,
+        "share": 0.0
+      },
+      "Indeterminate_0": {
+        "count": 1028,
+        "points": 0,
+        "share": 0.1884855152181885
+      },
+      "PP3_Intermediate_3": {
+        "count": 1869,
+        "points": 3,
+        "share": 0.3426842684268427
+      },
+      "PP3_Moderate_2": {
+        "count": 1637,
+        "points": 2,
+        "share": 0.30014668133480016
+      },
+      "PP3_Strong_4": {
+        "count": 0,
+        "points": 4,
+        "share": 0.0
+      },
+      "PP3_Supporting_1": {
+        "count": 699,
+        "points": 1,
+        "share": 0.12816281628162815
+      },
+      "PP3_VeryStrong_8": {
+        "count": 0,
+        "points": 8,
+        "share": 0.0
+      }
+    },
+    "point_thresholds": {
+      "BP4": {
+        "Intermediate_3": 0.431,
+        "Moderate_2": 0.639,
+        "Strong_4": 0.134,
+        "Supporting_1": 0.831,
+        "VeryStrong_8": -0.4
+      },
+      "PP3": {
+        "Intermediate_3": 1.423,
+        "Moderate_2": 1.286,
+        "Strong_4": 2.768,
+        "Supporting_1": 1.086,
+        "VeryStrong_8": null
+      }
+    },
+    "protocol_id": "clingen-pp3-bp4-v1",
+    "scope": "full",
+    "score_direction": "higher means stronger pathogenicity evidence",
+    "stratum": "post_2023_12_af001"
+  },
+  "protocol_version": "1",
+  "provenance": {
+    "cohort_file": "variants_post_2023_12.tsv",
+    "cohort_sha256": "90ec52d2b5dcbc4019113e60bd4b3099bf4e0761c821c2f2c7055b2c8b650438",
+    "data_verification": "pinned_source_bytes",
+    "gnomad_file": "gnomad_ref_missense.tsv",
+    "gnomad_sha256": "818ad7178c61c6eeddb489d6969b98728895cd70baf95dcd3a3ec7008442ac83",
+    "source_url": "https://github.com/rewire-bio/rewire-benchmarks/tree/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4",
+    "upstream_revision": "fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73"
+  },
+  "review_status": "unreviewed_local_run",
+  "schema_version": "1.0",
+  "scope": "full",
+  "timing_seconds": {
+    "evaluation": 8.885242083000776
+  }
+}

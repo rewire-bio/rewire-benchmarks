@@ -1,0 +1,1151 @@
+{
+  "schema_version": "1.0",
+  "kind": "rewire_run_receipt",
+  "receipt_kind": "runner_reproduction",
+  "scope": "full_protocol",
+  "verified_on": "2026-11-24",
+  "started_by": "human",
+  "backend": "local",
+  "recipe": {
+    "id": "clingen-pp3-bp4-af001-calibration",
+    "repository": "https://github.com/rewire-bio/rewire-benchmarks",
+    "commit": "49b2c943bf98fa361e79eab49795619d03a16941",
+    "path": "recipes/clingen-pp3-bp4/clingen-pp3-bp4-af001-calibration.yaml",
+    "sha256": "3a66001b46aa6dca971010821a91b33b1c279a35463c7fd869c546740b60d88a"
+  },
+  "recipe_missing": null,
+  "kg_release_id": null,
+  "code": {
+    "repository": "https://github.com/rewire-bio/rewire-benchmarks",
+    "commit": "49b2c943bf98fa361e79eab49795619d03a16941",
+    "dirty": false,
+    "rewirebench_version": "0.6.1",
+    "sdk_code_sha256": "9a02a143d41585f11402af4f857b34a1338512346fa730f98352472b3153048d",
+    "commit_source": "checkout"
+  },
+  "environment": {
+    "images": {
+      "linux/amd64": "sha256:beb2537c26950553f0df1e61b161507d484511988848f7973b0190285fd4f55c",
+      "linux/arm64": "sha256:0d9636331a18f40aadb35bf8f118b1811fd45491aafbeef6fa0db4ba9ade998c"
+    },
+    "image_used": null,
+    "container_runtime": null,
+    "python": "3.12.7",
+    "os": "macOS-26.6.2-arm64-arm-64bit",
+    "packages": {
+      "h5py": "3.14.0",
+      "mcp": "1.30.0",
+      "numpy": "1.26.4",
+      "pandas": "2.3.3",
+      "pyarrow": "23.0.1",
+      "pydantic": "2.14.4",
+      "pyyaml": "6.0.3",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.17.1"
+    }
+  },
+  "inputs": [
+    {
+      "name": "gnomad_ref_missense.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/cohorts/gnomad_ref_missense.tsv",
+      "obtained": "fetched",
+      "sha256": "818ad7178c61c6eeddb489d6969b98728895cd70baf95dcd3a3ec7008442ac83",
+      "bytes": 522482
+    },
+    {
+      "name": "variants_post_2023_12.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/cohorts/variants_post_2023_12.tsv",
+      "obtained": "fetched",
+      "sha256": "90ec52d2b5dcbc4019113e60bd4b3099bf4e0761c821c2f2c7055b2c8b650438",
+      "bytes": 1271595
+    },
+    {
+      "name": "scores_gpnmsa.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_gpnmsa.tsv",
+      "obtained": "fetched",
+      "sha256": "b7d188f75c15a552e5d66df8f5fbdbb261779c42000d236e4e40cdf5355c9770",
+      "bytes": 380995
+    },
+    {
+      "name": "scores_gpnstar_v.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_gpnstar_v.tsv",
+      "obtained": "fetched",
+      "sha256": "05b681f74de63d5697174696b717c8aa0615402531e220c4a69423ec65eea1a9",
+      "bytes": 412452
+    },
+    {
+      "name": "scores_gpnstar_m.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_gpnstar_m.tsv",
+      "obtained": "fetched",
+      "sha256": "fd7f857518e3966bee4e8c89b81ce1a4f143621faef5a2bef1828c802c0447ef",
+      "bytes": 411298
+    },
+    {
+      "name": "scores_avi.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_avi.tsv",
+      "obtained": "fetched",
+      "sha256": "9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501",
+      "bytes": 546369
+    },
+    {
+      "name": "scores_am.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_am.tsv",
+      "obtained": "fetched",
+      "sha256": "4d5e091bff4737650da0e82259fe8cdded8df6128e7640d84da5c1ff6a4bb5fd",
+      "bytes": 394870
+    },
+    {
+      "name": "scores_revel.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_revel.tsv",
+      "obtained": "fetched",
+      "sha256": "a2e4466f585556ffe2a972c9e4c10a2046eddb1fc5b40dc8b66473383103b90e",
+      "bytes": 390195
+    },
+    {
+      "name": "scores_cadd.tsv",
+      "source": "https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_cadd.tsv",
+      "obtained": "fetched",
+      "sha256": "58b427e2e85c30299af5a0464e9f552c92b80d6423bba3cf26cf8c8f3add8a14",
+      "bytes": 380474
+    }
+  ],
+  "hardware": {
+    "architecture": "arm64",
+    "cpu": {
+      "model": "Apple M4",
+      "logical_cores": 10
+    },
+    "memory_bytes": 17179869184,
+    "gpus": []
+  },
+  "commands": [
+    {
+      "name": "prepare-grid-01-d2",
+      "argv": [
+        "rewirebench",
+        "prepare",
+        "clingen-pp3-bp4-v1",
+        "--source",
+        "{inputs}",
+        "--output",
+        "{work}/prepared_01_d2",
+        "--options",
+        "{\"stratum\": \"post_2023_12_af001\", \"increment\": 0.01, \"decimals\": 2}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1.001,
+      "peak_memory_bytes": 219709440
+    },
+    {
+      "name": "prepare-grid-005-d3",
+      "argv": [
+        "rewirebench",
+        "prepare",
+        "clingen-pp3-bp4-v1",
+        "--source",
+        "{inputs}",
+        "--output",
+        "{work}/prepared_005_d3",
+        "--options",
+        "{\"stratum\": \"post_2023_12_af001\", \"increment\": 0.005, \"decimals\": 3}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.939,
+      "peak_memory_bytes": 219381760
+    },
+    {
+      "name": "prepare-grid-1-d1",
+      "argv": [
+        "rewirebench",
+        "prepare",
+        "clingen-pp3-bp4-v1",
+        "--source",
+        "{inputs}",
+        "--output",
+        "{work}/prepared_1_d1",
+        "--options",
+        "{\"stratum\": \"post_2023_12_af001\", \"increment\": 0.1, \"decimals\": 1}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.948,
+      "peak_memory_bytes": 219267072
+    },
+    {
+      "name": "prepare-grid-001-d3",
+      "argv": [
+        "rewirebench",
+        "prepare",
+        "clingen-pp3-bp4-v1",
+        "--source",
+        "{inputs}",
+        "--output",
+        "{work}/prepared_001_d3",
+        "--options",
+        "{\"stratum\": \"post_2023_12_af001\", \"increment\": 0.001, \"decimals\": 3}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.953,
+      "peak_memory_bytes": 219660288
+    },
+    {
+      "name": "run-gpn-msa",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_01_d2",
+        "--output",
+        "{output}/gpn-msa",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "GPN-MSA (-LLR)",
+        "--training-overlap",
+        "Unsupervised MSA language model; no ClinVar labels in training.",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_gpnmsa.tsv\", \"artifact_sha256\": \"b7d188f75c15a552e5d66df8f5fbdbb261779c42000d236e4e40cdf5355c9770\", \"column\": \"gpn_msa\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 9.231,
+      "peak_memory_bytes": 228655104
+    },
+    {
+      "name": "run-gpn-star-v",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_01_d2",
+        "--output",
+        "{output}/gpn-star-v",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "GPN-Star vertebrate v100 (-LLR)",
+        "--training-overlap",
+        "Unsupervised vertebrate MSA model; no ClinVar labels in training.",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_gpnstar_v.tsv\", \"artifact_sha256\": \"05b681f74de63d5697174696b717c8aa0615402531e220c4a69423ec65eea1a9\", \"column\": \"gpnstar_v\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 9.538,
+      "peak_memory_bytes": 228507648
+    },
+    {
+      "name": "run-gpn-star-m",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_01_d2",
+        "--output",
+        "{output}/gpn-star-m",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "GPN-Star mammal m447 (-LLR)",
+        "--training-overlap",
+        "Unsupervised mammalian MSA model; no ClinVar labels in training.",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_gpnstar_m.tsv\", \"artifact_sha256\": \"fd7f857518e3966bee4e8c89b81ce1a4f143621faef5a2bef1828c802c0447ef\", \"column\": \"gpnstar_m\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 8.776,
+      "peak_memory_bytes": 228556800
+    },
+    {
+      "name": "run-alphagenome-avi",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_005_d3",
+        "--output",
+        "{output}/alphagenome-avi",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "AlphaGenome AVI (raw)",
+        "--training-overlap",
+        "No ClinVar supervision; trained on gnomAD allele-frequency structure (rare AF<0.1% stratum isolates label confounding).",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_avi.tsv\", \"artifact_sha256\": \"9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501\", \"column\": \"avi\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 9.829,
+      "peak_memory_bytes": 228851712
+    },
+    {
+      "name": "run-alphagenome-avi-phred",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_1_d1",
+        "--output",
+        "{output}/alphagenome-avi-phred",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "AlphaGenome AVI (PHRED)",
+        "--training-overlap",
+        "No ClinVar supervision; trained on gnomAD allele-frequency structure (rare AF<0.1% stratum isolates label confounding).",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_avi.tsv\", \"artifact_sha256\": \"9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501\", \"column\": \"avi_phred\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 4.967,
+      "peak_memory_bytes": 228540416
+    },
+    {
+      "name": "run-alphamissense",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_001_d3",
+        "--output",
+        "{output}/alphamissense",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "AlphaMissense",
+        "--training-overlap",
+        "Weakly supervised using primate population frequency and AlphaFold structure; no ClinVar labels.",
+        "--allow-partial",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_am.tsv\", \"artifact_sha256\": \"4d5e091bff4737650da0e82259fe8cdded8df6128e7640d84da5c1ff6a4bb5fd\", \"column\": \"alphamissense\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 6.835,
+      "peak_memory_bytes": 228507648
+    },
+    {
+      "name": "run-revel",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_001_d3",
+        "--output",
+        "{output}/revel",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "REVEL v1.3",
+        "--training-overlap",
+        "Ensemble trained on HGMD and UniProt before Dec 2023; post-2023-12 ClinVar cohort is temporally held out.",
+        "--allow-partial",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_revel.tsv\", \"artifact_sha256\": \"a2e4466f585556ffe2a972c9e4c10a2046eddb1fc5b40dc8b66473383103b90e\", \"column\": \"revel\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 6.792,
+      "peak_memory_bytes": 228556800
+    },
+    {
+      "name": "run-cadd-v1-7",
+      "argv": [
+        "rewirebench",
+        "run",
+        "--prepared",
+        "{work}/prepared_1_d1",
+        "--output",
+        "{output}/cadd-v1-7",
+        "--model",
+        "clingen-score-table",
+        "--model-name",
+        "CADD v1.7 (PHRED)",
+        "--training-overlap",
+        "Trained on simulated vs human-derived neutral variants and genomic features before Dec 2023.",
+        "--batch-size",
+        "4096",
+        "--adapter-options",
+        "{\"artifact\": \"{inputs}/scores_cadd.tsv\", \"artifact_sha256\": \"58b427e2e85c30299af5a0464e9f552c92b80d6423bba3cf26cf8c8f3add8a14\", \"column\": \"cadd_phred\"}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 4.36,
+      "peak_memory_bytes": 228474880
+    }
+  ],
+  "started_at": "2026-11-24T13:15:33.283340Z",
+  "finished_at": "2026-11-24T13:16:40.895309Z",
+  "wall_seconds": 67.612,
+  "peak_memory_bytes": 228851712,
+  "outputs": [
+    {
+      "path": "alphagenome-avi/predictions.json",
+      "bytes": 451266,
+      "sha256": "fd95113b5d9b1f3e6a9805a9d45bbd9924088d2dd24ef4321b35b06e2dcf375b"
+    },
+    {
+      "path": "alphagenome-avi/report.json",
+      "bytes": 9104,
+      "sha256": "e0e4243c18147b140f5607f945b2d047573c901863d2b9e1f4f2e9a27f1c597d"
+    },
+    {
+      "path": "alphagenome-avi/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "alphagenome-avi-phred/predictions.json",
+      "bytes": 483416,
+      "sha256": "59aa63f19fed962f5d1014914b0a20b837b9d489d3dec998298e0b5b379c5723"
+    },
+    {
+      "path": "alphagenome-avi-phred/report.json",
+      "bytes": 9073,
+      "sha256": "31fa84e7d3fee246c832b9744ee8aabf164afd7932a2b03e2bf6fda72037d8b3"
+    },
+    {
+      "path": "alphagenome-avi-phred/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "alphamissense/predictions.json",
+      "bytes": 486098,
+      "sha256": "97fe3e3ea14334c6acbdca16e3c0e98a0e854f4e0a71fd4e964dbcd1370c80b5"
+    },
+    {
+      "path": "alphamissense/report.json",
+      "bytes": 9020,
+      "sha256": "25291fc311577344ab619114aaf35d5ca078cb8d1f19f5876ac747da738f4dbe"
+    },
+    {
+      "path": "alphamissense/unscored.json",
+      "bytes": 26376,
+      "sha256": "1903324d8ac8bf13e9a94096f65af14f630cdfbfc2d4b913fe4b45d9355ddfd2"
+    },
+    {
+      "path": "cadd-v1-7/predictions.json",
+      "bytes": 432208,
+      "sha256": "69beaa1f75b3d53e757d925cc4883cfc8be4afe6cccc579cea1bed441cca4afb"
+    },
+    {
+      "path": "cadd-v1-7/report.json",
+      "bytes": 8976,
+      "sha256": "51d0fe271de85029e65b8835a10885c115e9ee2d07ddb58e7cc93910afe7b42c"
+    },
+    {
+      "path": "cadd-v1-7/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "gpn-msa/predictions.json",
+      "bytes": 430003,
+      "sha256": "76451d67caa0ab0b38f6b3a3f94ff893861ec7bac74d96833d05d5fbb4412622"
+    },
+    {
+      "path": "gpn-msa/report.json",
+      "bytes": 8950,
+      "sha256": "cf707ea58a1485bc79b43dc585c69daee6e127e8a73b6a12d6e9ab930e029e42"
+    },
+    {
+      "path": "gpn-msa/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "gpn-star-m/predictions.json",
+      "bytes": 457813,
+      "sha256": "16f6a564c8c5cc3cf9714d46a17bb9fe043d5fc8bc4f701273a46cb9c7233064"
+    },
+    {
+      "path": "gpn-star-m/report.json",
+      "bytes": 8905,
+      "sha256": "f7188906778f62f81075b944303ed746a74f37083dfe1834d5548e780ced7cbe"
+    },
+    {
+      "path": "gpn-star-m/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "gpn-star-v/predictions.json",
+      "bytes": 459116,
+      "sha256": "bc61bbbeade36a6f3bf5444154ef5a3dc1d9377a92f70e4b568d8ed3bbbb9a62"
+    },
+    {
+      "path": "gpn-star-v/report.json",
+      "bytes": 8974,
+      "sha256": "85aa24d5faa50561f95ae5d8e66a5fa918e950e19e643ba6a13af5f20ad1ce5e"
+    },
+    {
+      "path": "gpn-star-v/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "logs/01-prepare-grid-01-d2.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/01-prepare-grid-01-d2.stdout.txt",
+      "bytes": 114,
+      "sha256": "977faef10b23b48e79a28f9a035a9d28463b71d412c8829f0d110a608db8ebd4"
+    },
+    {
+      "path": "logs/02-prepare-grid-005-d3.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/02-prepare-grid-005-d3.stdout.txt",
+      "bytes": 115,
+      "sha256": "c8bf46001df2cc75c241c059867f827dae7fe3184a1df5012654633fe11bdd76"
+    },
+    {
+      "path": "logs/03-prepare-grid-1-d1.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/03-prepare-grid-1-d1.stdout.txt",
+      "bytes": 113,
+      "sha256": "131c421c43d5f5161cde45d6ce5609f4c6fda7316252ee013c8a2d071992b2ec"
+    },
+    {
+      "path": "logs/04-prepare-grid-001-d3.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/04-prepare-grid-001-d3.stdout.txt",
+      "bytes": 115,
+      "sha256": "803ddcc66a2ce1f6601b09597353e56a5167562ffcd4ee63f1e471456964b1c0"
+    },
+    {
+      "path": "logs/05-run-gpn-msa.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/05-run-gpn-msa.stdout.txt",
+      "bytes": 1079,
+      "sha256": "71b81531fa68c8d0afed313f799c9debfdf267d955d5ac44714f55aa4bc60dc7"
+    },
+    {
+      "path": "logs/06-run-gpn-star-v.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/06-run-gpn-star-v.stdout.txt",
+      "bytes": 1080,
+      "sha256": "2de7512c78380802bcf70025cb0c7848a5ce10034c3e4e2ff80c4c684d5fa1be"
+    },
+    {
+      "path": "logs/07-run-gpn-star-m.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/07-run-gpn-star-m.stdout.txt",
+      "bytes": 1084,
+      "sha256": "da483fb112ebe1c392c3a4134740345eca39b817aaeec7af1a9f18046c26e7e5"
+    },
+    {
+      "path": "logs/08-run-alphagenome-avi.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/08-run-alphagenome-avi.stdout.txt",
+      "bytes": 1090,
+      "sha256": "19ae6acbf4ef3b52b21cd24c2fe44d044f60d81c92421c7cbb0c0069828c7be8"
+    },
+    {
+      "path": "logs/09-run-alphagenome-avi-phred.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/09-run-alphagenome-avi-phred.stdout.txt",
+      "bytes": 1089,
+      "sha256": "179c17a5678f9c51fa17a55a465eb8083bfdb23a4d4d36abd7945cedcfcbee37"
+    },
+    {
+      "path": "logs/10-run-alphamissense.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/10-run-alphamissense.stdout.txt",
+      "bytes": 1117,
+      "sha256": "f024031bccaedd890ce149dfcdaea3d1048cfef89e101ece64b86da8d0304921"
+    },
+    {
+      "path": "logs/11-run-revel.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/11-run-revel.stdout.txt",
+      "bytes": 1143,
+      "sha256": "c9d5f8d17b844e9a853a54b629483ccb494d256bcf2ce91767babc598006284d"
+    },
+    {
+      "path": "logs/12-run-cadd-v1-7.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/12-run-cadd-v1-7.stdout.txt",
+      "bytes": 1077,
+      "sha256": "18ff83c10e4e7d1d8e4a227a00923532f9e804311a446a67990c29f46bae63a7"
+    },
+    {
+      "path": "revel/predictions.json",
+      "bytes": 449965,
+      "sha256": "2e5199c0f27ebd4d67d7774611073294fb04ee47479552154d5929139c71b765"
+    },
+    {
+      "path": "revel/report.json",
+      "bytes": 9263,
+      "sha256": "51e6e75191de782ae8041fcf72bb1d56fffa2618749d743291733bfb6740efb6"
+    },
+    {
+      "path": "revel/unscored.json",
+      "bytes": 7188,
+      "sha256": "d0ce6195e18ca489da1dccbeb22abd4b58efa1549172b399552ff66054595275"
+    }
+  ],
+  "metrics": {
+    "gpn_msa_n_pos": 5454.0,
+    "gpn_msa_auroc": 0.8513241102053388,
+    "gpn_msa_pp3_supporting": 9.37,
+    "gpn_star_v_auroc": 0.8755829279739783,
+    "gpn_star_v_pp3_supporting": 9.01,
+    "gpn_star_m_auroc": 0.8300772547171601,
+    "gpn_star_m_pp3_supporting": 8.96,
+    "alphagenome_avi_auroc": 0.9407700756429694,
+    "alphagenome_avi_pp3_supporting": 1.17,
+    "alphagenome_avi_phred_auroc": 0.9407700756429694,
+    "alphagenome_avi_phred_pp3_supporting": 25.3,
+    "alphamissense_n_pos": 5384.0,
+    "alphamissense_auroc": 0.9468246969451882,
+    "alphamissense_pp3_supporting": 0.723,
+    "alphamissense_pp3_strong": 0.987,
+    "revel_n_pos": 5439.0,
+    "revel_auroc": 0.9686104921013415,
+    "revel_pp3_supporting": 0.683,
+    "revel_pp3_strong": 0.916,
+    "revel_bp4_supporting": 0.371,
+    "cadd_v1_7_auroc": 0.8942748697397962,
+    "cadd_v1_7_pp3_supporting": 26.0
+  },
+  "checks": [
+    {
+      "kind": "output",
+      "label": "gpn-msa/report.json written",
+      "metric_id": null,
+      "file": "gpn-msa/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "gpn-msa/predictions.json written",
+      "metric_id": null,
+      "file": "gpn-msa/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "gpn-star-v/report.json written",
+      "metric_id": null,
+      "file": "gpn-star-v/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "gpn-star-v/predictions.json written",
+      "metric_id": null,
+      "file": "gpn-star-v/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "gpn-star-m/report.json written",
+      "metric_id": null,
+      "file": "gpn-star-m/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "gpn-star-m/predictions.json written",
+      "metric_id": null,
+      "file": "gpn-star-m/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "alphagenome-avi/report.json written",
+      "metric_id": null,
+      "file": "alphagenome-avi/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "alphagenome-avi/predictions.json written",
+      "metric_id": null,
+      "file": "alphagenome-avi/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "alphagenome-avi-phred/report.json written",
+      "metric_id": null,
+      "file": "alphagenome-avi-phred/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "alphagenome-avi-phred/predictions.json written",
+      "metric_id": null,
+      "file": "alphagenome-avi-phred/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "alphamissense/report.json written",
+      "metric_id": null,
+      "file": "alphamissense/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "alphamissense/predictions.json written",
+      "metric_id": null,
+      "file": "alphamissense/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "revel/report.json written",
+      "metric_id": null,
+      "file": "revel/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "revel/predictions.json written",
+      "metric_id": null,
+      "file": "revel/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "cadd-v1-7/report.json written",
+      "metric_id": null,
+      "file": "cadd-v1-7/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "cadd-v1-7/predictions.json written",
+      "metric_id": null,
+      "file": "cadd-v1-7/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "GPN-MSA P/LP count",
+      "metric_id": "gpn_msa_n_pos",
+      "file": "gpn-msa/report.json",
+      "key": [
+        "metrics",
+        "n_pos"
+      ],
+      "expected": 5454.0,
+      "tolerance": 0.0,
+      "observed": 5454.0,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "GPN-MSA AUROC",
+      "metric_id": "gpn_msa_auroc",
+      "file": "gpn-msa/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.851324,
+      "tolerance": 1e-05,
+      "observed": 0.8513241102053388,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "GPN-MSA PP3 Supporting (+1)",
+      "metric_id": "gpn_msa_pp3_supporting",
+      "file": "gpn-msa/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 9.37,
+      "tolerance": 1e-05,
+      "observed": 9.37,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "GPN-Star vertebrate AUROC",
+      "metric_id": "gpn_star_v_auroc",
+      "file": "gpn-star-v/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.875583,
+      "tolerance": 1e-05,
+      "observed": 0.8755829279739783,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "GPN-Star vertebrate PP3 Supporting (+1)",
+      "metric_id": "gpn_star_v_pp3_supporting",
+      "file": "gpn-star-v/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 9.01,
+      "tolerance": 1e-05,
+      "observed": 9.01,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "GPN-Star mammal AUROC",
+      "metric_id": "gpn_star_m_auroc",
+      "file": "gpn-star-m/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.830077,
+      "tolerance": 1e-05,
+      "observed": 0.8300772547171601,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "GPN-Star mammal PP3 Supporting (+1)",
+      "metric_id": "gpn_star_m_pp3_supporting",
+      "file": "gpn-star-m/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 8.96,
+      "tolerance": 1e-05,
+      "observed": 8.96,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaGenome AVI (raw) AUROC",
+      "metric_id": "alphagenome_avi_auroc",
+      "file": "alphagenome-avi/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.94077,
+      "tolerance": 1e-05,
+      "observed": 0.9407700756429694,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaGenome AVI (raw) PP3 Supporting (+1)",
+      "metric_id": "alphagenome_avi_pp3_supporting",
+      "file": "alphagenome-avi/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 1.17,
+      "tolerance": 1e-05,
+      "observed": 1.17,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaGenome AVI (PHRED) AUROC",
+      "metric_id": "alphagenome_avi_phred_auroc",
+      "file": "alphagenome-avi-phred/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.94077,
+      "tolerance": 1e-05,
+      "observed": 0.9407700756429694,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaGenome AVI (PHRED) PP3 Supporting (+1)",
+      "metric_id": "alphagenome_avi_phred_pp3_supporting",
+      "file": "alphagenome-avi-phred/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 25.3,
+      "tolerance": 1e-05,
+      "observed": 25.3,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaMissense scored P/LP count",
+      "metric_id": "alphamissense_n_pos",
+      "file": "alphamissense/report.json",
+      "key": [
+        "metrics",
+        "n_pos"
+      ],
+      "expected": 5384.0,
+      "tolerance": 0.0,
+      "observed": 5384.0,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaMissense AUROC",
+      "metric_id": "alphamissense_auroc",
+      "file": "alphamissense/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.946825,
+      "tolerance": 1e-05,
+      "observed": 0.9468246969451882,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaMissense PP3 Supporting (+1)",
+      "metric_id": "alphamissense_pp3_supporting",
+      "file": "alphamissense/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 0.723,
+      "tolerance": 1e-05,
+      "observed": 0.723,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "AlphaMissense PP3 Strong (+4)",
+      "metric_id": "alphamissense_pp3_strong",
+      "file": "alphamissense/report.json",
+      "key": [
+        "metrics",
+        "pp3_strong"
+      ],
+      "expected": 0.987,
+      "tolerance": 1e-05,
+      "observed": 0.987,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "REVEL scored P/LP count",
+      "metric_id": "revel_n_pos",
+      "file": "revel/report.json",
+      "key": [
+        "metrics",
+        "n_pos"
+      ],
+      "expected": 5439.0,
+      "tolerance": 0.0,
+      "observed": 5439.0,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "REVEL AUROC",
+      "metric_id": "revel_auroc",
+      "file": "revel/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.96861,
+      "tolerance": 1e-05,
+      "observed": 0.9686104921013415,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "REVEL PP3 Supporting (+1)",
+      "metric_id": "revel_pp3_supporting",
+      "file": "revel/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 0.683,
+      "tolerance": 1e-05,
+      "observed": 0.683,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "REVEL PP3 Strong (+4)",
+      "metric_id": "revel_pp3_strong",
+      "file": "revel/report.json",
+      "key": [
+        "metrics",
+        "pp3_strong"
+      ],
+      "expected": 0.916,
+      "tolerance": 1e-05,
+      "observed": 0.916,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "REVEL BP4 Supporting (-1)",
+      "metric_id": "revel_bp4_supporting",
+      "file": "revel/report.json",
+      "key": [
+        "metrics",
+        "bp4_supporting"
+      ],
+      "expected": 0.371,
+      "tolerance": 1e-05,
+      "observed": 0.371,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "CADD v1.7 AUROC",
+      "metric_id": "cadd_v1_7_auroc",
+      "file": "cadd-v1-7/report.json",
+      "key": [
+        "metrics",
+        "auroc"
+      ],
+      "expected": 0.894275,
+      "tolerance": 1e-05,
+      "observed": 0.8942748697397962,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "CADD v1.7 PP3 Supporting (+1)",
+      "metric_id": "cadd_v1_7_pp3_supporting",
+      "file": "cadd-v1-7/report.json",
+      "key": [
+        "metrics",
+        "pp3_supporting"
+      ],
+      "expected": 26.0,
+      "tolerance": 1e-05,
+      "observed": 26.0,
+      "passed": true
+    }
+  ],
+  "checks_passed": true,
+  "cost": {
+    "paid_compute": false,
+    "amount": null,
+    "currency": null,
+    "reason": "owned hardware",
+    "hourly_rate": null,
+    "rate_source": null,
+    "rate_date": null
+  }
+}
