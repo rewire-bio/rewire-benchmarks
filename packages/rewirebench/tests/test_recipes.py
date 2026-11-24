@@ -649,7 +649,7 @@ def test_every_text_option_of_a_model_is_a_path_key_or_known_not_to_be_one():
     name any file with it. A new text option fails here until it is put on one side."""
     from rewirebench import models
 
-    not_paths = {"alphabet", "artifact_sha256", "device", "field", "fimo_sha256", "model_name"}
+    not_paths = {"alphabet", "artifact_sha256", "column", "device", "field", "fimo_sha256", "model_name"}
     text = {name for spec in models.REGISTRY.values() for name in spec.options or {}
             if spec.option_type(name) == "text"}
     assert text - not_paths == set(recipes.MODEL_PATH_KEYS)
@@ -669,6 +669,8 @@ def test_every_option_of_a_baseline_is_a_path_key_or_known_not_to_be_one():
 
 # Every key a protocol's prepare reads from --options, and whether it opens it as a file.
 PROTOCOL_OPTIONS = {
+    "clingen_pp3_bp4": {"decimals": False, "increment": False, "limit": False,
+                        "n_boot": False, "seed": False, "stratum": False},
     "dart_eval": {"dataset": False, "limit": False, "source_sha256": False},
     "flip2": {"allow_unverified": False, "dataset": False, "limit": False, "split": False},
     "genomic_benchmarks": {"dataset": False, "limit": False},

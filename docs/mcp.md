@@ -47,7 +47,7 @@ file, it is that commit. A recorded run through these tools is in [demo/](demo/R
 | Tool | What it does |
 | --- | --- |
 | `list_protocols` | The protocols, with the recipes and registered models for each |
-| `describe_protocol` | Capabilities, baselines, registered models and recipes of one protocol. Three protocols also give datasets, metrics and data access; the other five give capabilities only, and the reply says so in `note`. Inputs with sizes and licence are in `describe_recipe` |
+| `describe_protocol` | Capabilities, baselines, registered models and recipes of one protocol. Four protocols also give datasets, metrics and data access; the other five give capabilities only, and the reply says so in `note`. Inputs with sizes and licence are in `describe_recipe` |
 | `list_recipes` | The recipes under `recipes/` with SHA-256, scope, backends and `kg_record_id`, the graph record of the protocol (null when the recipe names none) |
 | `describe_recipe` | One recipe in full |
 | `list_models` | The registered model adapters, or those registered for one protocol, with each option's type |
@@ -102,8 +102,7 @@ Three limits of a pass, `strict` included:
 Two runs of the same recipe do not give the same output digests, because the report, the
 manifest, the logs and the receipt hold times. Whether `predictions.json` repeats depends on
 the protocol. `prepare` gives every row a random opaque ID for FLIP2, DART-Eval, mRNABench and Genomic Benchmarks, so
-that an adapter cannot key on it, and the IDs appear in the predictions. MFASS v2, ProteinGym
-and TDC ADMET keep their rows' own IDs: three MFASS v2 baseline runs on one machine, on Python
+that an adapter cannot key on it, and the IDs appear in the predictions. MFASS v2, ProteinGym, TDC ADMET and ClinGen PP3/BP4 keep their rows' own IDs: three MFASS v2 baseline runs on one machine, on Python
 3.11 and 3.12, gave a byte-identical `predictions.json`. That holds on one machine only, as
 the list above says. Compare two runs by the metric values the recipe checks, not by a digest.
 

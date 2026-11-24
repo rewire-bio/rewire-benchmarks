@@ -18,8 +18,8 @@ On `rewirebench`:
    A recipe run fetches its own inputs and checks each digest, so you do not fetch them
    yourself.
 3. `describe_protocol`: the protocol's capabilities, its baselines and the models it accepts.
-   Three protocols (`flip2-fitness-v1`, `dart-eval-task1-zero-shot-v1`,
-   `mrnabench-sample-mrl-v1`) also return datasets, metrics and data access. The other five,
+   Four protocols (`flip2-fitness-v1`, `dart-eval-task1-zero-shot-v1`,
+   `mrnabench-sample-mrl-v1`, `clingen-pp3-bp4-v1`) also return datasets, metrics and data access. The other five,
    `mfass-v2` among them, return capabilities only. If neither tool gives the inputs, say so
    and point to the protocol's page under `docs/` in rewire-bio/rewire-benchmarks. Do not
    list inputs, sizes or licences from memory.
@@ -67,7 +67,7 @@ at a time. Controlled-access data needs the user's own credentials, configured b
 ## Limits to state
 
 - No rewirebench protocol reads a VCF, BAM or FileRef yet. Today genomics-mcp supplies data
-  and truth sets for inspection and for benchmarks still to be built. The eight existing
+  and truth sets for inspection and for benchmarks still to be built. The nine existing
   protocols take the tabular files their own documentation names.
 - The truth-set and synthetic-protocol tools come from a pinned commit on the main branch of
   genomics-mcp. They are not in its 0.1.0 release.

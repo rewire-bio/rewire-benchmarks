@@ -45,7 +45,7 @@ against the graph, so copy it from `dataset_info`.
 ## A model run outside a recipe
 
 1. `list_protocols`, `describe_protocol`: the protocol's capabilities, its baselines and the
-   models it accepts. For five of the eight protocols (both MFASS v2 protocols, ProteinGym,
+   models it accepts. For five of the nine protocols (both MFASS v2 protocols, ProteinGym,
    TDC ADMET and Genomic Benchmarks) that is all it returns. Do not state a protocol's inputs,
    sizes or licence from it, or from memory: they are in `describe_recipe` when a recipe
    exists, and otherwise say that the server does not give them.

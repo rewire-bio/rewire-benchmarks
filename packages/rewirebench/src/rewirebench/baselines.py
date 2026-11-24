@@ -160,6 +160,12 @@ REGISTRY = {
                      "no published conventional zero-shot scalar Task 1 baseline was established in our source review"}},
         _H12CORE_FIMO,
     ],
+    "clingen-pp3-bp4-v1": [
+        _RANDOM,
+        _entry("clingen-conventional-pending-v1", "conventional",
+               "Precomputed clinical score tables run via clingen-score-table",
+               gap="Conventional comparators (REVEL, CADD, AlphaMissense) run as explicit score tables through --model clingen-score-table."),
+    ],
 }
 
 

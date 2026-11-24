@@ -2148,7 +2148,7 @@ dev = [
 
 [[package]]
 name = "rewirebench"
-version = "0.6.0"
+version = "0.6.1"
 source = { editable = "packages/rewirebench" }
 dependencies = [
     { name = "numpy" },

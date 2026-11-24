@@ -1,0 +1,429 @@
+schema_version: "1.0"
+id: clingen-pp3-bp4-af001-calibration
+title: ClinGen PP3/BP4 local posterior calibration on rare post-2023-12 ClinVar missense SNVs (CPU)
+summary: >-
+  Prepares the AF<0.1% ClinGen PP3/BP4 held-out ClinVar missense benchmark cohort
+  (5,454 P/LP, 2,687 B/LB, 6,312 gnomAD v3.1.2 reference variants) and calibrates eight
+  unconfounded predictors with 1,000 conservative bootstrap resamples on CPU.
+kind: benchmark_run
+purpose: harness_run
+scope: full_protocol
+rewirebench_protocol: clingen-pp3-bp4-v1
+kg_record_id: rewire-local-20261123-clingen-protocol-post-2023-12-af001
+store_recipe_id: clingen-pp3-bp4-af001-calibration
+licence:
+  code: MIT
+  weights: No model weights; evaluates pinned precomputed score tables for 8 predictors.
+  data: ClinVar public domain and gnomAD v3.1.2 ODC-By; pinned cohort and score TSVs fetched by SHA-256.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:beb2537c26950553f0df1e61b161507d484511988848f7973b0190285fd4f55c
+    linux/arm64:
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:0d9636331a18f40aadb35bf8f118b1811fd45491aafbeef6fa0db4ba9ade998c
+hardware_floor:
+  accelerator:
+    kind: none
+  host_memory_gb: 0.23
+  wall_clock_seconds: 67.6
+  basis: measured_by_rewire
+  note: >-
+    CPU only. Measured on 2026-11-24 on an Apple M4 (macOS arm64): 67.6 seconds across all
+    eight non-leaked predictors (1,000 bootstraps each), peak resident memory 229 MB (excludes EVEE).
+missing:
+  weights_pin:
+    reason: inapplicable
+    note: Evaluates pinned precomputed variant score tables via the registered clingen-score-table adapter.
+inputs:
+  - name: gnomad_ref_missense.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/cohorts/gnomad_ref_missense.tsv
+    sha256: 818ad7178c61c6eeddb489d6969b98728895cd70baf95dcd3a3ec7008442ac83
+    bytes: 522482
+  - name: variants_post_2023_12.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/cohorts/variants_post_2023_12.tsv
+    sha256: 90ec52d2b5dcbc4019113e60bd4b3099bf4e0761c821c2f2c7055b2c8b650438
+    bytes: 1271595
+  - name: scores_gpnmsa.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_gpnmsa.tsv
+    sha256: b7d188f75c15a552e5d66df8f5fbdbb261779c42000d236e4e40cdf5355c9770
+    bytes: 380995
+  - name: scores_gpnstar_v.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_gpnstar_v.tsv
+    sha256: 05b681f74de63d5697174696b717c8aa0615402531e220c4a69423ec65eea1a9
+    bytes: 412452
+  - name: scores_gpnstar_m.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_gpnstar_m.tsv
+    sha256: fd7f857518e3966bee4e8c89b81ce1a4f143621faef5a2bef1828c802c0447ef
+    bytes: 411298
+  - name: scores_avi.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_avi.tsv
+    sha256: 9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501
+    bytes: 546369
+  - name: scores_am.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_am.tsv
+    sha256: 4d5e091bff4737650da0e82259fe8cdded8df6128e7640d84da5c1ff6a4bb5fd
+    bytes: 394870
+  - name: scores_revel.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_revel.tsv
+    sha256: a2e4466f585556ffe2a972c9e4c10a2046eddb1fc5b40dc8b66473383103b90e
+    bytes: 390195
+  - name: scores_cadd.tsv
+    url: https://raw.githubusercontent.com/rewire-bio/rewire-benchmarks/fbf4fd5df880ee685fa276dfa6a5bb46da4bcf73/benchmarks/clingen-pp3-bp4/scores/scores_cadd.tsv
+    sha256: 58b427e2e85c30299af5a0464e9f552c92b80d6423bba3cf26cf8c8f3add8a14
+    bytes: 380474
+commands:
+  - name: prepare-grid-01-d2
+    argv:
+      - rewirebench
+      - prepare
+      - clingen-pp3-bp4-v1
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared_01_d2"
+      - --options
+      - '{"stratum": "post_2023_12_af001", "increment": 0.01, "decimals": 2}'
+  - name: prepare-grid-005-d3
+    argv:
+      - rewirebench
+      - prepare
+      - clingen-pp3-bp4-v1
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared_005_d3"
+      - --options
+      - '{"stratum": "post_2023_12_af001", "increment": 0.005, "decimals": 3}'
+  - name: prepare-grid-1-d1
+    argv:
+      - rewirebench
+      - prepare
+      - clingen-pp3-bp4-v1
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared_1_d1"
+      - --options
+      - '{"stratum": "post_2023_12_af001", "increment": 0.1, "decimals": 1}'
+  - name: prepare-grid-001-d3
+    argv:
+      - rewirebench
+      - prepare
+      - clingen-pp3-bp4-v1
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared_001_d3"
+      - --options
+      - '{"stratum": "post_2023_12_af001", "increment": 0.001, "decimals": 3}'
+  - name: run-gpn-msa
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_01_d2"
+      - --output
+      - "{output}/gpn-msa"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - GPN-MSA (-LLR)
+      - --training-overlap
+      - Unsupervised MSA language model; no ClinVar labels in training.
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_gpnmsa.tsv", "artifact_sha256": "b7d188f75c15a552e5d66df8f5fbdbb261779c42000d236e4e40cdf5355c9770", "column": "gpn_msa"}'
+  - name: run-gpn-star-v
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_01_d2"
+      - --output
+      - "{output}/gpn-star-v"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - GPN-Star vertebrate v100 (-LLR)
+      - --training-overlap
+      - Unsupervised vertebrate MSA model; no ClinVar labels in training.
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_gpnstar_v.tsv", "artifact_sha256": "05b681f74de63d5697174696b717c8aa0615402531e220c4a69423ec65eea1a9", "column": "gpnstar_v"}'
+  - name: run-gpn-star-m
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_01_d2"
+      - --output
+      - "{output}/gpn-star-m"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - GPN-Star mammal m447 (-LLR)
+      - --training-overlap
+      - Unsupervised mammalian MSA model; no ClinVar labels in training.
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_gpnstar_m.tsv", "artifact_sha256": "fd7f857518e3966bee4e8c89b81ce1a4f143621faef5a2bef1828c802c0447ef", "column": "gpnstar_m"}'
+  - name: run-alphagenome-avi
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_005_d3"
+      - --output
+      - "{output}/alphagenome-avi"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - AlphaGenome AVI (raw)
+      - --training-overlap
+      - No ClinVar supervision; trained on gnomAD allele-frequency structure (rare AF<0.1% stratum isolates label confounding).
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_avi.tsv", "artifact_sha256": "9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501", "column": "avi"}'
+  - name: run-alphagenome-avi-phred
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_1_d1"
+      - --output
+      - "{output}/alphagenome-avi-phred"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - AlphaGenome AVI (PHRED)
+      - --training-overlap
+      - No ClinVar supervision; trained on gnomAD allele-frequency structure (rare AF<0.1% stratum isolates label confounding).
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_avi.tsv", "artifact_sha256": "9a873bf165a596f07f703c175532276700ed0aae55e9c87d29ea7541279e0501", "column": "avi_phred"}'
+  - name: run-alphamissense
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_001_d3"
+      - --output
+      - "{output}/alphamissense"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - AlphaMissense
+      - --training-overlap
+      - Weakly supervised using primate population frequency and AlphaFold structure; no ClinVar labels.
+      - --allow-partial
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_am.tsv", "artifact_sha256": "4d5e091bff4737650da0e82259fe8cdded8df6128e7640d84da5c1ff6a4bb5fd", "column": "alphamissense"}'
+  - name: run-revel
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_001_d3"
+      - --output
+      - "{output}/revel"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - REVEL v1.3
+      - --training-overlap
+      - Ensemble trained on HGMD and UniProt before Dec 2023; post-2023-12 ClinVar cohort is temporally held out.
+      - --allow-partial
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_revel.tsv", "artifact_sha256": "a2e4466f585556ffe2a972c9e4c10a2046eddb1fc5b40dc8b66473383103b90e", "column": "revel"}'
+  - name: run-cadd-v1-7
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared_1_d1"
+      - --output
+      - "{output}/cadd-v1-7"
+      - --model
+      - clingen-score-table
+      - --model-name
+      - CADD v1.7 (PHRED)
+      - --training-overlap
+      - Trained on simulated vs human-derived neutral variants and genomic features before Dec 2023.
+      - --batch-size
+      - "4096"
+      - --adapter-options
+      - '{"artifact": "{inputs}/scores_cadd.tsv", "artifact_sha256": "58b427e2e85c30299af5a0464e9f552c92b80d6423bba3cf26cf8c8f3add8a14", "column": "cadd_phred"}'
+outputs:
+  - gpn-msa/report.json
+  - gpn-msa/predictions.json
+  - gpn-star-v/report.json
+  - gpn-star-v/predictions.json
+  - gpn-star-m/report.json
+  - gpn-star-m/predictions.json
+  - alphagenome-avi/report.json
+  - alphagenome-avi/predictions.json
+  - alphagenome-avi-phred/report.json
+  - alphagenome-avi-phred/predictions.json
+  - alphamissense/report.json
+  - alphamissense/predictions.json
+  - revel/report.json
+  - revel/predictions.json
+  - cadd-v1-7/report.json
+  - cadd-v1-7/predictions.json
+expected_output:
+  description: >-
+    Pejaver/Bergquist 1,000-bootstrap conservative PP3/BP4 thresholds and discrimination
+    metrics across all eight non-leaked predictors on post_2023_12_af001.
+  values:
+    - label: GPN-MSA P/LP count
+      metric_id: gpn_msa_n_pos
+      file: gpn-msa/report.json
+      key: [metrics, n_pos]
+      value: 5454
+      tolerance: 0
+    - label: GPN-MSA AUROC
+      metric_id: gpn_msa_auroc
+      file: gpn-msa/report.json
+      key: [metrics, auroc]
+      value: 0.851324
+      tolerance: 0.00001
+    - label: GPN-MSA PP3 Supporting (+1)
+      metric_id: gpn_msa_pp3_supporting
+      file: gpn-msa/report.json
+      key: [metrics, pp3_supporting]
+      value: 9.37
+      tolerance: 0.00001
+    - label: GPN-Star vertebrate AUROC
+      metric_id: gpn_star_v_auroc
+      file: gpn-star-v/report.json
+      key: [metrics, auroc]
+      value: 0.875583
+      tolerance: 0.00001
+    - label: GPN-Star vertebrate PP3 Supporting (+1)
+      metric_id: gpn_star_v_pp3_supporting
+      file: gpn-star-v/report.json
+      key: [metrics, pp3_supporting]
+      value: 9.01
+      tolerance: 0.00001
+    - label: GPN-Star mammal AUROC
+      metric_id: gpn_star_m_auroc
+      file: gpn-star-m/report.json
+      key: [metrics, auroc]
+      value: 0.830077
+      tolerance: 0.00001
+    - label: GPN-Star mammal PP3 Supporting (+1)
+      metric_id: gpn_star_m_pp3_supporting
+      file: gpn-star-m/report.json
+      key: [metrics, pp3_supporting]
+      value: 8.96
+      tolerance: 0.00001
+    - label: AlphaGenome AVI (raw) AUROC
+      metric_id: alphagenome_avi_auroc
+      file: alphagenome-avi/report.json
+      key: [metrics, auroc]
+      value: 0.940770
+      tolerance: 0.00001
+    - label: AlphaGenome AVI (raw) PP3 Supporting (+1)
+      metric_id: alphagenome_avi_pp3_supporting
+      file: alphagenome-avi/report.json
+      key: [metrics, pp3_supporting]
+      value: 1.170
+      tolerance: 0.00001
+    - label: AlphaGenome AVI (PHRED) AUROC
+      metric_id: alphagenome_avi_phred_auroc
+      file: alphagenome-avi-phred/report.json
+      key: [metrics, auroc]
+      value: 0.940770
+      tolerance: 0.00001
+    - label: AlphaGenome AVI (PHRED) PP3 Supporting (+1)
+      metric_id: alphagenome_avi_phred_pp3_supporting
+      file: alphagenome-avi-phred/report.json
+      key: [metrics, pp3_supporting]
+      value: 25.3
+      tolerance: 0.00001
+    - label: AlphaMissense scored P/LP count
+      metric_id: alphamissense_n_pos
+      file: alphamissense/report.json
+      key: [metrics, n_pos]
+      value: 5384
+      tolerance: 0
+    - label: AlphaMissense AUROC
+      metric_id: alphamissense_auroc
+      file: alphamissense/report.json
+      key: [metrics, auroc]
+      value: 0.946825
+      tolerance: 0.00001
+    - label: AlphaMissense PP3 Supporting (+1)
+      metric_id: alphamissense_pp3_supporting
+      file: alphamissense/report.json
+      key: [metrics, pp3_supporting]
+      value: 0.723
+      tolerance: 0.00001
+    - label: AlphaMissense PP3 Strong (+4)
+      metric_id: alphamissense_pp3_strong
+      file: alphamissense/report.json
+      key: [metrics, pp3_strong]
+      value: 0.987
+      tolerance: 0.00001
+    - label: REVEL scored P/LP count
+      metric_id: revel_n_pos
+      file: revel/report.json
+      key: [metrics, n_pos]
+      value: 5439
+      tolerance: 0
+    - label: REVEL AUROC
+      metric_id: revel_auroc
+      file: revel/report.json
+      key: [metrics, auroc]
+      value: 0.968610
+      tolerance: 0.00001
+    - label: REVEL PP3 Supporting (+1)
+      metric_id: revel_pp3_supporting
+      file: revel/report.json
+      key: [metrics, pp3_supporting]
+      value: 0.683
+      tolerance: 0.00001
+    - label: REVEL PP3 Strong (+4)
+      metric_id: revel_pp3_strong
+      file: revel/report.json
+      key: [metrics, pp3_strong]
+      value: 0.916
+      tolerance: 0.00001
+    - label: REVEL BP4 Supporting (-1)
+      metric_id: revel_bp4_supporting
+      file: revel/report.json
+      key: [metrics, bp4_supporting]
+      value: 0.371
+      tolerance: 0.00001
+    - label: CADD v1.7 AUROC
+      metric_id: cadd_v1_7_auroc
+      file: cadd-v1-7/report.json
+      key: [metrics, auroc]
+      value: 0.894275
+      tolerance: 0.00001
+    - label: CADD v1.7 PP3 Supporting (+1)
+      metric_id: cadd_v1_7_pp3_supporting
+      file: cadd-v1-7/report.json
+      key: [metrics, pp3_supporting]
+      value: 26.0
+      tolerance: 0.00001
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Evaluates pinned precomputed variant score tables via the clingen-score-table adapter, not raw model inference from FASTA/MSA.
+  - EVEE is intentionally excluded from this recipe because its published ClinVar-supervised table overlaps the held-out test window.
+  - The local backend runs in the host Python environment, not in the container image named in environment.images.

@@ -123,7 +123,10 @@ def test_protocols_recipes_and_models_can_be_listed_and_described(server: FastMC
     # Each summary names the graph record of its protocol, so a client can match a recipe
     # to a published result without a describe_recipe call per recipe.
     assert {entry["id"]: entry["kg_record_id"] for entry in listed["recipes"]} == {
-        "mfass-v2-kmer-baseline": "rewire-mfass-v2", SMOKE: None}
+        "clingen-pp3-bp4-af001-calibration": "rewire-local-20261123-clingen-protocol-post-2023-12-af001",
+        "mfass-v2-kmer-baseline": "rewire-mfass-v2",
+        SMOKE: None,
+    }
     recipe = call(server, "describe_recipe", recipe="mfass-v2-kmer-baseline")
     assert recipe["sha256"] == recipes.get_recipe("mfass-v2-kmer-baseline", RECIPES).sha256
     assert recipe["recipe"]["inputs"][0]["sha256"].startswith("a637ca0e")
