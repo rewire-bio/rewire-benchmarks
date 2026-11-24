@@ -13,15 +13,16 @@ Two tools work together:
   and scores them. It runs locally and uploads nothing.
 
 With the plugin installed, `rewirebench` is also an MCP server, and `genomics-mcp` supplies
-data and truth sets. Four shorter skills cover the main flows through those servers:
-`find-model-for-use-case`, `run-benchmark`, `verify-published-result` and
-`prepare-benchmark-data`. Prefer them when the servers are available. This skill is the
-command-line route and the reference for comparing a run with a published result.
+data and truth sets. Six shorter skills cover the main flows through those servers:
+`find-model-for-use-case`, `run-benchmark`, `verify-published-result`, `prepare-benchmark-data`,
+`author-benchmark` and `investigate-discrepancy`. Prefer them when the servers are available.
+This skill is the command-line route and the reference for comparing a run with a published
+result.
 
 Reference files in this skill:
 
 - `reference/protocols.md`: protocol IDs, data access and licences, extras, baselines, KG records.
-- `reference/kg-queries.md`: tested KG queries and the vocabulary.
+- `reference/kg-queries.md`: tested KG queries (`rank_for_use_case`, `gaps`, `recipe_for`, `results_for_model`, `provenance`) and the vocabulary.
 - `reference/adapter_template.py`: a `predict()` and `embed()` adapter to copy.
 
 Detailed per-protocol docs: https://github.com/rewire-bio/rewire-benchmarks/tree/main/docs

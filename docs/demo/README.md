@@ -154,7 +154,7 @@ It was recorded at an older pin than the two runs above. The plugin was version 
 from the plugin folder of a checkout at commit `26fd89b`, where `.mcp.json` pins rewirebench
 at `e5c5662`. The recording does not name that pin itself. The receipt in it has the
 `sdk_code_sha256` `3297cfe0...`, which is the digest of the rewirebench sources at `e5c5662`,
-computed here from that commit. The plugin is now 0.2.4 and pins `rewirebench[mcp]==0.6.0` (`v0.6.0`,
+computed here from that commit. The plugin is now 0.2.5 and pins `rewirebench[mcp]==0.6.0` (`v0.6.0`,
 commit `199c002`). The agent session has not been recorded again: not at `199c002` (`v0.6.0`), and
 not at `6d98f09`, `d74a030` or `023a7a2`, the pins before it. What
 follows describes the recording made at `e5c5662`.

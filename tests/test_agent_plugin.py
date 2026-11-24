@@ -18,9 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 SKILL = SKILLS / "bio-model-benchmarks"
 PLUGIN = ROOT / "plugins/bio-model-benchmarks"
-SKILL_NAMES = ["bio-model-benchmarks", "find-model-for-use-case", "prepare-benchmark-data",
-               "run-benchmark", "verify-published-result"]
-COMMANDS = ["data", "demo", "find", "plan", "run", "verify"]
+SKILL_NAMES = ["author-benchmark", "bio-model-benchmarks", "find-model-for-use-case",
+               "investigate-discrepancy", "prepare-benchmark-data", "run-benchmark",
+               "verify-published-result"]
+COMMANDS = ["author", "data", "demo", "discrepancy", "find", "plan", "run", "verify"]
 PLUGIN_ROOT = "${CLAUDE_PLUGIN_ROOT}"
 
 
@@ -233,10 +234,15 @@ def test_rewirebench_server_is_pinned_and_reads_the_plugin_recipes():
 # a tool of one of the three servers or one of these: fields, arguments and values. A new
 # word must be added here by hand, so a tool that does not exist cannot be named unnoticed.
 NOT_TOOLS = {
-    "allow_partial", "average_precision_sklearn", "batch_size", "budget_bytes",
-    "confirmed_amount", "expected_wall_seconds", "full_protocol", "install_metadata",
-    "kg_record_id", "kg_release_id", "limit_enforced", "model_name", "plan_sha256", "pod_specs",
-    "precision_at_capacity", "run_id", "started_by", "synthetic_smoke", "timeout_seconds",
+    "allow_partial", "applies_to", "average_precision_sklearn", "batch_size", "benchmark",
+    "benchmark_run", "budget_bytes", "configuration", "confirmed_amount",
+    "contested_results_for_use_case", "dataset_subset", "discrepancies_for_system",
+    "discrepancy_history", "discrepancy_review", "evaluation", "expected_wall_seconds",
+    "full_protocol", "gaps", "harness_run", "install_metadata", "kg_record_id", "kg_release_id",
+    "kind", "limit_enforced", "model_name", "open_discrepancies", "plan_sha256", "pod_specs",
+    "precision_at_capacity", "provenance", "purpose", "rank_for_use_case", "recipe_for",
+    "reproduced", "result", "results_for_model", "rewire_run", "run_id", "sha256", "source_checked",
+    "started_by", "status", "store_recipe_id", "synthetic_smoke", "timeout_seconds",
     "training_overlap", "variant_type",
     "20", "assembly", "backend", "chr20", "command", "commits", "contig", "cost", "cpu",
     "device", "eligible", "finished", "hardware", "limitations", "local", "method", "model",
