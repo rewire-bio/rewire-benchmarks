@@ -115,7 +115,7 @@ _MODELS: tuple[ModelSpec, ...] = (
         id="seeded-random", title="Seeded random ranking control",
         adapter="rewirebench.adapters.sequence:SeededRandomScore",
         interfaces=("predict",), pretrained=False,
-        protocols=("proteingym-v1.3-dms-substitutions", "dart-eval-task1-zero-shot-v1"),
+        protocols=("proteingym-v1.3-dms-substitutions", "dart-eval-task1-zero-shot-v1", "clingen-pp3-bp4-v1"),
         options={"seed": "Integer seed, default 0."}, option_types={"seed": "integer"},
     ),
     ModelSpec(
@@ -207,6 +207,21 @@ _MODELS: tuple[ModelSpec, ...] = (
         runs_program=True,
         note="Starts the FIMO executable named in the options, so it runs from the command "
              "line only: a recipe and the MCP server both refuse it.",
+    ),
+    ModelSpec(
+        id="clingen-score-table",
+        title="SHA-256 verified precomputed ClinGen variant score table",
+        adapter="rewirebench.adapters.clingen:ScoreTableLookup",
+        interfaces=("predict",),
+        pretrained=False,
+        protocols=("clingen-pp3-bp4-v1",),
+        options={
+            "artifact": "Path to a TSV holding chrom, pos, ref, alt and score columns.",
+            "artifact_sha256": "Expected SHA-256 hex digest of that TSV.",
+            "column": "Score column name in the TSV, default score.",
+        },
+        required_options=("artifact", "artifact_sha256"),
+        note="Looks up precomputed model or clinical baseline scores by genomic variant key.",
     ),
 )
 

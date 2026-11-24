@@ -34,6 +34,7 @@ PROTOCOLS = {
     "flip2-fitness-v1": "flip2",
     "dart-eval-task1-zero-shot-v1": "dart_eval",
     "mrnabench-sample-mrl-v1": "mrnabench",
+    "clingen-pp3-bp4-v1": "clingen_pp3_bp4",
 }
 
 SEQUENCE_PROTOCOLS = frozenset({

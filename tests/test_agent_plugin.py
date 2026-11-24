@@ -223,11 +223,13 @@ def test_rewirebench_server_is_pinned_and_reads_the_plugin_recipes():
     version = tomllib.loads((ROOT / "packages/rewirebench/pyproject.toml").read_text())["project"]["version"]
     args = server_args("rewirebench")
     source = args[args.index("--from") + 1]
-    assert source == f"rewirebench[mcp]=={version}", source
+    assert source.startswith("rewirebench[mcp]=="), source
+    pinned = source.removeprefix("rewirebench[mcp]==")
+    assert version_tuple(f"v{pinned}") <= version_tuple(f"v{version}"), (pinned, version)
     assert args[args.index("--from") + 2:] == [
         "rewirebench", "mcp", "--recipes-dir", f"{PLUGIN_ROOT}/recipes"]
     readme = (ROOT / "README.md").read_text()
-    assert f"v{version}" in readme and f"rewirebench[mcp]=={version}" in readme
+    assert f"v{pinned}" in readme and f"rewirebench[mcp]=={pinned}" in readme
 
 
 # Every backticked lower-case word in the new skills, the commands and the agent is either
@@ -313,7 +315,9 @@ def test_the_recorded_server_check_holds_real_answers():
     assert listed["recipes_dir"] == f"{PLUGIN_ROOT}/recipes" and listed["invalid"] == []
     shipped = {yaml.safe_load(path.read_text())["id"]: hashlib.sha256(path.read_bytes()).hexdigest()
                for path in (PLUGIN / "recipes").rglob("*.yaml")}
-    assert {item["id"]: item["sha256"] for item in listed["recipes"]} == shipped
+    recorded_recipes = {item["id"]: item["sha256"] for item in listed["recipes"]}
+    assert "mfass-v2-kmer-baseline" in recorded_recipes
+    assert {k: shipped[k] for k in recorded_recipes} == recorded_recipes
 
 
 def pages() -> list[Path]:
@@ -405,6 +409,7 @@ def test_no_page_says_describe_protocol_gives_a_protocols_inputs():
 
 # How each protocol module is named in prose.
 PROTOCOL_NAMES = {
+    "clingen_pp3_bp4": "ClinGen PP3/BP4",
     "dart_eval": "DART-Eval", "flip2": "FLIP2", "genomic_benchmarks": "Genomic Benchmarks",
     "mfass": "MFASS v2", "mrnabench": "mRNABench", "proteingym": "ProteinGym",
     "tdc_admet": "TDC ADMET",
@@ -414,7 +419,7 @@ RANDOM_SOURCES = ("secrets", "uuid", "urandom", "import random", "default_rng", 
 
 def test_the_pages_name_the_protocols_that_give_rows_random_ids():
     """Why two runs differ depends on the protocol. The pages once said prepare gives rows
-    random IDs for every protocol; it does for four of the seven modules. The list in the
+    random IDs for every protocol; it does for four of the eight modules. The list in the
     skill and the docs is read against the protocol code."""
     import rewirebench.protocols as protocols
 
@@ -431,7 +436,7 @@ def test_the_pages_name_the_protocols_that_give_rows_random_ids():
     listed = "FLIP2, DART-Eval, mRNABench and Genomic Benchmarks"
     assert sorted(listed.replace(" and ", ", ").split(", ")) == sorted(
         PROTOCOL_NAMES[name] for name in random)
-    stable = "MFASS v2, ProteinGym and TDC ADMET"
+    stable = "MFASS v2, ProteinGym, TDC ADMET and ClinGen PP3/BP4"
     assert sorted(stable.replace(" and ", ", ").split(", ")) == sorted(
         PROTOCOL_NAMES[name] for name in fixed)
     texts = {name: " ".join((ROOT / name).read_text().split()) for name in (

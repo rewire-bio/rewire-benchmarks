@@ -19,6 +19,7 @@ Docs: https://github.com/rewire-bio/rewire-benchmarks/blob/main/docs/
 | `flip2-fitness-v1` | Protein fitness | `flip2.md` | `sequence` | `fit`, `fit_with_validation`, or embeddings with a fixed ridge head | `training-mean-v1`, `protein-composition-probe-v1` | `id:discovery-benchmark-flip2` (recipes), `id:rewire-protocol-flip2-rhomax-by-wild-type-v1` (results) |
 | `dart-eval-task1-zero-shot-v1` | DNA regulatory elements | `dart-eval.md` | `sequence` | zero-shot, `fit` refused | `seeded-random-v1`; conventional blocked | `id:discovery-benchmark-dart-eval` (recipes) |
 | `mrnabench-sample-mrl-v1` | RNA translation (MRL) | `mrnabench.md` | `sequence` | `fit`, or embeddings with a fixed RidgeCV head | `training-mean-v1`, `rna-composition-probe-v1` | `id:discovery-benchmark-mrnabench` (recipes), `id:rewire-protocol-mrnabench-designed-mrl-v1` (results) |
+| `clingen-pp3-bp4-v1` | Missense clinical calibration | `clingen-pp3-bp4` | none | zero-shot, `fit` refused | `seeded-random-v1`; precomputed via `clingen-score-table` | `id:rewire-local-20261123-clingen-protocol-post-2023-12-af001` (results, recipe) |
 
 "Blocked" conventional baselines are listed with a gap reason and are not run.
 On `main` (after v0.5.0) two artifact-backed references exist,
@@ -95,6 +96,12 @@ Never accept a licence or create an account on the user's behalf. Ask first.
   TDC is MIT; each dataset has its own terms.
 - 22 datasets, each with its own TDC metric; six are errors (lower is better). No overall score.
 - Exports are labelled `local_evaluation_not_paper_reproduction`.
+
+### clingen-pp3-bp4-v1
+
+- Data: pinned ClinVar missense cohorts and gnomAD v3.1.2 reference missense table under `benchmarks/clingen-pp3-bp4/cohorts/`.
+- Default stratum: rare ClinVar post-2023-12 (`rare_af001`, 5,454 P/LP, 2,687 B/LB, 6,312 gnomAD ref = 14,453 variants).
+- Metrics: AUROC, AUPRC, 95% intervals, conservative 1,000-bootstrap PP3 and BP4 strength thresholds.
 
 ## Smoke options
 

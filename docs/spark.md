@@ -198,7 +198,7 @@ Where each registered model stands (`rewirebench models`):
 
 | Model | Extra | What stands in the way on arm64 |
 | --- | --- | --- |
-| `train-mean`, `seeded-random`, `sequence-composition`, `training-prior`, `string-ngram-linear`, `paired-composition`, `mfass-kmer-position` | none | Nothing known. NumPy and scikit-learn only. The MFASS baseline has run on macOS arm64, not on Linux arm64 |
+| `train-mean`, `seeded-random`, `sequence-composition`, `training-prior`, `string-ngram-linear`, `paired-composition`, `mfass-kmer-position`, `clingen-score-table` | none | Nothing known. NumPy and scikit-learn only. The MFASS baseline has run on macOS arm64, not on Linux arm64 |
 | `evcouplings-independent` | none | Nothing known. CPU only. Not verified on Linux arm64 |
 | `esm2-t6-8m-masked-marginal`, `esm2-embeddings` | `esm` | `torch==2.2.2` is CPU only on arm64. A GPU run needs a newer torch, and `fair-esm==2.0.0` is not verified against one |
 | `dnabert2-frozen` | `dnabert2` | The same torch pin, with `transformers==4.29.2`. DNABERT-2 loads its own model code; not verified on a newer torch or on arm64 |
@@ -229,7 +229,7 @@ For each model and protocol pair:
 3. **Same rows.** For FLIP2, DART-Eval, mRNABench and Genomic Benchmarks, `prepare` gives rows
    random IDs, so two separate runs cannot be joined row by row. Prepare once and give both
    machines the same prepared folder. This needs a recipe step or option that does not exist
-   yet. MFASS v2, ProteinGym and TDC ADMET keep their rows' own IDs, so two runs of those can
+   yet. MFASS v2, ProteinGym, TDC ADMET and ClinGen PP3/BP4 keep their rows' own IDs, so two runs of those can
    be joined as they are. One case measured on CPU, on 2026-11-21: the MFASS v2 k-mer
    baseline on macOS arm64 and on Linux x86-64, with the same locked packages, differed in
    19 of 8,324 predictions, by at most 1.4e-17, and in no metric.
