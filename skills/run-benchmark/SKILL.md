@@ -76,10 +76,10 @@ RunPod with another tool: nothing in it stops the pod, so the quote would not bo
   The values are read from the report, not computed again. The `commits` check reads the
   commit the receipt states and does not look it up.
 - `cost` is `null` with reason `owned hardware` on `local` and `spark`.
-- Installed from the plugin, the server runs from the released PyPI wheel (`rewirebench[mcp]==0.6.0`)
+- Installed from the plugin, the server runs from the released PyPI wheel (`rewirebench[mcp]==0.6.1`)
   and the recipes are the plugin's copy. On a PyPI wheel, `code.commit` and `code.commit_source`
   are `null` (whereas a wheel built from a git URL records `install_metadata` in `code.commit_source`)
-  and `code.rewirebench_version` records `0.6.0`. `code.dirty` is `null`, because no tree was checked.
+  and `code.rewirebench_version` records `0.6.1`. `code.dirty` is `null`, because no tree was checked.
   `recipe.commit` is `null` when the plugin folder is a plain copy. If the folder is inside a
   git work tree whose HEAD holds the recipe file, it is that commit.
   `verify_receipt` passes; `strict` reports `commits` as not checked in each of these cases.

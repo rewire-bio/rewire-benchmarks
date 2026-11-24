@@ -1,0 +1,39 @@
+{
+  "coverage": {
+    "denominator": 14453,
+    "scored": 13960,
+    "unscored": 493
+  },
+  "metrics": {
+    "n": 13960,
+    "n_pos": 5384,
+    "n_neg": 2471,
+    "n_ref": 6105,
+    "auroc": 0.9468246969451882,
+    "auroc_ci95_lo": 0.9417483728787365,
+    "auroc_ci95_hi": 0.9519294704530954,
+    "auprc": 0.9724432832681177,
+    "auprc_ci95_lo": 0.9692862621530681,
+    "auprc_ci95_hi": 0.975417775091931,
+    "pp3_supporting": 0.723,
+    "pp3_moderate": 0.873,
+    "pp3_intermediate": 0.959,
+    "pp3_strong": 0.987,
+    "pp3_very_strong": null,
+    "bp4_supporting": null,
+    "bp4_moderate": null,
+    "bp4_intermediate": null,
+    "bp4_strong": null,
+    "bp4_very_strong": null,
+    "plp_reaching_pp3_supporting_share": 0.725668647845468,
+    "plp_reaching_pp3_strong_share": 0.2728454680534918,
+    "blb_reaching_bp4_supporting_share": 0.0,
+    "blb_reaching_bp4_moderate_share": 0.0,
+    "max_pp3_points": 4,
+    "max_bp4_points": 0,
+    "coverage_pos": 0.9871653832049871,
+    "coverage_neg": 0.9196129512467436,
+    "coverage_ref": 0.9672053231939164
+  },
+  "report": "{output}/alphamissense/report.json"
+}

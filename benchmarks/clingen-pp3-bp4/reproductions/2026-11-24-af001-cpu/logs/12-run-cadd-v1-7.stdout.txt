@@ -1,0 +1,39 @@
+{
+  "coverage": {
+    "denominator": 14453,
+    "scored": 14453,
+    "unscored": 0
+  },
+  "metrics": {
+    "n": 14453,
+    "n_pos": 5454,
+    "n_neg": 2687,
+    "n_ref": 6312,
+    "auroc": 0.8942748697397962,
+    "auroc_ci95_lo": 0.8862410557207562,
+    "auroc_ci95_hi": 0.901898250161823,
+    "auprc": 0.9284531849770563,
+    "auprc_ci95_lo": 0.9215343611698702,
+    "auprc_ci95_hi": 0.9353372964947911,
+    "pp3_supporting": 26.0,
+    "pp3_moderate": 32.0,
+    "pp3_intermediate": null,
+    "pp3_strong": null,
+    "pp3_very_strong": null,
+    "bp4_supporting": 22.4,
+    "bp4_moderate": 19.7,
+    "bp4_intermediate": 11.6,
+    "bp4_strong": 1.9,
+    "bp4_very_strong": null,
+    "plp_reaching_pp3_supporting_share": 0.6864686468646866,
+    "plp_reaching_pp3_strong_share": 0.0,
+    "blb_reaching_bp4_supporting_share": 0.6416077409750651,
+    "blb_reaching_bp4_moderate_share": 0.4789728321548195,
+    "max_pp3_points": 2,
+    "max_bp4_points": 4,
+    "coverage_pos": 1.0,
+    "coverage_neg": 1.0,
+    "coverage_ref": 1.0
+  },
+  "report": "{output}/cadd-v1-7/report.json"
+}

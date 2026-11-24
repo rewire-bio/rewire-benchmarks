@@ -1,0 +1,39 @@
+{
+  "coverage": {
+    "denominator": 14453,
+    "scored": 14453,
+    "unscored": 0
+  },
+  "metrics": {
+    "n": 14453,
+    "n_pos": 5454,
+    "n_neg": 2687,
+    "n_ref": 6312,
+    "auroc": 0.8513241102053388,
+    "auroc_ci95_lo": 0.8420416291877296,
+    "auroc_ci95_hi": 0.8605708941133536,
+    "auprc": 0.9031237591715455,
+    "auprc_ci95_lo": 0.8949535811297266,
+    "auprc_ci95_hi": 0.9106039845888072,
+    "pp3_supporting": 9.37,
+    "pp3_moderate": 11.03,
+    "pp3_intermediate": null,
+    "pp3_strong": null,
+    "pp3_very_strong": null,
+    "bp4_supporting": 4.67,
+    "bp4_moderate": 3.8,
+    "bp4_intermediate": 1.38,
+    "bp4_strong": 0.24,
+    "bp4_very_strong": null,
+    "plp_reaching_pp3_supporting_share": 0.45874587458745875,
+    "plp_reaching_pp3_strong_share": 0.0,
+    "blb_reaching_bp4_supporting_share": 0.4495720133978415,
+    "blb_reaching_bp4_moderate_share": 0.35615928544845554,
+    "max_pp3_points": 2,
+    "max_bp4_points": 4,
+    "coverage_pos": 1.0,
+    "coverage_neg": 1.0,
+    "coverage_ref": 1.0
+  },
+  "report": "{output}/gpn-msa/report.json"
+}

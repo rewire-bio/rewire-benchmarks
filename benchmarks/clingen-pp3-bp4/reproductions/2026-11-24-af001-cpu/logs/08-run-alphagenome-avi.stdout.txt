@@ -1,0 +1,39 @@
+{
+  "coverage": {
+    "denominator": 14453,
+    "scored": 14453,
+    "unscored": 0
+  },
+  "metrics": {
+    "n": 14453,
+    "n_pos": 5454,
+    "n_neg": 2687,
+    "n_ref": 6312,
+    "auroc": 0.9407700756429694,
+    "auroc_ci95_lo": 0.9351299817985769,
+    "auroc_ci95_hi": 0.9458305091922168,
+    "auprc": 0.9649903480313885,
+    "auprc_ci95_lo": 0.9605510160701662,
+    "auprc_ci95_hi": 0.9687709084159417,
+    "pp3_supporting": 1.17,
+    "pp3_moderate": 1.334,
+    "pp3_intermediate": 1.527,
+    "pp3_strong": null,
+    "pp3_very_strong": null,
+    "bp4_supporting": 0.683,
+    "bp4_moderate": 0.56,
+    "bp4_intermediate": 0.184,
+    "bp4_strong": 0.065,
+    "bp4_very_strong": -0.501,
+    "plp_reaching_pp3_supporting_share": 0.770993766043271,
+    "plp_reaching_pp3_strong_share": 0.0,
+    "blb_reaching_bp4_supporting_share": 0.6702642352065501,
+    "blb_reaching_bp4_moderate_share": 0.540007443245255,
+    "max_pp3_points": 3,
+    "max_bp4_points": 8,
+    "coverage_pos": 1.0,
+    "coverage_neg": 1.0,
+    "coverage_ref": 1.0
+  },
+  "report": "{output}/alphagenome-avi/report.json"
+}

@@ -1,6 +1,6 @@
 {
   "name": "bio-model-benchmarks",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Find the right model for a use case in the Rewire benchmark graph, prepare data and truth sets, and plan, run and verify benchmarks locally with rewirebench, each run with a receipt.",
   "author": {
     "name": "Rewire",

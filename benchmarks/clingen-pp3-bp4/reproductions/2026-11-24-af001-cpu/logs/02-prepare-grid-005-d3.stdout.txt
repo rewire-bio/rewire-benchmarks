@@ -1,0 +1,5 @@
+{
+  "protocol_id": "clingen-pp3-bp4-v1",
+  "scope": "full",
+  "prepared": "{work}/prepared_005_d3/prepared.json"
+}
