@@ -1,0 +1,118 @@
+schema_version: "1.0"
+id: mrnabench-designed-mrl-baselines
+title: mRNABench Sample designed MRL RNA composition and control baselines on CPU
+summary: >-
+  Prepares the pinned mRNABench Sample designed MRL dataset (100,017 eligible sequences;
+  15,003 canonical held-out test sequences) and runs the registered training-mean null
+  control and train-only RidgeCV RNA composition baseline on CPU.
+kind: benchmark_run
+purpose: harness_run
+scope: full_protocol
+rewirebench_protocol: mrnabench-sample-mrl-v1
+kg_record_id: rewire-protocol-mrnabench-designed-mrl-v1
+store_recipe_id: mrnabench-designed-mrl-baselines
+licence:
+  code: MIT
+  weights: No pretrained weights; RidgeCV and training mean fit only on the training split.
+  data: Reuse terms are unreported upstream (morrislab/mrl-sample). The parquet file is fetched, not redistributed.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:21a0ab429af5399b284be3051507d3167d50ebc7fed8aa5ca074e49f308a5310
+    linux/arm64:
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:9d7b3b6eea2560f6b320b7a8657b7936c5bdd613a167a71d4072be283fc3b2c6
+hardware_floor:
+  accelerator:
+    kind: none
+  host_memory_gb: 0.97
+  wall_clock_seconds: 14.8
+  basis: measured_by_rewire
+  note: >-
+    CPU only. Measured on 2026-11-25 on an Apple M4 (macOS arm64) by this recipe: 14.8 seconds
+    including the 9.8 MB parquet download, peak resident memory 0.97 GiB.
+missing:
+  weights_pin:
+    reason: inapplicable
+    note: The registered baselines use no pretrained weights.
+inputs:
+  - name: mrl-sample-designed.parquet
+    url: https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet
+    sha256: 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4
+    bytes: 9778091
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - mrnabench-sample-mrl-v1
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"dataset": "designed", "target": "target_mrl_designed", "require_official": true}'
+  - name: run-baselines
+    argv:
+      - rewirebench
+      - run-baselines
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/baselines"
+outputs:
+  - baselines/baseline-manifest.json
+  - baselines/training-mean-v1/report.json
+  - baselines/training-mean-v1/predictions.json
+  - baselines/rna-composition-probe-v1/report.json
+  - baselines/rna-composition-probe-v1/predictions.json
+expected_output:
+  description: >-
+    Complete test-split metrics for both registered Rewire sequence baselines on all 15,003
+    held-out sequences of mrl-sample designed target_mrl_designed.
+  values:
+    - label: Scored variants
+      metric_id: n
+      file: baselines/rna-composition-probe-v1/report.json
+      key: [coverage, scored]
+      value: 15003
+      tolerance: 0
+    - label: RNA composition MSE
+      metric_id: mse
+      file: baselines/rna-composition-probe-v1/report.json
+      key: [metrics, mse]
+      value: 1.914439715839851
+      tolerance: 0.000001
+    - label: RNA composition Pearson
+      metric_id: pearson
+      file: baselines/rna-composition-probe-v1/report.json
+      key: [metrics, pearson]
+      value: 0.4367869170170987
+      tolerance: 0.000001
+    - label: RNA composition Spearman
+      metric_id: spearman
+      file: baselines/rna-composition-probe-v1/report.json
+      key: [metrics, spearman]
+      value: 0.49477537290902324
+      tolerance: 0.000001
+    - label: Training-mean scored variants
+      metric_id: train_mean_coverage_scored
+      file: baselines/training-mean-v1/report.json
+      key: [coverage, scored]
+      value: 15003
+      tolerance: 0
+    - label: Training-mean MSE
+      metric_id: train_mean_mse
+      file: baselines/training-mean-v1/report.json
+      key: [metrics, mse]
+      value: 2.3655294722554605
+      tolerance: 0.000001
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Evaluates one Sample dataset and target with train-only RidgeCV; not a complete mRNABench catalogue score or a reproduction of a published deep-model score.
+  - Running locally in Python requires pandas and pyarrow via rewirebench[sequence]; the published linux container image includes them.

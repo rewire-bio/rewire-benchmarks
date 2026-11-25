@@ -119,6 +119,23 @@ def prepare(source: Path, **options):
         pairs = pairs[:limit] if limit else pairs
         source_sha = hashlib.sha256(raw).hexdigest()
         scope, verification = "smoke", "synthetic_demo_not_biological_evidence"
+    elif Path(source).is_file() and Path(source).suffix == ".json":
+        path = Path(source)
+        source_sha = _hash_file(path)
+        expected = options.get("source_sha256")
+        if not isinstance(expected, str) or len(expected) != 64 or source_sha != expected.lower():
+            raise ValueError("source_sha256 must match the exact local JSON fixture bytes")
+        fixture = json.loads(path.read_text())
+        raw_pairs = fixture.get("pairs")
+        if not isinstance(raw_pairs, list) or not raw_pairs or not all(
+            isinstance(p, dict) and isinstance(p.get("source_index"), int)
+            and not isinstance(p.get("source_index"), bool) and p["source_index"] >= 0
+            and isinstance(p.get("sequence"), str) and isinstance(p.get("control"), str)
+            for p in raw_pairs
+        ):
+            raise ValueError("DART JSON fixture must contain nonempty pairs list")
+        pairs, count = (raw_pairs[:limit] if limit else raw_pairs), len(raw_pairs)
+        scope, verification = "smoke", "synthetic_demo_not_biological_evidence"
     else:
         path = Path(source)
         if path.is_dir():
@@ -144,7 +161,7 @@ def prepare(source: Path, **options):
         "dataset_id": DATASET_ID, "scope": scope, "rows": rows,
         "metadata": {"adapter_input_contract": INPUT_CONTRACT,
                      "canonical_test_count": count * 2, "canonical_pair_count": count,
-                     "canonical_count_origin": "synthetic fixture" if demo else "local HDF5 test group; not independently checked",
+                     "canonical_count_origin": "synthetic fixture" if verification == "synthetic_demo_not_biological_evidence" else "local HDF5 test group; not independently checked",
                      "chromosomes": list(CHROMOSOMES), "shuffle_seed": 0,
                      "score_semantics": "higher scalar sequence likelihood; element minus control; ties count as incorrect",
                      "metric": "acc", "metric_direction": "higher", "task": "zero_shot_paired_ranking",
