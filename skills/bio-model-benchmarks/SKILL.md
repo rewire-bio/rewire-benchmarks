@@ -52,7 +52,7 @@ Install the pinned release from PyPI or verify and install the release wheel fro
 ```bash
 set -euo pipefail
 uv venv --python 3.11 .venv
-uv pip install --python .venv/bin/python 'rewirebench==0.6.1'
+uv pip install --python .venv/bin/python 'rewirebench==0.6.2'
 .venv/bin/rewirebench protocols
 ```
 
@@ -61,17 +61,17 @@ To verify the release wheel against `SHA256SUMS` from GitHub Releases first:
 ```bash
 set -euo pipefail
 mkdir rewirebench-wheel && cd rewirebench-wheel
-curl --fail --location --remote-name https://github.com/rewire-bio/rewire-benchmarks/releases/download/v0.6.1/rewirebench-0.6.1-py3-none-any.whl
-curl --fail --location --remote-name https://github.com/rewire-bio/rewire-benchmarks/releases/download/v0.6.1/SHA256SUMS
-awk '$2 == "rewirebench-0.6.1-py3-none-any.whl"' SHA256SUMS | shasum -a 256 --check
+curl --fail --location --remote-name https://github.com/rewire-bio/rewire-benchmarks/releases/download/v0.6.2/rewirebench-0.6.2-py3-none-any.whl
+curl --fail --location --remote-name https://github.com/rewire-bio/rewire-benchmarks/releases/download/v0.6.2/SHA256SUMS
+awk '$2 == "rewirebench-0.6.2-py3-none-any.whl"' SHA256SUMS | shasum -a 256 --check
 cd .. && uv venv --python 3.11 .venv
-uv pip install --python .venv/bin/python 'rewirebench-wheel/rewirebench-0.6.1-py3-none-any.whl'
+uv pip install --python .venv/bin/python 'rewirebench-wheel/rewirebench-0.6.2-py3-none-any.whl'
 .venv/bin/rewirebench protocols
 ```
 
 Check for a newer release first (`gh release list -R rewire-bio/rewire-benchmarks`) and
-record the version used. Extras, installed as `'rewirebench[sequence]==0.6.1'` (or
-`'rewirebench-0.6.1-py3-none-any.whl[sequence]'`):
+record the version used. Extras, installed as `'rewirebench[sequence]==0.6.2'` (or
+`'rewirebench-0.6.2-py3-none-any.whl[sequence]'`):
 `sequence` for FLIP2, DART-Eval and mRNABench; `esm` and `dnabert2` for the public model
 examples; `mcp` for the stdio server. Model stacks conflict; give each its own environment.
 

@@ -1,0 +1,14 @@
+{
+  "baseline_id": "training-mean-v1",
+  "completion": "complete",
+  "configuration": {},
+  "coverage": {
+    "denominator": 15003,
+    "scored": 15003,
+    "unscored": 0
+  },
+  "report": "training-mean-v1/report.json",
+  "role": "null",
+  "scientific_reproduction": "not_established",
+  "status": "evaluated"
+}

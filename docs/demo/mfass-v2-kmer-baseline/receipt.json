@@ -3,24 +3,24 @@
   "kind": "rewire_run_receipt",
   "receipt_kind": "runner_reproduction",
   "scope": "full_protocol",
-  "verified_on": "2026-11-24",
+  "verified_on": "2026-11-25",
   "started_by": "agent",
   "backend": "local",
   "recipe": {
     "id": "mfass-v2-kmer-baseline",
     "repository": "https://github.com/rewire-bio/rewire-benchmarks",
-    "commit": "49b2c943bf98fa361e79eab49795619d03a16941",
+    "commit": "95e7cd6facb41ad18aad27759afd4463a177599f",
     "path": "recipes/mfass/mfass-v2-kmer-baseline.yaml",
     "sha256": "0857cabd37d1bc2097f2354846ebb1334e77f5523b02620d92c68c8e7e8643a0"
   },
   "recipe_missing": null,
-  "kg_release_id": "2026-11-23-066f267ebcf4",
+  "kg_release_id": "2026-11-24-fd6eb3f6141d",
   "code": {
     "repository": "https://github.com/rewire-bio/rewire-benchmarks",
-    "commit": "49b2c943bf98fa361e79eab49795619d03a16941",
+    "commit": "95e7cd6facb41ad18aad27759afd4463a177599f",
     "dirty": false,
-    "rewirebench_version": "0.6.1",
-    "sdk_code_sha256": "9a02a143d41585f11402af4f857b34a1338512346fa730f98352472b3153048d",
+    "rewirebench_version": "0.6.2",
+    "sdk_code_sha256": "b612a9539313ee992547ca33a0909c16072ac5839f153724b48a9a1be607db3d",
     "commit_source": "checkout"
   },
   "environment": {
@@ -33,11 +33,9 @@
     "python": "3.12.7",
     "os": "macOS-26.6.2-arm64-arm-64bit",
     "packages": {
-      "h5py": "3.14.0",
       "mcp": "1.30.0",
       "numpy": "1.26.4",
       "pandas": "2.3.3",
-      "pyarrow": "23.0.1",
       "pydantic": "2.14.4",
       "pyyaml": "6.0.3",
       "scikit-learn": "1.9.1",
@@ -82,8 +80,8 @@
         "{work}/prepared"
       ],
       "exit_code": 0,
-      "wall_seconds": 2.757,
-      "peak_memory_bytes": 781762560
+      "wall_seconds": 4.428,
+      "peak_memory_bytes": 761839616
     },
     {
       "name": "run-baselines",
@@ -98,24 +96,24 @@
         "mfass-kmer-position-v2"
       ],
       "exit_code": 0,
-      "wall_seconds": 6.718,
-      "peak_memory_bytes": 447791104
+      "wall_seconds": 7.399,
+      "peak_memory_bytes": 466698240
     }
   ],
-  "started_at": "2026-11-24T13:17:00.376792Z",
-  "finished_at": "2026-11-24T13:17:29.651567Z",
-  "wall_seconds": 29.275,
-  "peak_memory_bytes": 781762560,
+  "started_at": "2026-11-25T11:11:20.833721Z",
+  "finished_at": "2026-11-25T11:11:43.276425Z",
+  "wall_seconds": 22.443,
+  "peak_memory_bytes": 761839616,
   "outputs": [
     {
       "path": "baselines/baseline-manifest.json",
       "bytes": 1336,
-      "sha256": "ad55dac5bbbd0e0253ffe9fa1b501edc81fa22e9ab02366d0e373c9ed0aa4c7f"
+      "sha256": "61b282d6a8c79d75765ccc17cd3332d877ff205f53f2895b4ad68c98221760c6"
     },
     {
       "path": "baselines/baseline-plan.json",
       "bytes": 1445,
-      "sha256": "d85f2e40b114419f0775b18615bc52ce8d8c5a5140e6befe649b283b13a3435f"
+      "sha256": "20741297abfdc6cad1d9353947b5ffe41b5950b789a531ca175c61f9bcaf93f6"
     },
     {
       "path": "baselines/mfass-kmer-position-v2/predictions.json",
@@ -125,7 +123,7 @@
     {
       "path": "baselines/mfass-kmer-position-v2/report.json",
       "bytes": 4452,
-      "sha256": "3c103feeb53c445e0f9374c8284fa1a7d4c1307d0eeff29a001e6589130ac8bb"
+      "sha256": "fd68d60f3234a99ea6dbd694088bf4a6e40f26eef570422347466c6441cbc73b"
     },
     {
       "path": "baselines/mfass-kmer-position-v2/unscored.json",
@@ -155,7 +153,7 @@
     {
       "path": "logs/02-run-baselines.stdout.txt",
       "bytes": 1336,
-      "sha256": "6c4a55f20390aaf56ed4e88d866eb120c0d5960682c043b4cd8267036d61b47f"
+      "sha256": "ef6557ad291cbcd48c0c14336172262f98886da6991b099e2b7d381b71f41c1d"
     }
   ],
   "metrics": {

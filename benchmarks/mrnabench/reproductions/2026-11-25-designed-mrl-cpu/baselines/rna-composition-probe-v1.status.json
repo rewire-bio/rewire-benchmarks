@@ -1,0 +1,18 @@
+{
+  "baseline_id": "rna-composition-probe-v1",
+  "completion": "complete",
+  "configuration": {
+    "alphabet": "ACGTU",
+    "features": "log1p length, base fractions, unknown fraction",
+    "head": "protocol-owned RidgeCV"
+  },
+  "coverage": {
+    "denominator": 15003,
+    "scored": 15003,
+    "unscored": 0
+  },
+  "report": "rna-composition-probe-v1/report.json",
+  "role": "conventional",
+  "scientific_reproduction": "not_established",
+  "status": "evaluated"
+}

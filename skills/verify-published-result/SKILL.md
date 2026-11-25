@@ -22,7 +22,7 @@ rerun). The `find-model-for-use-case` and `run-benchmark` skills cover each half
    } ORDER BY ?metric
    ```
 
-   On release `2026-11-23-066f267ebcf4` this returns AUROC 0.7779498064677238, average
+   On release `2026-11-24-fd6eb3f6141d` this returns AUROC 0.7779498064677238, average
    precision 0.2864167459589237 and precision at 100 of 0.61, each on 8324 of 8324.
 4. `describe_resource` on a result for its source and locator.
 

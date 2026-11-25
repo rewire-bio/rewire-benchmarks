@@ -52,37 +52,37 @@
   "calls": [
     {
       "number": 1,
-      "at": "2026-11-24T13:16:53+00:00",
+      "at": "2026-11-25T11:10:47+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "dataset_info",
       "arguments": {},
       "is_error": false,
       "result": {
         "dataset": "rewire-benchmark-data",
-        "version": "2026-11-23-066f267ebcf4",
+        "version": "2026-11-24-fd6eb3f6141d",
         "title": "Rewire benchmark data",
         "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, discrepancies between studies' results in a derived graph, and what the release serves as use-case evidence in a release graph.",
         "license": null,
         "homepage": "https://github.com/rewire-bio/rewire-benchmark-data",
-        "manifest_sha256": "fd92288d5130df6bc62577126cde98136b078faf39d3e94e7406da26d2b711b2",
-        "statements": 2804072,
+        "manifest_sha256": "64f8b4ad0006dbc2f23f9a1e31ea3c2cdb59db8d2ab0613516e7ab14dafa6f77",
+        "statements": 2804520,
         "graphs": [
           {
             "iri": "https://benchmarks.rewire.it/graph/asserted",
             "role": "asserted",
-            "statements": 2470124,
+            "statements": 2470559,
             "description": "Source facts."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/derived",
             "role": "derived",
-            "statements": 16696,
+            "statements": 16705,
             "description": "Discrepancies between studies' results found by the rules in scripts/kg/contradictions.py, with their review state and follow-up actions. Each is a lead for review, not a finding that a result is wrong."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/inferred",
             "role": "inferred",
-            "statements": 302910,
+            "statements": 302913,
             "description": "Facts derived from the asserted graph by the ontology when the bundle was built."
           },
           {
@@ -94,7 +94,7 @@
           {
             "iri": "https://benchmarks.rewire.it/graph/release",
             "role": "release",
-            "statements": 6025,
+            "statements": 6026,
             "description": "What the release serves, copied from its use-case file: the evaluations behind each active direct or proxy relevance judgement (rb:servedEvaluation), each use case's reviewed baseline methods (rb:servedBaseline), and the sources of run receipts on executed full-protocol run recipes (rb:runReceipt). A judgement in the asserted graph with no served evaluation is withheld."
           }
         ],
@@ -147,7 +147,7 @@
           "vocabulary_sha256": "34c9e844e8f221def805ab0ecf6d5389a1af0a4b1d1d7b2ef84926a46c00ef3a",
           "kept": "New statements about records in the rewire vocabulary: rb: links and rb: types. Superclasses and superproperties from imported vocabularies are left to the ontology graph. Protected links are never inferred.",
           "by_predicate": {
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9673,
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9676,
             "https://benchmarks.rewire.it/vocab#contains": 1540,
             "https://benchmarks.rewire.it/vocab#hasResult": 52433,
             "https://benchmarks.rewire.it/vocab#resultFor": 52433,
@@ -185,13 +185,14 @@
           "rank_for_use_case",
           "gaps",
           "recipe_for",
+          "results_for_model",
           "provenance"
         ]
       }
     },
     {
       "number": 2,
-      "at": "2026-11-24T13:16:53+00:00",
+      "at": "2026-11-25T11:10:47+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "find_entity",
       "arguments": {
@@ -220,7 +221,7 @@
     },
     {
       "number": 3,
-      "at": "2026-11-24T13:16:56+00:00",
+      "at": "2026-11-25T11:10:51+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "sparql_query",
       "arguments": {
@@ -264,7 +265,7 @@
     },
     {
       "number": 4,
-      "at": "2026-11-24T13:16:59+00:00",
+      "at": "2026-11-25T11:11:19+00:00",
       "server": "rewirebench",
       "tool": "list_recipes",
       "arguments": {},
@@ -284,6 +285,19 @@
             ],
             "path": "recipes/clingen-pp3-bp4/clingen-pp3-bp4-af001-calibration.yaml",
             "sha256": "3a66001b46aa6dca971010821a91b33b1c279a35463c7fd869c546740b60d88a"
+          },
+          {
+            "id": "dart-eval-task1-synthetic-smoke",
+            "title": "DART-Eval Task 1 synthetic smoke check on CPU",
+            "kind": "benchmark_run",
+            "scope": "synthetic_smoke",
+            "rewirebench_protocol": "dart-eval-task1-zero-shot-v1",
+            "kg_record_id": null,
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/dart-eval/dart-eval-task1-synthetic-smoke.yaml",
+            "sha256": "7632fe5bc7b75ada9a185d9d8578a4d931c856e1e8e3889e98d95b8c644a4251"
           },
           {
             "id": "flip2-synthetic-smoke",
@@ -310,6 +324,32 @@
             ],
             "path": "recipes/mfass/mfass-v2-kmer-baseline.yaml",
             "sha256": "0857cabd37d1bc2097f2354846ebb1334e77f5523b02620d92c68c8e7e8643a0"
+          },
+          {
+            "id": "mrnabench-designed-mrl-baselines",
+            "title": "mRNABench Sample designed MRL RNA composition and control baselines on CPU",
+            "kind": "benchmark_run",
+            "scope": "full_protocol",
+            "rewirebench_protocol": "mrnabench-sample-mrl-v1",
+            "kg_record_id": "rewire-protocol-mrnabench-designed-mrl-v1",
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/mrnabench/mrnabench-designed-mrl-baselines.yaml",
+            "sha256": "a025843c19a25d7eb6470c0abef0994da074929f8ad392d7ca4d9c1e7954e996"
+          },
+          {
+            "id": "proteingym-v1-3-dms-synthetic-smoke",
+            "title": "ProteinGym v1.3 DMS substitutions synthetic smoke check on CPU",
+            "kind": "benchmark_run",
+            "scope": "synthetic_smoke",
+            "rewirebench_protocol": "proteingym-v1.3-dms-substitutions",
+            "kg_record_id": null,
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/proteingym/proteingym-v1-3-dms-synthetic-smoke.yaml",
+            "sha256": "6006151c1cdb516f8919d425f300a7e38a79c255f1b8ed1988ab7cb2376ffd0a"
           }
         ],
         "invalid": []
@@ -317,7 +357,7 @@
     },
     {
       "number": 5,
-      "at": "2026-11-24T13:16:59+00:00",
+      "at": "2026-11-25T11:11:19+00:00",
       "server": "rewirebench",
       "tool": "describe_recipe",
       "arguments": {
@@ -524,14 +564,14 @@
     },
     {
       "number": 6,
-      "at": "2026-11-24T13:16:59+00:00",
+      "at": "2026-11-25T11:11:19+00:00",
       "server": "rewirebench",
       "tool": "plan_run",
       "arguments": {
         "recipe": "mfass-v2-kmer-baseline",
         "backend": "local",
         "output": "<run folder>",
-        "kg_release_id": "2026-11-23-066f267ebcf4"
+        "kg_release_id": "2026-11-24-fd6eb3f6141d"
       },
       "is_error": false,
       "result": {
@@ -598,7 +638,7 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "steps": [],
         "pod_specs": [],
@@ -608,30 +648,30 @@
           "Runs in this Python environment with CUDA devices hidden.",
           "hardware_floor is checked for host memory only."
         ],
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013"
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a"
       }
     },
     {
       "number": 7,
-      "at": "2026-11-24T13:16:59+00:00",
+      "at": "2026-11-25T11:11:19+00:00",
       "server": "rewirebench",
       "tool": "run",
       "arguments": {
         "recipe": "mfass-v2-kmer-baseline",
         "backend": "local",
         "output": "<run folder>",
-        "kg_release_id": "2026-11-23-066f267ebcf4",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013"
+        "kg_release_id": "2026-11-24-fd6eb3f6141d",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -652,11 +692,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -666,21 +706,21 @@
     },
     {
       "number": 8,
-      "at": "2026-11-24T13:17:01+00:00",
+      "at": "2026-11-25T11:11:21+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -701,11 +741,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -715,21 +755,21 @@
     },
     {
       "number": 9,
-      "at": "2026-11-24T13:17:03+00:00",
+      "at": "2026-11-25T11:11:23+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -750,11 +790,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -764,21 +804,21 @@
     },
     {
       "number": 10,
-      "at": "2026-11-24T13:17:05+00:00",
+      "at": "2026-11-25T11:11:25+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -799,11 +839,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -813,21 +853,21 @@
     },
     {
       "number": 11,
-      "at": "2026-11-24T13:17:07+00:00",
+      "at": "2026-11-25T11:11:27+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -848,11 +888,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -862,21 +902,21 @@
     },
     {
       "number": 12,
-      "at": "2026-11-24T13:17:09+00:00",
+      "at": "2026-11-25T11:11:29+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -897,11 +937,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -911,21 +951,21 @@
     },
     {
       "number": 13,
-      "at": "2026-11-24T13:17:11+00:00",
+      "at": "2026-11-25T11:11:31+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -946,11 +986,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -960,21 +1000,21 @@
     },
     {
       "number": 14,
-      "at": "2026-11-24T13:17:13+00:00",
+      "at": "2026-11-25T11:11:33+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -995,11 +1035,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -1009,21 +1049,21 @@
     },
     {
       "number": 15,
-      "at": "2026-11-24T13:17:15+00:00",
+      "at": "2026-11-25T11:11:35+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -1044,11 +1084,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -1058,21 +1098,21 @@
     },
     {
       "number": 16,
-      "at": "2026-11-24T13:17:17+00:00",
+      "at": "2026-11-25T11:11:37+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -1093,11 +1133,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -1107,21 +1147,21 @@
     },
     {
       "number": 17,
-      "at": "2026-11-24T13:17:19+00:00",
+      "at": "2026-11-25T11:11:39+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -1142,11 +1182,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -1156,21 +1196,21 @@
     },
     {
       "number": 18,
-      "at": "2026-11-24T13:17:21+00:00",
+      "at": "2026-11-25T11:11:41+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "running",
         "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
         "finished_at": null,
         "time_limit_seconds": 10800.0,
         "stopped": null,
@@ -1191,11 +1231,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": null,
         "checks_passed": null,
@@ -1205,218 +1245,22 @@
     },
     {
       "number": 19,
-      "at": "2026-11-24T13:17:23+00:00",
+      "at": "2026-11-25T11:11:43+00:00",
       "server": "rewirebench",
       "tool": "run_status",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "kind": "recipe_run",
         "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
-        "state": "running",
-        "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
-        "finished_at": null,
-        "time_limit_seconds": 10800.0,
-        "stopped": null,
-        "output": "<run folder>",
-        "command": [
-          "<python>/python3",
-          "-m",
-          "rewirebench.cli",
-          "recipe",
-          "run",
-          "mfass-v2-kmer-baseline",
-          "--recipes-dir",
-          "<checkout>/recipes",
-          "--output",
-          "<run folder>",
-          "--backend",
-          "local",
-          "--started-by",
-          "agent",
-          "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
-        ],
-        "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
-        },
-        "receipt": null,
-        "checks_passed": null,
-        "result": null,
-        "stderr_tail": null
-      }
-    },
-    {
-      "number": 20,
-      "at": "2026-11-24T13:17:25+00:00",
-      "server": "rewirebench",
-      "tool": "run_status",
-      "arguments": {
-        "run_id": "run-3760593c3229"
-      },
-      "is_error": false,
-      "result": {
-        "run_id": "run-3760593c3229",
-        "kind": "recipe_run",
-        "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
-        "state": "running",
-        "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
-        "finished_at": null,
-        "time_limit_seconds": 10800.0,
-        "stopped": null,
-        "output": "<run folder>",
-        "command": [
-          "<python>/python3",
-          "-m",
-          "rewirebench.cli",
-          "recipe",
-          "run",
-          "mfass-v2-kmer-baseline",
-          "--recipes-dir",
-          "<checkout>/recipes",
-          "--output",
-          "<run folder>",
-          "--backend",
-          "local",
-          "--started-by",
-          "agent",
-          "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
-        ],
-        "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
-        },
-        "receipt": null,
-        "checks_passed": null,
-        "result": null,
-        "stderr_tail": null
-      }
-    },
-    {
-      "number": 21,
-      "at": "2026-11-24T13:17:27+00:00",
-      "server": "rewirebench",
-      "tool": "run_status",
-      "arguments": {
-        "run_id": "run-3760593c3229"
-      },
-      "is_error": false,
-      "result": {
-        "run_id": "run-3760593c3229",
-        "kind": "recipe_run",
-        "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
-        "state": "running",
-        "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
-        "finished_at": null,
-        "time_limit_seconds": 10800.0,
-        "stopped": null,
-        "output": "<run folder>",
-        "command": [
-          "<python>/python3",
-          "-m",
-          "rewirebench.cli",
-          "recipe",
-          "run",
-          "mfass-v2-kmer-baseline",
-          "--recipes-dir",
-          "<checkout>/recipes",
-          "--output",
-          "<run folder>",
-          "--backend",
-          "local",
-          "--started-by",
-          "agent",
-          "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
-        ],
-        "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
-        },
-        "receipt": null,
-        "checks_passed": null,
-        "result": null,
-        "stderr_tail": null
-      }
-    },
-    {
-      "number": 22,
-      "at": "2026-11-24T13:17:29+00:00",
-      "server": "rewirebench",
-      "tool": "run_status",
-      "arguments": {
-        "run_id": "run-3760593c3229"
-      },
-      "is_error": false,
-      "result": {
-        "run_id": "run-3760593c3229",
-        "kind": "recipe_run",
-        "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
-        "state": "running",
-        "exit_code": null,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
-        "finished_at": null,
-        "time_limit_seconds": 10800.0,
-        "stopped": null,
-        "output": "<run folder>",
-        "command": [
-          "<python>/python3",
-          "-m",
-          "rewirebench.cli",
-          "recipe",
-          "run",
-          "mfass-v2-kmer-baseline",
-          "--recipes-dir",
-          "<checkout>/recipes",
-          "--output",
-          "<run folder>",
-          "--backend",
-          "local",
-          "--started-by",
-          "agent",
-          "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
-        ],
-        "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
-        },
-        "receipt": null,
-        "checks_passed": null,
-        "result": null,
-        "stderr_tail": null
-      }
-    },
-    {
-      "number": 23,
-      "at": "2026-11-24T13:17:31+00:00",
-      "server": "rewirebench",
-      "tool": "run_status",
-      "arguments": {
-        "run_id": "run-3760593c3229"
-      },
-      "is_error": false,
-      "result": {
-        "run_id": "run-3760593c3229",
-        "kind": "recipe_run",
-        "recipe_id": "mfass-v2-kmer-baseline",
-        "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
+        "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
         "state": "finished",
         "exit_code": 0,
-        "started_at": "2026-11-24T13:16:59.494908+00:00",
-        "finished_at": "2026-11-24T13:17:31.594889+00:00",
+        "started_at": "2026-11-25T11:11:19.728155+00:00",
+        "finished_at": "2026-11-25T11:11:43.765202+00:00",
         "time_limit_seconds": 10800.0,
         "stopped": null,
         "output": "<run folder>",
@@ -1436,11 +1280,11 @@
           "--started-by",
           "agent",
           "--kg-release-id",
-          "2026-11-23-066f267ebcf4"
+          "2026-11-24-fd6eb3f6141d"
         ],
         "logs": {
-          "stdout": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stdout.txt",
-          "stderr": "<temp>/rewirebench-mcp-0_yb17xl/run-3760593c3229.stderr.txt"
+          "stdout": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stdout.txt",
+          "stderr": "<temp>/rewirebench-mcp-3ea2w74n/run-66d53509c831.stderr.txt"
         },
         "receipt": "<run folder>/receipt.json",
         "checks_passed": true,
@@ -1454,8 +1298,8 @@
             "average_precision_sklearn": 0.2864167459589237,
             "auroc": 0.7779498064677238
           },
-          "wall_seconds": 29.275,
-          "peak_memory_bytes": 781762560,
+          "wall_seconds": 22.443,
+          "peak_memory_bytes": 761839616,
           "cost": {
             "paid_compute": false,
             "amount": null,
@@ -1471,12 +1315,12 @@
       }
     },
     {
-      "number": 24,
-      "at": "2026-11-24T13:17:31+00:00",
+      "number": 20,
+      "at": "2026-11-25T11:11:43+00:00",
       "server": "rewirebench",
       "tool": "get_receipt",
       "arguments": {
-        "run_id": "run-3760593c3229"
+        "run_id": "run-66d53509c831"
       },
       "is_error": false,
       "result": {
@@ -1484,24 +1328,24 @@
         "kind": "rewire_run_receipt",
         "receipt_kind": "runner_reproduction",
         "scope": "full_protocol",
-        "verified_on": "2026-11-24",
+        "verified_on": "2026-11-25",
         "started_by": "agent",
         "backend": "local",
         "recipe": {
           "id": "mfass-v2-kmer-baseline",
           "repository": "https://github.com/rewire-bio/rewire-benchmarks",
-          "commit": "49b2c943bf98fa361e79eab49795619d03a16941",
+          "commit": "95e7cd6facb41ad18aad27759afd4463a177599f",
           "path": "recipes/mfass/mfass-v2-kmer-baseline.yaml",
           "sha256": "0857cabd37d1bc2097f2354846ebb1334e77f5523b02620d92c68c8e7e8643a0"
         },
         "recipe_missing": null,
-        "kg_release_id": "2026-11-23-066f267ebcf4",
+        "kg_release_id": "2026-11-24-fd6eb3f6141d",
         "code": {
           "repository": "https://github.com/rewire-bio/rewire-benchmarks",
-          "commit": "49b2c943bf98fa361e79eab49795619d03a16941",
+          "commit": "95e7cd6facb41ad18aad27759afd4463a177599f",
           "dirty": false,
-          "rewirebench_version": "0.6.1",
-          "sdk_code_sha256": "9a02a143d41585f11402af4f857b34a1338512346fa730f98352472b3153048d",
+          "rewirebench_version": "0.6.2",
+          "sdk_code_sha256": "b612a9539313ee992547ca33a0909c16072ac5839f153724b48a9a1be607db3d",
           "commit_source": "checkout"
         },
         "environment": {
@@ -1514,11 +1358,9 @@
           "python": "3.12.7",
           "os": "macOS-26.6.2-arm64-arm-64bit",
           "packages": {
-            "h5py": "3.14.0",
             "mcp": "1.30.0",
             "numpy": "1.26.4",
             "pandas": "2.3.3",
-            "pyarrow": "23.0.1",
             "pydantic": "2.14.4",
             "pyyaml": "6.0.3",
             "scikit-learn": "1.9.1",
@@ -1563,8 +1405,8 @@
               "{work}/prepared"
             ],
             "exit_code": 0,
-            "wall_seconds": 2.757,
-            "peak_memory_bytes": 781762560
+            "wall_seconds": 4.428,
+            "peak_memory_bytes": 761839616
           },
           {
             "name": "run-baselines",
@@ -1579,24 +1421,24 @@
               "mfass-kmer-position-v2"
             ],
             "exit_code": 0,
-            "wall_seconds": 6.718,
-            "peak_memory_bytes": 447791104
+            "wall_seconds": 7.399,
+            "peak_memory_bytes": 466698240
           }
         ],
-        "started_at": "2026-11-24T13:17:00.376792Z",
-        "finished_at": "2026-11-24T13:17:29.651567Z",
-        "wall_seconds": 29.275,
-        "peak_memory_bytes": 781762560,
+        "started_at": "2026-11-25T11:11:20.833721Z",
+        "finished_at": "2026-11-25T11:11:43.276425Z",
+        "wall_seconds": 22.443,
+        "peak_memory_bytes": 761839616,
         "outputs": [
           {
             "path": "baselines/baseline-manifest.json",
             "bytes": 1336,
-            "sha256": "ad55dac5bbbd0e0253ffe9fa1b501edc81fa22e9ab02366d0e373c9ed0aa4c7f"
+            "sha256": "61b282d6a8c79d75765ccc17cd3332d877ff205f53f2895b4ad68c98221760c6"
           },
           {
             "path": "baselines/baseline-plan.json",
             "bytes": 1445,
-            "sha256": "d85f2e40b114419f0775b18615bc52ce8d8c5a5140e6befe649b283b13a3435f"
+            "sha256": "20741297abfdc6cad1d9353947b5ffe41b5950b789a531ca175c61f9bcaf93f6"
           },
           {
             "path": "baselines/mfass-kmer-position-v2/predictions.json",
@@ -1606,7 +1448,7 @@
           {
             "path": "baselines/mfass-kmer-position-v2/report.json",
             "bytes": 4452,
-            "sha256": "3c103feeb53c445e0f9374c8284fa1a7d4c1307d0eeff29a001e6589130ac8bb"
+            "sha256": "fd68d60f3234a99ea6dbd694088bf4a6e40f26eef570422347466c6441cbc73b"
           },
           {
             "path": "baselines/mfass-kmer-position-v2/unscored.json",
@@ -1636,7 +1478,7 @@
           {
             "path": "logs/02-run-baselines.stdout.txt",
             "bytes": 1336,
-            "sha256": "6c4a55f20390aaf56ed4e88d866eb120c0d5960682c043b4cd8267036d61b47f"
+            "sha256": "ef6557ad291cbcd48c0c14336172262f98886da6991b099e2b7d381b71f41c1d"
           }
         ],
         "metrics": {
@@ -1764,12 +1606,12 @@
       }
     },
     {
-      "number": 25,
-      "at": "2026-11-24T13:17:31+00:00",
+      "number": 21,
+      "at": "2026-11-25T11:11:43+00:00",
       "server": "rewirebench",
       "tool": "verify_receipt",
       "arguments": {
-        "run_id": "run-3760593c3229",
+        "run_id": "run-66d53509c831",
         "strict": true
       },
       "is_error": false,
@@ -1817,7 +1659,7 @@
           {
             "check": "commits",
             "status": "match",
-            "detail": "code 49b2c943bf98fa361e79eab49795619d03a16941, as the receipt states it. The commit is not looked up in any repository."
+            "detail": "code 95e7cd6facb41ad18aad27759afd4463a177599f, as the receipt states it. The commit is not looked up in any repository."
           }
         ],
         "strict": true,
@@ -1829,9 +1671,9 @@
   ],
   "summary": {
     "recipe": "mfass-v2-kmer-baseline",
-    "plan_sha256": "aa21ffd350207fdd97d3faaee62b4901f640f01d06ae62dae6d5267e141cb013",
-    "kg_release_id": "2026-11-23-066f267ebcf4",
-    "code_commit": "49b2c943bf98fa361e79eab49795619d03a16941",
+    "plan_sha256": "854eae770e6e40aad952ab2a14bf861255edffae11ae7cf65ee813b05bc6467a",
+    "kg_release_id": "2026-11-24-fd6eb3f6141d",
+    "code_commit": "95e7cd6facb41ad18aad27759afd4463a177599f",
     "recipe_sha256": "0857cabd37d1bc2097f2354846ebb1334e77f5523b02620d92c68c8e7e8643a0",
     "checks_passed": true,
     "metrics": {
@@ -1846,7 +1688,7 @@
       "passed": true,
       "not_checked": []
     },
-    "wall_seconds": 29.275,
+    "wall_seconds": 22.443,
     "cost": {
       "paid_compute": false,
       "amount": null,
@@ -1857,7 +1699,7 @@
       "rate_date": null
     },
     "published": {
-      "kg_release_id": "2026-11-23-066f267ebcf4",
+      "kg_release_id": "2026-11-24-fd6eb3f6141d",
       "system": "id:rewire-model-baseline-kmer-position-v2",
       "protocol": "id:rewire-mfass-v2",
       "values": {

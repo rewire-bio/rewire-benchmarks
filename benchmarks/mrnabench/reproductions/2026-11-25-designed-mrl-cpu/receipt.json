@@ -1,0 +1,333 @@
+{
+  "schema_version": "1.0",
+  "kind": "rewire_run_receipt",
+  "receipt_kind": "runner_reproduction",
+  "scope": "full_protocol",
+  "verified_on": "2026-11-25",
+  "started_by": "human",
+  "backend": "local",
+  "recipe": {
+    "id": "mrnabench-designed-mrl-baselines",
+    "repository": "https://github.com/rewire-bio/rewire-benchmarks",
+    "commit": "95e7cd6facb41ad18aad27759afd4463a177599f",
+    "path": "recipes/mrnabench/mrnabench-designed-mrl-baselines.yaml",
+    "sha256": "a025843c19a25d7eb6470c0abef0994da074929f8ad392d7ca4d9c1e7954e996"
+  },
+  "recipe_missing": null,
+  "kg_release_id": null,
+  "code": {
+    "repository": "https://github.com/rewire-bio/rewire-benchmarks",
+    "commit": "95e7cd6facb41ad18aad27759afd4463a177599f",
+    "dirty": false,
+    "rewirebench_version": "0.6.2",
+    "sdk_code_sha256": "b612a9539313ee992547ca33a0909c16072ac5839f153724b48a9a1be607db3d",
+    "commit_source": "checkout"
+  },
+  "environment": {
+    "images": {
+      "linux/amd64": "sha256:21a0ab429af5399b284be3051507d3167d50ebc7fed8aa5ca074e49f308a5310",
+      "linux/arm64": "sha256:9d7b3b6eea2560f6b320b7a8657b7936c5bdd613a167a71d4072be283fc3b2c6"
+    },
+    "image_used": null,
+    "container_runtime": null,
+    "python": "3.11.13",
+    "os": "macOS-26.6.2-arm64-arm-64bit",
+    "packages": {
+      "h5py": "3.14.0",
+      "mcp": "1.30.0",
+      "numpy": "1.26.4",
+      "pandas": "2.3.3",
+      "pyarrow": "23.0.1",
+      "pydantic": "2.14.4",
+      "pyyaml": "6.0.3",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.17.1"
+    }
+  },
+  "inputs": [
+    {
+      "name": "mrl-sample-designed.parquet",
+      "source": "https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet",
+      "obtained": "fetched",
+      "sha256": "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4",
+      "bytes": 9778091
+    }
+  ],
+  "hardware": {
+    "architecture": "arm64",
+    "cpu": {
+      "model": "Apple M4",
+      "logical_cores": 10
+    },
+    "memory_bytes": 17179869184,
+    "gpus": []
+  },
+  "commands": [
+    {
+      "name": "prepare",
+      "argv": [
+        "rewirebench",
+        "prepare",
+        "mrnabench-sample-mrl-v1",
+        "--source",
+        "{inputs}",
+        "--output",
+        "{work}/prepared",
+        "--options",
+        "{\"dataset\": \"designed\", \"target\": \"target_mrl_designed\", \"require_official\": true}"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 5.088,
+      "peak_memory_bytes": 938328064
+    },
+    {
+      "name": "run-baselines",
+      "argv": [
+        "rewirebench",
+        "run-baselines",
+        "--prepared",
+        "{work}/prepared",
+        "--output",
+        "{output}/baselines"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 8.369,
+      "peak_memory_bytes": 1010352128
+    }
+  ],
+  "started_at": "2026-11-25T10:54:23.171191Z",
+  "finished_at": "2026-11-25T10:54:37.935414Z",
+  "wall_seconds": 14.764,
+  "peak_memory_bytes": 1010352128,
+  "outputs": [
+    {
+      "path": "baselines/baseline-manifest.json",
+      "bytes": 1454,
+      "sha256": "e143069bcaf271c165e23252e90924d33a28bb1375fccd75f0ff6eaa2608a015"
+    },
+    {
+      "path": "baselines/baseline-plan.json",
+      "bytes": 1660,
+      "sha256": "e91c481fa3e2a812ff74dd9ba1f3e6afc77d958ec92c9b31156be09fbb2152a8"
+    },
+    {
+      "path": "baselines/rna-composition-probe-v1/predictions.json",
+      "bytes": 1335553,
+      "sha256": "03177280ba179031ae2485fcd03bd808df892553d4806ca5b13b4c0b26b9d62f"
+    },
+    {
+      "path": "baselines/rna-composition-probe-v1/report.json",
+      "bytes": 1493550,
+      "sha256": "89c1601c93b86ffd43bbc1e60a8d93c64955da8be0d3746ab25296ed791a944d"
+    },
+    {
+      "path": "baselines/rna-composition-probe-v1/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "baselines/rna-composition-probe-v1.status.json",
+      "bytes": 467,
+      "sha256": "d54c79cd3e934a89cd916b273a344e388070a871a045431282723af85c060b91"
+    },
+    {
+      "path": "baselines/training-mean-v1/predictions.json",
+      "bytes": 1335270,
+      "sha256": "ada4827b455891cf8153698ce2d444b956b3f3c44eea44cc714e451658d955cf"
+    },
+    {
+      "path": "baselines/training-mean-v1/report.json",
+      "bytes": 1493452,
+      "sha256": "5744e2d62aacbda31a75314256467ec55cd65d0677fe2428c52764260ebe5761"
+    },
+    {
+      "path": "baselines/training-mean-v1/unscored.json",
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "baselines/training-mean-v1.status.json",
+      "bytes": 312,
+      "sha256": "d069486fa93f0284f26d6e32f81c8746bd570bf5e307747d7ce4b6487b8c5274"
+    },
+    {
+      "path": "logs/01-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/01-prepare.stdout.txt",
+      "bytes": 113,
+      "sha256": "73f3b797ee9f5c2eb1ce8aa05d545222f133cc9e30a81f694830ff7c53719c1e"
+    },
+    {
+      "path": "logs/02-run-baselines.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/02-run-baselines.stdout.txt",
+      "bytes": 1454,
+      "sha256": "a27087c39f85f6545ca262b541a5b353b4b36b221cbd8d6c76a492c389cf0493"
+    }
+  ],
+  "metrics": {
+    "n": 15003.0,
+    "mse": 1.9144397158433855,
+    "pearson": 0.43678691701454914,
+    "spearman": 0.49477537290902324,
+    "train_mean_coverage_scored": 15003.0,
+    "train_mean_mse": 2.3655294722554605
+  },
+  "checks": [
+    {
+      "kind": "output",
+      "label": "baselines/baseline-manifest.json written",
+      "metric_id": null,
+      "file": "baselines/baseline-manifest.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "baselines/training-mean-v1/report.json written",
+      "metric_id": null,
+      "file": "baselines/training-mean-v1/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "baselines/training-mean-v1/predictions.json written",
+      "metric_id": null,
+      "file": "baselines/training-mean-v1/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "baselines/rna-composition-probe-v1/report.json written",
+      "metric_id": null,
+      "file": "baselines/rna-composition-probe-v1/report.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "output",
+      "label": "baselines/rna-composition-probe-v1/predictions.json written",
+      "metric_id": null,
+      "file": "baselines/rna-composition-probe-v1/predictions.json",
+      "key": null,
+      "expected": "present",
+      "tolerance": null,
+      "observed": "present",
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "Scored variants",
+      "metric_id": "n",
+      "file": "baselines/rna-composition-probe-v1/report.json",
+      "key": [
+        "coverage",
+        "scored"
+      ],
+      "expected": 15003.0,
+      "tolerance": 0.0,
+      "observed": 15003.0,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "RNA composition MSE",
+      "metric_id": "mse",
+      "file": "baselines/rna-composition-probe-v1/report.json",
+      "key": [
+        "metrics",
+        "mse"
+      ],
+      "expected": 1.914439715839851,
+      "tolerance": 1e-06,
+      "observed": 1.9144397158433855,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "RNA composition Pearson",
+      "metric_id": "pearson",
+      "file": "baselines/rna-composition-probe-v1/report.json",
+      "key": [
+        "metrics",
+        "pearson"
+      ],
+      "expected": 0.4367869170170987,
+      "tolerance": 1e-06,
+      "observed": 0.43678691701454914,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "RNA composition Spearman",
+      "metric_id": "spearman",
+      "file": "baselines/rna-composition-probe-v1/report.json",
+      "key": [
+        "metrics",
+        "spearman"
+      ],
+      "expected": 0.49477537290902324,
+      "tolerance": 1e-06,
+      "observed": 0.49477537290902324,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "Training-mean scored variants",
+      "metric_id": "train_mean_coverage_scored",
+      "file": "baselines/training-mean-v1/report.json",
+      "key": [
+        "coverage",
+        "scored"
+      ],
+      "expected": 15003.0,
+      "tolerance": 0.0,
+      "observed": 15003.0,
+      "passed": true
+    },
+    {
+      "kind": "value",
+      "label": "Training-mean MSE",
+      "metric_id": "train_mean_mse",
+      "file": "baselines/training-mean-v1/report.json",
+      "key": [
+        "metrics",
+        "mse"
+      ],
+      "expected": 2.3655294722554605,
+      "tolerance": 1e-06,
+      "observed": 2.3655294722554605,
+      "passed": true
+    }
+  ],
+  "checks_passed": true,
+  "cost": {
+    "paid_compute": false,
+    "amount": null,
+    "currency": null,
+    "reason": "owned hardware",
+    "hourly_rate": null,
+    "rate_source": null,
+    "rate_date": null
+  }
+}

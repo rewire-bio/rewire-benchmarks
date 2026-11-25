@@ -72,7 +72,7 @@
       "command": [
         "uvx",
         "--from",
-        "rewirebench[mcp]==0.6.1",
+        "rewirebench[mcp]==0.6.2",
         "rewirebench",
         "mcp",
         "--recipes-dir",
@@ -100,37 +100,37 @@
   "calls": [
     {
       "number": 1,
-      "at": "2026-11-24T13:26:52+00:00",
+      "at": "2026-11-25T11:07:55+00:00",
       "server": "rewire-benchmark-graph",
       "tool": "dataset_info",
       "arguments": {},
       "is_error": false,
       "result": {
         "dataset": "rewire-benchmark-data",
-        "version": "2026-11-23-066f267ebcf4",
+        "version": "2026-11-24-fd6eb3f6141d",
         "title": "Rewire benchmark data",
         "description": "Reviewed biological benchmark records (models, methods, configurations, benchmarks, tasks, protocols, datasets, evaluations, results, sources and claims) as RDF, with OWL 2 RL inferences in a separate graph, discrepancies between studies' results in a derived graph, and what the release serves as use-case evidence in a release graph.",
         "license": null,
         "homepage": "https://github.com/rewire-bio/rewire-benchmark-data",
-        "manifest_sha256": "fd92288d5130df6bc62577126cde98136b078faf39d3e94e7406da26d2b711b2",
-        "statements": 2804072,
+        "manifest_sha256": "64f8b4ad0006dbc2f23f9a1e31ea3c2cdb59db8d2ab0613516e7ab14dafa6f77",
+        "statements": 2804520,
         "graphs": [
           {
             "iri": "https://benchmarks.rewire.it/graph/asserted",
             "role": "asserted",
-            "statements": 2470124,
+            "statements": 2470559,
             "description": "Source facts."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/derived",
             "role": "derived",
-            "statements": 16696,
+            "statements": 16705,
             "description": "Discrepancies between studies' results found by the rules in scripts/kg/contradictions.py, with their review state and follow-up actions. Each is a lead for review, not a finding that a result is wrong."
           },
           {
             "iri": "https://benchmarks.rewire.it/graph/inferred",
             "role": "inferred",
-            "statements": 302910,
+            "statements": 302913,
             "description": "Facts derived from the asserted graph by the ontology when the bundle was built."
           },
           {
@@ -142,7 +142,7 @@
           {
             "iri": "https://benchmarks.rewire.it/graph/release",
             "role": "release",
-            "statements": 6025,
+            "statements": 6026,
             "description": "What the release serves, copied from its use-case file: the evaluations behind each active direct or proxy relevance judgement (rb:servedEvaluation), each use case's reviewed baseline methods (rb:servedBaseline), and the sources of run receipts on executed full-protocol run recipes (rb:runReceipt). A judgement in the asserted graph with no served evaluation is withheld."
           }
         ],
@@ -195,7 +195,7 @@
           "vocabulary_sha256": "34c9e844e8f221def805ab0ecf6d5389a1af0a4b1d1d7b2ef84926a46c00ef3a",
           "kept": "New statements about records in the rewire vocabulary: rb: links and rb: types. Superclasses and superproperties from imported vocabularies are left to the ontology graph. Protected links are never inferred.",
           "by_predicate": {
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9673,
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 9676,
             "https://benchmarks.rewire.it/vocab#contains": 1540,
             "https://benchmarks.rewire.it/vocab#hasResult": 52433,
             "https://benchmarks.rewire.it/vocab#resultFor": 52433,
@@ -233,13 +233,14 @@
           "rank_for_use_case",
           "gaps",
           "recipe_for",
+          "results_for_model",
           "provenance"
         ]
       }
     },
     {
       "number": 2,
-      "at": "2026-11-24T13:26:55+00:00",
+      "at": "2026-11-25T11:07:58+00:00",
       "server": "genomics-mcp",
       "tool": "get_truth_set",
       "arguments": {
@@ -430,7 +431,7 @@
             "source_record_id": "giab-hg002-v4.2.1-grch38",
             "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/",
             "method": "curated catalogue in genomics-mcp",
-            "retrieved_at": "2026-11-24T13:26:55.663997Z",
+            "retrieved_at": "2026-11-25T11:07:58.590649Z",
             "source_version": "NISTv4.2.1",
             "source_updated_at": null,
             "terms_url": null,
@@ -450,7 +451,7 @@
     },
     {
       "number": 3,
-      "at": "2026-11-24T13:26:57+00:00",
+      "at": "2026-11-25T11:08:16+00:00",
       "server": "rewirebench",
       "tool": "list_recipes",
       "arguments": {},
@@ -470,6 +471,19 @@
             ],
             "path": "recipes/clingen-pp3-bp4/clingen-pp3-bp4-af001-calibration.yaml",
             "sha256": "3a66001b46aa6dca971010821a91b33b1c279a35463c7fd869c546740b60d88a"
+          },
+          {
+            "id": "dart-eval-task1-synthetic-smoke",
+            "title": "DART-Eval Task 1 synthetic smoke check on CPU",
+            "kind": "benchmark_run",
+            "scope": "synthetic_smoke",
+            "rewirebench_protocol": "dart-eval-task1-zero-shot-v1",
+            "kg_record_id": null,
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/dart-eval/dart-eval-task1-synthetic-smoke.yaml",
+            "sha256": "7632fe5bc7b75ada9a185d9d8578a4d931c856e1e8e3889e98d95b8c644a4251"
           },
           {
             "id": "flip2-synthetic-smoke",
@@ -496,6 +510,32 @@
             ],
             "path": "recipes/mfass/mfass-v2-kmer-baseline.yaml",
             "sha256": "0857cabd37d1bc2097f2354846ebb1334e77f5523b02620d92c68c8e7e8643a0"
+          },
+          {
+            "id": "mrnabench-designed-mrl-baselines",
+            "title": "mRNABench Sample designed MRL RNA composition and control baselines on CPU",
+            "kind": "benchmark_run",
+            "scope": "full_protocol",
+            "rewirebench_protocol": "mrnabench-sample-mrl-v1",
+            "kg_record_id": "rewire-protocol-mrnabench-designed-mrl-v1",
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/mrnabench/mrnabench-designed-mrl-baselines.yaml",
+            "sha256": "a025843c19a25d7eb6470c0abef0994da074929f8ad392d7ca4d9c1e7954e996"
+          },
+          {
+            "id": "proteingym-v1-3-dms-synthetic-smoke",
+            "title": "ProteinGym v1.3 DMS substitutions synthetic smoke check on CPU",
+            "kind": "benchmark_run",
+            "scope": "synthetic_smoke",
+            "rewirebench_protocol": "proteingym-v1.3-dms-substitutions",
+            "kg_record_id": null,
+            "backends": [
+              "local"
+            ],
+            "path": "recipes/proteingym/proteingym-v1-3-dms-synthetic-smoke.yaml",
+            "sha256": "6006151c1cdb516f8919d425f300a7e38a79c255f1b8ed1988ab7cb2376ffd0a"
           }
         ],
         "invalid": []

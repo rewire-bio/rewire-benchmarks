@@ -194,7 +194,7 @@ commands and one agent definition. Every server runs on your machine.
 | --- | --- | --- |
 | `rewire-benchmark-graph` | The read-only [benchmark knowledge graph](https://github.com/rewire-bio/rdf-kg-mcp): published results, provenance, disagreements | rdf-kg-mcp v0.4.0 |
 | `genomics-mcp` | [Genomic data](https://github.com/rewire-bio/genomics-mcp), GIAB and HPRC truth sets, synthetic-data protocols | commit `3b395a9648aa57610623c54c4d54dd933470b067` (no release has the truth-set tools yet) |
-| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | `rewirebench` `v0.6.1` on PyPI (`rewirebench[mcp]==0.6.1`) |
+| `rewirebench` | Recipes, plans, local CPU runs and receipts ([docs/mcp.md](docs/mcp.md)) | `rewirebench` `v0.6.2` on PyPI (`rewirebench[mcp]==0.6.2`) |
 
 | Skill | Command | What it does |
 | --- | --- | --- |
@@ -246,7 +246,7 @@ its receipt and every tool call.
 
 What an installed plugin cannot do yet:
 
-- The `rewirebench` server runs from the released PyPI package (`rewirebench[mcp]==0.6.1`)
+- The `rewirebench` server runs from the released PyPI package (`rewirebench[mcp]==0.6.2`)
   and reads the plugin's copy of [`recipes/`](recipes) (the wheel also ships [`recipes/`](recipes)
   for standalone installs). Because a PyPI install is not a git checkout, its receipts record
   the package version without a repository commit check, so `verify_receipt` with `strict`
@@ -255,7 +255,7 @@ What an installed plugin cannot do yet:
   [docs/demo/plugin-run.json](docs/demo/plugin-run.json) records an earlier MFASS v2 run made under the pre-release commit pin.
 - `uvx` does not apply this repository's `uv.lock`, so Python and the numeric packages are
   whatever uv resolves on the day. The last digits of a metric can then differ from a locked run.
-- The server is pinned to a released PyPI version (`rewirebench[mcp]==0.6.1`). Changes to
+- The server is pinned to a released PyPI version (`rewirebench[mcp]==0.6.2`). Changes to
   `packages/rewirebench` reach an installed plugin when a new version is released and the pin
   is raised.
 - Model extras (`esm`, `dnabert2`) are not installed, so the pretrained models in

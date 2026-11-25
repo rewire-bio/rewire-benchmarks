@@ -1,0 +1,45 @@
+{
+  "baselines": [],
+  "created_at": "2026-11-25T10:54:31.199094+00:00",
+  "dataset_id": "mrnabench-sample-mrl-designed-target_mrl_designed",
+  "kind": "rewire_baseline_batch",
+  "prepared_sha256": "7cfd975d3b8f41d77d9123bff426433e515e0b388da328adca71bf39ad1e6759",
+  "protocol_id": "mrnabench-sample-mrl-v1",
+  "publication": "local_only_not_submitted",
+  "registry_version": "1",
+  "schema_version": "1.0",
+  "scope": "full",
+  "sdk_code_sha256": "b612a9539313ee992547ca33a0909c16072ac5839f153724b48a9a1be607db3d",
+  "selected": [
+    {
+      "baseline_id": "training-mean-v1",
+      "configuration": {},
+      "execution_status": "not_established_by_registry",
+      "gap": null,
+      "implementation_source": "https://github.com/rewire-bio/rewire-benchmarks",
+      "prediction_type": "scalar",
+      "role": "null",
+      "scientific_claim": "Rewire reference; not a reproduced published baseline",
+      "status": "implemented",
+      "title": "Training target mean",
+      "version": "1"
+    },
+    {
+      "baseline_id": "rna-composition-probe-v1",
+      "configuration": {
+        "alphabet": "ACGTU",
+        "features": "log1p length, base fractions, unknown fraction",
+        "head": "protocol-owned RidgeCV"
+      },
+      "execution_status": "not_established_by_registry",
+      "gap": null,
+      "implementation_source": "https://github.com/rewire-bio/rewire-benchmarks",
+      "prediction_type": "embedding",
+      "role": "conventional",
+      "scientific_claim": "Rewire reference; not a reproduced published baseline",
+      "status": "implemented",
+      "title": "RNA composition + train-only RidgeCV",
+      "version": "1"
+    }
+  ]
+}
