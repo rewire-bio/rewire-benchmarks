@@ -1,0 +1,94 @@
+schema_version: "1.0"
+id: proteingym-v1-3-dms-synthetic-smoke
+title: ProteinGym v1.3 DMS substitutions synthetic smoke check on CPU
+summary: >-
+  Runs the seeded random control through proteingym-v1.3-dms-substitutions on a 10-row
+  synthetic assay table keyed to A0A247D711_LISMN_Stadelmann_2021. It checks that prepare,
+  run and receipt work offline. It is not a biological result.
+kind: benchmark_run
+purpose: harness_run
+scope: synthetic_smoke
+rewirebench_protocol: proteingym-v1.3-dms-substitutions
+licence:
+  code: MIT
+  weights: No pretrained weights.
+  data: Synthetic single-substitution table built against the packaged DMS_substitutions.csv reference sequence, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:eb392e97f6b43c7d18220c5e6f6e2dc00a210ae47d54309c5a878aa36ee462da
+    linux/arm64:
+      reference: ghcr.io/rewire-bio/rewirebench@sha256:a24c0ba55c51b1e4b6769099fe2d19d210c8f23740fdec1576671d355c7bf63c
+hardware_floor:
+  accelerator:
+    kind: none
+  basis: measured_by_rewire
+  note: CPU only. Finishes in under two seconds on a 10-row synthetic assay table.
+missing:
+  weights_pin:
+    reason: inapplicable
+    note: The seeded random control uses no pretrained weights.
+inputs:
+  - name: A0A247D711_LISMN_Stadelmann_2021.csv
+    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
+    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
+    bytes: 1065
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - proteingym-v1.3-dms-substitutions
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"assay_ids": ["A0A247D711_LISMN_Stadelmann_2021"], "limit": 10}'
+  - name: run-baselines
+    argv:
+      - rewirebench
+      - run-baselines
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/baselines"
+      - --baseline
+      - seeded-random-v1
+outputs:
+  - baselines/baseline-manifest.json
+  - baselines/seeded-random-v1/report.json
+  - baselines/seeded-random-v1/predictions.json
+expected_output:
+  description: >-
+    All 10 synthetic mutants from one assay are scored (out of 1,653 official variants in
+    the assay) with partial track status and deterministic coverage counts.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: baselines/seeded-random-v1/report.json
+      key: [coverage, scored]
+      value: 10
+      tolerance: 0
+    - label: Coverage, prepared
+      metric_id: coverage_prepared
+      file: baselines/seeded-random-v1/report.json
+      key: [protocol_results, coverage, prepared]
+      value: 10
+      tolerance: 0
+    - label: Complete assays
+      metric_id: complete_assays
+      file: baselines/seeded-random-v1/report.json
+      key: [protocol_results, complete_assays]
+      value: 0
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Synthetic 10-row subset only; upstream full v1.3 merge-script layout and legacy environment pinning remain tracked in issue #67.
+  - Seeded random control only; label-free EVcouplings independent scores require external plmc_v2 artifacts not bundled here.

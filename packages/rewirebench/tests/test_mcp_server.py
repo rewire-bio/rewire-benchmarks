@@ -124,7 +124,10 @@ def test_protocols_recipes_and_models_can_be_listed_and_described(server: FastMC
     # to a published result without a describe_recipe call per recipe.
     assert {entry["id"]: entry["kg_record_id"] for entry in listed["recipes"]} == {
         "clingen-pp3-bp4-af001-calibration": "rewire-local-20261123-clingen-protocol-post-2023-12-af001",
+        "dart-eval-task1-synthetic-smoke": None,
         "mfass-v2-kmer-baseline": "rewire-mfass-v2",
+        "mrnabench-designed-mrl-baselines": "rewire-protocol-mrnabench-designed-mrl-v1",
+        "proteingym-v1-3-dms-synthetic-smoke": None,
         SMOKE: None,
     }
     recipe = call(server, "describe_recipe", recipe="mfass-v2-kmer-baseline")

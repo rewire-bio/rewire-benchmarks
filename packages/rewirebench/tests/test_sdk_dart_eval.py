@@ -154,3 +154,23 @@ def test_control_generation_is_dinucleotide_preserving_demo():
     fixture = json.loads(dart._resource("demo.json").read_text())
     for pair in fixture["pairs"]:
         assert Counter(zip(pair["sequence"], pair["sequence"][1:])) == Counter(zip(pair["control"], pair["control"][1:]))
+
+
+def test_json_fixture_requires_matching_hash_and_valid_pairs(tmp_path):
+    raw = dart._resource("demo.json").read_bytes()
+    path = tmp_path / "dart_smoke.json"
+    path.write_bytes(raw)
+    sha = hashlib.sha256(raw).hexdigest()
+    with pytest.raises(ValueError, match="source_sha256"):
+        dart.prepare(path)
+    with pytest.raises(ValueError, match="source_sha256"):
+        dart.prepare(path, source_sha256="0" * 64)
+    data = dart.prepare(path, source_sha256=sha)
+    assert data["scope"] == "smoke"
+    assert data["provenance"]["data_verification"] == "synthetic_demo_not_biological_evidence"
+    assert data["metadata"]["canonical_test_count"] == 24
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"pairs": []}')
+    bad_sha = hashlib.sha256(bad.read_bytes()).hexdigest()
+    with pytest.raises(ValueError, match="nonempty pairs"):
+        dart.prepare(bad, source_sha256=bad_sha)

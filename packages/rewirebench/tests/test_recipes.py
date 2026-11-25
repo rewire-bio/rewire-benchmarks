@@ -753,6 +753,19 @@ def test_rendered_paths_are_resolved_and_refused_outside_the_run_folders(tmp_pat
                              values)
 
 
+def test_mrnabench_proteingym_and_dart_recipes_match_pinned_protocols():
+    mrna = recipes.load_recipe(RECIPES / "mrnabench/mrnabench-designed-mrl-baselines.yaml").recipe
+    assert mrna.rewirebench_protocol == "mrnabench-sample-mrl-v1" and mrna.scope == "full_protocol"
+    assert mrna.kg_record_id == "rewire-protocol-mrnabench-designed-mrl-v1"
+    assert mrna.store_recipe_id == "mrnabench-designed-mrl-baselines"
+    assert mrna.inputs[0].sha256 == "8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4"
+    pg = recipes.load_recipe(RECIPES / "proteingym/proteingym-v1-3-dms-synthetic-smoke.yaml").recipe
+    assert pg.rewirebench_protocol == "proteingym-v1.3-dms-substitutions" and pg.scope == "synthetic_smoke"
+    dart_recipe = recipes.load_recipe(RECIPES / "dart-eval/dart-eval-task1-synthetic-smoke.yaml").recipe
+    assert dart_recipe.rewirebench_protocol == "dart-eval-task1-zero-shot-v1"
+    assert dart_recipe.scope == "synthetic_smoke"
+
+
 def test_a_link_out_of_the_run_folders_is_followed_and_refused(tmp_path: Path):
     values = folders(tmp_path)
     outside = tmp_path / "outside"
