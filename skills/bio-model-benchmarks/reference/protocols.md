@@ -1,6 +1,6 @@
 # Protocols
 
-The nine protocol IDs below are what `rewirebench protocols` prints for v0.6.1.
+The nine protocol IDs below are what `rewirebench protocols` prints for v0.6.2.
 Run `rewirebench inspect ID` for the exact datasets, inputs, metrics and fitting
 rules, and `rewirebench baselines ID` for the registered baselines. Docs links point at
 `main`; in a checkout of this repository read `docs/` directly.
@@ -9,7 +9,7 @@ Docs: https://github.com/rewire-bio/rewire-benchmarks/blob/main/docs/
 
 ## Summary
 
-| Protocol ID | Modality | Docs | Extra | Fitting | Registered baselines (v0.6.1) | KG records |
+| Protocol ID | Modality | Docs | Extra | Fitting | Registered baselines (v0.6.2) | KG records |
 | --- | --- | --- | --- | --- | --- | --- |
 | `mfass-v2` | DNA splice variants | `mfass.md` | none | `fit` on train | `training-prior-v1`, `mfass-kmer-position-v2` | `id:rewire-mfass-v2` (results, recipes) |
 | `mfass-v2-frozen-encoder` | DNA, paired embeddings | `mfass.md` | `dnabert2` for the DNABERT-2 example | protocol-owned logistic head | `constant-paired-probe-v1`, `paired-composition-probe-v1` | `id:rewire-mfass-v2` (recipe `mfass-v2-dnabert2`) |

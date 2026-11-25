@@ -1,0 +1,15 @@
+e143069bcaf271c165e23252e90924d33a28bb1375fccd75f0ff6eaa2608a015  ./baselines/baseline-manifest.json
+e91c481fa3e2a812ff74dd9ba1f3e6afc77d958ec92c9b31156be09fbb2152a8  ./baselines/baseline-plan.json
+03177280ba179031ae2485fcd03bd808df892553d4806ca5b13b4c0b26b9d62f  ./baselines/rna-composition-probe-v1/predictions.json
+89c1601c93b86ffd43bbc1e60a8d93c64955da8be0d3746ab25296ed791a944d  ./baselines/rna-composition-probe-v1/report.json
+ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356  ./baselines/rna-composition-probe-v1/unscored.json
+d54c79cd3e934a89cd916b273a344e388070a871a045431282723af85c060b91  ./baselines/rna-composition-probe-v1.status.json
+ada4827b455891cf8153698ce2d444b956b3f3c44eea44cc714e451658d955cf  ./baselines/training-mean-v1/predictions.json
+5744e2d62aacbda31a75314256467ec55cd65d0677fe2428c52764260ebe5761  ./baselines/training-mean-v1/report.json
+ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356  ./baselines/training-mean-v1/unscored.json
+d069486fa93f0284f26d6e32f81c8746bd570bf5e307747d7ce4b6487b8c5274  ./baselines/training-mean-v1.status.json
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./logs/01-prepare.stderr.txt
+73f3b797ee9f5c2eb1ce8aa05d545222f133cc9e30a81f694830ff7c53719c1e  ./logs/01-prepare.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./logs/02-run-baselines.stderr.txt
+a27087c39f85f6545ca262b541a5b353b4b36b221cbd8d6c76a492c389cf0493  ./logs/02-run-baselines.stdout.txt
+179d8bc2076a43bee83d4bfb69f3121638f0e49ef053d6c8d413172ad3b5eb9e  ./receipt.json

@@ -1,0 +1,5 @@
+{
+  "protocol_id": "mrnabench-sample-mrl-v1",
+  "scope": "full",
+  "prepared": "{work}/prepared/prepared.json"
+}

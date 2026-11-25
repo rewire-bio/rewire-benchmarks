@@ -8,6 +8,7 @@ dependencies = ["rewirebench", "mfass"]
 
 [tool.uv.workspace]
 members = ["packages/*", "benchmarks/*"]
+exclude = ["benchmarks/mrnabench"]
 
 [tool.uv.sources]
 rewirebench = { workspace = true }

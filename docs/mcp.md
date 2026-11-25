@@ -10,7 +10,7 @@ It runs code and can only run on your machine. There is no hosted version.
 
 The server needs the `mcp` extra of rewirebench (the official MCP Python SDK). In a checkout
 of this repository `uv sync` installs it with the development tools. Outside a checkout, install
-from PyPI as `uvx --from 'rewirebench[mcp]==0.6.1' rewirebench mcp` or install the release wheel.
+from PyPI as `uvx --from 'rewirebench[mcp]==0.6.2' rewirebench mcp` or install the release wheel.
 
 ```sh
 uv run rewirebench mcp               # speaks MCP on stdin and stdout
@@ -34,7 +34,7 @@ The released wheel ships packaged copies of `recipes/` as a fallback outside a c
 Pass `--recipes-dir` or set `REWIREBENCH_RECIPES_DIR` to use recipes from another folder.
 
 The `bio-model-benchmarks` plugin starts this server from its `.mcp.json` using the pinned PyPI
-release (`rewirebench[mcp]==0.6.1`) with `uvx`, and passes `--recipes-dir ${CLAUDE_PLUGIN_ROOT}/recipes`,
+release (`rewirebench[mcp]==0.6.2`) with `uvx`, and passes `--recipes-dir ${CLAUDE_PLUGIN_ROOT}/recipes`,
 a byte-identical copy of `recipes/` that ships inside the plugin. A server started from a PyPI
 wheel has `code.commit` and `code.commit_source` set to null (whereas a wheel installed from a
 git URL reads `code.commit` from `install_metadata`) and `code.dirty` null, so receipts verify

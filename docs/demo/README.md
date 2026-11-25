@@ -1,6 +1,6 @@
 # Recorded demo: MFASS v2 baseline, rerun through MCP tools only
 
-On 2026-11-24 the corrected k-mer and position baseline on MFASS v2 was rerun on a laptop CPU
+On 2026-11-25 the corrected k-mer and position baseline on MFASS v2 was rerun on a laptop CPU
 through MCP tool calls only, and compared with the value in the benchmark knowledge graph.
 This folder holds the record.
 
@@ -20,16 +20,16 @@ and starts no rewirebench command itself.
 
 | # | Server | Tool | Result |
 | --- | --- | --- | --- |
-| 1 | `rewire-benchmark-graph` (rdf-kg-mcp v0.4.0) | `dataset_info` | Release `2026-11-23-066f267ebcf4` |
+| 1 | `rewire-benchmark-graph` (rdf-kg-mcp v0.4.0) | `dataset_info` | Release `2026-11-24-fd6eb3f6141d` |
 | 2 | | `find_entity` | `id:rewire-mfass-v2` |
 | 3 | | `sparql_query` | Published values of `id:rewire-model-baseline-kmer-position-v2`, each on 8324 of 8324, status `reproduced` |
-| 4 | `rewirebench` | `list_recipes` | Three recipes, each with its `kg_record_id` |
+| 4 | `rewirebench` | `list_recipes` | Six recipes, each with its `kg_record_id` |
 | 5 | | `describe_recipe` | `mfass-v2-kmer-baseline`: two inputs, 80 MB, pinned by SHA-256 |
 | 6 | | `plan_run` | Local, CPU, 21.6 seconds expected, owned hardware, no amount to confirm |
 | 7 | | `run` | Started, with the plan's `plan_sha256` and the graph release ID |
-| 8 to 23 | | `run_status` | Polled every 2 seconds until finished, exit code 0, checks passed |
-| 24 | | `get_receipt` | The receipt |
-| 25 | | `verify_receipt` with `strict` | Passed: all eight checks match, nothing left unchecked |
+| 8 to 19 | | `run_status` | Polled every 2 seconds until finished, exit code 0, checks passed |
+| 20 | | `get_receipt` | The receipt |
+| 21 | | `verify_receipt` with `strict` | Passed: all eight checks match, nothing left unchecked |
 
 ## Result
 
@@ -48,11 +48,11 @@ tolerance is 1e-9.
 From the receipt:
 
 - recipe `mfass-v2-kmer-baseline`, SHA-256 `0857cabd37d1bc2097f2354846ebb1334e77f5523b02620d92c68c8e7e8643a0`;
-- code and recipe commit `49b2c943bf98fa361e79eab49795619d03a16941` on `main`, clean tree, `commit_source` `checkout`;
+- code and recipe commit `95e7cd6facb41ad18aad27759afd4463a177599f` on `main`, clean tree, `commit_source` `checkout`;
 - inputs fetched from KosuriLab/MFASS at commit `9a8e4f27`, both digests matched;
 - Apple M4, arm64, 10 logical cores, 16 GiB, no GPU; macOS, Python 3.12.7, numpy 1.26.4,
   scikit-learn 1.9.1, scipy 1.17.1;
-- wall time 29.27 seconds including the download, peak memory 782 MB;
+- wall time 22.44 seconds including the download, peak memory 762 MB;
 - cost: no paid compute, reason "owned hardware";
 - container image: none used. The local backend runs in the host Python environment, so
   `image_used` is null. The receipt records the two published `core` digests the recipe names:
@@ -89,35 +89,35 @@ It does not show these:
 ## The same run through the plugin as shipped
 
 [`plugin-run.json`](plugin-run.json) is the transcript of the same run with both servers started by
-the launch lines in the plugin's `.mcp.json`. It holds the same 20 calls (3 to the graph, 17 to
+the launch lines in the plugin's `.mcp.json`. It holds the same 19 calls (3 to the graph, 16 to
 rewirebench). The plugin folder was copied outside any checkout first, as an
 installed plugin is, so `${CLAUDE_PLUGIN_ROOT}/recipes` was a plain folder. It was recorded on
-2026-11-24 on the same laptop. It makes 11 `run_status` calls where the checkout run made 16.
-The checkout run made 25.
+2026-11-25 on the same laptop. It makes 10 `run_status` calls where the checkout run made 12.
+The checkout run made 21.
 
 | | Checkout run (above) | Plugin run |
 | --- | --- | --- |
-| rewirebench | `python -m rewirebench.cli mcp` from a clean checkout of `49b2c94` | PyPI wheel `rewirebench[mcp]==0.6.1` (built from `49b2c94`) |
+| rewirebench | `python -m rewirebench.cli mcp` from a clean checkout of `95e7cd6` | PyPI wheel `rewirebench[mcp]==0.6.2` (built from `95e7cd6`) |
 | Recipes | `recipes/` of the checkout | the plugin's copy, same SHA-256 |
 | Python, packages | 3.12.7, locked by `uv.lock` (numpy 1.26.4, scipy 1.17.1) | 3.12.7, not locked (numpy 2.5.5, scipy 1.18.1) |
-| `code.commit` | `49b2c94` | null |
+| `code.commit` | `95e7cd6` | null |
 | `code.commit_source` | `checkout` | null |
 | `code.dirty` | false | null |
-| `recipe.commit` | `49b2c94` | null |
+| `recipe.commit` | `95e7cd6` | null |
 | `verify_receipt` | passed with `strict` | passed; `commits` not checked, so `strict` does not pass |
 | Precision at 100 | 0.61 | 0.61 |
 | Average precision | 0.2864167459589237 | 0.28641674595892375 |
 | AUROC | 0.7779498064677238 | 0.7779498064677238 |
-| `sdk_code_sha256` | `9a02a143...` | `9a02a143...` |
+| `sdk_code_sha256` | `b612a953...` | `b612a953...` |
 | SHA-256 of `predictions.json` | `2683ef05...` | `2683ef05...` |
-| Wall time | 29.27 s | 19.51 s (inputs downloaded again) |
+| Wall time | 22.44 s | 17.44 s (inputs downloaded again) |
 
 This is what a user of the installed plugin should expect. It is still a scripted client and
 not a Claude Code session with the plugin loaded: `${CLAUDE_PLUGIN_ROOT}` was substituted by
 the client.
 
-The plugin receipt records `code.rewirebench_version` `0.6.1` and the same `sdk_code_sha256` as
-the `v0.6.1` checkout. A PyPI wheel has no checkout or VCS `direct_url.json`, so `code.commit`,
+The plugin receipt records `code.rewirebench_version` `0.6.2` and the same `sdk_code_sha256` as
+the `v0.6.2` checkout. A PyPI wheel has no checkout or VCS `direct_url.json`, so `code.commit`,
 `code.commit_source` and `code.dirty` are null (whereas a wheel installed from a git URL records
 `install_metadata` in `code.commit_source`). It does not pass `strict`, for the reasons the
 `commits` check states: `code.commit` is null, no tree was checked for changes, and the plugin's
@@ -133,7 +133,7 @@ The runner still enforces `files_as_installed` on git-URL wheels before reportin
 Both receipts record the installed package versions under `environment.packages`.
 
 In the transcripts, the `version` recorded for the `rewirebench` server (1.30.0) is the version
-of the MCP SDK it is built on. The rewirebench version, 0.6.1, is in the receipt.
+of the MCP SDK it is built on. The rewirebench version, 0.6.2, is in the receipt.
 
 The step log in the run folder names `{work}` where the run used its scratch folder, and a
 test checks that nothing in the folder names a local folder.
@@ -154,9 +154,9 @@ It was recorded at an older pin than the two runs above. The plugin was version 
 from the plugin folder of a checkout at commit `26fd89b`, where `.mcp.json` pins rewirebench
 at `e5c5662`. The recording does not name that pin itself. The receipt in it has the
 `sdk_code_sha256` `3297cfe0...`, which is the digest of the rewirebench sources at `e5c5662`,
-computed here from that commit. The plugin is now 0.2.6 and pins `rewirebench[mcp]==0.6.1` (`v0.6.1`,
-commit `49b2c94`). The agent session has not been recorded again: not at `49b2c94` (`v0.6.1`), and
-not at `199c002` (`v0.6.0`), `6d98f09`, `d74a030` or `023a7a2`, the pins before it. What
+computed here from that commit. The plugin is now 0.2.7 and pins `rewirebench[mcp]==0.6.2` (`v0.6.2`,
+commit `95e7cd6`). The agent session has not been recorded again: not at `95e7cd6` (`v0.6.2`),
+`49b2c94` (`v0.6.1`), `199c002` (`v0.6.0`), `6d98f09`, `d74a030` or `023a7a2`, the pins before it. What
 follows describes the recording made at `e5c5662`.
 
 What the recording shows:
@@ -180,8 +180,8 @@ file states each change.
 
 ## The command line at the pinned commit
 
-The same recipe was run once more on 2026-11-24 from the command line, without MCP, from a
-fresh shallow clone of tag `v0.6.1` at commit `49b2c94`, the release the plugin now pins,
+The same recipe was run once more on 2026-11-25 from the command line, without MCP, from a
+fresh shallow clone of tag `v0.6.2` at commit `95e7cd6`, the release the plugin now pins,
 with Python 3.12.7 and `uv sync --locked --all-packages`:
 
 ```sh
@@ -193,11 +193,11 @@ uv run rewirebench receipt verify <folder> --strict
   of 0.61, average precision 0.2864167459589237 and AUROC 0.7779498064677238. These equal the
   published values in the Result table above. This run did not read the graph.
 - `receipt verify --strict` passed: all eight checks match and nothing was left unchecked. The
-  `commits` check read code commit `49b2c943bf98fa361e79eab49795619d03a16941` from the receipt.
-- Wall time was 15.45 seconds including the download, and peak memory 782 MB, on an
+  `commits` check read code commit `95e7cd6facb41ad18aad27759afd4463a177599f` from the receipt.
+- Wall time was 14.56 seconds including the download, and peak memory 757 MB, on an
   Apple M4 laptop (numpy 1.26.4, scikit-learn 1.9.1, scipy 1.17.1).
 - `predictions.json` had the SHA-256 `2683ef05...`, as in the two recorded runs.
-- `sdk_code_sha256` was `9a02a143...`, as in the two recorded runs.
+- `sdk_code_sha256` was `b612a953...`, as in the two recorded runs.
 
 That run folder is not committed. The committed run folder is the one recorded through MCP
 from the same tag checkout.
@@ -215,7 +215,7 @@ uv run rewirebench receipt verify docs/demo/mfass-v2-kmer-baseline
 ```
 
 It recomputes every digest in the folder and reads the checked values again from the outputs.
-If the recipe file has changed since the run, the recipe check needs commit `49b2c94` in your
+If the recipe file has changed since the run, the recipe check needs commit `95e7cd6` in your
 clone's history, to read the recipe as it was.
 
 ## Run it again

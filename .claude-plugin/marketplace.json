@@ -12,7 +12,7 @@
       "name": "bio-model-benchmarks",
       "source": "./plugins/bio-model-benchmarks",
       "description": "Find the right model for a use case in the Rewire benchmark graph, prepare data and truth sets, and plan, run and verify benchmarks locally with rewirebench, each run with a receipt.",
-      "version": "0.2.6",
+      "version": "0.2.7",
       "license": "MIT",
       "homepage": "https://benchmarks.rewirebio.io/",
       "repository": "https://github.com/rewire-bio/rewire-benchmarks",
