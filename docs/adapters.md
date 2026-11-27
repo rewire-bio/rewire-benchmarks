@@ -83,8 +83,9 @@ network:
 
 ## The first six
 
-All six are `local` recipes on CPU, and every file they load is pinned by SHA-256. None has
-been run yet. Tier is the record's `depth_tier`. No Tier 1 protein model had a run guide, so
+All six are `local` recipes on CPU, and every file they load is pinned by SHA-256.
+`.github/workflows/model-recipe-receipt.yml` runs each one on a GitHub runner and verifies its
+receipt with `--strict`, when these adapters, pins, recipes or the lock change. Tier is the record's `depth_tier`. No Tier 1 protein model had a run guide, so
 the protein adapters come from Tier 2.
 
 | Model ID | Data record | Tier | Interface | Protocol | Extra | Recipe |
