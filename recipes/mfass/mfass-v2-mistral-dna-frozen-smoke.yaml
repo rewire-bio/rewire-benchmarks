@@ -1,0 +1,117 @@
+schema_version: "1.0"
+id: mfass-v2-mistral-dna-frozen-smoke
+title: MFASS v2 frozen-encoder check with Mistral-DNA-v1-138M-hg38 on CPU
+summary: >-
+  Prepares the first 1,000 training and 1,000 held-out MFASS v2 variants from the two
+  published tables, embeds each reference and mutant window with the pinned
+  Mistral-DNA-v1-138M-hg38 checkpoint and fits the protocol's logistic probe. It checks that
+  the adapter runs end to end; it is not a full result.
+kind: model_run
+purpose: obtain_and_run
+scope: selected_assay
+rewirebench_protocol: mfass-v2-frozen-encoder
+licence:
+  code: MIT
+  weights: Apache-2.0 (model card metadata and Hugging Face API response); not gated.
+  data: Reuse terms are unreported upstream (KosuriLab/MFASS). The data is fetched, not redistributed.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the mistral-dna extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the mistral-dna extra yet.
+missing:
+  weights_pin:
+    reason: unavailable
+    note: >-
+      RaphaelMourad/Mistral-DNA-v1-138M-hg38 at revision
+      4c3c8c7b44fae10e63b5902d27c8699feeca7a56. The weights pin is written once every file
+      digest is known; until then the files are pinned as inputs below.
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: snv_data_clean.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
+    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
+    bytes: 41445250
+  - name: snv_func_annot.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
+    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
+    bytes: 38514140
+  - name: config.json
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/config.json
+    sha256: 651be00955c11f3b25779a20afd041eb7560a314a1b6afd74bf2684113e4c62d
+  - name: model.safetensors
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/model.safetensors
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: tokenizer.json
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/tokenizer.json
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: tokenizer_config.json
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/tokenizer_config.json
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: special_tokens_map.json
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/special_tokens_map.json
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - mfass-v2-frozen-encoder
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"limit": 1000}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - mistral-dna-138m-frozen
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    The first 1,000 held-out variants in source order are scored. The probe's metrics depend
+    on the model and are not checked until a run has been reviewed.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 1000
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - No SHA-256 is pinned yet for model.safetensors, special_tokens_map.json, tokenizer.json,
+    tokenizer_config.json. Their inputs carry the all-zero digest, so a run stops at the input
+    check before any command. Fill in the digests from the file listing of
+    RaphaelMourad/Mistral-DNA-v1-138M-hg38 at revision 4c3c8c7b, here and in mistral_dna.py,
+    together.
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - The limit takes rows in source order without looking at outcomes; it was set without
+    running prepare, so a run may stop if the first 1,000 training rows hold one outcome
+    class.
+  - The local backend runs in the host Python environment, which needs
+    rewirebench[mistral-dna].

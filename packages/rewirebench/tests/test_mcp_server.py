@@ -129,6 +129,12 @@ def test_protocols_recipes_and_models_can_be_listed_and_described(server: FastMC
         "mrnabench-designed-mrl-baselines": "rewire-protocol-mrnabench-designed-mrl-v1",
         "proteingym-v1-3-dms-synthetic-smoke": None,
         SMOKE: None,
+        "flip2-protbert-synthetic-smoke": None,
+        "mfass-v2-dnabert-s-frozen-smoke": None,
+        "mfass-v2-mistral-dna-frozen-smoke": None,
+        "mrnabench-plantrna-fm-smoke": None,
+        "proteingym-v1-3-esm1b-synthetic-smoke": None,
+        "proteingym-v1-3-protgpt2-synthetic-smoke": None,
     }
     recipe = call(server, "describe_recipe", recipe="mfass-v2-kmer-baseline")
     assert recipe["sha256"] == recipes.get_recipe("mfass-v2-kmer-baseline", RECIPES).sha256
@@ -431,7 +437,8 @@ def test_describe_protocol_says_when_it_holds_capabilities_only(server: FastMCP)
             fuller.append(protocol)
             assert "note" not in described
     assert "mfass-v2" in bare and "flip2-fitness-v1" in fuller
-    assert call(server, "describe_protocol", protocol="flip2-fitness-v1")["recipes"] == [SMOKE]
+    assert call(server, "describe_protocol", protocol="flip2-fitness-v1")["recipes"] == [
+        "flip2-protbert-synthetic-smoke", SMOKE]
     tool = next(tool for tool in anyio.run(server.list_tools)
                 if tool.name == "describe_protocol")
     assert "capabilities only" in " ".join(tool.description.split())

@@ -101,7 +101,12 @@ class ModelSpec:
 
 
 _CHECKPOINT = "Path of the pinned checkpoint file. Its SHA-256 is checked before loading."
+_FOLDER = ("Folder holding the pinned Hugging Face files. Each is checked by SHA-256 "
+           "before loading.")
 _DEVICE = "Torch device. The local backend hides CUDA devices, so use cpu there."
+_PINNED = {"checkpoint": _FOLDER, "device": _DEVICE}
+_PENDING = ("Refuses to load until the PENDING file digests in its adapter module are "
+            "filled in.")
 
 _MODELS: tuple[ModelSpec, ...] = (
     ModelSpec(
@@ -183,6 +188,55 @@ _MODELS: tuple[ModelSpec, ...] = (
         options={"checkpoint": _CHECKPOINT, "device": _DEVICE,
                  "model_name": "esm2_t6_8M_UR50D (default) or esm2_t12_35M_UR50D."},
         required_options=("checkpoint",),
+    ),
+    ModelSpec(
+        id="mistral-dna-138m-frozen", title="Mistral-DNA-v1-138M-hg38 frozen encoder",
+        adapter="rewirebench.adapters.mistral_dna:MistralDNA",
+        interfaces=("embed",), pretrained=True, extra="mistral-dna",
+        protocols=("mfass-v2-frozen-encoder",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Max-pooled final states, as on the model card. " + _PENDING,
+    ),
+    ModelSpec(
+        id="dnabert-s-frozen", title="DNABERT-S frozen encoder",
+        adapter="rewirebench.adapters.dnabert_s:DNABERTS",
+        interfaces=("embed",), pretrained=True, extra="dnabert-s",
+        protocols=("mfass-v2-frozen-encoder",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Mean-pooled final states, as in the README. Loads the checkpoint's own "
+             "model code (trust_remote_code), pinned by SHA-256 like the weights. " + _PENDING,
+    ),
+    ModelSpec(
+        id="plantrna-fm-embeddings", title="PlantRNA-FM mean-pooled embeddings",
+        adapter="rewirebench.adapters.plantrna_fm:PlantRNAFM",
+        interfaces=("embed",), pretrained=True, extra="plantrna-fm",
+        protocols=("mrnabench-sample-mrl-v1",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Plant RNA model; T is read as U. " + _PENDING,
+    ),
+    ModelSpec(
+        id="protbert-embeddings", title="ProtBert mean-pooled embeddings",
+        adapter="rewirebench.adapters.protbert:ProtBert",
+        interfaces=("embed",), pretrained=True, extra="protbert",
+        protocols=("flip2-fitness-v1",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Weights under AFL-3.0. " + _PENDING,
+    ),
+    ModelSpec(
+        id="esm1b-masked-marginal", title="ESM-1b masked-marginal substitution score",
+        adapter="rewirebench.adapters.esm1b:ESM1b",
+        interfaces=("predict",), pretrained=True, extra="esm1b",
+        protocols=("proteingym-v1.3-dms-substitutions",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Transformers port of ESM-1b at a pinned revision. " + _PENDING,
+    ),
+    ModelSpec(
+        id="protgpt2-log-likelihood", title="ProtGPT2 log-likelihood ratio",
+        adapter="rewirebench.adapters.protgpt2:ProtGPT2",
+        interfaces=("predict",), pretrained=True, extra="protgpt2",
+        protocols=("proteingym-v1.3-dms-substitutions",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Mutant minus wild-type summed log-likelihood. " + _PENDING,
     ),
     ModelSpec(
         id="evcouplings-independent", title="EVcouplings independent (site) model",

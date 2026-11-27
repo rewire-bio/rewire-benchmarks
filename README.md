@@ -173,6 +173,8 @@ The SDK provides local `prepare`, `run`, `evaluate`, `export` and explicit
 | mRNABench Sample | Four MRL datasets, six targets scored separately | [mRNABench](docs/mrnabench.md) |
 
 Start with [the SDK guide](docs/sdk.md) and [HPC packaging](docs/hpc.md).
+[Adapters from run guides](docs/adapters.md) explains how a pretrained model gets a registered
+adapter and recipe, and lists the six added from the data repository's run guides.
 Use `rewirebench inspect PROTOCOL_ID` for exact supported inputs and configurations.
 The new sequence environment adds parquet and HDF5 readers without downloading
 model weights. Podman and Apptainer use the same interfaces. A supported protocol

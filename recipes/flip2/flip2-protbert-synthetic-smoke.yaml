@@ -1,0 +1,107 @@
+schema_version: "1.0"
+id: flip2-protbert-synthetic-smoke
+title: FLIP2 plumbing check with ProtBert embeddings on CPU
+summary: >-
+  Embeds the eight-row synthetic FLIP2 table with the pinned ProtBert checkpoint and fits the
+  protocol's ridge probe on three training rows. It checks that the adapter runs end to end.
+  It is not a benchmark result.
+kind: model_run
+purpose: obtain_and_run
+scope: synthetic_smoke
+rewirebench_protocol: flip2-fitness-v1
+licence:
+  code: MIT
+  weights: Academic Free License v3.0 (ProtTrans README); the model card declares none.
+  data: Synthetic fixture in this repository, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the protbert extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the protbert extra yet.
+missing:
+  weights_pin:
+    reason: unavailable
+    note: >-
+      Rostlab/prot_bert at revision 7a894481acdc12202f0a415dd567f6cfdb698908. The weights pin
+      is written once every file digest is known; until then the files are pinned as inputs
+      below.
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: smoke.csv
+    repo_path: workflows/benchmark/examples/smoke.csv
+    sha256: f260bd83895cf43f417f4b3e5a105b052e56a0164f5616238271bac4ad7dc2d3
+  - name: config.json
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/config.json
+    sha256: 44c1e1229d520841e5b29f1dd2292595219061daf0c5f5dacb4f68d1272d69a3
+  - name: pytorch_model.bin
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/pytorch_model.bin
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: vocab.txt
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/vocab.txt
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: tokenizer_config.json
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/tokenizer_config.json
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: special_tokens_map.json
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/special_tokens_map.json
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - flip2-fitness-v1
+      - --source
+      - "{inputs}/smoke.csv"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"dataset": "flip2-amylase-one-to-many", "allow_unverified": true, "limit": 3}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - protbert-embeddings
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    Three synthetic test rows are scored; nothing else is stable enough to check.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 3
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - No SHA-256 is pinned yet for pytorch_model.bin, special_tokens_map.json,
+    tokenizer_config.json, vocab.txt. Their inputs carry the all-zero digest, so a run stops
+    at the input check before any command. Fill in the digests from the file listing of
+    Rostlab/prot_bert at revision 7a894481, here and in protbert.py, together.
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - Synthetic rows with allow_unverified, so the result says nothing about any model.
+  - ProtBert is depth tier 2 in the data repository.
+  - The local backend runs in the host Python environment, which needs rewirebench[protbert].
