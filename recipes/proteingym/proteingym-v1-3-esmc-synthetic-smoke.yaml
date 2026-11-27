@@ -1,0 +1,124 @@
+schema_version: "1.0"
+id: proteingym-v1-3-esmc-synthetic-smoke
+title: ProteinGym v1.3 DMS check with ESM C 600M masked marginals on CPU
+summary: >-
+  Scores the 10-row synthetic assay table keyed to A0A247D711_LISMN_Stadelmann_2021 with ESM C
+  600M masked marginals. It checks that the adapter runs end to end. It is not a biological
+  result.
+kind: model_run
+purpose: obtain_and_run
+scope: synthetic_smoke
+rewirebench_protocol: proteingym-v1.3-dms-substitutions
+licence:
+  code: MIT
+  weights: >-
+    MIT plus an other entry for the repository's third-party notice (model card metadata); use
+    is subject to the developers' acceptable use policy. Not redistributed: the recipe fetches
+    the weights from the developer's repository at the pinned revision. Not gated.
+  data: Synthetic single-substitution table built against the packaged DMS_substitutions.csv reference sequence, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-5-16 extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-5-16 extra yet.
+weights_pin:
+  - host: huggingface
+    repository: biohub/ESMC-600M
+    revision: 5e366569e675ad5ae3512f66bf0b53ffe80ee83e
+    files:
+      - path: config.json
+        sha256: 2494562385804f86db4ba04cba57e4453b1c080ce9eb758443df67ee852bfd31
+      - path: special_tokens_map.json
+        sha256: 0b7245ec86c8c3aeaf61523ba70dfa79be137e6283f127bd651adc30b4f15c74
+      - path: tokenizer.json
+        sha256: 8d3447b278176e65fb3ef0224472927bf5fee3be46ea2bd77fad0111423cee1f
+      - path: tokenizer_config.json
+        sha256: dd886af5f7a21ee11455a243e57e421bcd0289dfd15a2d2df4f5135986766a12
+      - path: model.safetensors
+        sha256: 526573c304b7718f9cfd2a8adf79638feb6752eb38056968bf21d9036b7882ce
+    licence: MIT plus other (acceptable use policy)
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/biohub/ESMC-600M/resolve/5e366569e675ad5ae3512f66bf0b53ffe80ee83e/config.json
+    sha256: 2494562385804f86db4ba04cba57e4453b1c080ce9eb758443df67ee852bfd31
+    bytes: 1114
+  - name: special_tokens_map.json
+    url: https://huggingface.co/biohub/ESMC-600M/resolve/5e366569e675ad5ae3512f66bf0b53ffe80ee83e/special_tokens_map.json
+    sha256: 0b7245ec86c8c3aeaf61523ba70dfa79be137e6283f127bd651adc30b4f15c74
+    bytes: 171
+  - name: tokenizer.json
+    url: https://huggingface.co/biohub/ESMC-600M/resolve/5e366569e675ad5ae3512f66bf0b53ffe80ee83e/tokenizer.json
+    sha256: 8d3447b278176e65fb3ef0224472927bf5fee3be46ea2bd77fad0111423cee1f
+    bytes: 2879
+  - name: tokenizer_config.json
+    url: https://huggingface.co/biohub/ESMC-600M/resolve/5e366569e675ad5ae3512f66bf0b53ffe80ee83e/tokenizer_config.json
+    sha256: dd886af5f7a21ee11455a243e57e421bcd0289dfd15a2d2df4f5135986766a12
+    bytes: 327
+  - name: model.safetensors
+    url: https://huggingface.co/biohub/ESMC-600M/resolve/5e366569e675ad5ae3512f66bf0b53ffe80ee83e/model.safetensors
+    sha256: 526573c304b7718f9cfd2a8adf79638feb6752eb38056968bf21d9036b7882ce
+    bytes: 2300201352
+  - name: A0A247D711_LISMN_Stadelmann_2021.csv
+    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
+    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
+    bytes: 1065
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - proteingym-v1.3-dms-substitutions
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"assay_ids": ["A0A247D711_LISMN_Stadelmann_2021"], "limit": 10}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - esmc-600m-masked-marginal
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    All 10 synthetic mutants of the 87-residue protein are scored.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 10
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - ESM C is depth tier 2 in the data repository.
+  - The local backend runs in the host Python environment, which needs
+    rewirebench[transformers-5-16].

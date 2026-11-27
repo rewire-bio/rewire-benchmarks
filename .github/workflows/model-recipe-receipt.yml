@@ -1,5 +1,5 @@
 name: Model recipe receipt check
-# Runs the six pretrained-model recipes on CPU with `rewirebench recipe run`, then re-checks
+# Runs the pretrained-model recipes on CPU with `rewirebench recipe run`, then re-checks
 # each receipt with `rewirebench receipt verify --strict`. `recipe run` fetches the pinned
 # checkpoint files and data from their https URLs and checks each SHA-256; the checkpoint
 # folder is the inputs folder. A run downloads up to 3.1 GB of weights, so this runs only when
@@ -15,6 +15,14 @@ on:
       - 'packages/rewirebench/src/rewirebench/adapters/protbert.py'
       - 'packages/rewirebench/src/rewirebench/adapters/esm1b.py'
       - 'packages/rewirebench/src/rewirebench/adapters/protgpt2.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/biofm.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/grover.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/hyenadna.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/mp_rna.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/ankh.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/prot_t5.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/glm2.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/esmc.py'
       - 'packages/rewirebench/src/rewirebench/resources/models/hf-trees/**'
       - 'packages/rewirebench/src/rewirebench/models.py'
       - 'packages/rewirebench/pyproject.toml'
@@ -24,6 +32,14 @@ on:
       - 'recipes/flip2/flip2-protbert-synthetic-smoke.yaml'
       - 'recipes/proteingym/proteingym-v1-3-esm1b-synthetic-smoke.yaml'
       - 'recipes/proteingym/proteingym-v1-3-protgpt2-synthetic-smoke.yaml'
+      - 'recipes/mfass/mfass-v2-biofm-frozen-smoke.yaml'
+      - 'recipes/mfass/mfass-v2-grover-frozen-smoke.yaml'
+      - 'recipes/dart-eval/dart-eval-task1-hyenadna-synthetic-smoke.yaml'
+      - 'recipes/mrnabench/mrnabench-mp-rna-smoke.yaml'
+      - 'recipes/flip2/flip2-ankh-base-synthetic-smoke.yaml'
+      - 'recipes/flip2/flip2-prot-t5-synthetic-smoke.yaml'
+      - 'recipes/flip2/flip2-glm2-synthetic-smoke.yaml'
+      - 'recipes/proteingym/proteingym-v1-3-esmc-synthetic-smoke.yaml'
       - 'uv.lock'
       - '.github/workflows/model-recipe-receipt.yml'
   push:
@@ -36,6 +52,14 @@ on:
       - 'packages/rewirebench/src/rewirebench/adapters/protbert.py'
       - 'packages/rewirebench/src/rewirebench/adapters/esm1b.py'
       - 'packages/rewirebench/src/rewirebench/adapters/protgpt2.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/biofm.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/grover.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/hyenadna.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/mp_rna.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/ankh.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/prot_t5.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/glm2.py'
+      - 'packages/rewirebench/src/rewirebench/adapters/esmc.py'
       - 'packages/rewirebench/src/rewirebench/resources/models/hf-trees/**'
       - 'packages/rewirebench/src/rewirebench/models.py'
       - 'packages/rewirebench/pyproject.toml'
@@ -45,6 +69,14 @@ on:
       - 'recipes/flip2/flip2-protbert-synthetic-smoke.yaml'
       - 'recipes/proteingym/proteingym-v1-3-esm1b-synthetic-smoke.yaml'
       - 'recipes/proteingym/proteingym-v1-3-protgpt2-synthetic-smoke.yaml'
+      - 'recipes/mfass/mfass-v2-biofm-frozen-smoke.yaml'
+      - 'recipes/mfass/mfass-v2-grover-frozen-smoke.yaml'
+      - 'recipes/dart-eval/dart-eval-task1-hyenadna-synthetic-smoke.yaml'
+      - 'recipes/mrnabench/mrnabench-mp-rna-smoke.yaml'
+      - 'recipes/flip2/flip2-ankh-base-synthetic-smoke.yaml'
+      - 'recipes/flip2/flip2-prot-t5-synthetic-smoke.yaml'
+      - 'recipes/flip2/flip2-glm2-synthetic-smoke.yaml'
+      - 'recipes/proteingym/proteingym-v1-3-esmc-synthetic-smoke.yaml'
       - 'uv.lock'
       - '.github/workflows/model-recipe-receipt.yml'
   workflow_dispatch:
@@ -69,6 +101,22 @@ jobs:
             extras: --extra esm1b
           - recipe: proteingym-v1-3-protgpt2-synthetic-smoke
             extras: --extra protgpt2
+          - recipe: mfass-v2-biofm-frozen-smoke
+            extras: --extra transformers-5-16
+          - recipe: mfass-v2-grover-frozen-smoke
+            extras: --extra transformers-4-41
+          - recipe: dart-eval-task1-hyenadna-synthetic-smoke
+            extras: --extra transformers-4-41
+          - recipe: mrnabench-mp-rna-smoke
+            extras: --extra transformers-4-41 --extra viennarna --extra sequence
+          - recipe: flip2-ankh-base-synthetic-smoke
+            extras: --extra transformers-4-41
+          - recipe: flip2-prot-t5-synthetic-smoke
+            extras: --extra transformers-4-41
+          - recipe: flip2-glm2-synthetic-smoke
+            extras: --extra transformers-4-41
+          - recipe: proteingym-v1-3-esmc-synthetic-smoke
+            extras: --extra transformers-5-16
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:

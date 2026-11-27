@@ -31,8 +31,8 @@ from rewirebench.adapters.pinned import (
     Checkpoint,
     as_array,
     log_softmax,
+    model_inputs,
     offline_frameworks,
-    to_device,
     unique_ids,
 )
 from rewirebench.protocols.proteingym import AMINO_ACIDS, _substitutions
@@ -77,6 +77,8 @@ class ESM1b:
     """Pinned local checkpoint only. Construct once, then call predict in batches."""
 
     CHECKPOINT = CHECKPOINT
+    NAME = "ESM-1b"
+    MAX_RESIDUES = MAX_RESIDUES
 
     def __init__(self, checkpoint: str, *, device: str = "cpu"):
         folder = self.CHECKPOINT.verify(checkpoint)
@@ -94,12 +96,16 @@ class ESM1b:
     def provenance(self) -> dict[str, Any]:
         return {
             **self.CHECKPOINT.provenance(),
-            "method": "ESM-1b masked marginals, wild-type context, summed log-odds",
-            "transformers_version": TRANSFORMERS_VERSION,
-            "maximum_sequence_length": MAX_RESIDUES, "device": self.device,
+            "method": f"{self.NAME} masked marginals, wild-type context, summed log-odds",
+            "transformers_version": self.transformers_version(),
+            "maximum_sequence_length": self.MAX_RESIDUES, "device": self.device,
             "training_overlap": "unreported; UniRef50 pretraining may overlap benchmark proteins",
             "published_result_reproduction": False,
         }
+
+    @staticmethod
+    def transformers_version() -> str:
+        return TRANSFORMERS_VERSION
 
     def _log_probabilities(self, sequence: str, index: int) -> Any:
         """Log-probabilities over the vocabulary at one masked residue."""
@@ -111,8 +117,7 @@ class ESM1b:
             masked[0, index + 1] = self.tokenizer.mask_token_id
             encoded["input_ids"] = masked
             with self.torch.inference_mode():
-                logits = self.model(**{k: to_device(v, self.device)
-                                       for k, v in encoded.items()})[0]
+                logits = self.model(**model_inputs(self.model, encoded, self.device))[0]
             self._cache[key] = log_softmax(as_array(logits)[0, index + 1])
         return self._cache[key]
 
@@ -121,10 +126,10 @@ class ESM1b:
         checked = [check_record(record) for record in inputs]
         results: dict[str, Any] = {}
         for identifier, sequence, substitutions in checked:
-            if len(sequence) > MAX_RESIDUES:
+            if len(sequence) > self.MAX_RESIDUES:
                 results[identifier] = {
                     "score": None,
-                    "reason": f"ESM-1b scores at most {MAX_RESIDUES} residues; "
+                    "reason": f"{self.NAME} scores at most {self.MAX_RESIDUES} residues; "
                               "windowed inference is not implemented",
                 }
                 continue

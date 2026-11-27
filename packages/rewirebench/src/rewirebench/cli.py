@@ -63,6 +63,7 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
         return {**recipes.summary(loaded, directory),
                 "recipe": loaded.recipe.model_dump(mode="json", by_alias=True)}, 0
     from rewirebench import backends
+    from rewirebench.backends import base
 
     started_by = args.started_by or receipts.default_started_by()
     if args.recipe_command == "plan":
@@ -71,6 +72,8 @@ def _recipe_command(args: argparse.Namespace) -> tuple[Any, int]:
             loaded, recipes_dir=directory, output=args.output, inputs=args.inputs,
             started_by=started_by, kg_release_id=args.kg_release_id,
         )
+        for line in base.weights_notices(loaded.recipe):
+            print(line, file=sys.stderr)
         return plan.model_dump(mode="json"), 0
     if args.backend == "spark" and not args.in_container:
         # From this machine: SSH to the Spark and run the pinned image there. Without

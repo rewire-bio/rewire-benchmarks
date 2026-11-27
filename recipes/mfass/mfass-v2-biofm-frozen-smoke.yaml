@@ -1,0 +1,127 @@
+schema_version: "1.0"
+id: mfass-v2-biofm-frozen-smoke
+title: MFASS v2 frozen-encoder check with BioFM-265M on CPU
+summary: >-
+  Prepares the first 1,000 training and 1,000 held-out MFASS v2 variants from the two
+  published tables, embeds each reference and mutant window with the pinned BioFM-265M
+  checkpoint and fits the protocol's logistic probe. It checks that the adapter runs end to
+  end; it is not a full result.
+kind: model_run
+purpose: obtain_and_run
+scope: selected_assay
+rewirebench_protocol: mfass-v2-frozen-encoder
+licence:
+  code: MIT
+  weights: >-
+    CC BY-NC 4.0 (model card metadata and README): licensed for non-commercial use only. Not
+    redistributed: the recipe fetches the weights from the developer's repository at the
+    pinned revision. Not gated.
+  data: Reuse terms are unreported upstream (KosuriLab/MFASS). The data is fetched, not redistributed.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-5-16 extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-5-16 extra yet.
+weights_pin:
+  - host: huggingface
+    repository: m42-health/BioFM-265M
+    revision: 52218bbdd383c123f6ced585c9cf2f62ae1fbb17
+    files:
+      - path: config.json
+        sha256: 68656f74065d92cd077bc1e1b54ecdb3061dfc74a67c67b64cf103ec07b82620
+      - path: generation_config.json
+        sha256: 5a037a70ac785795f6258505c78482ead2f4ce77b7214c386a43d0d65417cf71
+      - path: tokenizer_config.json
+        sha256: 8429c2b5485bd51a010c0980d5871c11c6386e770886e9f87ab0d03dcd7700bb
+      - path: model.safetensors
+        sha256: ff6ea18ca716b5686ad3e0f025e0d3c86257a88766b6aa0063db5cb6493ae108
+    licence: CC-BY-NC-4.0
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/m42-health/BioFM-265M/resolve/52218bbdd383c123f6ced585c9cf2f62ae1fbb17/config.json
+    sha256: 68656f74065d92cd077bc1e1b54ecdb3061dfc74a67c67b64cf103ec07b82620
+    bytes: 5429
+  - name: generation_config.json
+    url: https://huggingface.co/m42-health/BioFM-265M/resolve/52218bbdd383c123f6ced585c9cf2f62ae1fbb17/generation_config.json
+    sha256: 5a037a70ac785795f6258505c78482ead2f4ce77b7214c386a43d0d65417cf71
+    bytes: 156
+  - name: tokenizer_config.json
+    url: https://huggingface.co/m42-health/BioFM-265M/resolve/52218bbdd383c123f6ced585c9cf2f62ae1fbb17/tokenizer_config.json
+    sha256: 8429c2b5485bd51a010c0980d5871c11c6386e770886e9f87ab0d03dcd7700bb
+    bytes: 129
+  - name: model.safetensors
+    url: https://huggingface.co/m42-health/BioFM-265M/resolve/52218bbdd383c123f6ced585c9cf2f62ae1fbb17/model.safetensors
+    sha256: ff6ea18ca716b5686ad3e0f025e0d3c86257a88766b6aa0063db5cb6493ae108
+    bytes: 528959288
+  - name: snv_data_clean.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
+    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
+    bytes: 41445250
+  - name: snv_func_annot.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
+    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
+    bytes: 38514140
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - mfass-v2-frozen-encoder
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"limit": 1000}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - biofm-265m-frozen
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    The first 1,000 held-out variants in source order are scored. The probe's metrics depend
+    on the model and are not checked until a run has been reviewed.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 1000
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - prepare takes the first 1,000 rows of each split in source order and has no seeded or
+    stratified sample option. The limit was set without running prepare, so a run stops at the
+    probe if those training rows hold one outcome class.
+  - BioFM's weights are for non-commercial use only (CC BY-NC 4.0).
+  - The local backend runs in the host Python environment, which needs
+    rewirebench[transformers-5-16].

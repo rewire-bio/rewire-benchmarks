@@ -253,6 +253,7 @@ class SparkBackend:
                 None if self.config.host is not None
                 else f"No Spark is named. Set --spark-host or {HOST_VARIABLE}."),
             notes=[
+                *base.weights_notices(recipe),
                 "A dry-run plan: nothing was contacted.",
                 "The Spark keeps the run folder after the copy. Remove it there by hand.",
                 ("The container is named after the output folder. If this machine loses the "

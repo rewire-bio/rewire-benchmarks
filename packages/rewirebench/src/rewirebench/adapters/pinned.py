@@ -17,6 +17,7 @@ Nothing was loaded or run, and no weights were downloaded.
 from __future__ import annotations
 
 import hashlib
+import inspect
 import os
 import re
 from collections.abc import Mapping
@@ -109,6 +110,21 @@ def to_device(value: Any, device: str) -> Any:
     return value.to(device) if hasattr(value, "to") else value
 
 
+def model_inputs(model: Any, encoded: Mapping[str, Any], device: str) -> dict[str, Any]:
+    """The tokenizer outputs the model's forward accepts, on the device.
+
+    A tokenizer can return fields its model does not take (``token_type_ids`` for a model
+    without segment embeddings), and an unexpected keyword stops the forward pass.
+    """
+    forward = getattr(model, "forward", model)
+    parameters = inspect.signature(forward).parameters.values()
+    if any(parameter.kind is parameter.VAR_KEYWORD for parameter in parameters):
+        names = set(encoded)
+    else:
+        names = {parameter.name for parameter in parameters}
+    return {key: to_device(value, device) for key, value in encoded.items() if key in names}
+
+
 def pool(hidden: Any, how: str, keep: Any = None) -> list[float]:
     """Pool one sequence's token states (tokens x features) into one vector.
 
@@ -179,7 +195,7 @@ class FrozenEncoder:
             if self.IDS_ONLY:
                 output = self.model(to_device(encoded["input_ids"], self.device))
             else:
-                output = self.model(**{k: to_device(v, self.device) for k, v in encoded.items()})
+                output = self.model(**model_inputs(self.model, encoded, self.device))
         keep = None if special is None else as_array(special)[0] == 0
         return pool(output[0][0], self.POOLING, keep)
 

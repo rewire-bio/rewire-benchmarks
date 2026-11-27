@@ -55,6 +55,11 @@ class ModelSpec:
     the JSON type of each one that is not text. ``runs_program`` marks an adapter that
     starts an executable named by an option; such a model cannot be used from a recipe
     or through the MCP server, neither of which may start another program.
+
+    ``weights_licence`` is the licence of the pretrained weights the adapter loads, and
+    ``commercial_use`` whether that licence permits commercial use: None where no licence
+    is stated or the model loads no weights. Nothing is redistributed: a recipe fetches
+    the weights from the developer's own pinned address.
     """
 
     id: str
@@ -69,6 +74,8 @@ class ModelSpec:
     option_types: Mapping[str, OptionType] | None = None
     runs_program: bool = False
     note: str | None = None
+    weights_licence: str | None = None
+    commercial_use: bool | None = None
 
     @property
     def prediction_type(self) -> Literal["scalar", "embedding"]:
@@ -96,6 +103,8 @@ class ModelSpec:
             "required_options": list(self.required_options),
             "runs_program": self.runs_program,
             "recipe_allowed": self.recipe_allowed,
+            "weights_licence": self.weights_licence,
+            "commercial_use": self.commercial_use,
             "note": self.note,
         }
 
@@ -169,6 +178,9 @@ _MODELS: tuple[ModelSpec, ...] = (
                  "batch_size": "Encoder batch size, default 2."},
         option_types={"batch_size": "integer"},
         required_options=("checkpoint",),
+        weights_licence=("Not stated: the model card at revision b5ae377f declares no "
+                         "licence"),
+        commercial_use=None,
     ),
     ModelSpec(
         id="esm2-t6-8m-masked-marginal", title="ESM-2 8M masked-marginal substitution score",
@@ -177,6 +189,9 @@ _MODELS: tuple[ModelSpec, ...] = (
         protocols=("proteingym-v1.3-dms-substitutions",),
         options={"checkpoint": _CHECKPOINT, "device": _DEVICE},
         required_options=("checkpoint",),
+        weights_licence=("MIT, the licence of the facebookresearch/esm repository "
+                         "that distributes the weights"),
+        commercial_use=True,
     ),
     ModelSpec(
         id="esm2-embeddings", title="ESM-2 mean-pooled embeddings (8M or 35M)",
@@ -186,6 +201,9 @@ _MODELS: tuple[ModelSpec, ...] = (
         options={"checkpoint": _CHECKPOINT, "device": _DEVICE,
                  "model_name": "esm2_t6_8M_UR50D (default) or esm2_t12_35M_UR50D."},
         required_options=("checkpoint",),
+        weights_licence=("MIT, the licence of the facebookresearch/esm repository "
+                         "that distributes the weights"),
+        commercial_use=True,
     ),
     ModelSpec(
         id="mistral-dna-138m-frozen", title="Mistral-DNA-v1-138M-hg38 frozen encoder",
@@ -194,6 +212,8 @@ _MODELS: tuple[ModelSpec, ...] = (
         protocols=("mfass-v2-frozen-encoder",),
         options=_PINNED, required_options=("checkpoint",),
         note="Max-pooled final states, as on the model card.",
+        weights_licence="Apache-2.0",
+        commercial_use=True,
     ),
     ModelSpec(
         id="dnabert-s-frozen", title="DNABERT-S frozen encoder",
@@ -203,6 +223,8 @@ _MODELS: tuple[ModelSpec, ...] = (
         options=_PINNED, required_options=("checkpoint",),
         note="Mean-pooled final states, as in the README. Loads the checkpoint's own "
              "model code (trust_remote_code), pinned by SHA-256 like the weights.",
+        weights_licence="Apache-2.0",
+        commercial_use=True,
     ),
     ModelSpec(
         id="plantrna-fm-embeddings", title="PlantRNA-FM mean-pooled embeddings",
@@ -211,6 +233,8 @@ _MODELS: tuple[ModelSpec, ...] = (
         protocols=("mrnabench-sample-mrl-v1",),
         options=_PINNED, required_options=("checkpoint",),
         note="Plant RNA model; T is read as U.",
+        weights_licence="MIT",
+        commercial_use=True,
     ),
     ModelSpec(
         id="protbert-embeddings", title="ProtBert mean-pooled embeddings",
@@ -219,6 +243,8 @@ _MODELS: tuple[ModelSpec, ...] = (
         protocols=("flip2-fitness-v1",),
         options=_PINNED, required_options=("checkpoint",),
         note="Weights under AFL-3.0.",
+        weights_licence="AFL-3.0",
+        commercial_use=True,
     ),
     ModelSpec(
         id="esm1b-masked-marginal", title="ESM-1b masked-marginal substitution score",
@@ -227,6 +253,8 @@ _MODELS: tuple[ModelSpec, ...] = (
         protocols=("proteingym-v1.3-dms-substitutions",),
         options=_PINNED, required_options=("checkpoint",),
         note="Transformers port of ESM-1b at a pinned revision.",
+        weights_licence="MIT",
+        commercial_use=True,
     ),
     ModelSpec(
         id="protgpt2-log-likelihood", title="ProtGPT2 log-likelihood ratio",
@@ -235,6 +263,87 @@ _MODELS: tuple[ModelSpec, ...] = (
         protocols=("proteingym-v1.3-dms-substitutions",),
         options=_PINNED, required_options=("checkpoint",),
         note="Mutant minus wild-type summed log-likelihood.",
+        weights_licence="MIT in the LICENSE file; apache-2.0 in the card metadata",
+        commercial_use=True,
+    ),
+    ModelSpec(
+        id="biofm-265m-frozen", title="BioFM-265M frozen encoder",
+        adapter="rewirebench.adapters.biofm:BioFM",
+        interfaces=("embed",), pretrained=True, extra="transformers-5-16",
+        protocols=("mfass-v2-frozen-encoder",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Last-layer state at the last base, as the biofm-eval embedder takes it.",
+        weights_licence="CC-BY-NC-4.0", commercial_use=False,
+    ),
+    ModelSpec(
+        id="grover-frozen", title="GROVER frozen encoder",
+        adapter="rewirebench.adapters.grover:GROVER",
+        interfaces=("embed",), pretrained=True, extra="transformers-4-41",
+        protocols=("mfass-v2-frozen-encoder",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Mean-pooled final states over the sequence's own tokens.",
+        weights_licence=("CC-BY-4.0, from the authors' Zenodo deposit of the same "
+                         "model; the Hugging Face card states none"),
+        commercial_use=True,
+    ),
+    ModelSpec(
+        id="hyenadna-large-1m-log-likelihood", title="HyenaDNA large-1m log-likelihood",
+        adapter="rewirebench.adapters.hyenadna:HyenaDNA",
+        interfaces=("predict",), pretrained=True, extra="transformers-4-41",
+        protocols=("dart-eval-task1-zero-shot-v1",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Summed base log-likelihood. Loads the checkpoint's own model and tokenizer "
+             "code (trust_remote_code), pinned by SHA-256 like the weights.",
+        weights_licence="BSD-3-Clause", commercial_use=True,
+    ),
+    ModelSpec(
+        id="mp-rna-embeddings", title="MP-RNA mean-pooled embeddings",
+        adapter="rewirebench.adapters.mp_rna:MPRNA",
+        interfaces=("embed",), pretrained=True, extra="transformers-4-41,viennarna",
+        protocols=("mrnabench-sample-mrl-v1",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="T is read as U. Loads the checkpoint's own model code (trust_remote_code), "
+             "pinned by SHA-256 like the weights.",
+        weights_licence="Apache-2.0", commercial_use=True,
+    ),
+    ModelSpec(
+        id="ankh-base-embeddings", title="Ankh Base mean-pooled embeddings",
+        adapter="rewirebench.adapters.ankh:AnkhBase",
+        interfaces=("embed",), pretrained=True, extra="transformers-4-41",
+        protocols=("flip2-fitness-v1",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Encoder of the T5 checkpoint, mean over residues.",
+        weights_licence="CC-BY-NC-SA-4.0", commercial_use=False,
+    ),
+    ModelSpec(
+        id="prot-t5-xl-encoder-embeddings", title="ProtT5-XL-U50 encoder mean-pooled embeddings",
+        adapter="rewirebench.adapters.prot_t5:ProtT5Encoder",
+        interfaces=("embed",), pretrained=True, extra="transformers-4-41",
+        protocols=("flip2-fitness-v1",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="Half-precision weights run in float32, as the ProtTrans README says for a CPU.",
+        weights_licence="AFL-3.0", commercial_use=True,
+    ),
+    ModelSpec(
+        id="glm2-150m-embeddings", title="gLM2-150M mean-pooled protein embeddings",
+        adapter="rewirebench.adapters.glm2:GLM2",
+        interfaces=("embed",), pretrained=True, extra="transformers-4-41",
+        protocols=("flip2-fitness-v1",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="A protein is one coding element, <+> then the residues. Loads the "
+             "checkpoint's own model and tokenizer code (trust_remote_code), pinned by "
+             "SHA-256 like the weights.",
+        weights_licence="Apache-2.0", commercial_use=True,
+    ),
+    ModelSpec(
+        id="esmc-600m-masked-marginal", title="ESM C 600M masked-marginal substitution score",
+        adapter="rewirebench.adapters.esmc:ESMC",
+        interfaces=("predict",), pretrained=True, extra="transformers-5-16",
+        protocols=("proteingym-v1.3-dms-substitutions",),
+        options=_PINNED, required_options=("checkpoint",),
+        note="The transformers port of ESM C, no remote code.",
+        weights_licence="MIT plus other, under the developers' acceptable use policy",
+        commercial_use=True,
     ),
     ModelSpec(
         id="evcouplings-independent", title="EVcouplings independent (site) model",

@@ -1,0 +1,124 @@
+schema_version: "1.0"
+id: flip2-prot-t5-synthetic-smoke
+title: FLIP2 plumbing check with ProtT5-XL-U50 encoder embeddings on CPU
+summary: >-
+  Embeds the eight-row synthetic FLIP2 table with the pinned ProtT5-XL-U50 encoder and fits
+  the protocol's ridge probe on three training rows. It checks that the adapter runs end to
+  end. It is not a benchmark result.
+kind: model_run
+purpose: obtain_and_run
+scope: synthetic_smoke
+rewirebench_protocol: flip2-fitness-v1
+licence:
+  code: MIT
+  weights: >-
+    Academic Free License v3.0 (ProtTrans README); the model card declares none. Not
+    redistributed: the recipe fetches the weights from the developer's repository at the
+    pinned revision. Not gated.
+  data: Synthetic fixture in this repository, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-4-41 extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-4-41 extra yet.
+weights_pin:
+  - host: huggingface
+    repository: Rostlab/prot_t5_xl_half_uniref50-enc
+    revision: 94a6abc029ae13029317b140b7424e012bf8dfbf
+    files:
+      - path: config.json
+        sha256: c93cc8c31433fb062cad1825a9c16cde962a2015c8a3b10cfdc5f76a85128db3
+      - path: special_tokens_map.json
+        sha256: a4b8dfd3d9a75b0f6f9ddbcb52b147c7377f08aa9310e182829cda2a55684334
+      - path: spiece.model
+        sha256: 74da7b4afcde53faa570114b530c726135bdfcdb813dec3abfb27f9d44db7324
+      - path: tokenizer_config.json
+        sha256: d3adf2fb21d1242b5c0b72602f02ce5b0c43f767c0f957e3b57a67b2f93bf4f2
+      - path: pytorch_model.bin
+        sha256: 7f51ba885541c7dc569d46b796af57cc7a2ba7945107dced4f19d1b5ec091157
+    licence: AFL-3.0
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/Rostlab/prot_t5_xl_half_uniref50-enc/resolve/94a6abc029ae13029317b140b7424e012bf8dfbf/config.json
+    sha256: c93cc8c31433fb062cad1825a9c16cde962a2015c8a3b10cfdc5f76a85128db3
+    bytes: 656
+  - name: special_tokens_map.json
+    url: https://huggingface.co/Rostlab/prot_t5_xl_half_uniref50-enc/resolve/94a6abc029ae13029317b140b7424e012bf8dfbf/special_tokens_map.json
+    sha256: a4b8dfd3d9a75b0f6f9ddbcb52b147c7377f08aa9310e182829cda2a55684334
+    bytes: 1787
+  - name: spiece.model
+    url: https://huggingface.co/Rostlab/prot_t5_xl_half_uniref50-enc/resolve/94a6abc029ae13029317b140b7424e012bf8dfbf/spiece.model
+    sha256: 74da7b4afcde53faa570114b530c726135bdfcdb813dec3abfb27f9d44db7324
+    bytes: 237990
+  - name: tokenizer_config.json
+    url: https://huggingface.co/Rostlab/prot_t5_xl_half_uniref50-enc/resolve/94a6abc029ae13029317b140b7424e012bf8dfbf/tokenizer_config.json
+    sha256: d3adf2fb21d1242b5c0b72602f02ce5b0c43f767c0f957e3b57a67b2f93bf4f2
+    bytes: 25
+  - name: pytorch_model.bin
+    url: https://huggingface.co/Rostlab/prot_t5_xl_half_uniref50-enc/resolve/94a6abc029ae13029317b140b7424e012bf8dfbf/pytorch_model.bin
+    sha256: 7f51ba885541c7dc569d46b796af57cc7a2ba7945107dced4f19d1b5ec091157
+    bytes: 2416373051
+  - name: smoke.csv
+    repo_path: workflows/benchmark/examples/smoke.csv
+    sha256: f260bd83895cf43f417f4b3e5a105b052e56a0164f5616238271bac4ad7dc2d3
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - flip2-fitness-v1
+      - --source
+      - "{inputs}/smoke.csv"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"dataset": "flip2-amylase-one-to-many", "allow_unverified": true, "limit": 3}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - prot-t5-xl-encoder-embeddings
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    Three synthetic test rows are scored; nothing else is stable enough to check.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 3
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - Synthetic rows with allow_unverified, so the result says nothing about any model.
+  - ProtT5-XL is depth tier 2 in the data repository.
+  - The local backend runs in the host Python environment, which needs
+    rewirebench[transformers-4-41].

@@ -45,7 +45,8 @@ class LocalBackend:
             ),
             runnable=reason is None,
             not_runnable_reason=reason,
-            notes=["Runs in this Python environment with CUDA devices hidden.",
+            notes=[*base.weights_notices(recipe),
+                   "Runs in this Python environment with CUDA devices hidden.",
                    "hardware_floor is checked for host memory only."],
         )
 

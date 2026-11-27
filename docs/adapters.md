@@ -12,8 +12,7 @@ The guides were read, not executed. This page is how one becomes an adapter.
    `data/omics/model-pages-*/specs/<model>.json`. The saved sources sit beside it in
    `artifacts/<model>/`.
 2. Check the licence first. Read the weights licence in the spec's `structured` rows and
-   its `Weights licence` fact. Do not adapt weights that are non-commercial, gated or have no
-   stated licence.
+   its `Weights licence` fact, then the terms in the saved sources. See "What is adapted".
 3. Check the pin. The checkpoint needs a 40-hex revision in a saved source, usually the
    model card or `config.json` fetched at `/raw/<revision>/`. Do not use a branch name.
 4. Decide on remote code from `config.json`, not from the snippet. If `auto_map` is
@@ -37,12 +36,26 @@ The guides were read, not executed. This page is how one becomes an adapter.
    docstring, with the record ID and the saved file it came from.
 7. Register it in `models.py` with a `ModelSpec`. Add an extra to
    `packages/rewirebench/pyproject.toml` with exact pins, from the README or requirements
-   where they state versions. Declare a conflict in the root `pyproject.toml` when its
-   transformers pin differs from another extra's. Then regenerate `uv.lock`.
+   where they state versions. A model whose pins match an existing shared extra
+   (`transformers-4-41`, `transformers-5-16`) uses that extra: every new extra with its own
+   pins adds conflict sets in the root `pyproject.toml`, and each set multiplies the forks
+   `uv lock` resolves. Then regenerate `uv.lock`.
 8. Write a recipe that runs it on the smallest honest input. Reuse a table already in
    this repository where the protocol has one. List every checkpoint file as an input at
    `https://huggingface.co/<repo>/resolve/<revision>/<file>` and pass
    `{"checkpoint": "{inputs}"}`.
+
+## What is adapted
+
+Weights are adapted when their licence permits running the unmodified weights for research
+evaluation, including non-commercial licences (CC BY-NC, CC BY-NC-SA, CC BY-NC-ND, PolyForm
+Noncommercial, academic or research-only terms). Not adapted: gated weights (no credentials
+are used), weights with no stated licence, terms that limit use to named kinds of
+organisation, no pinnable revision, and GPU-only kernels. Nothing is redistributed: a recipe
+fetches the weights from the developer's own pinned address. `ModelSpec.weights_licence` and
+`commercial_use` record the terms; `rewirebench models` shows them, the recipe's
+`licence.weights` states them in words, and `recipe plan` prints "These weights are licensed
+for non-commercial use only: <licence>" for non-commercial weights.
 
 ## Safety rules
 
@@ -81,12 +94,12 @@ network:
 - each recipe validates, names its model, and pins the adapter's files at the adapter's
   URLs and digests, in its inputs and in `weights_pin`.
 
-## The first six
+## The adapters
 
-All six are `local` recipes on CPU, and every file they load is pinned by SHA-256.
+All are `local` recipes on CPU, and every file they load is pinned by SHA-256.
 `.github/workflows/model-recipe-receipt.yml` runs each one on a GitHub runner and verifies its
-receipt with `--strict`, when these adapters, pins, recipes or the lock change. Tier is the record's `depth_tier`. No Tier 1 protein model had a run guide, so
-the protein adapters come from Tier 2.
+receipt with `--strict` when these adapters, pins, recipes or the lock change. Tier is the
+record's `depth_tier`. Protein models with run guides are mostly Tier 2.
 
 | Model ID | Data record | Tier | Interface | Protocol | Extra | Recipe |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -96,12 +109,20 @@ the protein adapters come from Tier 2.
 | `protbert-embeddings` | `lit-protein-20261011-deepprotein-model-protbert` | 2 | `embed` | `flip2-fitness-v1` | `protbert` | `flip2-protbert-synthetic-smoke` |
 | `esm1b-masked-marginal` | `uc20260930-model-esm-1b` | 2 | `predict` | `proteingym-v1.3-dms-substitutions` | `esm1b` | `proteingym-v1-3-esm1b-synthetic-smoke` |
 | `protgpt2-log-likelihood` | `uc20260930-model-protgpt2` | 2 | `predict` | `proteingym-v1.3-dms-substitutions` | `protgpt2` | `proteingym-v1-3-protgpt2-synthetic-smoke` |
+| `biofm-265m-frozen` (non-commercial) | `lit-genomics-20261011-geneb-model-biofm` | 1 | `embed` | `mfass-v2-frozen-encoder` | `transformers-5-16` | `mfass-v2-biofm-frozen-smoke` |
+| `grover-frozen` | `lit-genomics-20261011-geneb-model-grover` | 1 | `embed` | `mfass-v2-frozen-encoder` | `transformers-4-41` | `mfass-v2-grover-frozen-smoke` |
+| `hyenadna-large-1m-log-likelihood` | `regulatory-variant-20261009-model-hyenadna` | 1 | `predict` | `dart-eval-task1-zero-shot-v1` | `transformers-4-41` | `dart-eval-task1-hyenadna-synthetic-smoke` |
+| `mp-rna-embeddings` | `lit-rna-20261011-rnalm-zeroshot-model-mp-rna` | 1 | `embed` | `mrnabench-sample-mrl-v1` | `transformers-4-41`, `viennarna` | `mrnabench-mp-rna-smoke` |
+| `ankh-base-embeddings` (non-commercial) | `hyplm-flash-20261106-model-ankh` | 2 | `embed` | `flip2-fitness-v1` | `transformers-4-41` | `flip2-ankh-base-synthetic-smoke` |
+| `prot-t5-xl-encoder-embeddings` | `lit-protein-20261011-deepprotein-model-prot-t5-xl` | 2 | `embed` | `flip2-fitness-v1` | `transformers-4-41` | `flip2-prot-t5-synthetic-smoke` |
+| `glm2-150m-embeddings` | `bacformer-20261115-model-glm2` | 1 | `embed` | `flip2-fitness-v1` | `transformers-4-41` | `flip2-glm2-synthetic-smoke` |
+| `esmc-600m-masked-marginal` | `lit-protein-20261011-prime-model-esm-c` | 2 | `predict` | `proteingym-v1.3-dms-substitutions` | `transformers-5-16` | `proteingym-v1-3-esmc-synthetic-smoke` |
 
 DNABERT-S has a twin record, `lit-genomics-20261011-geneb-model-dnabert-s`, with the same run
-guide. It is the only one of the six that loads remote code.
+guide. DNABERT-S, HyenaDNA, MP-RNA and gLM2 load remote code, pinned like the weights.
 
 Follow-up: the plugin under `plugins/bio-model-benchmarks` installs `rewirebench[mcp]==0.6.2`,
 which has none of these models, so it does not ship their recipes yet.
-`tests/test_agent_plugin.py` holds them back by model ID. After a release that includes them,
-raise the plugin's pin, copy the six recipes into the plugin, empty `NOT_IN_PINNED_RELEASE` in
+`tests/test_agent_plugin.py` holds them back by model ID. No released rewirebench includes them
+yet. After a release that does, raise the plugin's pin, copy their recipes into the plugin, empty `NOT_IN_PINNED_RELEASE` in
 that test, and record `docs/demo/plugin-servers.json` again (see `docs/demo/README.md`).

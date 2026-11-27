@@ -135,6 +135,23 @@ def pending_inputs(recipe: Recipe) -> list[str]:
     return [item.name for item in recipe.inputs if item.sha256 == PENDING_SHA256]
 
 
+NON_COMMERCIAL = "These weights are licensed for non-commercial use only: {licence}"
+
+
+def weights_notices(recipe: Recipe) -> list[str]:
+    """One plain line for each model a run step names whose weights forbid commercial use."""
+    from rewirebench import cli, models
+
+    lines = []
+    for command in recipe.commands:
+        if command.argv[1] != "run":
+            continue
+        spec = models.get_model(cli.parse_strict(command.argv[1:]).model)
+        if spec.commercial_use is False:
+            lines.append(NON_COMMERCIAL.format(licence=spec.weights_licence))
+    return lines
+
+
 def pending_reason(recipe: Recipe) -> str | None:
     pending = pending_inputs(recipe)
     if not pending:
