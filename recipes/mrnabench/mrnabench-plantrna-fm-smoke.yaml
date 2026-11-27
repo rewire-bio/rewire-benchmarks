@@ -36,16 +36,6 @@ missing:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: mrl-sample-designed.parquet
-    url: https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet
-    sha256: 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4
-    bytes: 9778091
-  - name: config.json
-    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/config.json
-    sha256: b520579b517e6b5c9c3ed993086a06c0d5af452a98c4bf8d8633eae4a93b3166
-  - name: model.safetensors
-    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/model.safetensors
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
   - name: vocab.txt
     url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/vocab.txt
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -55,6 +45,16 @@ inputs:
   - name: special_tokens_map.json
     url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/special_tokens_map.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: model.safetensors
+    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/model.safetensors
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: config.json
+    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/config.json
+    sha256: b520579b517e6b5c9c3ed993086a06c0d5af452a98c4bf8d8633eae4a93b3166
+  - name: mrl-sample-designed.parquet
+    url: https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet
+    sha256: 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4
+    bytes: 9778091
 commands:
   - name: prepare
     argv:
@@ -103,8 +103,11 @@ limitations:
     tokenizer_config.json, vocab.txt. Their inputs carry the all-zero digest, so a run stops
     at the input check before any command. Fill in the digests from the file listing of
     yangheng/PlantRNA-FM at revision 5e7baf4e, here and in plantrna_fm.py, together.
+  - No file listing was saved for this revision, so the checkpoint file names are the usual
+    transformers layout, not confirmed. Check them against the listing when filling in the
+    digests.
   - Not yet run, so no wall time, memory or metric is recorded.
   - PlantRNA-FM was pretrained on plant transcriptomes; the designed MRL sequences are
     synthetic 5' UTRs measured in human cells.
   - The local backend runs in the host Python environment, which needs
-    rewirebench[plantrna-fm].
+    rewirebench[plantrna-fm,sequence].

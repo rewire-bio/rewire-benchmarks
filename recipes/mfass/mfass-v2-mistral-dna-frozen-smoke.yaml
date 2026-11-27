@@ -37,20 +37,6 @@ missing:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: snv_data_clean.txt
-    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
-    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
-    bytes: 41445250
-  - name: snv_func_annot.txt
-    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
-    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
-    bytes: 38514140
-  - name: config.json
-    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/config.json
-    sha256: 651be00955c11f3b25779a20afd041eb7560a314a1b6afd74bf2684113e4c62d
-  - name: model.safetensors
-    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/model.safetensors
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
   - name: tokenizer.json
     url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/tokenizer.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -60,6 +46,20 @@ inputs:
   - name: special_tokens_map.json
     url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/special_tokens_map.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: model.safetensors
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/model.safetensors
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: config.json
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/config.json
+    sha256: 651be00955c11f3b25779a20afd041eb7560a314a1b6afd74bf2684113e4c62d
+  - name: snv_data_clean.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
+    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
+    bytes: 41445250
+  - name: snv_func_annot.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
+    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
+    bytes: 38514140
 commands:
   - name: prepare
     argv:
@@ -109,6 +109,9 @@ limitations:
     check before any command. Fill in the digests from the file listing of
     RaphaelMourad/Mistral-DNA-v1-138M-hg38 at revision 4c3c8c7b, here and in mistral_dna.py,
     together.
+  - No file listing was saved for this revision, so the checkpoint file names are the usual
+    transformers layout, not confirmed. Check them against the listing when filling in the
+    digests.
   - Not yet run, so no wall time, memory or metric is recorded.
   - The limit takes rows in source order without looking at outcomes; it was set without
     running prepare, so a run may stop if the first 1,000 training rows hold one outcome

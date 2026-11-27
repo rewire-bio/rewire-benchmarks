@@ -138,7 +138,8 @@ def test_a_pin_needs_a_commit_and_hex_digests():
 def test_each_adapter_refuses_to_load_while_a_digest_is_pending(
     model_id: str, adapter: type, extra: str, recipe: str, tmp_path: Path
 ):
-    assert adapter.CHECKPOINT.pending
+    if not adapter.CHECKPOINT.pending:
+        pytest.skip("every digest is pinned")
     with pytest.raises(ValueError, match="no SHA-256 is pinned yet"):
         adapter(str(tmp_path))
     with pytest.raises(ValueError, match="no SHA-256 is pinned yet"):
@@ -451,7 +452,8 @@ def test_each_recipe_validates_and_pins_the_files_its_adapter_checks(
         assert item.sha256 == (ZERO if digest == pinned.PENDING else digest)
     limitations = " ".join(loaded.limitations)
     assert all(name in limitations for name in pinned_files.pending)
-    assert "weights_pin" in loaded.missing and loaded.weights_pin is None
+    if pinned_files.pending:
+        assert "weights_pin" in loaded.missing and loaded.weights_pin is None
 
 
 def test_the_recipe_zero_digest_is_quoted_text():

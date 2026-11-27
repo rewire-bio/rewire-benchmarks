@@ -37,20 +37,6 @@ missing:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: snv_data_clean.txt
-    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
-    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
-    bytes: 41445250
-  - name: snv_func_annot.txt
-    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
-    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
-    bytes: 38514140
-  - name: config.json
-    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/config.json
-    sha256: d54c142114563aa34ef7c2b54ccc921d08e50cd7c3cd69c439d5e0d2bbcfcdee
-  - name: pytorch_model.bin
-    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/pytorch_model.bin
-    sha256: f3cfc3d0541859df64759e758cc4bc40fe1d5760799a7d098a9f9f09501c1e5f
   - name: tokenizer.json
     url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/tokenizer.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -72,6 +58,20 @@ inputs:
   - name: flash_attn_triton.py
     url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/flash_attn_triton.py
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: config.json
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/config.json
+    sha256: d54c142114563aa34ef7c2b54ccc921d08e50cd7c3cd69c439d5e0d2bbcfcdee
+  - name: pytorch_model.bin
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/pytorch_model.bin
+    sha256: f3cfc3d0541859df64759e758cc4bc40fe1d5760799a7d098a9f9f09501c1e5f
+  - name: snv_data_clean.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
+    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
+    bytes: 41445250
+  - name: snv_func_annot.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
+    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
+    bytes: 38514140
 commands:
   - name: prepare
     argv:

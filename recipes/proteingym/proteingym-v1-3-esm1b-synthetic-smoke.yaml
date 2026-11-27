@@ -36,16 +36,6 @@ missing:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: A0A247D711_LISMN_Stadelmann_2021.csv
-    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
-    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
-    bytes: 1065
-  - name: config.json
-    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/config.json
-    sha256: e6296f876d44faeb9f4d206386af6db5e834763b14eb9a1c2539a3fb9a43edf5
-  - name: pytorch_model.bin
-    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/pytorch_model.bin
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
   - name: vocab.txt
     url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/vocab.txt
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -55,6 +45,16 @@ inputs:
   - name: special_tokens_map.json
     url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/special_tokens_map.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: pytorch_model.bin
+    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/pytorch_model.bin
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: config.json
+    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/config.json
+    sha256: e6296f876d44faeb9f4d206386af6db5e834763b14eb9a1c2539a3fb9a43edf5
+  - name: A0A247D711_LISMN_Stadelmann_2021.csv
+    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
+    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
+    bytes: 1065
 commands:
   - name: prepare
     argv:
@@ -102,6 +102,9 @@ limitations:
     tokenizer_config.json, vocab.txt. Their inputs carry the all-zero digest, so a run stops
     at the input check before any command. Fill in the digests from the file listing of
     biohub/esm1b_t33_650M_UR50S at revision 7b37824b, here and in esm1b.py, together.
+  - No file listing was saved for this revision, so the checkpoint file names are the usual
+    transformers layout, not confirmed. Check them against the listing when filling in the
+    digests.
   - Not yet run, so no wall time, memory or metric is recorded.
   - The weights are the transformers port biohub/esm1b_t33_650M_UR50S, not the fair-esm file
     ProteinGym scored; their equivalence is not checked here.

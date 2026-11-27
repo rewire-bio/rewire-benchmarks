@@ -63,6 +63,11 @@ hash it. Replace `PENDING` in the adapter module and the all-zero digest in its 
 same commit. `test_pinned_adapters.py` checks that the two agree. Remove the pending sentence
 from the model's `note` in `models.py` once nothing is pending.
 
+Only DNABERT-S and ProtGPT2 have a saved listing. For the other four the file names are the
+usual transformers layout, not read from the repository: check each name against the listing
+too, and rename, add or drop entries to match. A recipe lists pending inputs first, so a run
+stops at the first one after a small download.
+
 ## Tests
 
 `packages/rewirebench/tests/test_pinned_adapters.py` runs with no weights, no torch and no

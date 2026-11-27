@@ -36,15 +36,6 @@ missing:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: smoke.csv
-    repo_path: workflows/benchmark/examples/smoke.csv
-    sha256: f260bd83895cf43f417f4b3e5a105b052e56a0164f5616238271bac4ad7dc2d3
-  - name: config.json
-    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/config.json
-    sha256: 44c1e1229d520841e5b29f1dd2292595219061daf0c5f5dacb4f68d1272d69a3
-  - name: pytorch_model.bin
-    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/pytorch_model.bin
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
   - name: vocab.txt
     url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/vocab.txt
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -54,6 +45,15 @@ inputs:
   - name: special_tokens_map.json
     url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/special_tokens_map.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: pytorch_model.bin
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/pytorch_model.bin
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: config.json
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/config.json
+    sha256: 44c1e1229d520841e5b29f1dd2292595219061daf0c5f5dacb4f68d1272d69a3
+  - name: smoke.csv
+    repo_path: workflows/benchmark/examples/smoke.csv
+    sha256: f260bd83895cf43f417f4b3e5a105b052e56a0164f5616238271bac4ad7dc2d3
 commands:
   - name: prepare
     argv:
@@ -101,6 +101,9 @@ limitations:
     tokenizer_config.json, vocab.txt. Their inputs carry the all-zero digest, so a run stops
     at the input check before any command. Fill in the digests from the file listing of
     Rostlab/prot_bert at revision 7a894481, here and in protbert.py, together.
+  - No file listing was saved for this revision, so the checkpoint file names are the usual
+    transformers layout, not confirmed. Check them against the listing when filling in the
+    digests.
   - Not yet run, so no wall time, memory or metric is recorded.
   - Synthetic rows with allow_unverified, so the result says nothing about any model.
   - ProtBert is depth tier 2 in the data repository.

@@ -36,16 +36,6 @@ missing:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: A0A247D711_LISMN_Stadelmann_2021.csv
-    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
-    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
-    bytes: 1065
-  - name: config.json
-    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/config.json
-    sha256: b1eb50b2e360c8c9e433f234eeec53e809c99df254271ace5454b89244818195
-  - name: pytorch_model.bin
-    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/pytorch_model.bin
-    sha256: 95ee34898a635ad046aa3c53a08f50ca169ff67443db50c0ba328320d8ed1f04
   - name: tokenizer.json
     url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/tokenizer.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
@@ -58,6 +48,16 @@ inputs:
   - name: special_tokens_map.json
     url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/special_tokens_map.json
     sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  - name: config.json
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/config.json
+    sha256: b1eb50b2e360c8c9e433f234eeec53e809c99df254271ace5454b89244818195
+  - name: pytorch_model.bin
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/pytorch_model.bin
+    sha256: 95ee34898a635ad046aa3c53a08f50ca169ff67443db50c0ba328320d8ed1f04
+  - name: A0A247D711_LISMN_Stadelmann_2021.csv
+    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
+    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
+    bytes: 1065
 commands:
   - name: prepare
     argv:
