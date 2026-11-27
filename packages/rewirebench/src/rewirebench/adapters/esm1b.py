@@ -16,9 +16,11 @@ and ``config.json`` saved at revision 7b37824b (``artifacts/esm-1b/hf-card.md``,
 after ``<cls>``; sequences longer than 1022 residues are left unscored with a reason,
 as in the ESM-2 adapter.
 
-``config.json`` is pinned from the saved copy. No file listing was saved: the other
-names are the usual layout of an ESM checkpoint, and their names and digests are
-PENDING until someone reads the listing at the pinned revision.
+The weights are ``pytorch_model.bin``, a pickle, unpickled after the digest check.
+
+Pins: the file names and the weights digest come from the Hugging Face file listing
+at the pinned revision, saved as ``resources/models/hf-trees/esm1b.json``. The other
+digests are of the small files fetched once at that revision; see ``pinned``.
 """
 
 from __future__ import annotations
@@ -26,7 +28,6 @@ from __future__ import annotations
 from typing import Any
 
 from rewirebench.adapters.pinned import (
-    PENDING,
     Checkpoint,
     as_array,
     log_softmax,
@@ -45,10 +46,10 @@ CHECKPOINT = Checkpoint(
     record="uc20260930-model-esm-1b",
     files={
         "config.json": "e6296f876d44faeb9f4d206386af6db5e834763b14eb9a1c2539a3fb9a43edf5",
-        "pytorch_model.bin": PENDING,
-        "vocab.txt": PENDING,
-        "tokenizer_config.json": PENDING,
-        "special_tokens_map.json": PENDING,
+        "pytorch_model.bin": "ebb8a35768179581f91fc01b93cf78facba2821c3bab1452abb38ef2a7f6e7b1",
+        "vocab.txt": "0b82cc0a7c7cf9e567b1e5892d793285b9fbae822c964ca48696f7db44598e03",
+        "tokenizer_config.json": "7e9161ecdb548ec45a41cbc6b24aa4476fdd418461f491c4207baa99419a29ad",
+        "special_tokens_map.json": "3aedcd4211c0d43aec4e607ff60a63255f3174ead795e997350f09a5f8cd9ee1",
     },
 )
 

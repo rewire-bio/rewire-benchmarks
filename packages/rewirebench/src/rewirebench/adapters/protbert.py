@@ -12,11 +12,12 @@ The card gives no per-protein pooling. This adapter takes the mean over residue 
 and leaves out [CLS] and [SEP], which is how the ProtTrans README pools ProtT5.
 
 Weights licence: Academic Free License v3.0, from the ProtTrans README; the code is
-MIT. The card's metadata declares no licence. ``config.json`` is pinned from the saved
-copy. No file listing was saved: the other names are the usual layout of a BERT
-checkpoint, and their names and digests are PENDING until someone reads the listing at
-the pinned revision. The weights are a pickle (the API response lists no safetensors);
-transformers unpickles them after the digest check.
+MIT. The card's metadata declares no licence. The weights are ``pytorch_model.bin``, a
+pickle, unpickled after the digest check.
+
+Pins: the file names and the weights digest come from the Hugging Face file listing
+at the pinned revision, saved as ``resources/models/hf-trees/protbert.json``. The other
+digests are of the small files fetched once at that revision; see ``pinned``.
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from rewirebench.adapters.pinned import PENDING, Checkpoint, FrozenEncoder, offline_frameworks
+from rewirebench.adapters.pinned import Checkpoint, FrozenEncoder, offline_frameworks
 
 TRANSFORMERS_VERSION = "4.41.1"
 CHECKPOINT = Checkpoint(
@@ -33,10 +34,10 @@ CHECKPOINT = Checkpoint(
     record="lit-protein-20261011-deepprotein-model-protbert",
     files={
         "config.json": "44c1e1229d520841e5b29f1dd2292595219061daf0c5f5dacb4f68d1272d69a3",
-        "pytorch_model.bin": PENDING,
-        "vocab.txt": PENDING,
-        "tokenizer_config.json": PENDING,
-        "special_tokens_map.json": PENDING,
+        "pytorch_model.bin": "6ea3edd26cfefc3111176100ee2a027ed510f9c86b63e5b53a2a050b59f2af9d",
+        "vocab.txt": "7ea18f4fe3a796c1146f9830d50334a251f368db96bdd0606e78846ca3a30607",
+        "tokenizer_config.json": "73f5e97ab29042bac49dc96f7b8a7a790994509bbd2fe3e9cd4f59affc46c2ce",
+        "special_tokens_map.json": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
     },
 )
 

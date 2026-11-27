@@ -271,7 +271,7 @@ class SparkBackend:
         if local_only:
             return (f"Inputs {local_only} come from a repository path. The image holds no "
                     "checkout, so a spark recipe's inputs must be URLs.")
-        return None
+        return base.pending_reason(recipe)
 
     def run(
         self, loaded: LoadedRecipe, *, recipes_dir: Path, output: str | Path,

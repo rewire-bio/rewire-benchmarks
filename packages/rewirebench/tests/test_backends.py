@@ -19,6 +19,7 @@ from recipe_fixtures import (
     INPUT_URL,
     SMOKE_INPUT,
     gpu_recipe_data,
+    model_recipe_data,
     write_recipes,
 )
 from rewirebench import backends, cli, receipts, recipes
@@ -43,6 +44,23 @@ def no_network(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def gpu(fixture_recipes: Path) -> recipes.LoadedRecipe:
     return recipes.get_recipe("gpu-fixture", fixture_recipes)
+
+
+def test_a_plan_with_a_pending_input_digest_is_not_runnable(tmp_path: Path):
+    """The all-zero digest marks an input not pinned yet. The run would stop at the input
+    check, so the plan says so instead of reporting the recipe runnable."""
+    data = model_recipe_data()
+    data["inputs"].append({"name": "weights.bin", "url": "https://data.invalid/weights.bin",
+                           "sha256": "0" * 64})
+    loaded = recipes.get_recipe("model-step", write_recipes(tmp_path / "checkout", data))
+    plan = backends.get_backend("local").plan(loaded, recipes_dir=tmp_path / "checkout/recipes")
+    assert not plan.runnable
+    assert "weights.bin" in plan.not_runnable_reason and "smoke.csv" not in plan.not_runnable_reason
+    data["inputs"].pop()
+    data["id"] = "model-step-pinned"
+    pinned = recipes.get_recipe("model-step-pinned", write_recipes(tmp_path / "other", data))
+    assert backends.get_backend("local").plan(pinned, recipes_dir=tmp_path / "other/recipes").runnable
+    assert base.pending_reason(loaded.recipe) == plan.not_runnable_reason
 
 
 def test_local_plan_states_owned_hardware_and_the_exact_command(tmp_path: Path):

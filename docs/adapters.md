@@ -21,13 +21,16 @@ The guides were read, not executed. This page is how one becomes an adapter.
    False. If `auto_map` names files in the checkpoint, the model cannot load without them:
    pin each Python file like the weights and say so in the adapter's docstring.
 5. Pin every file the adapter loads. List each file with its SHA-256 in a
-   `pinned.Checkpoint`. Take digests from saved files only:
-   - `config.json`: the SHA-256 of the saved copy, which the spec records.
-   - Weights: `lfs.oid` in a saved Hugging Face tree listing (`hf-tree.json`) at the pinned
-     revision.
-   - Anything else is `PENDING`. A listing gives git SHA-1 object IDs for small files, not
-     SHA-256. Where a listing exists, check a saved file against it: the git object ID of
-     the bytes must equal the listing's `oid`.
+   `pinned.Checkpoint`, with names read from the repository's file listing at the pinned
+   revision (`https://huggingface.co/api/models/<repo>/tree/<revision>?recursive=1`).
+   Save the listing in `resources/models/hf-trees/`.
+   - Weights are stored with Git LFS: the listing's `lfs.oid` is the SHA-256. Never
+     download them here.
+   - A small file (config, tokenizer, vocabulary, model code) has only a git SHA-1 object
+     ID in the listing. Fetch it at the revision into an empty folder, check its git
+     object ID against the listing, hash it, and delete it. Do not import or run it.
+   - A digest that cannot be had this way stays `PENDING`, and its recipe input carries
+     the all-zero digest.
 6. Copy the loading and inference lines. Keep the card's tokenizer call, model class and
    pooling. Where the guide and the saved README differ, follow the README and note it.
    Write every departure (dtype, batching, pooling the source does not give) in the
@@ -54,19 +57,14 @@ The guides were read, not executed. This page is how one becomes an adapter.
   scalar protocol left unscored with a reason. Nothing is cropped.
 - Device is an option. A `local` recipe must pass `"device": "cpu"`.
 
-## Filling in a pending digest
+## Pending digests
 
-Read the repository's file listing at the pinned revision
-(`https://huggingface.co/api/models/<repo>/tree/<revision>`). Each LFS file's `lfs.oid` is
-its SHA-256. A small file has only a git SHA-1 there, so download it at the revision and
-hash it. Replace `PENDING` in the adapter module and the all-zero digest in its recipe in the
-same commit. `test_pinned_adapters.py` checks that the two agree. Remove the pending sentence
-from the model's `note` in `models.py` once nothing is pending.
-
-Only DNABERT-S and ProtGPT2 have a saved listing. For the other four the file names are the
-usual transformers layout, not read from the repository: check each name against the listing
-too, and rename, add or drop entries to match. A recipe lists pending inputs first, so a run
-stops at the first one after a small download.
+`Checkpoint.verify` refuses to load while any digest is `PENDING`, and `recipe plan` reports
+a recipe with an all-zero input digest as not runnable and names the input. A recipe lists
+pending inputs first, so a run that is started anyway stops after a small download. Replace
+`PENDING` in the adapter module and the all-zero digest in its recipe in the same commit;
+`test_pinned_adapters.py` checks that the two agree and that each pin matches the saved
+listing.
 
 ## Tests
 
@@ -79,14 +77,15 @@ network:
   verifies before it imports a framework (the import is replaced by a stub that raises);
 - pooling and scoring arithmetic on a fake tokenizer and model with known outputs, built
   with `object.__new__` so `__init__` never runs;
+- each pin's name is in the saved listing, and each LFS digest equals its `lfs.oid`;
 - each recipe validates, names its model, and pins the adapter's files at the adapter's
-  URLs and digests.
+  URLs and digests, in its inputs and in `weights_pin`.
 
 ## The first six
 
-All six are `local` recipes on CPU. None has been run yet, and each refuses to load until its
-pending digests are filled in. Tier is the record's `depth_tier`. No Tier 1 protein model had
-a run guide, so the protein adapters come from Tier 2.
+All six are `local` recipes on CPU, and every file they load is pinned by SHA-256. None has
+been run yet. Tier is the record's `depth_tier`. No Tier 1 protein model had a run guide, so
+the protein adapters come from Tier 2.
 
 | Model ID | Data record | Tier | Interface | Protocol | Extra | Recipe |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -99,3 +98,9 @@ a run guide, so the protein adapters come from Tier 2.
 
 DNABERT-S has a twin record, `lit-genomics-20261011-geneb-model-dnabert-s`, with the same run
 guide. It is the only one of the six that loads remote code.
+
+Follow-up: the plugin under `plugins/bio-model-benchmarks` installs `rewirebench[mcp]==0.6.2`,
+which has none of these models, so it does not ship their recipes yet.
+`tests/test_agent_plugin.py` holds them back by model ID. After a release that includes them,
+raise the plugin's pin, copy the six recipes into the plugin, empty `NOT_IN_PINNED_RELEASE` in
+that test, and record `docs/demo/plugin-servers.json` again (see `docs/demo/README.md`).

@@ -26,32 +26,43 @@ environment:
       missing:
         reason: unavailable
         note: No published image carries the mistral-dna extra yet.
+weights_pin:
+  - host: huggingface
+    repository: RaphaelMourad/Mistral-DNA-v1-138M-hg38
+    revision: 4c3c8c7b44fae10e63b5902d27c8699feeca7a56
+    files:
+      - path: config.json
+        sha256: 651be00955c11f3b25779a20afd041eb7560a314a1b6afd74bf2684113e4c62d
+      - path: model.safetensors
+        sha256: 73768b6de5f3ff03fd576b6d915d746ef56aa3a2c14d0ca08f8f47d75939b945
+      - path: tokenizer.json
+        sha256: 5d178e8ce2ba55df97fff197f4b30f40133b95d7096be398c2df6b526c5d8cd3
+      - path: tokenizer_config.json
+        sha256: f9d18c81f4dd9dd7db02e9f27cc1203228147d890bfce9167c3af6465ff5b769
+    licence: Apache-2.0
+    gated: false
+    resolved_on: "2026-11-27"
 missing:
-  weights_pin:
-    reason: unavailable
-    note: >-
-      RaphaelMourad/Mistral-DNA-v1-138M-hg38 at revision
-      4c3c8c7b44fae10e63b5902d27c8699feeca7a56. The weights pin is written once every file
-      digest is known; until then the files are pinned as inputs below.
   hardware_floor:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: tokenizer.json
-    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/tokenizer.json
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-  - name: tokenizer_config.json
-    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/tokenizer_config.json
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-  - name: special_tokens_map.json
-    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/special_tokens_map.json
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-  - name: model.safetensors
-    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/model.safetensors
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
   - name: config.json
     url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/config.json
     sha256: 651be00955c11f3b25779a20afd041eb7560a314a1b6afd74bf2684113e4c62d
+    bytes: 793
+  - name: tokenizer.json
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/tokenizer.json
+    sha256: 5d178e8ce2ba55df97fff197f4b30f40133b95d7096be398c2df6b526c5d8cd3
+    bytes: 167908
+  - name: tokenizer_config.json
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/tokenizer_config.json
+    sha256: f9d18c81f4dd9dd7db02e9f27cc1203228147d890bfce9167c3af6465ff5b769
+    bytes: 158
+  - name: model.safetensors
+    url: https://huggingface.co/RaphaelMourad/Mistral-DNA-v1-138M-hg38/resolve/4c3c8c7b44fae10e63b5902d27c8699feeca7a56/model.safetensors
+    sha256: 73768b6de5f3ff03fd576b6d915d746ef56aa3a2c14d0ca08f8f47d75939b945
+    bytes: 276979168
   - name: snv_data_clean.txt
     url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
     sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
@@ -104,17 +115,9 @@ estimate:
 backends:
   local: {}
 limitations:
-  - No SHA-256 is pinned yet for model.safetensors, special_tokens_map.json, tokenizer.json,
-    tokenizer_config.json. Their inputs carry the all-zero digest, so a run stops at the input
-    check before any command. Fill in the digests from the file listing of
-    RaphaelMourad/Mistral-DNA-v1-138M-hg38 at revision 4c3c8c7b, here and in mistral_dna.py,
-    together.
-  - No file listing was saved for this revision, so the checkpoint file names are the usual
-    transformers layout, not confirmed. Check them against the listing when filling in the
-    digests.
   - Not yet run, so no wall time, memory or metric is recorded.
-  - The limit takes rows in source order without looking at outcomes; it was set without
-    running prepare, so a run may stop if the first 1,000 training rows hold one outcome
-    class.
+  - prepare takes the first 1,000 rows of each split in source order and has no seeded or
+    stratified sample option. The limit was set without running prepare, so a run stops at the
+    probe if those training rows hold one outcome class.
   - The local backend runs in the host Python environment, which needs
     rewirebench[mistral-dna].

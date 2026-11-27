@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from rewirebench import sdk
+from rewirebench import models, sdk
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
@@ -58,13 +58,36 @@ def test_skill_frontmatter_and_length(name: str):
     assert len(text.splitlines()) <= 200
 
 
-def test_plugin_recipes_are_byte_identical_copies():
+# The rewirebench release the plugin's server installs, and the models registered here
+# that it does not have. Raising the pin means emptying this set and copying the recipes.
+PINNED_REWIREBENCH = "rewirebench[mcp]==0.6.2"
+NOT_IN_PINNED_RELEASE = {"mistral-dna-138m-frozen", "dnabert-s-frozen", "plantrna-fm-embeddings",
+                         "protbert-embeddings", "esm1b-masked-marginal", "protgpt2-log-likelihood"}
+
+
+def recipe_models(text: bytes) -> set[str]:
+    """The models a recipe's run steps name."""
+    found = set()
+    for command in yaml.safe_load(text)["commands"]:
+        argv = command["argv"]
+        if argv[1] == "run" and "--model" in argv:
+            found.add(argv[argv.index("--model") + 1])
+    return found
+
+
+def test_plugin_recipes_are_the_ones_its_pinned_release_can_run():
     """The plugin's rewirebench server reads the plugin's own recipes/, so an installed
-    plugin needs no checkout. They must be the recipes that CI validates and runs."""
+    plugin needs no checkout. It ships every recipe in recipes/ whose models its pinned
+    release has, byte for byte, and only those."""
+    args = json.loads((PLUGIN / ".mcp.json").read_text())["mcpServers"]["rewirebench"]["args"]
+    assert PINNED_REWIREBENCH in args, "The pin moved: update NOT_IN_PINNED_RELEASE"
     source, copy = files(ROOT / "recipes"), files(PLUGIN / "recipes")
-    assert sorted(source) == sorted(copy), "Copy recipes/ into the plugin"
-    changed = [str(path) for path in source if source[path] != copy[path]]
+    held_back = {path for path, text in source.items()
+                 if path.suffix == ".yaml" and recipe_models(text) & NOT_IN_PINNED_RELEASE}
+    assert sorted(set(source) - held_back) == sorted(copy), "Copy recipes/ into the plugin"
+    changed = [str(path) for path in copy if source[path] != copy[path]]
     assert not changed, f"Plugin recipes differ from recipes/: {changed}"
+    assert NOT_IN_PINNED_RELEASE <= set(models.REGISTRY)
 
 
 def test_plugin_holds_every_repository_input_its_recipes_name():

@@ -25,32 +25,49 @@ environment:
       missing:
         reason: unavailable
         note: No published image carries the protbert extra yet.
+weights_pin:
+  - host: huggingface
+    repository: Rostlab/prot_bert
+    revision: 7a894481acdc12202f0a415dd567f6cfdb698908
+    files:
+      - path: config.json
+        sha256: 44c1e1229d520841e5b29f1dd2292595219061daf0c5f5dacb4f68d1272d69a3
+      - path: pytorch_model.bin
+        sha256: 6ea3edd26cfefc3111176100ee2a027ed510f9c86b63e5b53a2a050b59f2af9d
+      - path: vocab.txt
+        sha256: 7ea18f4fe3a796c1146f9830d50334a251f368db96bdd0606e78846ca3a30607
+      - path: tokenizer_config.json
+        sha256: 73f5e97ab29042bac49dc96f7b8a7a790994509bbd2fe3e9cd4f59affc46c2ce
+      - path: special_tokens_map.json
+        sha256: 303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3
+    licence: AFL-3.0
+    gated: false
+    resolved_on: "2026-11-27"
 missing:
-  weights_pin:
-    reason: unavailable
-    note: >-
-      Rostlab/prot_bert at revision 7a894481acdc12202f0a415dd567f6cfdb698908. The weights pin
-      is written once every file digest is known; until then the files are pinned as inputs
-      below.
   hardware_floor:
     reason: unavailable
     note: Not measured. The recipe has not been run; the local backend runs it on CPU.
 inputs:
-  - name: vocab.txt
-    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/vocab.txt
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-  - name: tokenizer_config.json
-    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/tokenizer_config.json
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-  - name: special_tokens_map.json
-    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/special_tokens_map.json
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-  - name: pytorch_model.bin
-    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/pytorch_model.bin
-    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
   - name: config.json
     url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/config.json
     sha256: 44c1e1229d520841e5b29f1dd2292595219061daf0c5f5dacb4f68d1272d69a3
+    bytes: 361
+  - name: vocab.txt
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/vocab.txt
+    sha256: 7ea18f4fe3a796c1146f9830d50334a251f368db96bdd0606e78846ca3a30607
+    bytes: 81
+  - name: tokenizer_config.json
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/tokenizer_config.json
+    sha256: 73f5e97ab29042bac49dc96f7b8a7a790994509bbd2fe3e9cd4f59affc46c2ce
+    bytes: 86
+  - name: special_tokens_map.json
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/special_tokens_map.json
+    sha256: 303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3
+    bytes: 112
+  - name: pytorch_model.bin
+    url: https://huggingface.co/Rostlab/prot_bert/resolve/7a894481acdc12202f0a415dd567f6cfdb698908/pytorch_model.bin
+    sha256: 6ea3edd26cfefc3111176100ee2a027ed510f9c86b63e5b53a2a050b59f2af9d
+    bytes: 1684058277
   - name: smoke.csv
     repo_path: workflows/benchmark/examples/smoke.csv
     sha256: f260bd83895cf43f417f4b3e5a105b052e56a0164f5616238271bac4ad7dc2d3
@@ -97,13 +114,6 @@ estimate:
 backends:
   local: {}
 limitations:
-  - No SHA-256 is pinned yet for pytorch_model.bin, special_tokens_map.json,
-    tokenizer_config.json, vocab.txt. Their inputs carry the all-zero digest, so a run stops
-    at the input check before any command. Fill in the digests from the file listing of
-    Rostlab/prot_bert at revision 7a894481, here and in protbert.py, together.
-  - No file listing was saved for this revision, so the checkpoint file names are the usual
-    transformers layout, not confirmed. Check them against the listing when filling in the
-    digests.
   - Not yet run, so no wall time, memory or metric is recorded.
   - Synthetic rows with allow_unverified, so the result says nothing about any model.
   - ProtBert is depth tier 2 in the data repository.

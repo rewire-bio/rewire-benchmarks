@@ -127,6 +127,22 @@ def make_plan(**fields: Any) -> Plan:
     return Plan.model_validate(data)
 
 
+PENDING_SHA256 = "0" * 64
+
+
+def pending_inputs(recipe: Recipe) -> list[str]:
+    """Inputs whose digest is the all-zero placeholder: not pinned yet, so no run passes."""
+    return [item.name for item in recipe.inputs if item.sha256 == PENDING_SHA256]
+
+
+def pending_reason(recipe: Recipe) -> str | None:
+    pending = pending_inputs(recipe)
+    if not pending:
+        return None
+    return (f"Recipe {recipe.id} has no SHA-256 pinned yet for {', '.join(pending)}: the "
+            "all-zero digest marks it pending, so a run would stop at the input check.")
+
+
 def owned_hardware_quote() -> Quote:
     return Quote(paid=False, reason=OWNED_HARDWARE)
 

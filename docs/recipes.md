@@ -36,7 +36,9 @@ reports every other file under `invalid`, with exit code 1.
 
 - Every input has a SHA-256, and a size in `bytes` if you state one. It comes from an `https`
   URL with no user name or password, or from a `repo_path` in this repository. A run stops
-  before any command if an input does not match.
+  before any command if an input does not match. The all-zero digest marks an input whose
+  digest is not known yet: `recipe plan` reports such a recipe as not runnable and names the
+  input.
 - `commands` are argv lists. The first element is `rewirebench` and the second is one of
   `prepare`, `evaluate`, `run-baselines`, `prepare-baseline-artifact` or `run`. Nothing else is
   accepted: no shell, no other program, and none of the commands that send data (`submit`,

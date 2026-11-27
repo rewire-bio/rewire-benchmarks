@@ -15,17 +15,16 @@ Differences from the card, each deliberate:
 - The card's checkpoint is stored in bfloat16; it is loaded in float32, which is what
   ``from_pretrained`` does by default in the card's snippet too.
 
-``config.json`` is pinned from the saved copy, whose SHA-256 the data repository
-records. The other file names are the usual layout of a transformers checkpoint with
-safetensors weights; no file listing was saved, so names and digests are both PENDING
-until someone reads the listing at the pinned revision.
+Pins: the file names and the weights digest come from the Hugging Face file listing
+at the pinned revision, saved as ``resources/models/hf-trees/mistral-dna.json``. The other
+digests are of the small files fetched once at that revision; see ``pinned``.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from rewirebench.adapters.pinned import PENDING, Checkpoint, FrozenEncoder, offline_frameworks
+from rewirebench.adapters.pinned import Checkpoint, FrozenEncoder, offline_frameworks
 
 TRANSFORMERS_VERSION = "4.41.1"
 CHECKPOINT = Checkpoint(
@@ -34,10 +33,9 @@ CHECKPOINT = Checkpoint(
     record="lit-genomics-20261011-guanine-model-mistral-dna",
     files={
         "config.json": "651be00955c11f3b25779a20afd041eb7560a314a1b6afd74bf2684113e4c62d",
-        "model.safetensors": PENDING,
-        "tokenizer.json": PENDING,
-        "tokenizer_config.json": PENDING,
-        "special_tokens_map.json": PENDING,
+        "model.safetensors": "73768b6de5f3ff03fd576b6d915d746ef56aa3a2c14d0ca08f8f47d75939b945",
+        "tokenizer.json": "5d178e8ce2ba55df97fff197f4b30f40133b95d7096be398c2df6b526c5d8cd3",
+        "tokenizer_config.json": "f9d18c81f4dd9dd7db02e9f27cc1203228147d890bfce9167c3af6465ff5b769",
     },
 )
 

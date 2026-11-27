@@ -11,11 +11,12 @@ log-probability of every token after the first, because a substitution can chang
 number of tokens, and scores a variant as log P(mutant) minus log P(wild type).
 
 Weights licence: the repository's LICENSE file says MIT and its card metadata says
-apache-2.0; both are open. The file names come from the saved listing
-(``artifacts/protgpt2/hf-tree.json``); the weights digest is its ``lfs.oid`` and
-``config.json`` is the saved copy, whose git object ID matches the listing. The
-tokenizer files have only git SHA-1 object IDs in the listing, so they are PENDING.
-The weights are ``pytorch_model.bin``, a pickle, unpickled after the digest check.
+apache-2.0; both are open. The weights are ``pytorch_model.bin``, a pickle, unpickled
+after the digest check.
+
+Pins: the file names and the weights digest come from the Hugging Face file listing
+at the pinned revision, saved as ``resources/models/hf-trees/protgpt2.json``. The other
+digests are of the small files fetched once at that revision; see ``pinned``.
 """
 
 from __future__ import annotations
@@ -26,7 +27,6 @@ import numpy as np
 
 from rewirebench.adapters.esm1b import check_record
 from rewirebench.adapters.pinned import (
-    PENDING,
     Checkpoint,
     as_array,
     log_softmax,
@@ -45,10 +45,10 @@ CHECKPOINT = Checkpoint(
     files={
         "config.json": "b1eb50b2e360c8c9e433f234eeec53e809c99df254271ace5454b89244818195",
         "pytorch_model.bin": "95ee34898a635ad046aa3c53a08f50ca169ff67443db50c0ba328320d8ed1f04",
-        "tokenizer.json": PENDING,
-        "vocab.json": PENDING,
-        "merges.txt": PENDING,
-        "special_tokens_map.json": PENDING,
+        "tokenizer.json": "3e550dd50b13bc05ebbb681b8caa6d3fd9f04879e1f9c5bf3087c3f8517fad3e",
+        "vocab.json": "e89bc0dccbaf4ffbf62771d04e72aa7217c2d7c16bc8e5a8c520597880de3c20",
+        "merges.txt": "b8d3b38f3e97efa2483bedf198cdb757b988ed17fb080f3cba94869f189eddf6",
+        "special_tokens_map.json": "a00e1f660c842693e7f667898759c24eb538c2dbb09b91c22dbde1b45d4cdee8",
     },
 )
 

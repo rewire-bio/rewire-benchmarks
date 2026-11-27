@@ -11,6 +11,7 @@ import hashlib
 import importlib
 import json
 import tomllib
+from importlib.resources import files
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -136,14 +137,31 @@ def test_a_pin_needs_a_commit_and_hex_digests():
 
 @pytest.mark.parametrize(("model_id", "adapter", "extra", "recipe"), ADAPTERS, ids=IDS)
 def test_each_adapter_refuses_to_load_while_a_digest_is_pending(
-    model_id: str, adapter: type, extra: str, recipe: str, tmp_path: Path
+    model_id: str, adapter: type, extra: str, recipe: str,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
-    if not adapter.CHECKPOINT.pending:
-        pytest.skip("every digest is pinned")
-    with pytest.raises(ValueError, match="no SHA-256 is pinned yet"):
+    files = dict(adapter.CHECKPOINT.files, **{"config.json": pinned.PENDING})
+    monkeypatch.setattr(adapter, "CHECKPOINT", checkpoint(files))
+    with pytest.raises(ValueError, match="no SHA-256 is pinned yet for config.json"):
         adapter(str(tmp_path))
     with pytest.raises(ValueError, match="no SHA-256 is pinned yet"):
         models.load(models.get_model(model_id), {"checkpoint": str(tmp_path)})
+
+
+@pytest.mark.parametrize(("model_id", "adapter", "extra", "recipe"), ADAPTERS, ids=IDS)
+def test_each_pin_matches_the_saved_file_listing(
+    model_id: str, adapter: type, extra: str, recipe: str
+):
+    """Names come from the listing at the pinned revision, and an LFS file's digest is the
+    listing's lfs.oid. A small file has no SHA-256 in the listing, so only its name is
+    checked here; its digest was computed from the file fetched at that revision."""
+    tree = files("rewirebench").joinpath(f"resources/models/hf-trees/{extra}.json")
+    listing = {item["path"]: item for item in json.loads(tree.read_text())}
+    for name, digest in adapter.CHECKPOINT.files.items():
+        assert name in listing, (model_id, name)
+        lfs = listing[name].get("lfs")
+        if lfs:
+            assert digest == lfs["oid"], (model_id, name)
 
 
 @pytest.mark.parametrize(("model_id", "adapter", "extra", "recipe"), ADAPTERS, ids=IDS)
@@ -454,6 +472,11 @@ def test_each_recipe_validates_and_pins_the_files_its_adapter_checks(
     assert all(name in limitations for name in pinned_files.pending)
     if pinned_files.pending:
         assert "weights_pin" in loaded.missing and loaded.weights_pin is None
+    else:
+        (pin,) = loaded.weights_pin
+        assert (pin.host, pin.repository, pin.revision) == (
+            "huggingface", pinned_files.repository, pinned_files.revision)
+        assert {item.path: item.sha256 for item in pin.files} == dict(pinned_files.files)
 
 
 def test_the_recipe_zero_digest_is_quoted_text():

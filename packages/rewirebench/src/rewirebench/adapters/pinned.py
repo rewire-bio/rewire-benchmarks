@@ -5,6 +5,13 @@ adapter loads is listed with its SHA-256 and checked before any framework is imp
 A file whose digest is not known yet is listed as ``PENDING``, and the adapter refuses
 to load until it is filled in. Loading never reaches the network: the Hugging Face
 offline switches are set and every ``from_pretrained`` call is ``local_files_only``.
+
+Where the digests come from: the repository's file listing at the pinned revision
+(``/api/models/<repo>/tree/<revision>?recursive=1``) is saved under
+``resources/models/hf-trees``. A weights file is stored with Git LFS, and its ``lfs.oid``
+is its SHA-256. A small file has only a git SHA-1 object ID in the listing, so it was
+fetched once at the revision, its git object ID checked against the listing, and hashed.
+Nothing was loaded or run, and no weights were downloaded.
 """
 
 from __future__ import annotations

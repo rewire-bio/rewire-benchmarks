@@ -13,17 +13,19 @@ ESM example does for the ESM architecture this checkpoint uses. The README's exa
 written in U, so T is rewritten as U before tokenisation.
 
 The README lists ``omnigenome`` in its requirements, but its loading snippet does not
-import it, so the extra leaves it out. ``config.json`` is pinned from the saved copy.
-No file listing was saved: the other file names are the usual layout of a transformers
-checkpoint with safetensors weights and an ESM-style vocabulary, and their names and
-digests are PENDING until someone reads the listing at the pinned revision.
+import it, so the extra leaves it out. The pinned ``tokenizer_config.json`` names
+``EsmTokenizer``, which transformers ships, so no remote code is needed for it either.
+
+Pins: the file names and the weights digest come from the Hugging Face file listing
+at the pinned revision, saved as ``resources/models/hf-trees/plantrna-fm.json``. The other
+digests are of the small files fetched once at that revision; see ``pinned``.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from rewirebench.adapters.pinned import PENDING, Checkpoint, FrozenEncoder, offline_frameworks
+from rewirebench.adapters.pinned import Checkpoint, FrozenEncoder, offline_frameworks
 
 TRANSFORMERS_VERSION = "4.41.1"
 CHECKPOINT = Checkpoint(
@@ -32,10 +34,10 @@ CHECKPOINT = Checkpoint(
     record="lit-rna-20261011-rnalm-zeroshot-model-plantrna-fm",
     files={
         "config.json": "b520579b517e6b5c9c3ed993086a06c0d5af452a98c4bf8d8633eae4a93b3166",
-        "model.safetensors": PENDING,
-        "vocab.txt": PENDING,
-        "tokenizer_config.json": PENDING,
-        "special_tokens_map.json": PENDING,
+        "model.safetensors": "01f66172a243d589945b0b270cde3c5567c09d4ba537fcd710c8295e0d60d8c4",
+        "vocab.txt": "5c6fecdc35423dc779aa46529b81d5981b4eb77676a57eda961deba46a0f05df",
+        "tokenizer_config.json": "2f96b43c7f15f31aaa8ae3fab569590c6c6909dee9ed80b57b790f22c24042a4",
+        "special_tokens_map.json": "01e416f1aa5cb48b1d2c763ed8f2ef6e1344a5fc351657c1e8f2c73db82443d9",
     },
 )
 

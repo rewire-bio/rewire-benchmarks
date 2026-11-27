@@ -11,10 +11,12 @@ first output, special tokens included.
 The model cannot load without remote code: the pinned ``config.json`` maps ``AutoModel``
 to ``bert_layers.BertModel``, a file in the checkpoint. Its four Python files are pinned
 here like the weights, so the code transformers imports is checked before it runs.
-Their SHA-256 values are PENDING: the saved file listing
-(``artifacts/dnabert-s/hf-tree.json`` at revision 00e47f96) gives git SHA-1 object IDs
-for them, not SHA-256. The weights digest is the listing's ``lfs.oid``, and
-``config.json`` is the saved copy, whose git object ID matches the listing.
+Pins: the file names and the weights digest come from the Hugging Face file listing
+at the pinned revision, saved as ``resources/models/hf-trees/dnabert-s.json``. The other
+digests are of the small files fetched once at that revision; see ``pinned``.
+
+The transformers pin is the one in ``requirements.txt`` at commit ac01b55e
+(``transformers==4.27``; SHA-256 af018b27, as the data repository records).
 
 The weights are ``pytorch_model.bin``, a pickle: transformers 4.27 unpickles it after
 the digest check, as the ESM adapters do with their checkpoints.
@@ -24,7 +26,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from rewirebench.adapters.pinned import PENDING, Checkpoint, FrozenEncoder, offline_frameworks
+from rewirebench.adapters.pinned import Checkpoint, FrozenEncoder, offline_frameworks
 
 TRANSFORMERS_VERSION = "4.27.0"
 CHECKPOINT = Checkpoint(
@@ -35,13 +37,13 @@ CHECKPOINT = Checkpoint(
     files={
         "config.json": "d54c142114563aa34ef7c2b54ccc921d08e50cd7c3cd69c439d5e0d2bbcfcdee",
         "pytorch_model.bin": "f3cfc3d0541859df64759e758cc4bc40fe1d5760799a7d098a9f9f09501c1e5f",
-        "tokenizer.json": PENDING,
-        "tokenizer_config.json": PENDING,
-        "special_tokens_map.json": PENDING,
-        "bert_layers.py": PENDING,
-        "bert_padding.py": PENDING,
-        "configuration_bert.py": PENDING,
-        "flash_attn_triton.py": PENDING,
+        "tokenizer.json": "667f5a0e6e9630f7052b004784dda7c7aeba395cc4ca3c01b11b02e6aa29d7b1",
+        "tokenizer_config.json": "f13dbe9968de35aff25b06965f18e30449ec37ed94811bd0c7f97990f3b18ebb",
+        "special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+        "bert_layers.py": "cd2fe0efbb90db624fe4e25aa96bd049513e81740ba3f980163c385e894df561",
+        "bert_padding.py": "44d1c68afb1f585fdc66c150d4c60f1ed44a89c006abc57d50531d71940d7421",
+        "configuration_bert.py": "d030166bd279ca81e9d2304eaff9419171f2f8c69ab419e7cd37873b72f47a22",
+        "flash_attn_triton.py": "568d1ac3beca0b5e1df528a1f136aa19b6489a616fcf3784f33336a50bb1de81",
     },
 )
 
