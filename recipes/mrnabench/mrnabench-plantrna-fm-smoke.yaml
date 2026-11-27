@@ -1,0 +1,123 @@
+schema_version: "1.0"
+id: mrnabench-plantrna-fm-smoke
+title: mRNABench designed MRL check with PlantRNA-FM embeddings on CPU
+summary: >-
+  Prepares 50 training, 50 validation and 50 held-out sequences of the pinned mRNABench Sample
+  designed MRL dataset, embeds them with the pinned PlantRNA-FM checkpoint and fits the
+  protocol's ridge probe. It checks that the adapter runs end to end; it is not a full result.
+kind: model_run
+purpose: obtain_and_run
+scope: selected_assay
+rewirebench_protocol: mrnabench-sample-mrl-v1
+licence:
+  code: MIT
+  weights: MIT (model card, README and Hugging Face API response); not gated.
+  data: Reuse terms are unreported upstream (morrislab/mrl-sample). The parquet file is fetched, not redistributed.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the plantrna-fm extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the plantrna-fm extra yet.
+weights_pin:
+  - host: huggingface
+    repository: yangheng/PlantRNA-FM
+    revision: 5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5
+    files:
+      - path: config.json
+        sha256: b520579b517e6b5c9c3ed993086a06c0d5af452a98c4bf8d8633eae4a93b3166
+      - path: model.safetensors
+        sha256: 01f66172a243d589945b0b270cde3c5567c09d4ba537fcd710c8295e0d60d8c4
+      - path: vocab.txt
+        sha256: 5c6fecdc35423dc779aa46529b81d5981b4eb77676a57eda961deba46a0f05df
+      - path: tokenizer_config.json
+        sha256: 2f96b43c7f15f31aaa8ae3fab569590c6c6909dee9ed80b57b790f22c24042a4
+      - path: special_tokens_map.json
+        sha256: 01e416f1aa5cb48b1d2c763ed8f2ef6e1344a5fc351657c1e8f2c73db82443d9
+    licence: MIT
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/config.json
+    sha256: b520579b517e6b5c9c3ed993086a06c0d5af452a98c4bf8d8633eae4a93b3166
+    bytes: 799
+  - name: vocab.txt
+    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/vocab.txt
+    sha256: 5c6fecdc35423dc779aa46529b81d5981b4eb77676a57eda961deba46a0f05df
+    bytes: 91
+  - name: tokenizer_config.json
+    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/tokenizer_config.json
+    sha256: 2f96b43c7f15f31aaa8ae3fab569590c6c6909dee9ed80b57b790f22c24042a4
+    bytes: 1178
+  - name: special_tokens_map.json
+    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/special_tokens_map.json
+    sha256: 01e416f1aa5cb48b1d2c763ed8f2ef6e1344a5fc351657c1e8f2c73db82443d9
+    bytes: 732
+  - name: model.safetensors
+    url: https://huggingface.co/yangheng/PlantRNA-FM/resolve/5e7baf4e9d884f7a3ff7385b6a90dd2f63c7b1e5/model.safetensors
+    sha256: 01f66172a243d589945b0b270cde3c5567c09d4ba537fcd710c8295e0d60d8c4
+    bytes: 135983172
+  - name: mrl-sample-designed.parquet
+    url: https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet
+    sha256: 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4
+    bytes: 9778091
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - mrnabench-sample-mrl-v1
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"dataset": "designed", "target": "target_mrl_designed", "require_official": true, "limit": 50}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - plantrna-fm-embeddings
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    The first 50 held-out sequences of the canonical split are scored. The probe's metrics are
+    not checked until a run has been reviewed.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 50
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - PlantRNA-FM was pretrained on plant transcriptomes; the designed MRL sequences are
+    synthetic 5' UTRs measured in human cells.
+  - The local backend runs in the host Python environment, which needs
+    rewirebench[plantrna-fm,sequence].

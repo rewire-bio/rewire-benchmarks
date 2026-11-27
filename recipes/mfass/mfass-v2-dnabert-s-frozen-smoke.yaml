@@ -1,0 +1,154 @@
+schema_version: "1.0"
+id: mfass-v2-dnabert-s-frozen-smoke
+title: MFASS v2 frozen-encoder check with DNABERT-S on CPU
+summary: >-
+  Prepares the first 1,000 training and 1,000 held-out MFASS v2 variants from the two
+  published tables, embeds each reference and mutant window with the pinned DNABERT-S
+  checkpoint and fits the protocol's logistic probe. It checks that the adapter runs end to
+  end; it is not a full result.
+kind: model_run
+purpose: obtain_and_run
+scope: selected_assay
+rewirebench_protocol: mfass-v2-frozen-encoder
+licence:
+  code: MIT
+  weights: Apache-2.0 (model card metadata and Hugging Face API response); not gated. No licence is stated for the code repository.
+  data: Reuse terms are unreported upstream (KosuriLab/MFASS). The data is fetched, not redistributed.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the dnabert-s extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the dnabert-s extra yet.
+weights_pin:
+  - host: huggingface
+    repository: zhihan1996/DNABERT-S
+    revision: 00e47f96cdea35e4b6f5df89e5419cbe47d490c6
+    files:
+      - path: config.json
+        sha256: d54c142114563aa34ef7c2b54ccc921d08e50cd7c3cd69c439d5e0d2bbcfcdee
+      - path: pytorch_model.bin
+        sha256: f3cfc3d0541859df64759e758cc4bc40fe1d5760799a7d098a9f9f09501c1e5f
+      - path: tokenizer.json
+        sha256: 667f5a0e6e9630f7052b004784dda7c7aeba395cc4ca3c01b11b02e6aa29d7b1
+      - path: tokenizer_config.json
+        sha256: f13dbe9968de35aff25b06965f18e30449ec37ed94811bd0c7f97990f3b18ebb
+      - path: special_tokens_map.json
+        sha256: b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3
+      - path: bert_layers.py
+        sha256: cd2fe0efbb90db624fe4e25aa96bd049513e81740ba3f980163c385e894df561
+      - path: bert_padding.py
+        sha256: 44d1c68afb1f585fdc66c150d4c60f1ed44a89c006abc57d50531d71940d7421
+      - path: configuration_bert.py
+        sha256: d030166bd279ca81e9d2304eaff9419171f2f8c69ab419e7cd37873b72f47a22
+      - path: flash_attn_triton.py
+        sha256: 568d1ac3beca0b5e1df528a1f136aa19b6489a616fcf3784f33336a50bb1de81
+    licence: Apache-2.0
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/config.json
+    sha256: d54c142114563aa34ef7c2b54ccc921d08e50cd7c3cd69c439d5e0d2bbcfcdee
+    bytes: 1025
+  - name: tokenizer.json
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/tokenizer.json
+    sha256: 667f5a0e6e9630f7052b004784dda7c7aeba395cc4ca3c01b11b02e6aa29d7b1
+    bytes: 168203
+  - name: tokenizer_config.json
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/tokenizer_config.json
+    sha256: f13dbe9968de35aff25b06965f18e30449ec37ed94811bd0c7f97990f3b18ebb
+    bytes: 268
+  - name: special_tokens_map.json
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/special_tokens_map.json
+    sha256: b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3
+    bytes: 125
+  - name: bert_layers.py
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/bert_layers.py
+    sha256: cd2fe0efbb90db624fe4e25aa96bd049513e81740ba3f980163c385e894df561
+    bytes: 40807
+  - name: bert_padding.py
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/bert_padding.py
+    sha256: 44d1c68afb1f585fdc66c150d4c60f1ed44a89c006abc57d50531d71940d7421
+    bytes: 6099
+  - name: configuration_bert.py
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/configuration_bert.py
+    sha256: d030166bd279ca81e9d2304eaff9419171f2f8c69ab419e7cd37873b72f47a22
+    bytes: 1017
+  - name: flash_attn_triton.py
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/flash_attn_triton.py
+    sha256: 568d1ac3beca0b5e1df528a1f136aa19b6489a616fcf3784f33336a50bb1de81
+    bytes: 42737
+  - name: pytorch_model.bin
+    url: https://huggingface.co/zhihan1996/DNABERT-S/resolve/00e47f96cdea35e4b6f5df89e5419cbe47d490c6/pytorch_model.bin
+    sha256: f3cfc3d0541859df64759e758cc4bc40fe1d5760799a7d098a9f9f09501c1e5f
+    bytes: 468320053
+  - name: snv_data_clean.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_data_clean.txt
+    sha256: a637ca0e307e66ff48811ec7efa22b9ce453bc7883b04f0cacb867f7283132d8
+    bytes: 41445250
+  - name: snv_func_annot.txt
+    url: https://raw.githubusercontent.com/KosuriLab/MFASS/9a8e4f27106be52aeb11acad27f95f5cded663a8/processed_data/snv/snv_func_annot.txt
+    sha256: 71a857fe647c4e68acbb41ca61e959c47e1176de89b1442bd6ca1772aa60d5a1
+    bytes: 38514140
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - mfass-v2-frozen-encoder
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"limit": 1000}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - dnabert-s-frozen
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    The first 1,000 held-out variants in source order are scored. The probe's metrics depend
+    on the model and are not checked until a run has been reviewed.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 1000
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - prepare takes the first 1,000 rows of each split in source order and has no seeded or
+    stratified sample option. The limit was set without running prepare, so a run stops at the
+    probe if those training rows hold one outcome class.
+  - The checkpoint's own model code runs (trust_remote_code); its four Python files are pinned
+    by SHA-256 like the weights.
+  - The local backend runs in the host Python environment, which needs rewirebench[dnabert-s].

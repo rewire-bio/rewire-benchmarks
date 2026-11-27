@@ -1,0 +1,122 @@
+schema_version: "1.0"
+id: proteingym-v1-3-esm1b-synthetic-smoke
+title: ProteinGym v1.3 DMS check with ESM-1b masked marginals on CPU
+summary: >-
+  Scores the 10-row synthetic assay table keyed to A0A247D711_LISMN_Stadelmann_2021 with
+  ESM-1b masked marginals from the pinned transformers port. It checks that the adapter runs
+  end to end. It is not a biological result.
+kind: model_run
+purpose: obtain_and_run
+scope: synthetic_smoke
+rewirebench_protocol: proteingym-v1.3-dms-substitutions
+licence:
+  code: MIT
+  weights: MIT (model card metadata and Hugging Face API response); not gated.
+  data: Synthetic single-substitution table built against the packaged DMS_substitutions.csv reference sequence, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the esm1b extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the esm1b extra yet.
+weights_pin:
+  - host: huggingface
+    repository: biohub/esm1b_t33_650M_UR50S
+    revision: 7b37824baec4d3658e1df7479222a7c79b465b76
+    files:
+      - path: config.json
+        sha256: e6296f876d44faeb9f4d206386af6db5e834763b14eb9a1c2539a3fb9a43edf5
+      - path: pytorch_model.bin
+        sha256: ebb8a35768179581f91fc01b93cf78facba2821c3bab1452abb38ef2a7f6e7b1
+      - path: vocab.txt
+        sha256: 0b82cc0a7c7cf9e567b1e5892d793285b9fbae822c964ca48696f7db44598e03
+      - path: tokenizer_config.json
+        sha256: 7e9161ecdb548ec45a41cbc6b24aa4476fdd418461f491c4207baa99419a29ad
+      - path: special_tokens_map.json
+        sha256: 3aedcd4211c0d43aec4e607ff60a63255f3174ead795e997350f09a5f8cd9ee1
+    licence: MIT
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/config.json
+    sha256: e6296f876d44faeb9f4d206386af6db5e834763b14eb9a1c2539a3fb9a43edf5
+    bytes: 782
+  - name: vocab.txt
+    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/vocab.txt
+    sha256: 0b82cc0a7c7cf9e567b1e5892d793285b9fbae822c964ca48696f7db44598e03
+    bytes: 93
+  - name: tokenizer_config.json
+    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/tokenizer_config.json
+    sha256: 7e9161ecdb548ec45a41cbc6b24aa4476fdd418461f491c4207baa99419a29ad
+    bytes: 95
+  - name: special_tokens_map.json
+    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/special_tokens_map.json
+    sha256: 3aedcd4211c0d43aec4e607ff60a63255f3174ead795e997350f09a5f8cd9ee1
+    bytes: 125
+  - name: pytorch_model.bin
+    url: https://huggingface.co/biohub/esm1b_t33_650M_UR50S/resolve/7b37824baec4d3658e1df7479222a7c79b465b76/pytorch_model.bin
+    sha256: ebb8a35768179581f91fc01b93cf78facba2821c3bab1452abb38ef2a7f6e7b1
+    bytes: 2609617413
+  - name: A0A247D711_LISMN_Stadelmann_2021.csv
+    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
+    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
+    bytes: 1065
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - proteingym-v1.3-dms-substitutions
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"assay_ids": ["A0A247D711_LISMN_Stadelmann_2021"], "limit": 10}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - esm1b-masked-marginal
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    All 10 synthetic mutants of the 87-residue protein are scored.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 10
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - The weights are the transformers port biohub/esm1b_t33_650M_UR50S, not the fair-esm file
+    ProteinGym scored; their equivalence is not checked here.
+  - ESM-1b is depth tier 2 in the data repository.
+  - The local backend runs in the host Python environment, which needs rewirebench[esm1b].

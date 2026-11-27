@@ -19,7 +19,9 @@ class LocalBackend:
         kg_release_id: str | None = None,
     ) -> base.Plan:
         recipe = loaded.recipe
-        runnable = recipe.backends.local is not None
+        reason = (None if recipe.backends.local is not None
+                  else f"Recipe {recipe.id} does not name the local backend")
+        reason = reason or base.pending_reason(recipe)
         hardware, hardware_note = base.hardware_needs(recipe)
         expected, basis = base.expected_wall(recipe)
         return base.make_plan(
@@ -41,9 +43,8 @@ class LocalBackend:
                 inputs=str(inputs) if inputs is not None else None,
                 kg_release_id=kg_release_id,
             ),
-            runnable=runnable,
-            not_runnable_reason=None if runnable
-            else f"Recipe {recipe.id} does not name the local backend",
+            runnable=reason is None,
+            not_runnable_reason=reason,
             notes=["Runs in this Python environment with CUDA devices hidden.",
                    "hardware_floor is checked for host memory only."],
         )

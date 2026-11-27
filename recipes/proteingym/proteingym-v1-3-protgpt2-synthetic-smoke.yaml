@@ -1,0 +1,126 @@
+schema_version: "1.0"
+id: proteingym-v1-3-protgpt2-synthetic-smoke
+title: ProteinGym v1.3 DMS check with ProtGPT2 log-likelihood ratios on CPU
+summary: >-
+  Scores the 10-row synthetic assay table keyed to A0A247D711_LISMN_Stadelmann_2021 with the
+  ProtGPT2 log-likelihood of each mutant minus that of the wild type. It checks that the
+  adapter runs end to end. It is not a biological result.
+kind: model_run
+purpose: obtain_and_run
+scope: synthetic_smoke
+rewirebench_protocol: proteingym-v1.3-dms-substitutions
+licence:
+  code: MIT
+  weights: MIT in the repository's LICENSE file, apache-2.0 in its card metadata; not gated.
+  data: Synthetic single-substitution table built against the packaged DMS_substitutions.csv reference sequence, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the protgpt2 extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the protgpt2 extra yet.
+weights_pin:
+  - host: huggingface
+    repository: nferruz/ProtGPT2
+    revision: ff981fc96771d6f6d3b6453f94772d3cb6c7b90b
+    files:
+      - path: config.json
+        sha256: b1eb50b2e360c8c9e433f234eeec53e809c99df254271ace5454b89244818195
+      - path: pytorch_model.bin
+        sha256: 95ee34898a635ad046aa3c53a08f50ca169ff67443db50c0ba328320d8ed1f04
+      - path: tokenizer.json
+        sha256: 3e550dd50b13bc05ebbb681b8caa6d3fd9f04879e1f9c5bf3087c3f8517fad3e
+      - path: vocab.json
+        sha256: e89bc0dccbaf4ffbf62771d04e72aa7217c2d7c16bc8e5a8c520597880de3c20
+      - path: merges.txt
+        sha256: b8d3b38f3e97efa2483bedf198cdb757b988ed17fb080f3cba94869f189eddf6
+      - path: special_tokens_map.json
+        sha256: a00e1f660c842693e7f667898759c24eb538c2dbb09b91c22dbde1b45d4cdee8
+    licence: MIT (LICENSE file); apache-2.0 (card metadata)
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/config.json
+    sha256: b1eb50b2e360c8c9e433f234eeec53e809c99df254271ace5454b89244818195
+    bytes: 850
+  - name: tokenizer.json
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/tokenizer.json
+    sha256: 3e550dd50b13bc05ebbb681b8caa6d3fd9f04879e1f9c5bf3087c3f8517fad3e
+    bytes: 1069833
+  - name: vocab.json
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/vocab.json
+    sha256: e89bc0dccbaf4ffbf62771d04e72aa7217c2d7c16bc8e5a8c520597880de3c20
+    bytes: 655440
+  - name: merges.txt
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/merges.txt
+    sha256: b8d3b38f3e97efa2483bedf198cdb757b988ed17fb080f3cba94869f189eddf6
+    bytes: 313855
+  - name: special_tokens_map.json
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/special_tokens_map.json
+    sha256: a00e1f660c842693e7f667898759c24eb538c2dbb09b91c22dbde1b45d4cdee8
+    bytes: 357
+  - name: pytorch_model.bin
+    url: https://huggingface.co/nferruz/ProtGPT2/resolve/ff981fc96771d6f6d3b6453f94772d3cb6c7b90b/pytorch_model.bin
+    sha256: 95ee34898a635ad046aa3c53a08f50ca169ff67443db50c0ba328320d8ed1f04
+    bytes: 3134053001
+  - name: A0A247D711_LISMN_Stadelmann_2021.csv
+    repo_path: workflows/benchmark/examples/proteingym/A0A247D711_LISMN_Stadelmann_2021.csv
+    sha256: adf27835bf9c3bf5145dbbf8a0b4dce1d6592586e496c0864131776a2918df49
+    bytes: 1065
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - proteingym-v1.3-dms-substitutions
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"assay_ids": ["A0A247D711_LISMN_Stadelmann_2021"], "limit": 10}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - protgpt2-log-likelihood
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    All 10 synthetic mutants of the 87-residue protein are scored.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 10
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - ProtGPT2 is depth tier 2 in the data repository.
+  - The local backend runs in the host Python environment, which needs rewirebench[protgpt2].
