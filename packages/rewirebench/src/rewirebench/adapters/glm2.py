@@ -7,8 +7,9 @@ embeddings for a contig", taken from the model card (spec
 name, at a pinned revision, because it fits the CPU runner. gLM2 reads a contig as
 strand-prefixed elements, amino acids in upper case. A FLIP2 protein is one coding
 element, so it is passed as ``<+>`` followed by the residues. Loading follows the card:
-``AutoTokenizer`` and ``AutoModel`` with ``trust_remote_code``, then
-``last_hidden_state``. The card gives no pooling: the adapter takes the mean over residue
+``AutoTokenizer`` and ``AutoModel`` with ``trust_remote_code``, and only ``input_ids``
+passed to the model, then ``last_hidden_state``. The tokenizer also returns
+``token_type_ids``, which ``gLM2Model.forward`` does not accept. The card gives no pooling: the adapter takes the mean over residue
 tokens and leaves out the strand token. The card loads bfloat16 on a GPU; this adapter
 uses float32 on the CPU.
 
@@ -55,6 +56,7 @@ class GLM2(FrozenEncoder):
     POOLING = "mean"
     MAX_TOKENS = 4096
     EXCLUDE_SPECIAL_TOKENS = True
+    IDS_ONLY = True
     ALPHABET = frozenset("ACDEFGHIKLMNPQRSTVWYXBZUO")
 
     def __init__(self, checkpoint: str, *, device: str = "cpu"):

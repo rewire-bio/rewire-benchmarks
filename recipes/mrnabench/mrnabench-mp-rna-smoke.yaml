@@ -134,4 +134,4 @@ limitations:
   - The checkpoint's own model code runs (trust_remote_code); its two Python files are pinned
     by SHA-256 like the weights.
   - The local backend runs in the host Python environment, which needs
-    rewirebench[transformers-4-41,sequence].
+    rewirebench[transformers-4-41,viennarna,sequence].

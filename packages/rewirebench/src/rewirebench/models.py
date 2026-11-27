@@ -299,7 +299,7 @@ _MODELS: tuple[ModelSpec, ...] = (
     ModelSpec(
         id="mp-rna-embeddings", title="MP-RNA mean-pooled embeddings",
         adapter="rewirebench.adapters.mp_rna:MPRNA",
-        interfaces=("embed",), pretrained=True, extra="transformers-4-41",
+        interfaces=("embed",), pretrained=True, extra="transformers-4-41,viennarna",
         protocols=("mrnabench-sample-mrl-v1",),
         options=_PINNED, required_options=("checkpoint",),
         note="T is read as U. Loads the checkpoint's own model code (trust_remote_code), "

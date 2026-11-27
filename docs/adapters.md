@@ -112,7 +112,7 @@ record's `depth_tier`. Protein models with run guides are mostly Tier 2.
 | `biofm-265m-frozen` (non-commercial) | `lit-genomics-20261011-geneb-model-biofm` | 1 | `embed` | `mfass-v2-frozen-encoder` | `transformers-5-16` | `mfass-v2-biofm-frozen-smoke` |
 | `grover-frozen` | `lit-genomics-20261011-geneb-model-grover` | 1 | `embed` | `mfass-v2-frozen-encoder` | `transformers-4-41` | `mfass-v2-grover-frozen-smoke` |
 | `hyenadna-large-1m-log-likelihood` | `regulatory-variant-20261009-model-hyenadna` | 1 | `predict` | `dart-eval-task1-zero-shot-v1` | `transformers-4-41` | `dart-eval-task1-hyenadna-synthetic-smoke` |
-| `mp-rna-embeddings` | `lit-rna-20261011-rnalm-zeroshot-model-mp-rna` | 1 | `embed` | `mrnabench-sample-mrl-v1` | `transformers-4-41` | `mrnabench-mp-rna-smoke` |
+| `mp-rna-embeddings` | `lit-rna-20261011-rnalm-zeroshot-model-mp-rna` | 1 | `embed` | `mrnabench-sample-mrl-v1` | `transformers-4-41`, `viennarna` | `mrnabench-mp-rna-smoke` |
 | `ankh-base-embeddings` (non-commercial) | `hyplm-flash-20261106-model-ankh` | 2 | `embed` | `flip2-fitness-v1` | `transformers-4-41` | `flip2-ankh-base-synthetic-smoke` |
 | `prot-t5-xl-encoder-embeddings` | `lit-protein-20261011-deepprotein-model-prot-t5-xl` | 2 | `embed` | `flip2-fitness-v1` | `transformers-4-41` | `flip2-prot-t5-synthetic-smoke` |
 | `glm2-150m-embeddings` | `bacformer-20261115-model-glm2` | 1 | `embed` | `flip2-fitness-v1` | `transformers-4-41` | `flip2-glm2-synthetic-smoke` |

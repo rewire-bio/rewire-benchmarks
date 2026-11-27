@@ -31,8 +31,8 @@ from rewirebench.adapters.pinned import (
     Checkpoint,
     as_array,
     log_softmax,
+    model_inputs,
     offline_frameworks,
-    to_device,
     unique_ids,
 )
 from rewirebench.protocols.proteingym import AMINO_ACIDS, _substitutions
@@ -117,8 +117,7 @@ class ESM1b:
             masked[0, index + 1] = self.tokenizer.mask_token_id
             encoded["input_ids"] = masked
             with self.torch.inference_mode():
-                logits = self.model(**{k: to_device(v, self.device)
-                                       for k, v in encoded.items()})[0]
+                logits = self.model(**model_inputs(self.model, encoded, self.device))[0]
             self._cache[key] = log_softmax(as_array(logits)[0, index + 1])
         return self._cache[key]
 

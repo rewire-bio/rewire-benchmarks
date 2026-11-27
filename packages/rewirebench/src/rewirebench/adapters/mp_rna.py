@@ -14,6 +14,11 @@ Difference from the card: it loads without ``trust_remote_code``, but the pinned
 the model cannot load without remote code. Its two Python files are pinned here like the
 weights. The tokenizer is ``EsmTokenizer``, which transformers ships.
 
+``modeling_omnigenome.py`` imports ``ViennaRNA`` inside its RNA design method, which the
+embedding path never calls. transformers checks every import in a remote modelling file
+before loading it, so the package must be installed all the same: the ``viennarna`` extra
+pins its wheel.
+
 Weights licence: Apache-2.0 (model card metadata).
 
 Pins: the file names and the weights digest come from the Hugging Face file listing

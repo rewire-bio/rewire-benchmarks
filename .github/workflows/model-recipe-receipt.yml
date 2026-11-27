@@ -108,7 +108,7 @@ jobs:
           - recipe: dart-eval-task1-hyenadna-synthetic-smoke
             extras: --extra transformers-4-41
           - recipe: mrnabench-mp-rna-smoke
-            extras: --extra transformers-4-41 --extra sequence
+            extras: --extra transformers-4-41 --extra viennarna --extra sequence
           - recipe: flip2-ankh-base-synthetic-smoke
             extras: --extra transformers-4-41
           - recipe: flip2-prot-t5-synthetic-smoke

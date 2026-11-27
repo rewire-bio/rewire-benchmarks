@@ -82,7 +82,7 @@ def test_each_adapter_is_registered_with_a_checkpoint_folder_and_a_device(
     spec = models.get_model(model_id)
     assert spec.adapter == f"{adapter.__module__}:{adapter.__name__}"
     project = tomllib.loads((ROOT / "packages/rewirebench/pyproject.toml").read_text())
-    assert spec.extra in project["project"]["optional-dependencies"]
+    assert set(spec.extra.split(",")) <= set(project["project"]["optional-dependencies"])
     assert spec.pretrained and spec.recipe_allowed
     assert set(spec.options or {}) == {"checkpoint", "device"}
     assert spec.required_options == ("checkpoint",)
@@ -102,7 +102,9 @@ def test_each_extra_pins_the_transformers_version_its_adapter_checks(
     model_id: str, adapter: type, listing: str, recipe: str
 ):
     project = tomllib.loads((ROOT / "packages/rewirebench/pyproject.toml").read_text())
-    requirements = project["project"]["optional-dependencies"][models.get_model(model_id).extra]
+    extras = project["project"]["optional-dependencies"]
+    requirements = [requirement for extra in models.get_model(model_id).extra.split(",")
+                    for requirement in extras[extra]]
     assert all("==" in requirement for requirement in requirements), requirements
     assert f"transformers=={module_of(adapter).TRANSFORMERS_VERSION}" in requirements
 
@@ -244,23 +246,30 @@ class FakeTokenizer:
         tokens = text.split(" ") if " " in text else list(text)
         count = len(tokens) + 2
         encoded = {"input_ids": np.arange(1, count + 1)[None, :],
-                   "attention_mask": np.ones((1, count), dtype=int)}
+                   "attention_mask": np.ones((1, count), dtype=int),
+                   "token_type_ids": np.zeros((1, count), dtype=int)}
         if return_special_tokens_mask:
             encoded["special_tokens_mask"] = np.array([[1] + [0] * len(tokens) + [1]])
         return encoded
 
 
 class FakeEncoder:
-    """Token t has state [t, -t]: the first and last tokens are the special ones."""
+    """Token t has state [t, -t]: the first and last tokens are the special ones.
+
+    Its forward takes input_ids and attention_mask only, so an adapter that passes another
+    tokenizer field (token_type_ids, say) fails here as it would on a model without it.
+    """
 
     def __init__(self) -> None:
         self.calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
 
+    def forward(self, input_ids: Any, attention_mask: Any = None) -> tuple[np.ndarray]:
+        states = np.stack([input_ids, -input_ids], axis=-1).astype(float)
+        return (states,)
+
     def __call__(self, *args: Any, **kwargs: Any) -> tuple[np.ndarray]:
         self.calls.append((args, kwargs))
-        ids = args[0] if args else kwargs["input_ids"]
-        states = np.stack([ids, -ids], axis=-1).astype(float)
-        return (states,)
+        return self.forward(*args, **kwargs)
 
 
 def fake(adapter: type) -> Any:
@@ -326,6 +335,19 @@ def test_glm2_reads_a_protein_as_one_forward_strand_coding_element():
     adapter = fake(GLM2)
     adapter.embed([{"id": "p", "sequence": "MKTA"}])
     assert adapter.tokenizer.texts == ["<+>MKTA"]
+    # As on the card, only input_ids reach gLM2Model.forward.
+    args, kwargs = adapter.model.calls[0]
+    assert len(args) == 1 and not kwargs
+
+
+def test_only_the_fields_a_forward_accepts_are_passed():
+    def strict(input_ids: Any) -> None: ...
+
+    def open_ended(input_ids: Any, **kwargs: Any) -> None: ...
+
+    encoded = {"input_ids": 1, "attention_mask": 2, "token_type_ids": 3}
+    assert pinned.model_inputs(strict, encoded, "cpu") == {"input_ids": 1}
+    assert pinned.model_inputs(open_ended, encoded, "cpu") == encoded
 
 
 class HiddenStates:
@@ -410,7 +432,8 @@ class ResidueTokenizer:
 
     def __call__(self, text: str, return_tensors: str) -> dict[str, Any]:
         ids = [0] + [self.convert_tokens_to_ids(r) for r in text] + [1]
-        return {"input_ids": np.array([ids]), "attention_mask": np.ones((1, len(ids)), int)}
+        return {"input_ids": np.array([ids]), "attention_mask": np.ones((1, len(ids)), int),
+                "token_type_ids": np.zeros((1, len(ids)), int)}
 
     def convert_tokens_to_ids(self, token: str) -> int:
         return 3 + AMINO.index(token)
