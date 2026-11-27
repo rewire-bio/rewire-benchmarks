@@ -61,8 +61,13 @@ def test_skill_frontmatter_and_length(name: str):
 # The rewirebench release the plugin's server installs, and the models registered here
 # that it does not have. Raising the pin means emptying this set and copying the recipes.
 PINNED_REWIREBENCH = "rewirebench[mcp]==0.6.2"
-NOT_IN_PINNED_RELEASE = {"mistral-dna-138m-frozen", "dnabert-s-frozen", "plantrna-fm-embeddings",
-                         "protbert-embeddings", "esm1b-masked-marginal", "protgpt2-log-likelihood"}
+NOT_IN_PINNED_RELEASE = {
+    "mistral-dna-138m-frozen", "dnabert-s-frozen", "plantrna-fm-embeddings",
+    "protbert-embeddings", "esm1b-masked-marginal", "protgpt2-log-likelihood",
+    "biofm-265m-frozen", "grover-frozen", "hyenadna-large-1m-log-likelihood",
+    "mp-rna-embeddings", "ankh-base-embeddings", "prot-t5-xl-encoder-embeddings",
+    "glm2-150m-embeddings", "esmc-600m-masked-marginal",
+}
 
 
 def recipe_models(text: bytes) -> set[str]:

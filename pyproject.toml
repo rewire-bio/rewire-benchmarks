@@ -7,19 +7,23 @@ license = "MIT"
 dependencies = ["rewirebench", "mfass"]
 
 [tool.uv]
-# Each set holds extras that pin different transformers versions.
+# Every pair of extras in one set pins different torch or transformers versions:
+# 4.29.2 (dnabert2 and the mfass pilot), 4.27.0 (dnabert-s), 5.16.0 with torch 2.5.1
+# (transformers-5-16) and 4.41.1 (the last item). esm pins torch 2.2.2 only.
 conflicts = [
-    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "mistral-dna" }],
-    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "mistral-dna" }],
-    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "plantrna-fm" }],
-    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "plantrna-fm" }],
-    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "protbert" }],
-    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "protbert" }],
-    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "esm1b" }],
-    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "esm1b" }],
-    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "protgpt2" }],
-    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "protgpt2" }],
-    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "dnabert-s" }],
+    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "mistral-dna" }],
+    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "mistral-dna" }],
+    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "plantrna-fm" }],
+    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "plantrna-fm" }],
+    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "protbert" }],
+    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "protbert" }],
+    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "esm1b" }],
+    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "esm1b" }],
+    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "protgpt2" }],
+    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "protgpt2" }],
+    [{ package = "rewirebench", extra = "dnabert2" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "transformers-4-41" }],
+    [{ package = "mfass", extra = "dnabert2-pilot" }, { package = "rewirebench", extra = "dnabert-s" }, { package = "rewirebench", extra = "transformers-5-16" }, { package = "rewirebench", extra = "transformers-4-41" }],
+    [{ package = "rewirebench", extra = "esm" }, { package = "rewirebench", extra = "transformers-5-16" }],
 ]
 
 [tool.uv.workspace]

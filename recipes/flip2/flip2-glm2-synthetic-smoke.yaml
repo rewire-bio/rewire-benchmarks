@@ -1,0 +1,142 @@
+schema_version: "1.0"
+id: flip2-glm2-synthetic-smoke
+title: FLIP2 plumbing check with gLM2-150M protein embeddings on CPU
+summary: >-
+  Embeds the eight-row synthetic FLIP2 table with the pinned gLM2-150M checkpoint, each
+  protein as one coding element, and fits the protocol's ridge probe on three training rows.
+  It checks that the adapter runs end to end. It is not a benchmark result.
+kind: model_run
+purpose: obtain_and_run
+scope: synthetic_smoke
+rewirebench_protocol: flip2-fitness-v1
+licence:
+  code: MIT
+  weights: >-
+    Apache-2.0 (model card metadata). Not redistributed: the recipe fetches the weights from
+    the developer's repository at the pinned revision. Not gated.
+  data: Synthetic fixture in this repository, MIT.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-4-41 extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the transformers-4-41 extra yet.
+weights_pin:
+  - host: huggingface
+    repository: tattabio/gLM2_150M
+    revision: 93c88529115476b27bdd85da14311779114a8a64
+    files:
+      - path: config.json
+        sha256: 01b99a415d0be6f5976a4b1f52a93faee2ddf8b777ef75ace0643f26ac9b4d66
+      - path: configuration_glm2.py
+        sha256: 987df0584a9df63d6027ff75a0f1f9dbdbf4eda1a81ef56643cf40367efa083a
+      - path: glm_tokenizer.py
+        sha256: ea4c47e392f51a1924e93eeedd4396ec2102dc52ba87c468ba90bc6dab214f31
+      - path: modeling_glm2.py
+        sha256: 503e5ec0bfd45957b9ecd92e37ae6414bd3574aa78887b14f8769a397e4b27f2
+      - path: special_tokens_map.json
+        sha256: 6abc3f2fe29ea77edacdb356f151ae93898d31aec82b1be4636485d7023e2ccc
+      - path: tokenizer.json
+        sha256: e803e69825b468900a18989d8e89b53c4ef34630a77cfaba7a213f710859516e
+      - path: tokenizer_config.json
+        sha256: beadc8517f5e82bad0657789c83e70a7b84087640dbfa92afbd73ba48f1f66b5
+      - path: model.safetensors
+        sha256: 047facd39472afe082c985058fa042f43a7b10d4ffb2ab51b9a3e6c63e9f3834
+    licence: Apache-2.0
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/config.json
+    sha256: 01b99a415d0be6f5976a4b1f52a93faee2ddf8b777ef75ace0643f26ac9b4d66
+    bytes: 459
+  - name: configuration_glm2.py
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/configuration_glm2.py
+    sha256: 987df0584a9df63d6027ff75a0f1f9dbdbf4eda1a81ef56643cf40367efa083a
+    bytes: 1030
+  - name: glm_tokenizer.py
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/glm_tokenizer.py
+    sha256: ea4c47e392f51a1924e93eeedd4396ec2102dc52ba87c468ba90bc6dab214f31
+    bytes: 1416
+  - name: modeling_glm2.py
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/modeling_glm2.py
+    sha256: 503e5ec0bfd45957b9ecd92e37ae6414bd3574aa78887b14f8769a397e4b27f2
+    bytes: 17102
+  - name: special_tokens_map.json
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/special_tokens_map.json
+    sha256: 6abc3f2fe29ea77edacdb356f151ae93898d31aec82b1be4636485d7023e2ccc
+    bytes: 149
+  - name: tokenizer.json
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/tokenizer.json
+    sha256: e803e69825b468900a18989d8e89b53c4ef34630a77cfaba7a213f710859516e
+    bytes: 2414
+  - name: tokenizer_config.json
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/tokenizer_config.json
+    sha256: beadc8517f5e82bad0657789c83e70a7b84087640dbfa92afbd73ba48f1f66b5
+    bytes: 1749
+  - name: model.safetensors
+    url: https://huggingface.co/tattabio/gLM2_150M/resolve/93c88529115476b27bdd85da14311779114a8a64/model.safetensors
+    sha256: 047facd39472afe082c985058fa042f43a7b10d4ffb2ab51b9a3e6c63e9f3834
+    bytes: 609855088
+  - name: smoke.csv
+    repo_path: workflows/benchmark/examples/smoke.csv
+    sha256: f260bd83895cf43f417f4b3e5a105b052e56a0164f5616238271bac4ad7dc2d3
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - flip2-fitness-v1
+      - --source
+      - "{inputs}/smoke.csv"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"dataset": "flip2-amylase-one-to-many", "allow_unverified": true, "limit": 3}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - glm2-150m-embeddings
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    Three synthetic test rows are scored; nothing else is stable enough to check.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 3
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - Synthetic rows with allow_unverified, so the result says nothing about any model.
+  - The checkpoint's own model and tokenizer code runs (trust_remote_code); its three Python
+    files are pinned by SHA-256 like the weights.
+  - The local backend runs in the host Python environment, which needs
+    rewirebench[transformers-4-41].

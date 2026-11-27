@@ -234,6 +234,7 @@ class RunpodBackend:
             runnable=False,
             not_runnable_reason=NOT_BUILT,
             notes=[
+                *base.weights_notices(recipe),
                 (f"The pod spec is the body for POST {API}/pods, for review only. Do not "
                  "send it with another tool."),
                 *unpriced,

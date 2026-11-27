@@ -31,3 +31,6 @@ plantrna-fm = ["torch==2.2.2", "transformers==4.41.1", "safetensors==0.7.0", "nu
 protbert = ["torch==2.2.2", "transformers==4.41.1", "numpy==1.26.4"]
 esm1b = ["torch==2.2.2", "transformers==4.41.1", "numpy==1.26.4"]
 protgpt2 = ["torch==2.2.2", "transformers==4.41.1", "numpy==1.26.4"]
+transformers-4-41 = ["torch==2.2.2", "transformers==4.41.1", "safetensors==0.7.0", "einops==0.6.1",
+                     "sentencepiece==0.2.0", "numpy==1.26.4"]
+transformers-5-16 = ["torch==2.5.1", "transformers==5.16.0", "safetensors==0.8.0", "numpy==1.26.4"]

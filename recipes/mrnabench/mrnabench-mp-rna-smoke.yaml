@@ -1,0 +1,137 @@
+schema_version: "1.0"
+id: mrnabench-mp-rna-smoke
+title: mRNABench designed MRL check with MP-RNA embeddings on CPU
+summary: >-
+  Prepares 50 training, 50 validation and 50 held-out sequences of the pinned mRNABench Sample
+  designed MRL dataset, embeds them with the pinned MP-RNA checkpoint and fits the protocol's
+  ridge probe. It checks that the adapter runs end to end; it is not a full result.
+kind: model_run
+purpose: obtain_and_run
+scope: selected_assay
+rewirebench_protocol: mrnabench-sample-mrl-v1
+licence:
+  code: MIT
+  weights: >-
+    Apache-2.0 (model card metadata). Not redistributed: the recipe fetches the weights from
+    the developer's repository at the pinned revision. Not gated.
+  data: Reuse terms are unreported upstream (morrislab/mrl-sample). The parquet file is fetched, not redistributed.
+environment:
+  runtime: python
+  python: ">=3.11"
+  images:
+    linux/amd64:
+      missing:
+        reason: unavailable
+        note: No published image carries the mp-rna extra yet.
+    linux/arm64:
+      missing:
+        reason: unavailable
+        note: No published image carries the mp-rna extra yet.
+weights_pin:
+  - host: huggingface
+    repository: yangheng/MP-RNA
+    revision: 0a727ebb92df41949266b234ef70b1621bfd5742
+    files:
+      - path: config.json
+        sha256: ebc021d327a6ef556fa277dd3c842ae219a0ff619d55f939e0d0dca3b19b9b16
+      - path: configuration_omnigenome.py
+        sha256: aabbeaa27857544e060e47af9293baef1d5b4b95789f717f56cfa3e9be57a78d
+      - path: modeling_omnigenome.py
+        sha256: bfbb1ef7b8726def69cd22f968ce48dc83c1c7c5ed76846d491d2541cb68676e
+      - path: special_tokens_map.json
+        sha256: 01e416f1aa5cb48b1d2c763ed8f2ef6e1344a5fc351657c1e8f2c73db82443d9
+      - path: tokenizer_config.json
+        sha256: 2f96b43c7f15f31aaa8ae3fab569590c6c6909dee9ed80b57b790f22c24042a4
+      - path: vocab.txt
+        sha256: 5c6fecdc35423dc779aa46529b81d5981b4eb77676a57eda961deba46a0f05df
+      - path: model.safetensors
+        sha256: f66b44233c66723a359a3a7864af93e42f2cadb43835440ca9c318fe17383923
+    licence: Apache-2.0
+    gated: false
+    resolved_on: "2026-11-27"
+missing:
+  hardware_floor:
+    reason: unavailable
+    note: Not measured. The recipe has not been run; the local backend runs it on CPU.
+inputs:
+  - name: config.json
+    url: https://huggingface.co/yangheng/MP-RNA/resolve/0a727ebb92df41949266b234ef70b1621bfd5742/config.json
+    sha256: ebc021d327a6ef556fa277dd3c842ae219a0ff619d55f939e0d0dca3b19b9b16
+    bytes: 1380
+  - name: configuration_omnigenome.py
+    url: https://huggingface.co/yangheng/MP-RNA/resolve/0a727ebb92df41949266b234ef70b1621bfd5742/configuration_omnigenome.py
+    sha256: aabbeaa27857544e060e47af9293baef1d5b4b95789f717f56cfa3e9be57a78d
+    bytes: 13366
+  - name: modeling_omnigenome.py
+    url: https://huggingface.co/yangheng/MP-RNA/resolve/0a727ebb92df41949266b234ef70b1621bfd5742/modeling_omnigenome.py
+    sha256: bfbb1ef7b8726def69cd22f968ce48dc83c1c7c5ed76846d491d2541cb68676e
+    bytes: 75316
+  - name: special_tokens_map.json
+    url: https://huggingface.co/yangheng/MP-RNA/resolve/0a727ebb92df41949266b234ef70b1621bfd5742/special_tokens_map.json
+    sha256: 01e416f1aa5cb48b1d2c763ed8f2ef6e1344a5fc351657c1e8f2c73db82443d9
+    bytes: 732
+  - name: tokenizer_config.json
+    url: https://huggingface.co/yangheng/MP-RNA/resolve/0a727ebb92df41949266b234ef70b1621bfd5742/tokenizer_config.json
+    sha256: 2f96b43c7f15f31aaa8ae3fab569590c6c6909dee9ed80b57b790f22c24042a4
+    bytes: 1178
+  - name: vocab.txt
+    url: https://huggingface.co/yangheng/MP-RNA/resolve/0a727ebb92df41949266b234ef70b1621bfd5742/vocab.txt
+    sha256: 5c6fecdc35423dc779aa46529b81d5981b4eb77676a57eda961deba46a0f05df
+    bytes: 91
+  - name: model.safetensors
+    url: https://huggingface.co/yangheng/MP-RNA/resolve/0a727ebb92df41949266b234ef70b1621bfd5742/model.safetensors
+    sha256: f66b44233c66723a359a3a7864af93e42f2cadb43835440ca9c318fe17383923
+    bytes: 743622740
+  - name: mrl-sample-designed.parquet
+    url: https://huggingface.co/datasets/morrislab/mrl-sample/resolve/ef67f7cf8a999bb1c412ad6551aa7d9f901cbb95/mrl-sample-designed.parquet
+    sha256: 8b8c57581d472e89a21f8b468b3b0599f6c235c01423264561e6c302d78927d4
+    bytes: 9778091
+commands:
+  - name: prepare
+    argv:
+      - rewirebench
+      - prepare
+      - mrnabench-sample-mrl-v1
+      - --source
+      - "{inputs}"
+      - --output
+      - "{work}/prepared"
+      - --options
+      - '{"dataset": "designed", "target": "target_mrl_designed", "require_official": true, "limit": 50}'
+  - name: run-model
+    argv:
+      - rewirebench
+      - run
+      - --prepared
+      - "{work}/prepared"
+      - --output
+      - "{output}/run"
+      - --model
+      - mp-rna-embeddings
+      - --adapter-options
+      - '{"checkpoint": "{inputs}", "device": "cpu"}'
+outputs:
+  - run/report.json
+  - run/predictions.json
+expected_output:
+  description: >-
+    The first 50 held-out sequences of the canonical split are scored. The probe's metrics are
+    not checked until a run has been reviewed.
+  values:
+    - label: Coverage, scored
+      metric_id: coverage_scored
+      file: run/report.json
+      key: [coverage, scored]
+      value: 50
+      tolerance: 0
+estimate:
+  gpu_hours: 0
+  note: No GPU and no paid compute.
+backends:
+  local: {}
+limitations:
+  - Not yet run, so no wall time, memory or metric is recorded.
+  - The checkpoint's own model code runs (trust_remote_code); its two Python files are pinned
+    by SHA-256 like the weights.
+  - The local backend runs in the host Python environment, which needs
+    rewirebench[transformers-4-41,sequence].

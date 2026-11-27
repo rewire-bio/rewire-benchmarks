@@ -202,7 +202,8 @@ Where each registered model stands (`rewirebench models`):
 | `evcouplings-independent` | none | Nothing known. CPU only. Not verified on Linux arm64 |
 | `esm2-t6-8m-masked-marginal`, `esm2-embeddings` | `esm` | `torch==2.2.2` is CPU only on arm64. A GPU run needs a newer torch, and `fair-esm==2.0.0` is not verified against one |
 | `dnabert2-frozen` | `dnabert2` | The same torch pin, with `transformers==4.29.2`. DNABERT-2 loads its own model code; not verified on a newer torch or on arm64 |
-| `mistral-dna-138m-frozen`, `dnabert-s-frozen`, `plantrna-fm-embeddings`, `protbert-embeddings`, `esm1b-masked-marginal`, `protgpt2-log-likelihood` | one extra each, named after the model | The same torch pin. DNABERT-S needs `transformers==4.27.0` and loads its own model code; the others need `transformers==4.41.1`. None has run anywhere yet |
+| `mistral-dna-138m-frozen`, `dnabert-s-frozen`, `plantrna-fm-embeddings`, `protbert-embeddings`, `esm1b-masked-marginal`, `protgpt2-log-likelihood`, `grover-frozen`, `hyenadna-large-1m-log-likelihood`, `mp-rna-embeddings`, `ankh-base-embeddings`, `prot-t5-xl-encoder-embeddings`, `glm2-150m-embeddings` | one extra each for the first six; `transformers-4-41` for the rest | The same torch pin. DNABERT-S needs `transformers==4.27.0`; the others need `transformers==4.41.1`. DNABERT-S, HyenaDNA, MP-RNA and gLM2 load their own model code. Their CPU runs are on x86-64 GitHub runners only |
+| `biofm-265m-frozen`, `esmc-600m-masked-marginal` | `transformers-5-16` | `torch==2.5.1` with `transformers==5.16.0`. Not verified on arm64 |
 | `fimo-h12core-hit-count` | none | Starts the FIMO executable. Needs an arm64 build of the MEME Suite. It cannot be used in a recipe in any case |
 | Evo 2 (not in rewirebench) | | See the Evo 2 image row above |
 
